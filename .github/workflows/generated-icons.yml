@@ -1,6 +1,12 @@
 name: Update Generated Icons
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'common/assets/icons.json'
+      - 'scripts/build.py'
+      - '.github/workflows/generated-icons.yml'
   workflow_dispatch:
 
 permissions:
