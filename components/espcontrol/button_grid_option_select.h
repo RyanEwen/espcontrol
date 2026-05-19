@@ -251,7 +251,7 @@ inline lv_obj_t *option_select_create_option_button(lv_obj_t *parent,
   lv_label_set_text(value, label.c_str());
   lv_label_set_long_mode(value, LV_LABEL_LONG_DOT);
   lv_obj_set_width(value, lv_pct(100));
-  lv_obj_set_style_text_color(value, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+  lv_obj_set_style_text_color(value, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
   lv_obj_set_style_text_align(value, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
   if (font) lv_obj_set_style_text_font(value, font, LV_PART_MAIN);
   apply_width_compensation(value, width_compensation_percent);
@@ -290,12 +290,12 @@ inline void option_select_open_modal(OptionSelectCtx *ctx) {
   control_modal_style_overlay(ui.overlay);
 
   ui.panel = lv_obj_create(ui.overlay);
-  control_modal_style_panel(ui.panel, ctx->tertiary_color, radius);
+  control_modal_style_panel(ui.panel, radius);
   control_modal_apply_panel_layout(ui.overlay, ui.panel, layout, radius);
 
   ui.close_btn = control_modal_create_round_button(
     ui.panel, 32, "\U000F0156", ctx->icon_font,
-    0x454545, ctx->tertiary_color);
+    DARK_BORDER, DARK_BACKGROUND_TERTIARY);
   lv_obj_set_style_bg_opa(ui.close_btn, LV_OPA_TRANSP, LV_PART_MAIN);
   lv_obj_set_style_border_width(ui.close_btn, 0, LV_PART_MAIN);
   lv_obj_set_size(ui.close_btn, layout.back_size, layout.back_size);
@@ -307,7 +307,7 @@ inline void option_select_open_modal(OptionSelectCtx *ctx) {
   lv_label_set_text(ui.title_lbl, title.c_str());
   lv_label_set_long_mode(ui.title_lbl, LV_LABEL_LONG_DOT);
   lv_obj_set_width(ui.title_lbl, content_w - layout.back_size - gap);
-  lv_obj_set_style_text_color(ui.title_lbl, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+  lv_obj_set_style_text_color(ui.title_lbl, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
   lv_obj_set_style_text_align(ui.title_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
   if (ctx->label_font) lv_obj_set_style_text_font(ui.title_lbl, ctx->label_font, LV_PART_MAIN);
   apply_width_compensation(ui.title_lbl, ctx->width_compensation_percent);
@@ -332,7 +332,7 @@ inline void option_select_open_modal(OptionSelectCtx *ctx) {
     bool active = ctx->options[i] == ctx->current_option;
     lv_obj_t *btn = option_select_create_option_button(
       ui.list, ctx->options[i], active, row_h, row_radius,
-      ctx->accent_color, ctx->secondary_color,
+      ctx->accent_color, DARK_BACKGROUND_SECONDARY,
       ctx->label_font, ctx->width_compensation_percent);
     ui.option_clicks[i].ctx = ctx;
     ui.option_clicks[i].value = ctx->options[i];
@@ -349,7 +349,7 @@ inline void option_select_open_modal(OptionSelectCtx *ctx) {
     lv_label_set_text(ui.empty_lbl, "No options");
     lv_label_set_long_mode(ui.empty_lbl, LV_LABEL_LONG_WRAP);
     lv_obj_set_width(ui.empty_lbl, lv_pct(100));
-    lv_obj_set_style_text_color(ui.empty_lbl, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+    lv_obj_set_style_text_color(ui.empty_lbl, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
     lv_obj_set_style_text_align(ui.empty_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
     if (ctx->label_font) lv_obj_set_style_text_font(ui.empty_lbl, ctx->label_font, LV_PART_MAIN);
   }

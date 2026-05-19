@@ -31,8 +31,7 @@ script:
             network_status_ip_address(),
             "${firmware_version}",
             id(${media_title_font})->get_lv_font(),
-            id(${icon_font})->get_lv_font(),
-            id(sensor_card_color).state);
+            id(${icon_font})->get_lv_font());
 
 # ---------------------------------------------------------------------------
 # Uptime and WiFi signal sensors

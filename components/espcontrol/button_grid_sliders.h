@@ -202,9 +202,9 @@ inline void control_modal_style_overlay(lv_obj_t *overlay) {
   lv_obj_clear_flag(overlay, LV_OBJ_FLAG_SCROLLABLE);
 }
 
-inline void control_modal_style_panel(lv_obj_t *panel, uint32_t bg_color, lv_coord_t radius) {
+inline void control_modal_style_panel(lv_obj_t *panel, lv_coord_t radius) {
   if (!panel) return;
-  lv_obj_set_style_bg_color(panel, lv_color_hex(bg_color), LV_PART_MAIN);
+  lv_obj_set_style_bg_color(panel, lv_color_hex(DARK_BACKGROUND_TERTIARY), LV_PART_MAIN);
   lv_obj_set_style_bg_opa(panel, LV_OPA_COVER, LV_PART_MAIN);
   lv_obj_set_style_border_width(panel, 0, LV_PART_MAIN);
   lv_obj_set_style_shadow_width(panel, 0, LV_PART_MAIN);
@@ -916,7 +916,7 @@ inline lv_obj_t *control_modal_create_round_button(lv_obj_t *parent, lv_coord_t 
   lv_obj_set_style_shadow_width(btn, 0, LV_PART_MAIN);
   lv_obj_t *label = lv_label_create(btn);
   lv_label_set_text(label, text);
-  lv_obj_set_style_text_color(label, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+  lv_obj_set_style_text_color(label, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
   lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
   if (font) lv_obj_set_style_text_font(label, font, LV_PART_MAIN);
   lv_obj_center(label);
@@ -1019,14 +1019,14 @@ inline void media_volume_open_modal(MediaVolumeCtx *ctx) {
   control_modal_style_overlay(ui.overlay);
 
   ui.panel = lv_obj_create(ui.overlay);
-  control_modal_style_panel(ui.panel, ctx->tertiary_color, media_volume_card_radius(ctx));
+  control_modal_style_panel(ui.panel, media_volume_card_radius(ctx));
 
   ui.back_btn = control_modal_create_round_button(ui.panel, 32, "\U000F0141",
-    ctx->icon_font, 0x454545, ctx->tertiary_color, ctx->width_compensation_percent);
+    ctx->icon_font, DARK_BORDER, DARK_BACKGROUND_TERTIARY, ctx->width_compensation_percent);
   lv_obj_set_style_bg_opa(ui.back_btn, LV_OPA_TRANSP, LV_PART_MAIN);
   lv_obj_set_style_border_width(ui.back_btn, 0, LV_PART_MAIN);
   lv_obj_t *back_label = lv_obj_get_child(ui.back_btn, 0);
-  if (back_label) lv_obj_set_style_text_color(back_label, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+  if (back_label) lv_obj_set_style_text_color(back_label, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
   lv_obj_add_event_cb(ui.back_btn, [](lv_event_t *) {
     media_volume_hide_modal();
   }, LV_EVENT_CLICKED, nullptr);
@@ -1037,11 +1037,11 @@ inline void media_volume_open_modal(MediaVolumeCtx *ctx) {
   lv_arc_set_value(ui.arc, ctx->current_pct);
   lv_obj_set_style_bg_opa(ui.arc, LV_OPA_TRANSP, LV_PART_MAIN);
   lv_obj_set_style_border_width(ui.arc, 0, LV_PART_MAIN);
-  lv_obj_set_style_arc_color(ui.arc, lv_color_hex(0x333333), LV_PART_MAIN);
+  lv_obj_set_style_arc_color(ui.arc, lv_color_hex(DARK_TRACK_BACKGROUND), LV_PART_MAIN);
   lv_obj_set_style_arc_color(ui.arc, lv_color_hex(ctx->accent_color), LV_PART_INDICATOR);
   lv_obj_set_style_arc_rounded(ui.arc, true, LV_PART_MAIN);
   lv_obj_set_style_arc_rounded(ui.arc, true, LV_PART_INDICATOR);
-  lv_obj_set_style_bg_color(ui.arc, lv_color_hex(0xFFFFFF), LV_PART_KNOB);
+  lv_obj_set_style_bg_color(ui.arc, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_KNOB);
   lv_obj_set_style_border_width(ui.arc, 0, LV_PART_KNOB);
   lv_obj_set_style_shadow_width(ui.arc, 0, LV_PART_KNOB);
   lv_obj_add_flag(ui.arc, LV_OBJ_FLAG_ADV_HITTEST);
@@ -1054,7 +1054,7 @@ inline void media_volume_open_modal(MediaVolumeCtx *ctx) {
 
   ui.title_lbl = lv_label_create(ui.panel);
   lv_label_set_text(ui.title_lbl, "Volume");
-  lv_obj_set_style_text_color(ui.title_lbl, lv_color_hex(0xA0A0A0), LV_PART_MAIN);
+  lv_obj_set_style_text_color(ui.title_lbl, lv_color_hex(DARK_TEXT_MUTED), LV_PART_MAIN);
   lv_obj_set_style_text_align(ui.title_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
   if (ctx->label_font) lv_obj_set_style_text_font(ui.title_lbl, ctx->label_font, LV_PART_MAIN);
   apply_width_compensation(ui.title_lbl, ctx->width_compensation_percent);
@@ -1073,23 +1073,23 @@ inline void media_volume_open_modal(MediaVolumeCtx *ctx) {
   lv_obj_set_style_flex_cross_place(ui.pct_row, LV_FLEX_ALIGN_END, LV_PART_MAIN);
 
   ui.pct_lbl = lv_label_create(ui.pct_row);
-  lv_obj_set_style_text_color(ui.pct_lbl, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+  lv_obj_set_style_text_color(ui.pct_lbl, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
   lv_obj_set_style_text_align(ui.pct_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
   if (ctx->number_font) lv_obj_set_style_text_font(ui.pct_lbl, ctx->number_font, LV_PART_MAIN);
   apply_width_compensation(ui.pct_lbl, ctx->width_compensation_percent);
 
   ui.pct_unit_lbl = lv_label_create(ui.pct_row);
   lv_label_set_text(ui.pct_unit_lbl, "");
-  lv_obj_set_style_text_color(ui.pct_unit_lbl, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+  lv_obj_set_style_text_color(ui.pct_unit_lbl, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
   lv_obj_set_style_text_align(ui.pct_unit_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
   if (ctx->unit_font) lv_obj_set_style_text_font(ui.pct_unit_lbl, ctx->unit_font, LV_PART_MAIN);
   lv_obj_set_style_translate_y(ui.pct_unit_lbl, MEDIA_VOLUME_UNIT_Y_REF_PX, LV_PART_MAIN);
   apply_width_compensation(ui.pct_unit_lbl, ctx->width_compensation_percent);
 
   ui.minus_btn = control_modal_create_round_button(ui.panel, 72, find_icon("Minus"),
-    ctx->icon_font, 0xBDBDBD, ctx->tertiary_color, ctx->width_compensation_percent);
+    ctx->icon_font, DARK_CONTROL_NEUTRAL, DARK_BACKGROUND_TERTIARY, ctx->width_compensation_percent);
   ui.plus_btn = control_modal_create_round_button(ui.panel, 72, find_icon("Plus"),
-    ctx->icon_font, 0xBDBDBD, ctx->tertiary_color, ctx->width_compensation_percent);
+    ctx->icon_font, DARK_CONTROL_NEUTRAL, DARK_BACKGROUND_TERTIARY, ctx->width_compensation_percent);
   lv_obj_add_event_cb(ui.minus_btn, [](lv_event_t *) {
     MediaVolumeModalUi &ui = media_volume_modal_ui();
     if (ui.active) media_volume_apply_percent(ui.active, ui.active->current_pct - 1, true, true);

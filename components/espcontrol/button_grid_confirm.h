@@ -73,7 +73,7 @@ inline lv_obj_t *switch_confirmation_create_text_button(
   lv_obj_t *label = lv_label_create(btn);
   lv_label_set_text(label, text.c_str());
   lv_label_set_long_mode(label, LV_LABEL_LONG_CLIP);
-  lv_obj_set_style_text_color(label, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+  lv_obj_set_style_text_color(label, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
   lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
   if (font) lv_obj_set_style_text_font(label, font, LV_PART_MAIN);
 
@@ -143,12 +143,12 @@ inline void switch_confirmation_open_modal(const ParsedCfg &p, lv_obj_t *btn_obj
   control_modal_style_overlay(ui.overlay);
 
   ui.panel = lv_obj_create(ui.overlay);
-  control_modal_style_panel(ui.panel, DEFAULT_TERTIARY_COLOR, radius);
+  control_modal_style_panel(ui.panel, radius);
   control_modal_apply_panel_layout(ui.overlay, ui.panel, layout, radius);
 
   ui.close_btn = control_modal_create_round_button(
     ui.panel, 32, "\U000F0156", icon_font,
-    0x454545, DEFAULT_TERTIARY_COLOR);
+    DARK_BORDER, DARK_BACKGROUND_TERTIARY);
   lv_obj_set_style_bg_opa(ui.close_btn, LV_OPA_TRANSP, LV_PART_MAIN);
   lv_obj_set_style_border_width(ui.close_btn, 0, LV_PART_MAIN);
   lv_obj_set_size(ui.close_btn, layout.back_size, layout.back_size);
@@ -160,13 +160,13 @@ inline void switch_confirmation_open_modal(const ParsedCfg &p, lv_obj_t *btn_obj
   lv_label_set_text(ui.message_lbl, message.c_str());
   lv_label_set_long_mode(ui.message_lbl, LV_LABEL_LONG_WRAP);
   lv_obj_set_width(ui.message_lbl, content_w);
-  lv_obj_set_style_text_color(ui.message_lbl, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+  lv_obj_set_style_text_color(ui.message_lbl, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
   lv_obj_set_style_text_align(ui.message_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
   if (message_font) lv_obj_set_style_text_font(ui.message_lbl, message_font, LV_PART_MAIN);
 
   ui.no_btn = switch_confirmation_create_text_button(
     ui.panel, switch_confirmation_no_text(p), button_max_w, button_min_w, button_h,
-    button_h / 2, 0x454545, button_font);
+    button_h / 2, DARK_BORDER, button_font);
   ui.confirm_btn = switch_confirmation_create_text_button(
     ui.panel, switch_confirmation_yes_text(p), button_max_w, button_min_w, button_h,
     button_h / 2, DEFAULT_SLIDER_COLOR, button_font);

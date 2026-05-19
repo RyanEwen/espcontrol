@@ -30,13 +30,6 @@ inline NetworkStatusModalUi &network_status_modal_ui() {
   return ui;
 }
 
-inline uint32_t network_status_parse_color(const std::string &hex, uint32_t fallback) {
-  if (hex.length() != 6) return fallback;
-  char *end = nullptr;
-  uint32_t value = strtoul(hex.c_str(), &end, 16);
-  return end && *end == '\0' ? value : fallback;
-}
-
 inline const char *network_status_wifi_icon(float pct) {
   if (!std::isfinite(pct) || pct < 25.0f) return NETWORK_ICON_WIFI_1;
   if (pct < 50.0f) return NETWORK_ICON_WIFI_2;
@@ -129,8 +122,7 @@ inline void network_status_open_modal(const std::string &device_name,
                                       const std::string &ip_address,
                                       const std::string &firmware_version,
                                       const lv_font_t *text_font,
-                                      const lv_font_t *icon_font,
-                                      const std::string &panel_color_hex) {
+                                      const lv_font_t *icon_font) {
   media_volume_hide_modal();
   climate_control_hide_modal();
   switch_confirmation_hide_modal();
@@ -145,17 +137,16 @@ inline void network_status_open_modal(const std::string &device_name,
   ui.overlay = lv_obj_create(lv_layer_top());
   control_modal_style_overlay(ui.overlay);
 
-  uint32_t panel_color = network_status_parse_color(panel_color_hex, 0x212121);
   ui.panel = lv_obj_create(ui.overlay);
-  control_modal_style_panel(ui.panel, panel_color, radius);
+  control_modal_style_panel(ui.panel, radius);
   control_modal_apply_panel_layout(ui.overlay, ui.panel, layout, radius);
 
   ui.close_btn = control_modal_create_round_button(ui.panel, 32, "\U000F0156",
-    icon_font, 0x454545, panel_color, 100);
+    icon_font, DARK_BORDER, DARK_BACKGROUND_TERTIARY, 100);
   lv_obj_set_style_bg_opa(ui.close_btn, LV_OPA_TRANSP, LV_PART_MAIN);
   lv_obj_set_style_border_width(ui.close_btn, 0, LV_PART_MAIN);
   lv_obj_t *close_label = lv_obj_get_child(ui.close_btn, 0);
-  if (close_label) lv_obj_set_style_text_color(close_label, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+  if (close_label) lv_obj_set_style_text_color(close_label, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
   lv_obj_add_event_cb(ui.close_btn, [](lv_event_t *) {
     network_status_hide_modal();
   }, LV_EVENT_CLICKED, nullptr);
@@ -178,20 +169,20 @@ inline void network_status_open_modal(const std::string &device_name,
     device_name.empty() ? "Not available" : device_name.c_str(),
     text_font,
     content_w,
-    0xFFFFFF);
+    DARK_TEXT_PRIMARY);
   ui.ip_lbl = network_status_add_center_label(
     ui.content,
     ip_address.empty() ? "Not available" : ip_address.c_str(),
     text_font,
     content_w,
-    0xA0A0A0);
+    DARK_TEXT_MUTED);
   std::string firmware_label = network_status_firmware_label(firmware_version);
   ui.firmware_lbl = network_status_add_center_label(
     ui.content,
     firmware_label.c_str(),
     text_font,
     content_w,
-    0xA0A0A0);
+    DARK_TEXT_MUTED);
   lv_obj_update_layout(ui.content);
   lv_obj_align(ui.content, LV_ALIGN_CENTER, 0, 0);
 

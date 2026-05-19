@@ -284,7 +284,7 @@ inline void fan_preset_open(FanCardCtx *ctx) {
   ui.active = ctx;
   ui.overlay = lv_obj_create(lv_layer_top());
   lv_obj_set_size(ui.overlay, lv_pct(100), lv_pct(100));
-  lv_obj_set_style_bg_color(ui.overlay, lv_color_hex(0x000000), LV_PART_MAIN);
+  lv_obj_set_style_bg_color(ui.overlay, lv_color_hex(DARK_OVERLAY), LV_PART_MAIN);
   lv_obj_set_style_bg_opa(ui.overlay, LV_OPA_COVER, LV_PART_MAIN);
   lv_obj_set_style_border_width(ui.overlay, 0, LV_PART_MAIN);
   lv_obj_set_style_shadow_width(ui.overlay, 0, LV_PART_MAIN);
@@ -309,7 +309,7 @@ inline void fan_preset_open(FanCardCtx *ctx) {
   lv_obj_set_size(back_btn, 48, 48);
   lv_obj_align(back_btn, LV_ALIGN_TOP_LEFT, 10, 10);
   lv_obj_set_style_radius(back_btn, 24, LV_PART_MAIN);
-  lv_obj_set_style_bg_color(back_btn, lv_color_hex(ctx->tertiary_color), LV_PART_MAIN);
+  lv_obj_set_style_bg_color(back_btn, lv_color_hex(DARK_BACKGROUND_TERTIARY), LV_PART_MAIN);
   lv_obj_set_style_border_width(back_btn, 0, LV_PART_MAIN);
   lv_obj_set_style_shadow_width(back_btn, 0, LV_PART_MAIN);
   lv_obj_add_event_cb(back_btn, [](lv_event_t *) { fan_preset_close(); }, LV_EVENT_CLICKED, nullptr);
@@ -320,7 +320,7 @@ inline void fan_preset_open(FanCardCtx *ctx) {
 
   lv_obj_t *title = lv_label_create(ui.overlay);
   lv_label_set_text(title, "Preset");
-  lv_obj_set_style_text_color(title, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+  lv_obj_set_style_text_color(title, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
   lv_obj_set_style_text_align(title, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
   if (ctx->label_font) lv_obj_set_style_text_font(title, ctx->label_font, LV_PART_MAIN);
   lv_obj_align(title, LV_ALIGN_TOP_MID, 0, 24);
@@ -331,14 +331,14 @@ inline void fan_preset_open(FanCardCtx *ctx) {
     lv_obj_set_width(btn, lv_pct(100));
     lv_obj_set_height(btn, 54);
     lv_obj_set_style_radius(btn, 8, LV_PART_MAIN);
-    lv_obj_set_style_bg_color(btn, lv_color_hex(selected ? ctx->on_color : ctx->tertiary_color), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(btn, lv_color_hex(selected ? ctx->on_color : DARK_BACKGROUND_TERTIARY), LV_PART_MAIN);
     lv_obj_set_style_bg_opa(btn, LV_OPA_COVER, LV_PART_MAIN);
     lv_obj_set_style_border_width(btn, 0, LV_PART_MAIN);
     lv_obj_set_style_shadow_width(btn, 0, LV_PART_MAIN);
 
     lv_obj_t *label = lv_label_create(btn);
     lv_label_set_text(label, fan_option_label(mode).c_str());
-    lv_obj_set_style_text_color(label, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+    lv_obj_set_style_text_color(label, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
     lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
     if (ctx->label_font) lv_obj_set_style_text_font(label, ctx->label_font, LV_PART_MAIN);
     lv_obj_center(label);

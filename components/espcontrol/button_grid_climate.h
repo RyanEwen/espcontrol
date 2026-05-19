@@ -6,9 +6,6 @@
 
 constexpr uint32_t CLIMATE_HEATING_COLOR = 0xA44A1C;
 constexpr uint32_t CLIMATE_COOLING_COLOR = 0x1565C0;
-constexpr uint32_t CLIMATE_POPUP_COLOR = 0x242424;
-constexpr uint32_t CLIMATE_TEXT_COLOR = 0xD8D8D8;
-constexpr uint32_t CLIMATE_NEUTRAL_COLOR = 0xBDBDBD;
 constexpr int CLIMATE_DEFAULT_TARGET_TENTHS = 200;
 constexpr int CLIMATE_DEFAULT_LOW_TENTHS = 180;
 constexpr int CLIMATE_DEFAULT_HIGH_TENTHS = 220;
@@ -737,12 +734,12 @@ inline lv_obj_t *climate_create_chip(lv_obj_t *parent, const char *title,
   lv_obj_set_style_radius(btn, 12, LV_PART_MAIN);
   lv_obj_set_style_bg_color(btn, lv_color_hex(bg_color), LV_PART_MAIN);
   lv_obj_set_style_bg_opa(btn, LV_OPA_COVER, LV_PART_MAIN);
-  lv_obj_set_style_border_color(btn, lv_color_hex(0x454545), LV_PART_MAIN);
+  lv_obj_set_style_border_color(btn, lv_color_hex(DARK_BORDER), LV_PART_MAIN);
   lv_obj_set_style_border_width(btn, 1, LV_PART_MAIN);
   lv_obj_set_style_shadow_width(btn, 0, LV_PART_MAIN);
   lv_obj_t *label = lv_label_create(btn);
   lv_label_set_text(label, title);
-  lv_obj_set_style_text_color(label, lv_color_hex(CLIMATE_TEXT_COLOR), LV_PART_MAIN);
+  lv_obj_set_style_text_color(label, lv_color_hex(DARK_TEXT_SOFT), LV_PART_MAIN);
   lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
   if (font) lv_obj_set_style_text_font(label, font, LV_PART_MAIN);
   lv_obj_center(label);
@@ -783,7 +780,7 @@ inline lv_obj_t *climate_create_menu_tile(lv_obj_t *parent, const char *icon,
   lv_obj_set_size(btn, 240, 94);
   apply_width_compensation(btn, width_compensation_percent);
   lv_obj_set_style_radius(btn, 22, LV_PART_MAIN);
-  lv_obj_set_style_bg_color(btn, lv_color_hex(0x2B2B2B), LV_PART_MAIN);
+  lv_obj_set_style_bg_color(btn, lv_color_hex(DARK_BACKGROUND_SECONDARY), LV_PART_MAIN);
   lv_obj_set_style_bg_opa(btn, LV_OPA_COVER, LV_PART_MAIN);
   lv_obj_set_style_border_width(btn, 0, LV_PART_MAIN);
   lv_obj_set_style_shadow_width(btn, 0, LV_PART_MAIN);
@@ -797,12 +794,12 @@ inline lv_obj_t *climate_create_menu_tile(lv_obj_t *parent, const char *icon,
 
   lv_obj_t *icon_lbl = lv_label_create(btn);
   lv_label_set_text(icon_lbl, icon);
-  lv_obj_set_style_text_color(icon_lbl, lv_color_hex(0xE8E8E8), LV_PART_MAIN);
+  lv_obj_set_style_text_color(icon_lbl, lv_color_hex(DARK_TEXT_SOFT), LV_PART_MAIN);
   if (icon_font) lv_obj_set_style_text_font(icon_lbl, icon_font, LV_PART_MAIN);
 
   lv_obj_t *label = lv_label_create(btn);
   lv_label_set_text(label, title);
-  lv_obj_set_style_text_color(label, lv_color_hex(0xE8E8E8), LV_PART_MAIN);
+  lv_obj_set_style_text_color(label, lv_color_hex(DARK_TEXT_SOFT), LV_PART_MAIN);
   lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
   if (label_font) lv_obj_set_style_text_font(label, label_font, LV_PART_MAIN);
   return btn;
@@ -870,7 +867,7 @@ inline void climate_open_inline_option_list(ClimateControlCtx *ctx, const std::s
     if (section_title && section_title[0]) {
       lv_obj_t *title_lbl = lv_label_create(parent);
       lv_label_set_text(title_lbl, section_title);
-      lv_obj_set_style_text_color(title_lbl, lv_color_hex(0xA0A0A0), LV_PART_MAIN);
+      lv_obj_set_style_text_color(title_lbl, lv_color_hex(DARK_TEXT_MUTED), LV_PART_MAIN);
       lv_obj_set_style_text_align(title_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
       if (ctx->label_font) lv_obj_set_style_text_font(title_lbl, ctx->label_font, LV_PART_MAIN);
       lv_obj_set_width(title_lbl, lv_pct(100));
@@ -895,7 +892,7 @@ inline void climate_open_inline_option_list(ClimateControlCtx *ctx, const std::s
 
       lv_obj_t *label = lv_label_create(btn);
       lv_label_set_text(label, climate_option_label(option).c_str());
-      lv_obj_set_style_text_color(label, lv_color_hex(selected ? ctx->accent_color : 0xE8E8E8), LV_PART_MAIN);
+      lv_obj_set_style_text_color(label, lv_color_hex(selected ? ctx->accent_color : DARK_TEXT_SOFT), LV_PART_MAIN);
       lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
       if (ctx->label_font) lv_obj_set_style_text_font(label, ctx->label_font, LV_PART_MAIN);
 
@@ -939,7 +936,7 @@ inline void climate_open_option_menu(ClimateControlCtx *ctx, const std::string &
 
   ui.menu_overlay = lv_obj_create(lv_layer_top());
   lv_obj_set_size(ui.menu_overlay, lv_pct(100), lv_pct(100));
-  lv_obj_set_style_bg_color(ui.menu_overlay, lv_color_hex(0x000000), LV_PART_MAIN);
+  lv_obj_set_style_bg_color(ui.menu_overlay, lv_color_hex(DARK_OVERLAY), LV_PART_MAIN);
   lv_obj_set_style_bg_opa(ui.menu_overlay, kind == "hvac" ? LV_OPA_TRANSP : LV_OPA_50, LV_PART_MAIN);
   lv_obj_set_style_border_width(ui.menu_overlay, 0, LV_PART_MAIN);
   lv_obj_set_style_pad_all(ui.menu_overlay, 0, LV_PART_MAIN);
@@ -951,7 +948,7 @@ inline void climate_open_option_menu(ClimateControlCtx *ctx, const std::string &
   lv_obj_t *box = lv_obj_create(ui.menu_overlay);
   lv_obj_set_width(box, climate_option_menu_width(*options, kind));
   lv_obj_set_height(box, LV_SIZE_CONTENT);
-  lv_obj_set_style_bg_color(box, lv_color_hex(ctx->secondary_color), LV_PART_MAIN);
+  lv_obj_set_style_bg_color(box, lv_color_hex(DARK_BACKGROUND_SECONDARY), LV_PART_MAIN);
   lv_obj_set_style_bg_opa(box, LV_OPA_COVER, LV_PART_MAIN);
   lv_obj_set_style_border_width(box, 0, LV_PART_MAIN);
   lv_obj_set_style_radius(box, kind == "hvac" ? 8 : 14, LV_PART_MAIN);
@@ -980,7 +977,7 @@ inline void climate_open_option_menu(ClimateControlCtx *ctx, const std::string &
     lv_obj_t *label = lv_label_create(btn);
     lv_label_set_text(label, climate_option_label(option).c_str());
     lv_label_set_long_mode(label, LV_LABEL_LONG_CLIP);
-    lv_obj_set_style_text_color(label, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+    lv_obj_set_style_text_color(label, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
     lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     if (ctx->label_font) lv_obj_set_style_text_font(label, ctx->label_font, LV_PART_MAIN);
     if (kind == "hvac") {
@@ -989,7 +986,7 @@ inline void climate_open_option_menu(ClimateControlCtx *ctx, const std::string &
       if (selected) {
         lv_obj_t *check_lbl = lv_label_create(btn);
         lv_label_set_text(check_lbl, find_icon("Check"));
-        lv_obj_set_style_text_color(check_lbl, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+        lv_obj_set_style_text_color(check_lbl, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
         if (ctx->icon_font) lv_obj_set_style_text_font(check_lbl, ctx->icon_font, LV_PART_MAIN);
         lv_obj_set_style_transform_zoom(check_lbl, 170, LV_PART_MAIN);
         lv_obj_align(check_lbl, LV_ALIGN_RIGHT_MID, 0, 0);
@@ -1010,7 +1007,7 @@ inline void climate_open_option_menu(ClimateControlCtx *ctx, const std::string &
       lv_obj_t *divider = lv_obj_create(box);
       lv_obj_set_width(divider, lv_pct(100));
       lv_obj_set_height(divider, 1);
-      lv_obj_set_style_bg_color(divider, lv_color_hex(ctx->tertiary_color), LV_PART_MAIN);
+      lv_obj_set_style_bg_color(divider, lv_color_hex(DARK_BACKGROUND_TERTIARY), LV_PART_MAIN);
       lv_obj_set_style_bg_opa(divider, LV_OPA_COVER, LV_PART_MAIN);
       lv_obj_set_style_border_width(divider, 0, LV_PART_MAIN);
       lv_obj_set_style_shadow_width(divider, 0, LV_PART_MAIN);
@@ -1033,7 +1030,7 @@ inline void climate_control_set_modal_value(ClimateControlCtx *ctx) {
       ui.updating_arc = true;
       lv_arc_set_range(ui.arc, ctx->min_tenths, ctx->max_tenths);
       lv_arc_set_value(ui.arc, temp_enabled ? climate_clamp_tenths(ctx, target) : ctx->min_tenths);
-      lv_obj_set_style_arc_color(ui.arc, lv_color_hex(climate_is_active(ctx) ? climate_active_color(ctx) : ctx->secondary_color), LV_PART_INDICATOR);
+      lv_obj_set_style_arc_color(ui.arc, lv_color_hex(climate_is_active(ctx) ? climate_active_color(ctx) : DARK_BACKGROUND_SECONDARY), LV_PART_INDICATOR);
       ui.updating_arc = false;
     }
   }
@@ -1257,17 +1254,16 @@ inline void climate_control_open_modal(ClimateControlCtx *ctx) {
   control_modal_style_overlay(ui.overlay);
 
   ui.panel = lv_obj_create(ui.overlay);
-  control_modal_style_panel(ui.panel, ctx->tertiary_color,
-    control_modal_card_radius(ctx->btn));
+  control_modal_style_panel(ui.panel, control_modal_card_radius(ctx->btn));
 
   ui.back_btn = control_modal_create_round_button(ui.panel, 32, "\U000F0141", ctx->icon_font,
-    0x454545, ctx->tertiary_color, ctx->width_compensation_percent);
+    DARK_BORDER, DARK_BACKGROUND_TERTIARY, ctx->width_compensation_percent);
   lv_obj_set_style_bg_opa(ui.back_btn, LV_OPA_TRANSP, LV_PART_MAIN);
   lv_obj_set_style_border_width(ui.back_btn, 0, LV_PART_MAIN);
   lv_obj_add_event_cb(ui.back_btn, [](lv_event_t *) { climate_control_hide_modal(); }, LV_EVENT_CLICKED, nullptr);
 
   ui.mode_btn = control_modal_create_round_button(ui.panel, 32, find_icon("Dots Horizontal"), ctx->icon_font,
-    0x454545, ctx->tertiary_color, ctx->width_compensation_percent);
+    DARK_BORDER, DARK_BACKGROUND_TERTIARY, ctx->width_compensation_percent);
   lv_obj_set_style_bg_opa(ui.mode_btn, LV_OPA_TRANSP, LV_PART_MAIN);
   lv_obj_set_style_border_width(ui.mode_btn, 0, LV_PART_MAIN);
   lv_obj_add_event_cb(ui.mode_btn, [](lv_event_t *) {
@@ -1284,7 +1280,7 @@ inline void climate_control_open_modal(ClimateControlCtx *ctx) {
   lv_obj_add_flag(ui.menu_view, LV_OBJ_FLAG_HIDDEN);
 
   ui.menu_close_btn = control_modal_create_round_button(ui.panel, 32, "\U000F0156", ctx->icon_font,
-    0x454545, ctx->tertiary_color, ctx->width_compensation_percent);
+    DARK_BORDER, DARK_BACKGROUND_TERTIARY, ctx->width_compensation_percent);
   lv_obj_set_style_bg_opa(ui.menu_close_btn, LV_OPA_TRANSP, LV_PART_MAIN);
   lv_obj_set_style_border_width(ui.menu_close_btn, 0, LV_PART_MAIN);
   lv_obj_add_flag(ui.menu_close_btn, LV_OBJ_FLAG_HIDDEN);
@@ -1310,7 +1306,7 @@ inline void climate_control_open_modal(ClimateControlCtx *ctx) {
   lv_arc_set_range(ui.arc, ctx->min_tenths, ctx->max_tenths);
   lv_obj_set_style_bg_opa(ui.arc, LV_OPA_TRANSP, LV_PART_MAIN);
   lv_obj_set_style_border_width(ui.arc, 0, LV_PART_MAIN);
-  lv_obj_set_style_arc_color(ui.arc, lv_color_hex(ctx->secondary_color), LV_PART_MAIN);
+  lv_obj_set_style_arc_color(ui.arc, lv_color_hex(DARK_BACKGROUND_SECONDARY), LV_PART_MAIN);
   lv_obj_set_style_arc_rounded(ui.arc, true, LV_PART_MAIN);
   lv_obj_set_style_arc_rounded(ui.arc, true, LV_PART_INDICATOR);
   lv_obj_set_style_bg_opa(ui.arc, LV_OPA_TRANSP, LV_PART_KNOB);
@@ -1342,7 +1338,7 @@ inline void climate_control_open_modal(ClimateControlCtx *ctx) {
   }, LV_EVENT_PRESS_LOST, nullptr);
 
   ui.current_dot = lv_obj_create(ui.panel);
-  lv_obj_set_style_bg_color(ui.current_dot, lv_color_hex(CLIMATE_NEUTRAL_COLOR), LV_PART_MAIN);
+  lv_obj_set_style_bg_color(ui.current_dot, lv_color_hex(DARK_CONTROL_NEUTRAL), LV_PART_MAIN);
   lv_obj_set_style_bg_opa(ui.current_dot, LV_OPA_COVER, LV_PART_MAIN);
   lv_obj_set_style_border_width(ui.current_dot, 0, LV_PART_MAIN);
   lv_obj_set_style_shadow_width(ui.current_dot, 0, LV_PART_MAIN);
@@ -1352,7 +1348,7 @@ inline void climate_control_open_modal(ClimateControlCtx *ctx) {
   lv_obj_add_flag(ui.current_dot, LV_OBJ_FLAG_HIDDEN);
 
   ui.handle_dot = lv_obj_create(ui.panel);
-  lv_obj_set_style_bg_color(ui.handle_dot, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+  lv_obj_set_style_bg_color(ui.handle_dot, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
   lv_obj_set_style_bg_opa(ui.handle_dot, LV_OPA_COVER, LV_PART_MAIN);
   lv_obj_set_style_border_width(ui.handle_dot, 0, LV_PART_MAIN);
   lv_obj_set_style_shadow_width(ui.handle_dot, 0, LV_PART_MAIN);
@@ -1374,7 +1370,7 @@ inline void climate_control_open_modal(ClimateControlCtx *ctx) {
   lv_obj_clear_flag(ui.target_row, LV_OBJ_FLAG_SCROLLABLE);
 
   ui.target_lbl = lv_label_create(ui.target_row);
-  lv_obj_set_style_text_color(ui.target_lbl, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+  lv_obj_set_style_text_color(ui.target_lbl, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
   lv_obj_set_style_text_align(ui.target_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
   if (ctx->number_font) lv_obj_set_style_text_font(ui.target_lbl, ctx->number_font, LV_PART_MAIN);
   apply_width_compensation(ui.target_lbl, ctx->width_compensation_percent);
@@ -1388,24 +1384,24 @@ inline void climate_control_open_modal(ClimateControlCtx *ctx) {
   }, LV_EVENT_CLICKED, nullptr);
 
   ui.unit_lbl = lv_label_create(ui.target_row);
-  lv_obj_set_style_text_color(ui.unit_lbl, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+  lv_obj_set_style_text_color(ui.unit_lbl, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
   lv_obj_set_style_text_align(ui.unit_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
   if (ctx->unit_font) lv_obj_set_style_text_font(ui.unit_lbl, ctx->unit_font, LV_PART_MAIN);
   lv_obj_set_style_translate_y(ui.unit_lbl, MEDIA_VOLUME_UNIT_Y_REF_PX, LV_PART_MAIN);
   apply_width_compensation(ui.unit_lbl, ctx->width_compensation_percent);
 
   ui.status_lbl = lv_label_create(ui.panel);
-  lv_obj_set_style_text_color(ui.status_lbl, lv_color_hex(0xA0A0A0), LV_PART_MAIN);
+  lv_obj_set_style_text_color(ui.status_lbl, lv_color_hex(DARK_TEXT_MUTED), LV_PART_MAIN);
   lv_obj_set_style_text_align(ui.status_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
   if (ctx->label_font) lv_obj_set_style_text_font(ui.status_lbl, ctx->label_font, LV_PART_MAIN);
 
   ui.hint_lbl = lv_label_create(ui.panel);
-  lv_obj_set_style_text_color(ui.hint_lbl, lv_color_hex(0xA0A0A0), LV_PART_MAIN);
+  lv_obj_set_style_text_color(ui.hint_lbl, lv_color_hex(DARK_TEXT_MUTED), LV_PART_MAIN);
   lv_obj_set_style_text_align(ui.hint_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
   if (ctx->label_font) lv_obj_set_style_text_font(ui.hint_lbl, ctx->label_font, LV_PART_MAIN);
 
-  ui.low_btn = climate_create_chip(ui.panel, "Low", ctx->label_font, 0x333333, ctx->width_compensation_percent);
-  ui.high_btn = climate_create_chip(ui.panel, "High", ctx->label_font, 0x333333, ctx->width_compensation_percent);
+  ui.low_btn = climate_create_chip(ui.panel, "Low", ctx->label_font, DARK_TRACK_BACKGROUND, ctx->width_compensation_percent);
+  ui.high_btn = climate_create_chip(ui.panel, "High", ctx->label_font, DARK_TRACK_BACKGROUND, ctx->width_compensation_percent);
   lv_obj_add_event_cb(ui.low_btn, [](lv_event_t *) {
     ClimateControlModalUi &ui = climate_control_modal_ui();
     if (ui.active) { ui.active->edit_high = false; climate_control_set_modal_value(ui.active); }
@@ -1416,9 +1412,9 @@ inline void climate_control_open_modal(ClimateControlCtx *ctx) {
   }, LV_EVENT_CLICKED, nullptr);
 
   ui.minus_btn = control_modal_create_round_button(ui.panel, 72, find_icon("Minus"), ctx->icon_font,
-    CLIMATE_NEUTRAL_COLOR, ctx->tertiary_color, ctx->width_compensation_percent);
+    DARK_CONTROL_NEUTRAL, DARK_BACKGROUND_TERTIARY, ctx->width_compensation_percent);
   ui.plus_btn = control_modal_create_round_button(ui.panel, 72, find_icon("Plus"), ctx->icon_font,
-    CLIMATE_NEUTRAL_COLOR, ctx->tertiary_color, ctx->width_compensation_percent);
+    DARK_CONTROL_NEUTRAL, DARK_BACKGROUND_TERTIARY, ctx->width_compensation_percent);
   lv_obj_add_event_cb(ui.minus_btn, [](lv_event_t *) {
     ClimateControlModalUi &ui = climate_control_modal_ui();
     if (ui.active) climate_apply_selected_target(ui.active,
@@ -1442,8 +1438,8 @@ inline void climate_control_open_modal(ClimateControlCtx *ctx) {
   lv_obj_set_style_flex_cross_place(ui.chips, LV_FLEX_ALIGN_CENTER, LV_PART_MAIN);
   lv_obj_clear_flag(ui.chips, LV_OBJ_FLAG_SCROLLABLE);
 
-  ui.fan_chip = climate_create_chip(ui.chips, "Fan\nNone", ctx->label_font, 0x333333, ctx->width_compensation_percent);
-  ui.swing_chip = climate_create_chip(ui.chips, "Swing\nNone", ctx->label_font, 0x333333, ctx->width_compensation_percent);
+  ui.fan_chip = climate_create_chip(ui.chips, "Fan\nNone", ctx->label_font, DARK_TRACK_BACKGROUND, ctx->width_compensation_percent);
+  ui.swing_chip = climate_create_chip(ui.chips, "Swing\nNone", ctx->label_font, DARK_TRACK_BACKGROUND, ctx->width_compensation_percent);
   lv_obj_add_event_cb(ui.fan_chip, [](lv_event_t *) {
     ClimateControlModalUi &ui = climate_control_modal_ui();
     if (ui.active) climate_open_option_menu(ui.active, "fan");

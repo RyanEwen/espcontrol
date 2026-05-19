@@ -216,7 +216,7 @@ inline void alarm_show_failure(const std::string &message) {
 
   lv_obj_t *label = lv_label_create(ui.box);
   lv_label_set_text(label, message.empty() ? "Alarm action failed" : message.c_str());
-  lv_obj_set_style_text_color(label, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+  lv_obj_set_style_text_color(label, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
   lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
   lv_obj_center(label);
 
@@ -297,7 +297,7 @@ inline lv_obj_t *alarm_create_key_button(lv_obj_t *parent, lv_coord_t size,
                                          const lv_font_t *font,
                                          int width_compensation_percent) {
   lv_obj_t *btn = control_modal_create_round_button(
-    parent, size, text, font, 0x5A5A5A, DEFAULT_TERTIARY_COLOR,
+    parent, size, text, font, DARK_BORDER, DARK_BACKGROUND_TERTIARY,
     width_compensation_percent);
   lv_obj_set_style_shadow_width(btn, 0, LV_PART_MAIN);
   return btn;
@@ -342,12 +342,12 @@ inline void alarm_pin_open_modal(AlarmActionCtx *action) {
   ui.overlay = lv_obj_create(lv_layer_top());
   control_modal_style_overlay(ui.overlay);
   ui.panel = lv_obj_create(ui.overlay);
-  control_modal_style_panel(ui.panel, action->card->tertiary_color, radius);
+  control_modal_style_panel(ui.panel, radius);
   control_modal_apply_panel_layout(ui.overlay, ui.panel, layout, radius);
 
   ui.close_btn = control_modal_create_round_button(
     ui.panel, layout.back_size, "\U000F0156", label_font,
-    0x454545, action->card->tertiary_color,
+    DARK_BORDER, DARK_BACKGROUND_TERTIARY,
     action->card->width_compensation_percent);
   lv_obj_set_style_bg_opa(ui.close_btn, LV_OPA_TRANSP, LV_PART_MAIN);
   lv_obj_set_style_border_width(ui.close_btn, 0, LV_PART_MAIN);
@@ -358,13 +358,13 @@ inline void alarm_pin_open_modal(AlarmActionCtx *action) {
 
   ui.title_lbl = lv_label_create(ui.panel);
   lv_label_set_text(ui.title_lbl, "Enter PIN");
-  lv_obj_set_style_text_color(ui.title_lbl, lv_color_hex(0xA0A0A0), LV_PART_MAIN);
+  lv_obj_set_style_text_color(ui.title_lbl, lv_color_hex(DARK_TEXT_MUTED), LV_PART_MAIN);
   lv_obj_set_style_text_align(ui.title_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
   if (label_font) lv_obj_set_style_text_font(ui.title_lbl, label_font, LV_PART_MAIN);
   lv_obj_align(ui.title_lbl, LV_ALIGN_TOP_MID, 0, layout.inset + layout.back_size / 4);
 
   ui.pin_lbl = lv_label_create(ui.panel);
-  lv_obj_set_style_text_color(ui.pin_lbl, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+  lv_obj_set_style_text_color(ui.pin_lbl, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
   lv_obj_set_style_text_align(ui.pin_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
   if (label_font) lv_obj_set_style_text_font(ui.pin_lbl, label_font, LV_PART_MAIN);
   lv_obj_align(ui.pin_lbl, LV_ALIGN_TOP_MID, 0, layout.inset + layout.back_size + 16);
@@ -466,7 +466,7 @@ inline AlarmCardCtx *create_alarm_card_context(
   int NS = bounded_grid_slots(num_slots);
   int COLS = cols > 0 ? cols : 1;
   ctx->page = lv_obj_create(NULL);
-  lv_obj_set_style_bg_color(ctx->page, lv_color_black(), LV_PART_MAIN);
+  lv_obj_set_style_bg_color(ctx->page, lv_color_hex(DARK_OVERLAY), LV_PART_MAIN);
   lv_obj_set_style_bg_opa(ctx->page, LV_OPA_COVER, LV_PART_MAIN);
   lv_obj_set_layout(ctx->page, LV_LAYOUT_GRID);
   alarm_configure_page_grid(ctx->page, NS, COLS);

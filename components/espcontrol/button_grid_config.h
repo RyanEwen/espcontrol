@@ -5,6 +5,15 @@
 constexpr uint32_t DEFAULT_SLIDER_COLOR = 0xFF8C00;
 constexpr uint32_t DEFAULT_OFF_COLOR = 0x313131;
 constexpr uint32_t DEFAULT_TERTIARY_COLOR = 0x212121;
+constexpr uint32_t DARK_BACKGROUND_SECONDARY = 0x313131;
+constexpr uint32_t DARK_BACKGROUND_TERTIARY = 0x212121;
+constexpr uint32_t DARK_TEXT_PRIMARY = 0xFFFFFF;
+constexpr uint32_t DARK_TEXT_MUTED = 0xA0A0A0;
+constexpr uint32_t DARK_TEXT_SOFT = 0xE8E8E8;
+constexpr uint32_t DARK_BORDER = 0x454545;
+constexpr uint32_t DARK_CONTROL_NEUTRAL = 0xBDBDBD;
+constexpr uint32_t DARK_OVERLAY = 0x000000;
+constexpr uint32_t DARK_TRACK_BACKGROUND = 0x333333;
 constexpr int MAX_GRID_SLOTS = 25;
 constexpr int MAX_SUBPAGE_ITEMS = MAX_GRID_SLOTS * MAX_GRID_SLOTS;
 
