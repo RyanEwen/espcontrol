@@ -554,6 +554,12 @@ var SCREEN_SCHEDULE_DIMMED_BRIGHTNESS_UNAVAILABLE =
   "The schedule dimmed brightness setting is not available on this firmware. Update the device firmware, then reload this page.";
 var SCREEN_SCHEDULE_CLOCK_BRIGHTNESS_UNAVAILABLE =
   "The schedule clock brightness setting is not available on this firmware. Update the device firmware, then reload this page.";
+var AUTOMATIC_BRIGHTNESS_UNAVAILABLE =
+  "Automatic brightness control is not available on this firmware. Update the device firmware, then reload this page.";
+
+function postAutomaticBrightnessEnabled(on) {
+  postSwitchWithObjectId("Screen: Automatic Brightness", "screen__automatic_brightness", on, AUTOMATIC_BRIGHTNESS_UNAVAILABLE);
+}
 
 function postScreenScheduleEnabled(on) {
   postSwitchWithObjectId("Screen: Schedule Enabled", "screen__schedule_enabled", on, SCREEN_SCHEDULE_UNAVAILABLE);
@@ -696,6 +702,7 @@ function settingsStateEntities() {
     ["text_sensor", "Screen: Sunset"],
     ["text_sensor", "Network Transport"],
     ["sensor", "Wifi Strength"],
+    ["switch", "Screen: Automatic Brightness"],
     ["switch", "Screen: Schedule Enabled"],
     ["select", "Screen: Schedule Mode"],
     ["number", "Screen: Schedule On Hour"],

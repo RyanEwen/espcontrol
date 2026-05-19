@@ -18,8 +18,15 @@ Configured in the **Brightness** section of the **Settings** tab in [Setup](/fea
 
 - **Daytime Brightness** — screen brightness during the day (10%–100%, default 100%).
 - **Nighttime Brightness** — screen brightness at night (10%–100%, default 75%).
+- **Automatic Brightness** — when enabled, EspControl applies the saved daytime or nighttime brightness automatically. Turn it off if Home Assistant should temporarily control the display brightness without EspControl changing it back at sunrise, sunset, or the next brightness refresh.
 
 Sunrise and sunset times are derived from the timezone set in [Time Settings](/features/clock).
+
+## Home Assistant Control
+
+The panel exposes **Screen: Automatic Brightness** to Home Assistant. Turn this switch off before an automation sets `Display Backlight` brightness, then turn it back on when the automation should return control to EspControl.
+
+For example, a TV mode automation can turn off automatic brightness, set `Display Backlight` to a low brightness, and leave it there until TV mode ends. When automatic brightness is turned back on, EspControl immediately reapplies the correct saved brightness for the current time of day.
 
 ## Screensaver
 

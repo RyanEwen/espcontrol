@@ -61,6 +61,18 @@ esphome:
 
 switch:
   - platform: template
+    name: "Screen: Automatic Brightness"
+    id: automatic_brightness_enabled
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+    entity_category: config
+    icon: "mdi:brightness-auto"
+    web_server:
+      sorting_group_id: sg_brightness
+    on_turn_on:
+      - script.execute: backlight_apply_brightness
+
+  - platform: template
     name: "Screen: Schedule Enabled"
     internal: true
     id: schedule_enabled
@@ -590,6 +602,7 @@ script:
             id(backlight_force_display_off).execute();
             return;
           }
+          if (!id(automatic_brightness_enabled).state) return;
           float pct;
           if (id(manual_wake_ms) != 0) {
             pct = id(schedule_wake_brightness).state;

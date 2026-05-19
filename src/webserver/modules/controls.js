@@ -185,6 +185,15 @@ function buildSettingsPage(parent) {
   els.setNightBrightness = nightSlider.range;
   els.setNightBrightnessVal = nightSlider.val;
 
+  var autoBrightnessToggle = toggleRow("Automatic Brightness", "sp-set-automatic-brightness", state.automaticBrightnessEnabled);
+  blBody.appendChild(autoBrightnessToggle.row);
+  els.setAutomaticBrightnessToggle = autoBrightnessToggle.input;
+  autoBrightnessToggle.input.addEventListener("change", function () {
+    state.automaticBrightnessEnabled = this.checked;
+    postAutomaticBrightnessEnabled(state.automaticBrightnessEnabled);
+    syncScreenScheduleUi();
+  });
+
   var sunInfo = document.createElement("div");
   sunInfo.className = "sp-sun-info";
   sunInfo.id = "sp-sun-info";

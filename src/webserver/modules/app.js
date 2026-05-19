@@ -119,6 +119,7 @@ function exportConfig() {
     screen: {
       brightness_day: Math.round(state.brightnessDayVal),
       brightness_night: Math.round(state.brightnessNightVal),
+      automatic_brightness: !!state.automaticBrightnessEnabled,
       schedule_enabled: !!state.scheduleEnabled,
       schedule_on_hour: normalizeHour(state.scheduleOnHour, 6),
       schedule_off_hour: normalizeHour(state.scheduleOffHour, 23),
@@ -462,6 +463,9 @@ function importConfig() {
         if (!isFinite(state.brightnessDayVal)) state.brightnessDayVal = 100;
         state.brightnessNightVal = parseFloat(screenSettings.brightness_night);
         if (!isFinite(state.brightnessNightVal)) state.brightnessNightVal = 75;
+        state.automaticBrightnessEnabled = screenSettings.automatic_brightness != null
+          ? !!screenSettings.automatic_brightness
+          : true;
         state.scheduleEnabled = !!screenSettings.schedule_enabled;
         state.scheduleOnHour = normalizeHour(screenSettings.schedule_on_hour, 6);
         state.scheduleOffHour = normalizeHour(screenSettings.schedule_off_hour, 23);
@@ -485,6 +489,7 @@ function importConfig() {
 
         postNumber("Screen: Daytime Brightness", state.brightnessDayVal);
         postNumber("Screen: Nighttime Brightness", state.brightnessNightVal);
+        postAutomaticBrightnessEnabled(state.automaticBrightnessEnabled);
         postScreenScheduleOnHour(state.scheduleOnHour);
         postScreenScheduleOffHour(state.scheduleOffHour);
         postScreenScheduleMode(state.scheduleMode);
@@ -805,6 +810,10 @@ function connectEvents() {
         els.setNightBrightness.value = state.brightnessNightVal;
         els.setNightBrightnessVal.textContent = Math.round(state.brightnessNightVal) + "%";
       }
+    },
+    "switch-screen__automatic_brightness": function (val, d) {
+      state.automaticBrightnessEnabled = d.value === true || val === "ON";
+      syncScreenScheduleUi();
     },
     "switch-screen__schedule_enabled": function (val, d) {
       state.scheduleEnabled = d.value === true || val === "ON";

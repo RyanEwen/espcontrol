@@ -47,6 +47,7 @@ var state = {
   homeScreenTimeout: 60,
   brightnessDayVal: 100,
   brightnessNightVal: 75,
+  automaticBrightnessEnabled: true,
   scheduleEnabled: false,
   scheduleOnHour: 6,
   scheduleOffHour: 23,
@@ -473,6 +474,9 @@ function syncScreenScheduleUi() {
   state.scheduleWakeBrightness = normalizeScheduleWakeBrightness(state.scheduleWakeBrightness);
   state.scheduleDimmedBrightness = normalizeScheduleDimmedBrightness(state.scheduleDimmedBrightness);
   state.scheduleClockBrightness = normalizeScheduleClockBrightness(state.scheduleClockBrightness);
+  if (els.setAutomaticBrightnessToggle) {
+    els.setAutomaticBrightnessToggle.checked = !!state.automaticBrightnessEnabled;
+  }
   if (els.setScheduleToggle) els.setScheduleToggle.checked = !!state.scheduleEnabled;
   if (els.setScheduleOnHour) els.setScheduleOnHour.value = String(state.scheduleOnHour);
   if (els.setScheduleOffHour) els.setScheduleOffHour.value = String(state.scheduleOffHour);
