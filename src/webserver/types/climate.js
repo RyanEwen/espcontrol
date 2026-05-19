@@ -95,13 +95,13 @@ registerButtonType("climate", {
     if (hasRange) advanced.classList.add("sp-visible");
 
     var minField = helpers.textField(
-      "Minimum Temperature", helpers.idPrefix + "climate-min", climateConfig.min, "e.g. 16");
+      "Minimum Temperature", helpers.idPrefix + "climate-min", climateConfig.min, "e.g. -25");
     var minInp = minField.input;
     minInp.inputMode = "decimal";
     advanced.appendChild(minField.field);
 
     var maxField = helpers.textField(
-      "Maximum Temperature", helpers.idPrefix + "climate-max", climateConfig.max, "e.g. 30");
+      "Maximum Temperature", helpers.idPrefix + "climate-max", climateConfig.max, "e.g. 5");
     var maxInp = maxField.input;
     maxInp.inputMode = "decimal";
     advanced.appendChild(maxField.field);

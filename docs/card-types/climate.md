@@ -20,7 +20,7 @@ A Climate card controls a Home Assistant `climate` entity, such as a thermostat,
 6. Choose **Unit Precision**:
    - **10** shows whole numbers.
    - **10.2** shows one decimal place.
-7. Use **Advanced** only if you want to override the minimum or maximum temperature range shown on the panel.
+7. Use **Advanced** only if you want to override the minimum or maximum temperature range shown on the panel. Negative values are supported, for example `-25` to `5` for a freezer thermostat.
 
 ## How It Works on the Panel
 

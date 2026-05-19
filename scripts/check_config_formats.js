@@ -780,6 +780,17 @@ assertButtonRoundTrip(hooks, "climate card custom range", {
   precision: "1:16:30",
 }, false);
 
+assertButtonRoundTrip(hooks, "climate card negative custom range", {
+  entity: "climate.freezer",
+  label: "Freezer",
+  icon: "Auto",
+  icon_on: "Auto",
+  sensor: "",
+  unit: "",
+  type: "climate",
+  precision: "1:-25:5",
+}, false);
+
 assertButtonRoundTrip(hooks, "climate card set temp when off", {
   entity: "climate.hallway",
   label: "Hallway",
@@ -1384,6 +1395,13 @@ assertSubpageRoundTrip(hooks, "climate subpage custom range", {
   order: ["1", "B"],
   buttons: [
     buttonShape({ entity: "climate.hallway", label: "Hallway", type: "climate", precision: "0:16:30" }),
+  ],
+}, true);
+
+assertSubpageRoundTrip(hooks, "climate subpage negative custom range", {
+  order: ["1", "B"],
+  buttons: [
+    buttonShape({ entity: "climate.freezer", label: "Freezer", type: "climate", precision: "1:-25:5" }),
   ],
 }, true);
 

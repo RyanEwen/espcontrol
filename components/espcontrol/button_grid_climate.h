@@ -44,6 +44,8 @@ struct ClimateControlCtx {
   int max_tenths = CLIMATE_DEFAULT_MAX_TENTHS;
   bool custom_min = false;
   bool custom_max = false;
+  bool received_min = false;
+  bool received_max = false;
   int step_tenths = CLIMATE_DEFAULT_STEP_TENTHS;
   int precision = 0;
   bool show_target_when_off = false;
@@ -159,6 +161,17 @@ inline bool climate_parse_tenths_string(const std::string &value, int &out) {
   return true;
 }
 
+inline void climate_normalize_range(ClimateControlCtx *ctx) {
+  if (!ctx || ctx->max_tenths > ctx->min_tenths) return;
+  bool min_known = ctx->custom_min || ctx->received_min;
+  bool max_known = ctx->custom_max || ctx->received_max;
+  if (!min_known && max_known) {
+    ctx->min_tenths = ctx->max_tenths - 10;
+  } else {
+    ctx->max_tenths = ctx->min_tenths + 10;
+  }
+}
+
 inline void climate_apply_saved_range(ClimateControlCtx *ctx, const std::string &precision) {
   if (!ctx) return;
   size_t first = precision.find(':');
@@ -177,12 +190,12 @@ inline void climate_apply_saved_range(ClimateControlCtx *ctx, const std::string 
     ctx->max_tenths = tenths;
     ctx->custom_max = true;
   }
-  if (ctx->max_tenths <= ctx->min_tenths) ctx->max_tenths = ctx->min_tenths + 10;
+  climate_normalize_range(ctx);
 }
 
 inline int climate_clamp_tenths(ClimateControlCtx *ctx, int value) {
   if (!ctx) return value;
-  if (ctx->max_tenths <= ctx->min_tenths) ctx->max_tenths = ctx->min_tenths + 10;
+  climate_normalize_range(ctx);
   if (value < ctx->min_tenths) value = ctx->min_tenths;
   if (value > ctx->max_tenths) value = ctx->max_tenths;
   return value;
@@ -1536,8 +1549,11 @@ inline void subscribe_climate_control_state(ClimateControlCtx *ctx) {
     std::function<void(esphome::StringRef)>(
       [ctx, refresh](esphome::StringRef value) {
         int tenths = 0;
-        if (!ctx->custom_min && climate_parse_tenths(value, tenths)) ctx->min_tenths = tenths;
-        if (ctx->max_tenths <= ctx->min_tenths) ctx->max_tenths = ctx->min_tenths + 10;
+        if (!ctx->custom_min && climate_parse_tenths(value, tenths)) {
+          ctx->min_tenths = tenths;
+          ctx->received_min = true;
+        }
+        climate_normalize_range(ctx);
         refresh();
       })
   );
@@ -1546,8 +1562,11 @@ inline void subscribe_climate_control_state(ClimateControlCtx *ctx) {
     std::function<void(esphome::StringRef)>(
       [ctx, refresh](esphome::StringRef value) {
         int tenths = 0;
-        if (!ctx->custom_max && climate_parse_tenths(value, tenths)) ctx->max_tenths = tenths;
-        if (ctx->max_tenths <= ctx->min_tenths) ctx->max_tenths = ctx->min_tenths + 10;
+        if (!ctx->custom_max && climate_parse_tenths(value, tenths)) {
+          ctx->max_tenths = tenths;
+          ctx->received_max = true;
+        }
+        climate_normalize_range(ctx);
         refresh();
       })
   );
