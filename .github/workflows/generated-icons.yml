@@ -9,7 +9,7 @@ permissions:
 jobs:
   sync-icons:
     name: Sync generated icon files
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
 
