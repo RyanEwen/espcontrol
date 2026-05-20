@@ -461,6 +461,15 @@ inline std::string string_ref_limited(esphome::StringRef value, size_t max_len) 
   return std::string(value.c_str(), len);
 }
 
+inline std::string normalized_state_text(esphome::StringRef value,
+                                         size_t max_len = HA_SHORT_STATE_MAX_LEN) {
+  std::string text = trim_display_unit(string_ref_limited(value, max_len));
+  for (char &ch : text) {
+    ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+  }
+  return text;
+}
+
 inline std::string text_sensor_display_text(esphome::StringRef value,
                                             size_t max_len = HA_TEXT_SENSOR_STATE_MAX_LEN) {
   std::string raw = string_ref_limited(value, max_len);
@@ -511,13 +520,17 @@ inline bool parse_float_ref(esphome::StringRef value, float &out) {
 }
 
 inline bool is_entity_on_ref(esphome::StringRef state) {
-  return state == "on" || state == "home" || state == "playing" ||
-         state == "open" || state == "opening" || state == "closing" ||
-         state == "unlocked" || state == "unlocking" || state == "jammed";
+  std::string value = normalized_state_text(state);
+  return value == "on" || value == "true" || value == "1" ||
+         value == "home" || value == "playing" ||
+         value == "open" || value == "opened" ||
+         value == "opening" || value == "closing" ||
+         value == "unlocked" || value == "unlocking" || value == "jammed";
 }
 
 inline bool ha_state_unavailable_ref(esphome::StringRef state) {
-  return state.size() == 0 || state == "unavailable" || state == "unknown";
+  std::string value = normalized_state_text(state);
+  return value.empty() || value == "unavailable" || value == "unknown";
 }
 
 inline void apply_control_availability(lv_obj_t *visual_obj, lv_obj_t *input_obj,

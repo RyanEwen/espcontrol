@@ -113,8 +113,10 @@ inline void subscribe_door_window_state(lv_obj_t *btn_ptr, lv_obj_t *icon_lbl,
         apply_control_availability(btn_ptr, btn_ptr, !unavailable, false);
         bool open = !unavailable && is_entity_on_ref(state);
         lv_label_set_text(icon_lbl, open ? open_icon : closed_icon);
-        apply_sensor_active_color(btn_ptr, active_color, state,
-          on_color, sensor_color, unavailable);
+        if (btn_ptr && active_color) {
+          lv_obj_set_style_bg_color(btn_ptr, lv_color_hex(open ? on_color : sensor_color),
+            static_cast<lv_style_selector_t>(LV_PART_MAIN) | static_cast<lv_style_selector_t>(LV_STATE_DEFAULT));
+        }
       })
   );
 }
