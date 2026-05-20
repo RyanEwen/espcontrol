@@ -36,6 +36,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v6
+      - run: git sparse-checkout disable || true
 
       - uses: actions/setup-node@v6
         with:
@@ -56,6 +57,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v6
+      - run: git sparse-checkout disable || true
 
       - uses: actions/setup-node@v6
         with:
@@ -82,6 +84,18 @@ jobs:
           - guition-esp32-s3-4848s040
     steps:
       - uses: actions/checkout@v6
+      - run: git sparse-checkout disable || true
+
+      - name: Select Docker command
+        run: |
+          if docker info >/dev/null 2>&1; then
+            echo "DOCKER=docker" >> "$GITHUB_ENV"
+          elif sudo -n docker info >/dev/null 2>&1; then
+            echo "DOCKER=sudo docker" >> "$GITHUB_ENV"
+          else
+            echo "::error::Docker is not available to the self-hosted runner user"
+            exit 1
+          fi
 
       - name: Prepare local ESPHome cache
         run: |
@@ -92,7 +106,7 @@ jobs:
 
       - name: Compile firmware
         run: >-
-          docker run --rm
+          ${DOCKER} run --rm
           -v "${PWD}:/config"
           -v "${HOME}/.cache/espcontrol-actions:${HOME}/.cache/espcontrol-actions"
           ghcr.io/esphome/esphome:2026.4.3

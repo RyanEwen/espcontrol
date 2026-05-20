@@ -18,6 +18,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v6
+      - run: git sparse-checkout disable || true
 
       - name: Generate icon outputs
         run: python3 scripts/build.py icons

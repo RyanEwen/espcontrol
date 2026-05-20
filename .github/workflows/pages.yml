@@ -34,6 +34,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v6
+      - run: git sparse-checkout disable || true
 
       - uses: actions/setup-node@v6
         with:
