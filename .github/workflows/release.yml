@@ -115,5 +115,34 @@ jobs:
       - name: Upload firmware to release
         env:
           GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-        run: gh release upload "${{ github.event.release.tag_name }}" firmware/* --clobber
+          RELEASE_ID: ${{ github.event.release.id }}
+        run: |
+          API_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}"
+          UPLOAD_URL="https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}/assets"
+          ASSET_API_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/assets"
+          ASSETS_JSON=$(curl -fsSL \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "${API_URL}/assets")
+
+          for FILE in firmware/*; do
+            NAME=$(basename "${FILE}")
+            EXISTING_ID=$(printf '%s' "${ASSETS_JSON}" | jq -r --arg name "${NAME}" \
+              '.[] | select(.name == $name) | .id' | head -n 1)
+            if [ -n "${EXISTING_ID}" ]; then
+              curl -fsSL \
+                -X DELETE \
+                -H "Authorization: Bearer ${GH_TOKEN}" \
+                -H "Accept: application/vnd.github+json" \
+                "${ASSET_API_URL}/${EXISTING_ID}"
+            fi
+
+            curl -fsSL \
+              -X POST \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              -H "Content-Type: application/octet-stream" \
+              --data-binary @"${FILE}" \
+              "${UPLOAD_URL}?name=${NAME}" \
+              -o /dev/null
+          done
