@@ -48,6 +48,13 @@ def slot_device(slug: str, device: dict, settings: dict) -> dict:
         slot["width_compensation_percent"] = display["widthCompensationPercent"]
     if display.get("volumeWidthCompensationPercent", 100) != 100:
         slot["volume_width_compensation_percent"] = display["volumeWidthCompensationPercent"]
+    if display.get("colorCorrection"):
+        correction = display["colorCorrection"]
+        slot["color_correction"] = {
+            "red": correction.get("redPercent", 100),
+            "green": correction.get("greenPercent", 100),
+            "blue": correction.get("bluePercent", 100),
+        }
     if rotation.get("rotateWidthCompensation"):
         slot["rotate_width_compensation"] = True
     return slot
@@ -133,6 +140,11 @@ def cfg_lines(device: dict) -> list[str]:
         lines.append(
             f"            cfg.volume_width_compensation_percent = {device['volume_width_compensation_percent']};"
         )
+    if device.get("color_correction"):
+        correction = device["color_correction"]
+        lines.append(f"            cfg.color_correction_red_percent = {correction['red']};")
+        lines.append(f"            cfg.color_correction_green_percent = {correction['green']};")
+        lines.append(f"            cfg.color_correction_blue_percent = {correction['blue']};")
     lines.append(f"            cfg.icon_font = id({device['icon_font']})->get_lv_font();")
     lines.append(f"            cfg.sp_sensor_font = id({device['sensor_font']})->get_lv_font();")
     lines.append(f"            cfg.sp_large_sensor_font = id({device['large_sensor_font']})->get_lv_font();")

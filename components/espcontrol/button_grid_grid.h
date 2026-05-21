@@ -16,6 +16,9 @@ struct GridConfig {
   bool wrap_tall_labels;
   int width_compensation_percent = 100;
   int volume_width_compensation_percent = 100;
+  int color_correction_red_percent = COLOR_CORRECTION_RED_PERCENT;
+  int color_correction_green_percent = COLOR_CORRECTION_GREEN_PERCENT;
+  int color_correction_blue_percent = COLOR_CORRECTION_BLUE_PERCENT;
   const lv_font_t *icon_font;
   const lv_font_t *sp_sensor_font;
   const lv_font_t *sp_large_sensor_font = nullptr;
@@ -382,9 +385,15 @@ inline void grid_phase1(
   uint32_t on_val = parse_hex_color(on_hex, has_on);
   uint32_t off_val = parse_hex_color(off_hex, has_off);
   uint32_t sensor_val = parse_hex_color(sensor_hex, has_sensor_color);
-  if (has_on) on_val = correct_display_color(on_val);
-  if (has_off) off_val = correct_display_color(off_val);
-  if (has_sensor_color) sensor_val = correct_display_color(sensor_val);
+  if (has_on) on_val = correct_display_color(
+    on_val, cfg.color_correction_red_percent, cfg.color_correction_green_percent,
+    cfg.color_correction_blue_percent);
+  if (has_off) off_val = correct_display_color(
+    off_val, cfg.color_correction_red_percent, cfg.color_correction_green_percent,
+    cfg.color_correction_blue_percent);
+  if (has_sensor_color) sensor_val = correct_display_color(
+    sensor_val, cfg.color_correction_red_percent, cfg.color_correction_green_percent,
+    cfg.color_correction_blue_percent);
 
   CardPalette palette;
   palette.has_on = has_on;
@@ -477,9 +486,15 @@ inline void grid_phase2(
   uint32_t on_val = parse_hex_color(on_hex, has_on);
   uint32_t off_val = parse_hex_color(off_hex, has_off);
   uint32_t sensor_val = parse_hex_color(sensor_hex, has_sensor_color);
-  if (has_on) on_val = correct_display_color(on_val);
-  if (has_off) off_val = correct_display_color(off_val);
-  if (has_sensor_color) sensor_val = correct_display_color(sensor_val);
+  if (has_on) on_val = correct_display_color(
+    on_val, cfg.color_correction_red_percent, cfg.color_correction_green_percent,
+    cfg.color_correction_blue_percent);
+  if (has_off) off_val = correct_display_color(
+    off_val, cfg.color_correction_red_percent, cfg.color_correction_green_percent,
+    cfg.color_correction_blue_percent);
+  if (has_sensor_color) sensor_val = correct_display_color(
+    sensor_val, cfg.color_correction_red_percent, cfg.color_correction_green_percent,
+    cfg.color_correction_blue_percent);
 
   CardPalette palette;
   palette.has_on = has_on;

@@ -332,6 +332,11 @@
           "volumeLabel": "volume_modal_label_font_md_square"
         },
         "display": {
+          "colorCorrection": {
+            "redPercent": 130,
+            "greenPercent": 105,
+            "bluePercent": 104
+          },
           "wrapTallLabels": false
         }
       }
