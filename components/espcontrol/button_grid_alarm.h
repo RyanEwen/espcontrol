@@ -17,6 +17,8 @@ struct AlarmCardCtx {
   lv_obj_t *page = nullptr;
   TransientStatusLabel *status_label = nullptr;
   const lv_font_t *label_font = nullptr;
+  const lv_font_t *pin_label_font = nullptr;
+  const lv_font_t *key_label_font = nullptr;
   const lv_font_t *icon_font = nullptr;
   uint32_t on_color = DEFAULT_SLIDER_COLOR;
   uint32_t off_color = DEFAULT_OFF_COLOR;
@@ -369,6 +371,29 @@ inline lv_obj_t *alarm_create_key_button(lv_obj_t *parent, lv_coord_t width,
   return btn;
 }
 
+inline lv_coord_t alarm_pin_keypad_gap(lv_coord_t keypad_w, lv_coord_t keypad_h,
+                                       lv_coord_t short_side) {
+  lv_coord_t gap = control_modal_scaled_px(14, short_side);
+  lv_coord_t max_gap_w = keypad_w > 0 ? keypad_w / 16 : 0;
+  lv_coord_t max_gap_h = keypad_h > 0 ? keypad_h / 20 : 0;
+  if (max_gap_w > 0 && gap > max_gap_w) gap = max_gap_w;
+  if (max_gap_h > 0 && gap > max_gap_h) gap = max_gap_h;
+  if (gap < 4) gap = 4;
+  return gap;
+}
+
+inline lv_coord_t alarm_pin_key_size(lv_coord_t keypad_w, lv_coord_t keypad_h,
+                                     lv_coord_t gap, lv_coord_t short_side) {
+  lv_coord_t key_size_w = (keypad_w - gap * 2) / 3;
+  lv_coord_t key_size_h = (keypad_h - gap * 3) / 4;
+  lv_coord_t key_size = key_size_w < key_size_h ? key_size_w : key_size_h;
+  lv_coord_t max_key_size = control_modal_scaled_px(112, short_side);
+  if (max_key_size < 64) max_key_size = 64;
+  if (key_size > max_key_size) key_size = max_key_size;
+  if (key_size < 24) key_size = 24;
+  return key_size;
+}
+
 inline void alarm_pin_key_cb(lv_event_t *e) {
   const char *key = static_cast<const char *>(lv_event_get_user_data(e));
   if (!key) return;
@@ -404,6 +429,12 @@ inline void alarm_pin_open_modal(AlarmActionCtx *action) {
   const lv_font_t *label_font = action->card->btn
     ? lv_obj_get_style_text_font(action->card->btn, LV_PART_MAIN)
     : nullptr;
+  const lv_font_t *pin_label_font = action->card->pin_label_font
+    ? action->card->pin_label_font
+    : label_font;
+  const lv_font_t *key_label_font = action->card->key_label_font
+    ? action->card->key_label_font
+    : label_font;
   const lv_font_t *icon_font = action->card->icon_font
     ? action->card->icon_font
     : action->card->icon_lbl
@@ -430,7 +461,8 @@ inline void alarm_pin_open_modal(AlarmActionCtx *action) {
   ui.pin_lbl = lv_label_create(ui.panel);
   lv_obj_set_style_text_color(ui.pin_lbl, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
   lv_obj_set_style_text_align(ui.pin_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-  if (label_font) lv_obj_set_style_text_font(ui.pin_lbl, label_font, LV_PART_MAIN);
+  if (pin_label_font) lv_obj_set_style_text_font(ui.pin_lbl, pin_label_font, LV_PART_MAIN);
+  apply_width_compensation(ui.pin_lbl, action->card->width_compensation_percent);
   lv_coord_t pin_w = layout.panel_w - (layout.inset + layout.back_size) * 2;
   if (pin_w < 60) pin_w = layout.panel_w - layout.inset * 2;
   lv_obj_set_width(ui.pin_lbl, pin_w);
@@ -441,18 +473,14 @@ inline void alarm_pin_open_modal(AlarmActionCtx *action) {
   if (pin_y < layout.inset) pin_y = layout.inset;
   lv_obj_align(ui.pin_lbl, LV_ALIGN_TOP_MID, 0, pin_y);
 
-  lv_coord_t gap = control_modal_scaled_px(14, layout.short_side);
-  if (gap < 8) gap = 8;
   lv_coord_t pin_button_gap = control_modal_scaled_px(24, layout.short_side);
-  if (pin_button_gap < 14) pin_button_gap = 14;
+  if (pin_button_gap < 10) pin_button_gap = 10;
   lv_coord_t keypad_top = layout.inset + layout.back_size + pin_button_gap;
   lv_coord_t keypad_bottom = layout.panel_h - layout.inset;
   lv_coord_t keypad_w = layout.panel_w - layout.inset * 2;
   lv_coord_t keypad_h = keypad_bottom - keypad_top;
-  lv_coord_t key_size_w = (keypad_w - gap * 2) / 3;
-  lv_coord_t key_size_h = (keypad_h - gap * 3) / 4;
-  lv_coord_t key_size = key_size_w < key_size_h ? key_size_w : key_size_h;
-  if (key_size < 44) key_size = 44;
+  lv_coord_t gap = alarm_pin_keypad_gap(keypad_w, keypad_h, layout.short_side);
+  lv_coord_t key_size = alarm_pin_key_size(keypad_w, keypad_h, gap, layout.short_side);
   lv_coord_t total_w = key_size * 3 + gap * 2;
   lv_coord_t total_h = key_size * 4 + gap * 3;
   lv_coord_t start_x = (layout.panel_w - total_w) / 2;
@@ -468,7 +496,7 @@ inline void alarm_pin_open_modal(AlarmActionCtx *action) {
 
   for (int i = 0; i < 12; i++) {
     const char *text = key_data[i];
-    const lv_font_t *key_font = label_font;
+    const lv_font_t *key_font = key_label_font;
     if (strcmp(text, "back") == 0) {
       text = "\U000F0156";
       key_font = icon_font;
@@ -546,6 +574,8 @@ inline AlarmCardCtx *create_alarm_card_context(
   ctx->btn = slot.btn;
   ctx->icon_lbl = slot.icon_lbl;
   ctx->label_font = label_font;
+  ctx->pin_label_font = label_font;
+  ctx->key_label_font = value_font ? value_font : label_font;
   ctx->icon_font = icon_font;
   ctx->on_color = on_color;
   ctx->off_color = off_color;
