@@ -1038,7 +1038,7 @@ inline void alarm_control_open_modal(AlarmCardCtx *ctx) {
     rail_h = layout.panel_h - layout.inset * 2;
   if (rail_h < control_modal_scaled_px(240, layout.short_side))
     rail_h = control_modal_scaled_px(240, layout.short_side);
-  lv_coord_t control_radius = rail_w / 14;
+  lv_coord_t control_radius = rail_w / 4;
 
   ui.rail = lv_obj_create(ui.panel);
   lv_obj_set_size(ui.rail, rail_w, rail_h);
