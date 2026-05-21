@@ -271,34 +271,9 @@ inline std::string climate_option_label(const std::string &raw) {
   return sentence_cap_text(value);
 }
 
-inline lv_coord_t climate_estimated_label_width(const std::string &label) {
-  lv_coord_t width = 0;
-  for (char ch : label) {
-    if (ch == ' ') width += 8;
-    else if (ch == '/' || ch == '-' || ch == '_') width += 10;
-    else if (std::isupper((unsigned char)ch)) width += 18;
-    else width += 16;
-  }
-  return width;
-}
-
-inline lv_coord_t climate_option_menu_width(const std::vector<std::string> &options,
-                                            const std::string &kind) {
-  if (kind != "hvac") return 220;
-  lv_coord_t label_w = 0;
-  for (const auto &option : options) {
-    lv_coord_t w = climate_estimated_label_width(climate_option_label(option));
-    if (w > label_w) label_w = w;
-  }
-
-  lv_coord_t width = label_w + 92;
-  if (width < 240) width = 240;
-
-  lv_disp_t *disp = lv_disp_get_default();
-  lv_coord_t screen_w = disp ? lv_disp_get_hor_res(disp) : 480;
-  lv_coord_t max_w = screen_w - 32;
-  if (max_w < 190) max_w = 190;
-  if (width > max_w) width = max_w;
+inline lv_coord_t climate_option_menu_width(const std::vector<std::string> &,
+                                            const std::string &) {
+  lv_coord_t width = 220;
   return width;
 }
 
@@ -679,7 +654,7 @@ inline void climate_hide_inline_option_list() {
 }
 
 inline void climate_update_chip(lv_obj_t *chip, const char *title, const std::string &value,
-                                bool visible) {
+                                bool visible, bool show_value = true) {
   if (!chip) return;
   if (!visible) {
     lv_obj_add_flag(chip, LV_OBJ_FLAG_HIDDEN);
@@ -688,7 +663,8 @@ inline void climate_update_chip(lv_obj_t *chip, const char *title, const std::st
   lv_obj_clear_flag(chip, LV_OBJ_FLAG_HIDDEN);
   lv_obj_t *label = lv_obj_get_child(chip, 0);
   if (!label) return;
-  std::string text = std::string(title) + " " + (value.empty() ? "None" : climate_option_label(value));
+  std::string text = title;
+  if (show_value) text += " " + (value.empty() ? "None" : climate_option_label(value));
   lv_label_set_text(label, text.c_str());
 }
 
@@ -854,7 +830,7 @@ inline void climate_open_inline_option_list(ClimateControlCtx *ctx, const std::s
   bool combined = kind == "all";
   if (kind == "hvac") {
     options = &ctx->hvac_modes;
-    title = "";
+    title = "Mode";
   } else if (kind == "preset") {
     options = &ctx->preset_modes;
     title = "Preset";
@@ -965,7 +941,7 @@ inline void climate_open_option_menu(ClimateControlCtx *ctx, const std::string &
   ui.menu_overlay = lv_obj_create(lv_layer_top());
   lv_obj_set_size(ui.menu_overlay, lv_pct(100), lv_pct(100));
   lv_obj_set_style_bg_color(ui.menu_overlay, lv_color_hex(DARK_OVERLAY), LV_PART_MAIN);
-  lv_obj_set_style_bg_opa(ui.menu_overlay, kind == "hvac" ? LV_OPA_TRANSP : LV_OPA_50, LV_PART_MAIN);
+  lv_obj_set_style_bg_opa(ui.menu_overlay, LV_OPA_50, LV_PART_MAIN);
   lv_obj_set_style_border_width(ui.menu_overlay, 0, LV_PART_MAIN);
   lv_obj_set_style_pad_all(ui.menu_overlay, 0, LV_PART_MAIN);
   lv_obj_clear_flag(ui.menu_overlay, LV_OBJ_FLAG_SCROLLABLE);
@@ -979,28 +955,25 @@ inline void climate_open_option_menu(ClimateControlCtx *ctx, const std::string &
   lv_obj_set_style_bg_color(box, lv_color_hex(DARK_BACKGROUND_SECONDARY), LV_PART_MAIN);
   lv_obj_set_style_bg_opa(box, LV_OPA_COVER, LV_PART_MAIN);
   lv_obj_set_style_border_width(box, 0, LV_PART_MAIN);
-  lv_obj_set_style_radius(box, kind == "hvac" ? 8 : 14, LV_PART_MAIN);
-  lv_obj_set_style_pad_all(box, kind == "hvac" ? 12 : 10, LV_PART_MAIN);
-  lv_obj_set_style_pad_row(box, kind == "hvac" ? 0 : 6, LV_PART_MAIN);
+  lv_obj_set_style_radius(box, 14, LV_PART_MAIN);
+  lv_obj_set_style_pad_all(box, 10, LV_PART_MAIN);
+  lv_obj_set_style_pad_row(box, 6, LV_PART_MAIN);
   lv_obj_set_layout(box, LV_LAYOUT_FLEX);
   lv_obj_set_style_flex_flow(box, LV_FLEX_FLOW_COLUMN, LV_PART_MAIN);
-  if (kind == "hvac") lv_obj_align(box, LV_ALIGN_TOP_RIGHT, -24, 78);
-  else lv_obj_align(box, LV_ALIGN_CENTER, 0, 0);
+  lv_obj_align(box, LV_ALIGN_CENTER, 0, 0);
   lv_obj_clear_flag(box, LV_OBJ_FLAG_SCROLLABLE);
 
-  for (size_t option_index = 0; option_index < options->size(); option_index++) {
-    const auto &option = (*options)[option_index];
-    bool selected = climate_option_selected(ctx, kind, option);
+  for (const auto &option : *options) {
     lv_obj_t *btn = lv_btn_create(box);
     lv_obj_set_width(btn, lv_pct(100));
-    lv_obj_set_height(btn, kind == "hvac" ? 66 : 50);
+    lv_obj_set_height(btn, 50);
     lv_obj_set_style_radius(btn, 0, LV_PART_MAIN);
     lv_obj_set_style_bg_opa(btn, LV_OPA_TRANSP, LV_PART_MAIN);
     lv_obj_set_style_border_width(btn, 0, LV_PART_MAIN);
     lv_obj_set_style_shadow_width(btn, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_top(btn, kind == "hvac" ? 14 : 4, LV_PART_MAIN);
-    lv_obj_set_style_pad_bottom(btn, kind == "hvac" ? 14 : 4, LV_PART_MAIN);
-    lv_obj_set_style_pad_left(btn, kind == "hvac" ? 6 : 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_top(btn, 4, LV_PART_MAIN);
+    lv_obj_set_style_pad_bottom(btn, 4, LV_PART_MAIN);
+    lv_obj_set_style_pad_left(btn, 0, LV_PART_MAIN);
     lv_obj_set_style_pad_right(btn, 0, LV_PART_MAIN);
     lv_obj_t *label = lv_label_create(btn);
     lv_label_set_text(label, climate_option_label(option).c_str());
@@ -1008,20 +981,7 @@ inline void climate_open_option_menu(ClimateControlCtx *ctx, const std::string &
     lv_obj_set_style_text_color(label, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
     lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
     if (ctx->label_font) lv_obj_set_style_text_font(label, ctx->label_font, LV_PART_MAIN);
-    if (kind == "hvac") {
-      lv_obj_set_width(label, lv_pct(78));
-      lv_obj_align(label, LV_ALIGN_LEFT_MID, 0, 0);
-      if (selected) {
-        lv_obj_t *check_lbl = lv_label_create(btn);
-        lv_label_set_text(check_lbl, find_icon("Check"));
-        lv_obj_set_style_text_color(check_lbl, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
-        if (ctx->icon_font) lv_obj_set_style_text_font(check_lbl, ctx->icon_font, LV_PART_MAIN);
-        lv_obj_set_style_transform_zoom(check_lbl, 170, LV_PART_MAIN);
-        lv_obj_align(check_lbl, LV_ALIGN_RIGHT_MID, 0, 0);
-      }
-    } else {
-      lv_obj_center(label);
-    }
+    lv_obj_center(label);
     ClimateOptionClick *click = new ClimateOptionClick();
     click->ctx = ctx;
     click->kind = kind;
@@ -1031,17 +991,6 @@ inline void climate_open_option_menu(ClimateControlCtx *ctx, const std::string &
       if (click) climate_send_option(click->ctx, click->kind, click->value);
       climate_hide_option_menu();
     }, LV_EVENT_CLICKED, click);
-    if (kind == "hvac" && option_index + 1 < options->size()) {
-      lv_obj_t *divider = lv_obj_create(box);
-      lv_obj_set_width(divider, lv_pct(100));
-      lv_obj_set_height(divider, 1);
-      lv_obj_set_style_bg_color(divider, lv_color_hex(DARK_BACKGROUND_TERTIARY), LV_PART_MAIN);
-      lv_obj_set_style_bg_opa(divider, LV_OPA_COVER, LV_PART_MAIN);
-      lv_obj_set_style_border_width(divider, 0, LV_PART_MAIN);
-      lv_obj_set_style_shadow_width(divider, 0, LV_PART_MAIN);
-      lv_obj_set_style_pad_all(divider, 0, LV_PART_MAIN);
-      lv_obj_clear_flag(divider, LV_OBJ_FLAG_SCROLLABLE);
-    }
   }
   lv_obj_move_foreground(ui.menu_overlay);
 }
@@ -1120,8 +1069,8 @@ inline void climate_control_set_modal_value(ClimateControlCtx *ctx) {
   bool show_chips = ctx->available &&
     (!ctx->hvac_modes.empty() || !ctx->preset_modes.empty() ||
      !ctx->fan_modes.empty() || !ctx->swing_modes.empty());
-  climate_update_chip(ui.mode_chip, "Mode", ctx->hvac_mode, ctx->available && !ctx->hvac_modes.empty());
-  climate_update_chip(ui.preset_chip, "Preset", ctx->preset_mode, ctx->available && !ctx->preset_modes.empty());
+  climate_update_chip(ui.mode_chip, "Mode", ctx->hvac_mode, ctx->available && !ctx->hvac_modes.empty(), false);
+  climate_update_chip(ui.preset_chip, "Preset", ctx->preset_mode, ctx->available && !ctx->preset_modes.empty(), false);
   climate_update_chip(ui.fan_chip, "Fan", ctx->fan_mode, ctx->available && !ctx->fan_modes.empty());
   climate_update_chip(ui.swing_chip, "Swing", ctx->swing_mode, ctx->available && !ctx->swing_modes.empty());
   climate_set_obj_visible(ui.chips, show_chips);
@@ -1474,8 +1423,8 @@ inline void climate_control_open_modal(ClimateControlCtx *ctx) {
   lv_obj_set_style_flex_cross_place(ui.chips, LV_FLEX_ALIGN_CENTER, LV_PART_MAIN);
   lv_obj_clear_flag(ui.chips, LV_OBJ_FLAG_SCROLLABLE);
 
-  ui.mode_chip = climate_create_chip(ui.chips, "Mode None", ctx->label_font, DARK_TRACK_BACKGROUND, ctx->width_compensation_percent, true);
-  ui.preset_chip = climate_create_chip(ui.chips, "Preset None", ctx->label_font, DARK_TRACK_BACKGROUND, ctx->width_compensation_percent, true);
+  ui.mode_chip = climate_create_chip(ui.chips, "Mode", ctx->label_font, DARK_TRACK_BACKGROUND, ctx->width_compensation_percent, true);
+  ui.preset_chip = climate_create_chip(ui.chips, "Preset", ctx->label_font, DARK_TRACK_BACKGROUND, ctx->width_compensation_percent, true);
   ui.fan_chip = climate_create_chip(ui.chips, "Fan None", ctx->label_font, DARK_TRACK_BACKGROUND, ctx->width_compensation_percent, true);
   ui.swing_chip = climate_create_chip(ui.chips, "Swing None", ctx->label_font, DARK_TRACK_BACKGROUND, ctx->width_compensation_percent, true);
   lv_obj_add_event_cb(ui.mode_chip, [](lv_event_t *) {
