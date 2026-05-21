@@ -1044,7 +1044,7 @@ inline void alarm_control_open_modal(AlarmCardCtx *ctx) {
   lv_obj_set_size(ui.rail, rail_w, rail_h);
   apply_width_compensation(ui.rail, ctx->width_compensation_percent);
   lv_obj_set_style_radius(ui.rail, control_radius, LV_PART_MAIN);
-  lv_obj_set_style_bg_color(ui.rail, lv_color_hex(DARK_BACKGROUND_TERTIARY), LV_PART_MAIN);
+  lv_obj_set_style_bg_color(ui.rail, lv_color_hex(alarm_control_inactive_color(ctx)), LV_PART_MAIN);
   lv_obj_set_style_bg_opa(ui.rail, LV_OPA_COVER, LV_PART_MAIN);
   lv_obj_set_style_border_width(ui.rail, 0, LV_PART_MAIN);
   lv_obj_set_style_shadow_width(ui.rail, 0, LV_PART_MAIN);
