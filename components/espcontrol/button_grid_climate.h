@@ -17,6 +17,7 @@ constexpr int CLIMATE_MODAL_ARC_SIZE_PERCENT = 88;
 constexpr lv_coord_t CLIMATE_MODAL_ARC_UP_REF_PX = 20;
 constexpr lv_coord_t CLIMATE_MODAL_STEP_BUTTONS_UP_REF_PX = 42;
 constexpr lv_coord_t CLIMATE_MODAL_STEP_BUTTON_GAP_REF_PX = 16;
+constexpr uint16_t CLIMATE_MODAL_STEP_ICON_ZOOM = 214;
 constexpr int CLIMATE_OPTION_ROW_WIDTH_PERCENT = 88;
 constexpr lv_coord_t CLIMATE_MODAL_OFF_TEXT_DOWN_REF_PX = 24;
 
@@ -446,6 +447,17 @@ inline uint32_t climate_active_color(ClimateControlCtx *ctx) {
   if (ctx->hvac_action == "heating") return CLIMATE_HEATING_COLOR;
   if (ctx->hvac_action == "cooling") return CLIMATE_COOLING_COLOR;
   return ctx->accent_color;
+}
+
+inline void climate_apply_step_button_icon_size(lv_obj_t *btn) {
+  if (!btn || CLIMATE_MODAL_STEP_ICON_ZOOM == 256) return;
+  lv_obj_t *label = lv_obj_get_child(btn, 0);
+  if (!label) return;
+  lv_obj_update_layout(label);
+  lv_coord_t offset_x = lv_obj_get_width(label) * (256 - CLIMATE_MODAL_STEP_ICON_ZOOM) / 512;
+  lv_coord_t offset_y = lv_obj_get_height(label) * (256 - CLIMATE_MODAL_STEP_ICON_ZOOM) / 512;
+  lv_obj_set_style_transform_zoom(label, CLIMATE_MODAL_STEP_ICON_ZOOM, LV_PART_MAIN);
+  lv_obj_align(label, LV_ALIGN_CENTER, offset_x, offset_y);
 }
 
 inline std::string climate_card_target_value(ClimateControlCtx *ctx) {
@@ -1494,6 +1506,8 @@ inline void climate_control_open_modal(ClimateControlCtx *ctx) {
     DARK_CONTROL_NEUTRAL, DARK_BACKGROUND_TERTIARY, ctx->width_compensation_percent);
   ui.plus_btn = control_modal_create_round_button(ui.panel, 72, find_icon("Plus"), ctx->icon_font,
     DARK_CONTROL_NEUTRAL, DARK_BACKGROUND_TERTIARY, ctx->width_compensation_percent);
+  climate_apply_step_button_icon_size(ui.minus_btn);
+  climate_apply_step_button_icon_size(ui.plus_btn);
   lv_obj_add_event_cb(ui.minus_btn, [](lv_event_t *) {
     ClimateControlModalUi &ui = climate_control_modal_ui();
     if (ui.active) climate_apply_selected_target(ui.active,
