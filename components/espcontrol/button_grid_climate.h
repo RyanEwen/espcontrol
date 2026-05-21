@@ -13,8 +13,10 @@ constexpr int CLIMATE_DEFAULT_MIN_TENTHS = 50;
 constexpr int CLIMATE_DEFAULT_MAX_TENTHS = 350;
 constexpr int CLIMATE_DEFAULT_STEP_TENTHS = 5;
 constexpr uint32_t CLIMATE_TEMP_DEBOUNCE_MS = 450;
-constexpr int CLIMATE_MODAL_ARC_SIZE_PERCENT = 94;
-constexpr lv_coord_t CLIMATE_MODAL_ARC_UP_REF_PX = 16;
+constexpr int CLIMATE_MODAL_ARC_SIZE_PERCENT = 92;
+constexpr lv_coord_t CLIMATE_MODAL_ARC_UP_REF_PX = 20;
+constexpr lv_coord_t CLIMATE_MODAL_STEP_BUTTONS_UP_REF_PX = 42;
+constexpr lv_coord_t CLIMATE_MODAL_STEP_BUTTON_GAP_REF_PX = 16;
 constexpr int CLIMATE_OPTION_ROW_WIDTH_PERCENT = 88;
 constexpr lv_coord_t CLIMATE_MODAL_OFF_TEXT_DOWN_REF_PX = 24;
 
@@ -1166,7 +1168,7 @@ inline void climate_control_layout_modal(ClimateControlCtx *ctx) {
     value_center_y += control_modal_scaled_px(CLIMATE_MODAL_OFF_TEXT_DOWN_REF_PX, layout.short_side);
   }
   lv_coord_t controls_center_y = layout.controls_center_y -
-    control_modal_scaled_px(30, layout.short_side);
+    control_modal_scaled_px(CLIMATE_MODAL_STEP_BUTTONS_UP_REF_PX, layout.short_side);
   lv_coord_t title_center_y = value_center_y -
     (value_h / 2 + layout.title_gap + title_h / 2);
   lv_coord_t chip_h = layout.short_side < 520 ? 72 : 94;
@@ -1199,7 +1201,7 @@ inline void climate_control_layout_modal(ClimateControlCtx *ctx) {
   ControlModalLayout controls_layout = layout;
   controls_layout.btn_size = control_modal_scaled_px(64, layout.short_side);
   if (controls_layout.btn_size < 48) controls_layout.btn_size = 48;
-  controls_layout.controls_gap = control_modal_scaled_px(10, layout.short_side);
+  controls_layout.controls_gap = control_modal_scaled_px(CLIMATE_MODAL_STEP_BUTTON_GAP_REF_PX, layout.short_side);
   if (controls_layout.controls_gap < 6) controls_layout.controls_gap = 6;
   controls_layout.controls_center_y = controls_center_y;
   control_modal_apply_step_buttons_layout(ui.minus_btn, ui.plus_btn, controls_layout);
