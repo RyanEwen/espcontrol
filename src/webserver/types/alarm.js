@@ -180,7 +180,7 @@ registerButtonType("alarm", {
   },
   renderPreview: function (b, helpers) {
     var label = (b.label && b.label.trim()) || (b.entity && b.entity.trim()) || "Alarm";
-    var iconName = alarmUsesDefaultIcon(b.icon) ? "security" : iconSlug(b.icon);
+    var iconName = iconSlug(b.icon && b.icon !== "Auto" ? b.icon : "Security");
     return {
       iconHtml: '<span class="sp-btn-icon mdi mdi-' + iconName + '"></span>',
       labelHtml: '<span class="sp-btn-label">' + helpers.escHtml(label) + '</span>',

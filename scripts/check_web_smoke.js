@@ -103,6 +103,14 @@ assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("alarm", true,
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("alarm", true, true), true);
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("alarm_action", false, false), false);
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("alarm_action", false, true), false);
+assert(
+  hooks.buttonTypePreviewFor("alarm", { label: "Alarm", icon: "Security", type: "alarm" }).iconHtml.includes("mdi-shield-home"),
+  "alarm preview uses the selected Security icon"
+);
+assert(
+  hooks.buttonTypePreviewFor("alarm", { label: "Alarm", icon: "Alarm", type: "alarm" }).iconHtml.includes("mdi-bell-ring"),
+  "alarm preview uses the selected Alarm icon"
+);
 assert.deepStrictEqual(Array.from(hooks.alarmVisibleActions(hooks.parseButtonConfig(
   "alarm_control_panel.house;House;Security;Auto;;;alarm;;actions=away%7Cdisarm"
 ))), ["away", "disarm"]);
@@ -213,7 +221,7 @@ assert.deepStrictEqual(hooks.entityDetailPaths("text_sensor", [
 ]);
 assert.strictEqual(hooks.firmwareUpdateControlsVisibleFor("wifi", true), true);
 assert.strictEqual(hooks.firmwareUpdateControlsVisibleFor("wifi", false), false);
-assert.strictEqual(hooks.firmwareUpdateControlsVisibleFor("ethernet", true), false);
+assert.strictEqual(hooks.firmwareUpdateControlsVisibleFor("ethernet", true), true);
 assert.strictEqual(
   hooks.firmwareVersionAfterUpdateInfo("Dev", { state: "NO UPDATE", latest_version: "v1.11.1" }).version,
   "v1.11.1"

@@ -735,8 +735,7 @@ function publicFirmwareStatusHtml() {
 }
 
 function firmwareUpdateControlsVisible() {
-  var transport = String(state.networkTransport == null ? "" : state.networkTransport).trim().toLowerCase();
-  return state.firmwareUpdateControlsSupported === true && transport !== "ethernet";
+  return state.firmwareUpdateControlsSupported === true;
 }
 
 function syncFirmwareUpdateUi() {

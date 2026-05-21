@@ -1435,6 +1435,12 @@ function renderPreview() {
       var bIdx = slot - 1;
       if (c.isSub && bIdx >= c.buttons.length) continue;
       var b = c.buttons[bIdx];
+      if (state.settingsDraft &&
+          state.settingsDraft.slot === slot &&
+          state.settingsDraft.isSub === c.isSub &&
+          (!c.isSub || state.settingsDraft.homeSlot === state.editingSubpage)) {
+        b = state.settingsDraft.button;
+      }
       var iconName = resolveIcon(b);
       var label = b.label || b.entity || "Configure";
       var color = (b.type === "sensor" || b.type === "door_window" || b.type === "weather" || b.type === "weather_forecast" || b.type === "calendar" || b.type === "timezone")
@@ -1844,6 +1850,7 @@ function renderButtonSettings(forceOpen) {
       if (b[field] === input.value) return;
       b[field] = input.value;
       markDraftDirty();
+      if (rerender) renderPreview();
     }
     input.addEventListener("input", function () {
       syncValue();
@@ -2349,6 +2356,7 @@ function initIconPicker(picker, currentIcon, onSelect) {
     setPickerIcon(opt);
     closePicker();
     onSelect(opt);
+    renderPreview();
   }
   picker._setIcon = setPickerIcon;
 
