@@ -13,6 +13,10 @@ function alarmCardTypeOptions() {
   return options;
 }
 
+function alarmCardTypeOptionsForSettings() {
+  return alarmCardTypeOptions();
+}
+
 function alarmLabelIsGenerated(label) {
   if (!label) return true;
   for (var i = 0; i < ALARM_ACTIONS.length; i++) {
@@ -84,15 +88,14 @@ function setAlarmCardType(b, value, helpers) {
 }
 
 function renderAlarmCardTypeField(panel, b, helpers) {
-  var options = alarmCardTypeOptions();
-  if (helpers.isSub) options = options.slice(1);
+  var options = alarmCardTypeOptionsForSettings(helpers.isSub);
   var value = b.type === "alarm"
     ? ALARM_CONTROL_PANEL_VALUE
     : (alarmActionInfo(b.sensor) || ALARM_ACTIONS[0]).value;
   panel.appendChild(helpers.selectField(
     "Type",
     helpers.idPrefix + "alarm-card-type",
-    alarmCardTypeOptions(),
+    options,
     value,
     function () {
       setAlarmCardType(b, this.value, helpers);
@@ -119,10 +122,6 @@ registerButtonType("alarm", {
     renderAlarmCardTypeField(panel, b, helpers);
   },
   renderSettings: function (panel, b, slot, helpers) {
-    if (helpers.isSub) {
-      setAlarmCardType(b, "away", helpers);
-      return;
-    }
     b.sensor = "";
     b.unit = "";
     b.precision = "";

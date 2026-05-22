@@ -1259,6 +1259,11 @@ if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
     alarmIconDisplayMode: alarmIconDisplayMode,
     alarmLabelDisplayMode: alarmLabelDisplayMode,
     alarmVisibleActions: alarmVisibleActions,
+    alarmCardTypeOptionValues: function (isSub) {
+      return alarmCardTypeOptionsForSettings(!!isSub).map(function (option) {
+        return option.value;
+      });
+    },
     normalizeAlarmOptions: normalizeAlarmOptions,
     buttonTypePickerKeysForExperimental: function (enabled, isSub, selectedTypeKey) {
       var oldExperimental = state.developerExperimentalFeatures;

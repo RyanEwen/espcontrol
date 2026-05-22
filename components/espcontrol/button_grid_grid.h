@@ -1173,7 +1173,34 @@ inline void grid_phase2(
         continue;
       }
       if (sb_cfg.type == "alarm") {
-        apply_control_availability(sub_slot.btn, sub_slot.btn, false);
+        ParsedCfg alarm_cfg = sb_cfg;
+        if (alarm_cfg.entity.empty()) alarm_cfg.entity = p.entity;
+        if (alarm_cfg.options.empty()) alarm_cfg.options = p.options;
+        if (!alarm_cfg.entity.empty()) {
+          AlarmCardCtx *ctx = create_alarm_card_context(
+            sub_slot, alarm_cfg, sub_scr, NS, COLS,
+            palette.has_on ? palette.on_val : DEFAULT_SLIDER_COLOR,
+            palette.has_off ? palette.off_val : DEFAULT_OFF_COLOR,
+            palette.has_sensor_color ? palette.sensor_val : DEFAULT_TERTIARY_COLOR,
+            cfg.icon_font,
+            cfg.volume_number_font ? cfg.volume_number_font : cfg.sp_sensor_font,
+            cfg.sp_sensor_font,
+            cfg.media_title_font,
+            lv_obj_get_style_text_font(sub_slot.text_lbl, LV_PART_MAIN),
+            lv_obj_get_style_text_color(sub_slot.text_lbl, LV_PART_MAIN),
+            cfg.width_compensation_percent,
+            false);
+          ctx->grid_page = sub_scr;
+          lv_obj_set_user_data(sb_btn, ctx);
+          subscribe_alarm_state(ctx);
+          if (alarm_cfg.label.empty() && !ctx->show_status_label)
+            subscribe_friendly_name(ctx->status_label, alarm_cfg.entity);
+          add_parent_indicator(alarm_cfg.entity);
+          lv_obj_add_event_cb(sb_btn, [](lv_event_t *e) {
+            AlarmCardCtx *ctx = (AlarmCardCtx *)lv_event_get_user_data(e);
+            if (ctx) alarm_card_open_page(ctx);
+          }, LV_EVENT_CLICKED, ctx);
+        }
         continue;
       }
       if (sb_cfg.type == "alarm_action") {
