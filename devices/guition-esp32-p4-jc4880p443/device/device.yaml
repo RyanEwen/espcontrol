@@ -71,8 +71,8 @@ esphome:
       # Separate marker for the JC4880P443 boot-loop fix so ESPHome cannot
       # silently reuse the earlier 09:02 build that still crashes.
       - "-DESPCONTROL_JC4880P443_BOOTFIX_20260522=1"
-      # Rebuild marker for the one-time saved crash report cleanup below.
-      - "-DESPCONTROL_JC4880P443_CRASHCLEAR_20260522=1"
+      # Rebuild marker for the second saved crash report cleanup below.
+      - "-DESPCONTROL_JC4880P443_CRASHCLEAR2_20260522=1"
     build_src_flags:
       - "-Wno-literal-suffix"
   on_boot:
@@ -80,15 +80,16 @@ esphome:
       then:
         - if:
             condition:
-              lambda: 'return !id(jc4880p443_crash_report_cleared);'
+              lambda: 'return !id(jc4880p443_crash_report_cleared_2);'
             then:
               - lambda: |-
                   #ifdef USE_ESP32_CRASH_HANDLER
                   esphome::esp32::crash_handler_clear();
                   #endif
-                  id(jc4880p443_crash_report_cleared) = true;
+                  id(jc4880p443_safe_mode).mark_successful();
+                  id(jc4880p443_crash_report_cleared_2) = true;
                   global_preferences->sync();
-                  ESP_LOGW("jc4880p443", "Cleared saved crash report; rebooting once");
+                  ESP_LOGW("jc4880p443", "Cleared saved crash report marker 2; rebooting once");
               - delay: 500ms
               - lambda: |-
                   App.safe_reboot();
@@ -102,7 +103,7 @@ esphome:
         - script.execute: apply_screen_rotation
 
 globals:
-  - id: jc4880p443_crash_report_cleared
+  - id: jc4880p443_crash_report_cleared_2
     type: bool
     restore_value: true
     initial_value: "false"
@@ -134,6 +135,9 @@ psram:
 ota:
   - platform: esphome
   - platform: http_request
+
+safe_mode:
+  id: jc4880p443_safe_mode
 
 # ---------------------------------------------------------------------------
 # Shared infrastructure (API, logging, web server, restart button)
