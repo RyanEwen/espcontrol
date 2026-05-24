@@ -8,6 +8,8 @@ description:
 
 A Media card controls a Home Assistant `media_player` entity. It can work as a simple playback button, a volume control, a track position control, or a now-playing display.
 
+![Wide media card showing now-playing title and artist](/images/card-media.png)
+
 ## Setting Up a Media Card
 
 1. Select a card and change its type to **Media**.

@@ -8,6 +8,8 @@ description:
 
 A Climate card controls a Home Assistant `climate` entity, such as a thermostat, heat pump, air conditioner, or radiator thermostat.
 
+![Climate card showing target temperature and current idle status](/images/card-climate.png)
+
 ## Setting Up a Climate Card
 
 1. Select a card and change its type to **Climate**.

@@ -8,7 +8,7 @@ description:
 
 A cover card lets you control a Home Assistant cover entity — blinds, shutters, roller shades, gates, or garage doors — as a slider, a toggle, or a one-tap command.
 
-<!-- ![Cover card showing a blinds icon with a position fill bar](/images/card-cover.png) -->
+![Cover card showing a blinds icon with a position fill bar](/images/card-cover.png)
 
 ## Setting Up a Cover
 

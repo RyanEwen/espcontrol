@@ -12,6 +12,8 @@ Weather cards are read-only — tapping them does nothing.
 
 Older cards that were created as **Weather Forecast** cards still work. They now load as **Weather** cards with **Display** set to **Temperatures Tomorrow**.
 
+![Weather card showing today's high and low temperatures](/images/card-weather.png)
+
 ## Setting Up a Weather Card
 
 1. Select a card and change its type to **Weather**.

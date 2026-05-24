@@ -8,6 +8,8 @@ description:
 
 The Lights card is a guided card type for Home Assistant `light` entities. It keeps the common light controls together, so you can choose whether a light should behave like a switch, a brightness slider, or a colour temperature slider.
 
+![Light brightness card showing a lightbulb icon and dimmer fill bar](/images/card-light-brightness.png)
+
 ## Setting Up a Light Card
 
 1. Select a card and change its type to **Lights**.

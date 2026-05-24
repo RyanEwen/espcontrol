@@ -8,7 +8,7 @@ description:
 
 A slider card lets you control the brightness of a Home Assistant light entity or the speed of a Home Assistant fan entity by dragging a vertical fill bar up or down.
 
-<!-- ![Slider card showing a lightbulb icon with a brightness fill bar](/images/card-slider.png) -->
+![Slider card showing a lightbulb icon with a brightness fill bar](/images/card-slider.png)
 
 For light-only controls, you may prefer the newer [Lights](/card-types/lights) card. It groups light switching, brightness, and colour temperature in one card type. Use Slider when you want a generic light or fan slider.
 

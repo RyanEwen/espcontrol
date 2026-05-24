@@ -10,6 +10,8 @@ Your EspControl panel has a built-in web page where you can set everything up. O
 
 ![Screen setup page](/images/screen-setup.png)
 
+![Webserver card grid with examples of lights, climate, media, weather, covers, locks, actions, sensors, and date cards](/images/webserver-card-gallery.png)
+
 ::: tip Finding the address
 The address is shown on the display screen when no cards are configured yet. You can also find it in your router's connected devices list, or in Home Assistant under **Settings > Devices & Services > ESPHome**.
 :::
@@ -19,6 +21,8 @@ The address is shown on the display screen when no cards are configured yet. You
 Tap any empty space in the grid (shown as a dashed outline with a **+** icon). A settings panel appears below the preview where you configure the card:
 
 ![Card settings panel](/images/button-settings.png)
+
+![Light card settings panel showing card type, entity, label, and icon fields](/images/settings-panel-light-card.png)
 
 ![Switch card showing a Heater icon](/images/card-toggle.png)
 
@@ -78,6 +82,8 @@ If a card already occupies the space needed for a larger size, the setup page tr
 ## Device Settings
 
 The **Settings** tab also includes display, brightness, screensaver, backup, and firmware update controls.
+
+![Settings tab showing appearance, backlight, schedule, clock, and firmware controls](/images/settings-tab-display.png)
 
 ## Apply Configuration
 
