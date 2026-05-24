@@ -286,6 +286,7 @@ WWW_SOURCE = ROOT / "src" / "webserver" / "www.js"
 MODULES_DIR = ROOT / "src" / "webserver" / "modules"
 TYPES_DIR = ROOT / "src" / "webserver" / "types"
 WWW_OUTPUT_DIR = ROOT / "docs" / "public" / "webserver"
+WEB_MODULE_ORDER_PATH = ROOT / "scripts" / "web_modules.json"
 
 CONFIG_START = "__DEVICE_CONFIG_START__"
 CONFIG_END = "__DEVICE_CONFIG_END__"
@@ -293,15 +294,12 @@ MODULES_START = "__WEB_MODULES_START__"
 MODULES_END = "__WEB_MODULES_END__"
 TYPES_START = "__BUTTON_TYPES_START__"
 TYPES_END = "__BUTTON_TYPES_END__"
-WEB_MODULE_ORDER = [
-    "styles",
-    "state",
-    "grid",
-    "api",
-    "config_codec",
-    "controls",
-    "app",
-]
+
+def load_web_module_order():
+    order = load_json(WEB_MODULE_ORDER_PATH)
+    if not isinstance(order, list) or not all(isinstance(name, str) and name for name in order):
+        raise BuildError(f"Invalid web module order: {WEB_MODULE_ORDER_PATH.relative_to(ROOT)}")
+    return order
 
 
 def build_config_block(slug, cfg):
@@ -369,7 +367,7 @@ def load_button_types():
 
 def load_web_modules():
     chunks = []
-    for name in WEB_MODULE_ORDER:
+    for name in load_web_module_order():
         path = MODULES_DIR / f"{name}.js"
         if not path.exists():
             raise BuildError(f"Missing web module: {path.relative_to(ROOT)}")

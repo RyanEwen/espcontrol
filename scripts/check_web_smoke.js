@@ -13,7 +13,8 @@ const DEVICE_MANIFEST = path.join(ROOT, "devices", "manifest.json");
 const WEB_OUTPUT_DIR = path.join(ROOT, "docs", "public", "webserver");
 const ALL_ROTATIONS = ["0", "90", "180", "270"];
 
-function loadHooks() {
+function createWebSandbox() {
+  const domEvents = [];
   const sandbox = {
     __ESPCONTROL_TEST_HOOKS__: {},
     console: { log() {}, warn() {}, error() {} },
@@ -23,10 +24,19 @@ function loadHooks() {
     document: {
       readyState: "loading",
       activeElement: null,
-      addEventListener() {},
+      addEventListener(type, listener) {
+        domEvents.push({ type, listener });
+      },
     },
   };
+  sandbox.__domEvents = domEvents;
   sandbox.window = sandbox;
+  sandbox.globalThis = sandbox;
+  return sandbox;
+}
+
+function loadHooks() {
+  const sandbox = createWebSandbox();
   vm.createContext(sandbox);
   vm.runInContext(loadBundledWebSource(), sandbox, { filename: SOURCE });
   return sandbox.__ESPCONTROL_TEST_HOOKS__.config;
@@ -47,6 +57,22 @@ const hooks = loadHooks();
 assert(hooks, "web test hooks were not exported");
 
 const manifest = JSON.parse(fs.readFileSync(DEVICE_MANIFEST, "utf8"));
+for (const slug of Object.keys(manifest.devices || {})) {
+  const webOutput = path.join(WEB_OUTPUT_DIR, slug, "www.js");
+  const generated = fs.readFileSync(webOutput, "utf8");
+  const sandbox = createWebSandbox();
+  vm.createContext(sandbox);
+  vm.runInContext(generated, sandbox, { filename: webOutput });
+  assert(
+    sandbox.__ESPCONTROL_TEST_HOOKS__.config,
+    `${slug}: generated web UI must export the same test hooks used by local checks`
+  );
+  assert(
+    sandbox.__domEvents.some((event) => event.type === "DOMContentLoaded" && typeof event.listener === "function"),
+    `${slug}: generated web UI must register DOMContentLoaded startup wiring`
+  );
+}
+
 for (const [slug, device] of Object.entries(manifest.devices || {})) {
   if (!device.rotation || !device.rotation.enabled) continue;
   const webOutput = path.join(WEB_OUTPUT_DIR, slug, "www.js");

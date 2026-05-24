@@ -8,28 +8,7 @@ const ROOT = path.resolve(__dirname, "..");
 const SOURCE = path.join(ROOT, "src", "webserver", "www.js");
 const MODULES_DIR = path.join(ROOT, "src", "webserver", "modules");
 const TYPES_DIR = path.join(ROOT, "src", "webserver", "types");
-
-const WEB_MODULE_ORDER = [
-  "styles",
-  "state",
-  "grid",
-  "api",
-  "config_codec",
-  "controls",
-  "controls_shell",
-  "settings_page",
-  "controls_fields",
-  "preview_render",
-  "button_settings",
-  "preview_interactions",
-  "backup_contract",
-  "app_backup",
-  "app_status_preview",
-  "app_events",
-  "app",
-  "app_test_hooks",
-  "app_start",
-];
+const WEB_MODULE_ORDER = require("./web_modules.json");
 
 function indentChunk(text) {
   return text.trimEnd().split(/\r?\n/).map((line) => {
