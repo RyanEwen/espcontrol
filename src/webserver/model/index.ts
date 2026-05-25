@@ -44,6 +44,7 @@ export {
 
 export {
   MONTH_NAME_DEFAULTS,
+  normalizeBackupScreenSettings,
   normalizeClockBrightness,
   normalizeHour,
   normalizeMonthNames,
@@ -59,6 +60,10 @@ export {
   scheduleModeOption,
   screensaverActionOption,
   serializeMonthNames,
+} from "./settings";
+
+export type {
+  BackupScreenSettingsState,
 } from "./settings";
 
 export type {

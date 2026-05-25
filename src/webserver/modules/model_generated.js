@@ -44,6 +44,7 @@ var EspControlModel = (() => {
     isBackOrderToken: () => isBackOrderToken,
     legacyButtonConfigSafe: () => legacyButtonConfigSafe,
     markSpannedCells: () => markSpannedCells,
+    normalizeBackupScreenSettings: () => normalizeBackupScreenSettings,
     normalizeClockBrightness: () => normalizeClockBrightness,
     normalizeHour: () => normalizeHour,
     normalizeMonthNames: () => normalizeMonthNames,
@@ -612,6 +613,34 @@ var EspControlModel = (() => {
   }
   function serializeMonthNames(value) {
     return normalizeMonthNames(value).join(",");
+  }
+  function numberOrFallback(value, fallback) {
+    const n = parseFloat(String(value));
+    return Number.isFinite(n) ? n : fallback;
+  }
+  function objectValue(source, key) {
+    return Object.prototype.hasOwnProperty.call(source, key) ? source[key] : void 0;
+  }
+  function normalizeBackupScreenSettings(screenSettings, current) {
+    return {
+      brightnessDayVal: numberOrFallback(screenSettings.brightness_day, 100),
+      brightnessNightVal: numberOrFallback(screenSettings.brightness_night, 75),
+      automaticBrightnessEnabled: objectValue(screenSettings, "automatic_brightness") != null ? !!screenSettings.automatic_brightness : true,
+      scheduleEnabled: !!screenSettings.schedule_enabled,
+      scheduleOnHour: normalizeHour(screenSettings.schedule_on_hour, 6),
+      scheduleOffHour: normalizeHour(screenSettings.schedule_off_hour, 23),
+      scheduleMode: normalizeScheduleMode(screenSettings.schedule_mode),
+      scheduleWakeTimeout: normalizeScheduleWakeTimeout(screenSettings.schedule_wake_timeout),
+      scheduleWakeBrightness: normalizeScheduleWakeBrightness(
+        objectValue(screenSettings, "schedule_wake_brightness") != null ? screenSettings.schedule_wake_brightness : current.scheduleWakeBrightness
+      ),
+      scheduleDimmedBrightness: normalizeScheduleDimmedBrightness(
+        objectValue(screenSettings, "schedule_dimmed_brightness") != null ? screenSettings.schedule_dimmed_brightness : current.scheduleDimmedBrightness
+      ),
+      scheduleClockBrightness: normalizeScheduleClockBrightness(
+        objectValue(screenSettings, "schedule_clock_brightness") != null ? screenSettings.schedule_clock_brightness : current.scheduleClockBrightness
+      )
+    };
   }
   return __toCommonJS(index_exports);
 })();

@@ -291,33 +291,22 @@ function importConfig() {
 
       var screenSettings = backupPlan.screen;
       if (screenSettings) {
-        state.brightnessDayVal = parseFloat(screenSettings.brightness_day);
-        if (!isFinite(state.brightnessDayVal)) state.brightnessDayVal = 100;
-        state.brightnessNightVal = parseFloat(screenSettings.brightness_night);
-        if (!isFinite(state.brightnessNightVal)) state.brightnessNightVal = 75;
-        state.automaticBrightnessEnabled = screenSettings.automatic_brightness != null
-          ? !!screenSettings.automatic_brightness
-          : true;
-        state.scheduleEnabled = !!screenSettings.schedule_enabled;
-        state.scheduleOnHour = normalizeHour(screenSettings.schedule_on_hour, 6);
-        state.scheduleOffHour = normalizeHour(screenSettings.schedule_off_hour, 23);
-        state.scheduleMode = normalizeScheduleMode(screenSettings.schedule_mode);
-        state.scheduleWakeTimeout = normalizeScheduleWakeTimeout(screenSettings.schedule_wake_timeout);
-        state.scheduleWakeBrightness = normalizeScheduleWakeBrightness(
-          screenSettings.schedule_wake_brightness != null
-            ? screenSettings.schedule_wake_brightness
-            : state.scheduleWakeBrightness
-        );
-        state.scheduleDimmedBrightness = normalizeScheduleDimmedBrightness(
-          screenSettings.schedule_dimmed_brightness != null
-            ? screenSettings.schedule_dimmed_brightness
-            : state.scheduleDimmedBrightness
-        );
-        state.scheduleClockBrightness = normalizeScheduleClockBrightness(
-          screenSettings.schedule_clock_brightness != null
-            ? screenSettings.schedule_clock_brightness
-            : state.scheduleClockBrightness
-        );
+        var importedScreenSettings = EspControlModel.normalizeBackupScreenSettings(screenSettings, {
+          scheduleWakeBrightness: state.scheduleWakeBrightness,
+          scheduleDimmedBrightness: state.scheduleDimmedBrightness,
+          scheduleClockBrightness: state.scheduleClockBrightness,
+        });
+        state.brightnessDayVal = importedScreenSettings.brightnessDayVal;
+        state.brightnessNightVal = importedScreenSettings.brightnessNightVal;
+        state.automaticBrightnessEnabled = importedScreenSettings.automaticBrightnessEnabled;
+        state.scheduleEnabled = importedScreenSettings.scheduleEnabled;
+        state.scheduleOnHour = importedScreenSettings.scheduleOnHour;
+        state.scheduleOffHour = importedScreenSettings.scheduleOffHour;
+        state.scheduleMode = importedScreenSettings.scheduleMode;
+        state.scheduleWakeTimeout = importedScreenSettings.scheduleWakeTimeout;
+        state.scheduleWakeBrightness = importedScreenSettings.scheduleWakeBrightness;
+        state.scheduleDimmedBrightness = importedScreenSettings.scheduleDimmedBrightness;
+        state.scheduleClockBrightness = importedScreenSettings.scheduleClockBrightness;
 
         postNumber(entityName("screen_daytime_brightness"), state.brightnessDayVal);
         postNumber(entityName("screen_nighttime_brightness"), state.brightnessNightVal);
