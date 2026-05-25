@@ -436,19 +436,19 @@ inline void alarm_apply_home_arm_delay(AlarmCardCtx *ctx, const std::string &del
 
 inline void subscribe_alarm_state(AlarmCardCtx *ctx) {
   if (!ctx || ctx->entity_id.empty()) return;
-  esphome::api::global_api_server->subscribe_home_assistant_state(
-    ctx->entity_id, {},
+  ha_subscribe_state(
+    ctx->entity_id,
     std::function<void(esphome::StringRef)>([ctx](esphome::StringRef state) {
       alarm_apply_home_state(ctx, string_ref_limited(state, HA_SHORT_STATE_MAX_LEN));
     })
   );
-  esphome::api::global_api_server->subscribe_home_assistant_state(
+  ha_subscribe_attribute(
     ctx->entity_id, std::string("arm_mode"),
     std::function<void(esphome::StringRef)>([ctx](esphome::StringRef arm_mode) {
       alarm_apply_home_arm_mode(ctx, string_ref_limited(arm_mode, HA_SHORT_STATE_MAX_LEN));
     })
   );
-  esphome::api::global_api_server->subscribe_home_assistant_state(
+  ha_subscribe_attribute(
     ctx->entity_id, std::string("delay"),
     std::function<void(esphome::StringRef)>([ctx](esphome::StringRef delay) {
       alarm_apply_home_arm_delay(ctx, string_ref_limited(delay, HA_SHORT_STATE_MAX_LEN));
@@ -489,8 +489,8 @@ inline void alarm_apply_action_arm_mode(AlarmCardCtx *ctx, const std::string &mo
 inline void subscribe_alarm_action_availability(AlarmCardCtx *ctx) {
   if (!ctx || ctx->entity_id.empty()) return;
   ctx->available = true;
-  esphome::api::global_api_server->subscribe_home_assistant_state(
-    ctx->entity_id, {},
+  ha_subscribe_state(
+    ctx->entity_id,
     std::function<void(esphome::StringRef)>([ctx](esphome::StringRef state) {
       alarm_apply_action_availability(ctx, string_ref_limited(state, HA_SHORT_STATE_MAX_LEN));
     })
@@ -500,13 +500,13 @@ inline void subscribe_alarm_action_availability(AlarmCardCtx *ctx) {
 inline void subscribe_alarm_action_state(AlarmCardCtx *ctx, const std::string &mode) {
   if (!ctx || ctx->entity_id.empty()) return;
   ctx->available = true;
-  esphome::api::global_api_server->subscribe_home_assistant_state(
-    ctx->entity_id, {},
+  ha_subscribe_state(
+    ctx->entity_id,
     std::function<void(esphome::StringRef)>([ctx, mode](esphome::StringRef state) {
       alarm_apply_action_state(ctx, mode, string_ref_limited(state, HA_SHORT_STATE_MAX_LEN));
     })
   );
-  esphome::api::global_api_server->subscribe_home_assistant_state(
+  ha_subscribe_attribute(
     ctx->entity_id, std::string("arm_mode"),
     std::function<void(esphome::StringRef)>([ctx, mode](esphome::StringRef arm_mode) {
       alarm_apply_action_arm_mode(ctx, mode, string_ref_limited(arm_mode, HA_SHORT_STATE_MAX_LEN));

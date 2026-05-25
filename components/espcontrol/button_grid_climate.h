@@ -1787,8 +1787,8 @@ inline void subscribe_climate_control_state(ClimateControlCtx *ctx) {
     climate_update_card(ctx);
     climate_control_set_modal_value(ctx);
   };
-  esphome::api::global_api_server->subscribe_home_assistant_state(
-    ctx->entity_id, {},
+  ha_subscribe_state(
+    ctx->entity_id,
     std::function<void(esphome::StringRef)>(
       [ctx, refresh](esphome::StringRef state) {
         ctx->hvac_mode = climate_hvac_service_value(string_ref_limited(state, HA_SHORT_STATE_MAX_LEN));
@@ -1799,7 +1799,7 @@ inline void subscribe_climate_control_state(ClimateControlCtx *ctx) {
         refresh();
       })
   );
-  esphome::api::global_api_server->subscribe_home_assistant_state(
+  ha_subscribe_attribute(
     ctx->entity_id, std::string("friendly_name"),
     std::function<void(esphome::StringRef)>(
       [ctx, refresh](esphome::StringRef value) {
@@ -1807,7 +1807,7 @@ inline void subscribe_climate_control_state(ClimateControlCtx *ctx) {
         refresh();
       })
   );
-  esphome::api::global_api_server->subscribe_home_assistant_state(
+  ha_subscribe_attribute(
     ctx->entity_id, std::string("hvac_action"),
     std::function<void(esphome::StringRef)>(
       [ctx, refresh](esphome::StringRef value) {
@@ -1816,7 +1816,7 @@ inline void subscribe_climate_control_state(ClimateControlCtx *ctx) {
       })
   );
   auto subscribe_temp = [ctx, refresh](const char *attr, int ClimateControlCtx::*field, bool ClimateControlCtx::*has_field) {
-    esphome::api::global_api_server->subscribe_home_assistant_state(
+    ha_subscribe_attribute(
       ctx->entity_id, std::string(attr),
       std::function<void(esphome::StringRef)>(
         [ctx, refresh, field, has_field](esphome::StringRef value) {
@@ -1837,7 +1837,7 @@ inline void subscribe_climate_control_state(ClimateControlCtx *ctx) {
   subscribe_temp("temperature", &ClimateControlCtx::target_tenths, &ClimateControlCtx::has_target);
   subscribe_temp("target_temp_low", &ClimateControlCtx::low_tenths, &ClimateControlCtx::has_low);
   subscribe_temp("target_temp_high", &ClimateControlCtx::high_tenths, &ClimateControlCtx::has_high);
-  esphome::api::global_api_server->subscribe_home_assistant_state(
+  ha_subscribe_attribute(
     ctx->entity_id, std::string("min_temp"),
     std::function<void(esphome::StringRef)>(
       [ctx, refresh](esphome::StringRef value) {
@@ -1850,7 +1850,7 @@ inline void subscribe_climate_control_state(ClimateControlCtx *ctx) {
         refresh();
       })
   );
-  esphome::api::global_api_server->subscribe_home_assistant_state(
+  ha_subscribe_attribute(
     ctx->entity_id, std::string("max_temp"),
     std::function<void(esphome::StringRef)>(
       [ctx, refresh](esphome::StringRef value) {
@@ -1863,7 +1863,7 @@ inline void subscribe_climate_control_state(ClimateControlCtx *ctx) {
         refresh();
       })
   );
-  esphome::api::global_api_server->subscribe_home_assistant_state(
+  ha_subscribe_attribute(
     ctx->entity_id, std::string("target_temp_step"),
     std::function<void(esphome::StringRef)>(
       [ctx, refresh](esphome::StringRef value) {
@@ -1876,7 +1876,7 @@ inline void subscribe_climate_control_state(ClimateControlCtx *ctx) {
       })
   );
   auto subscribe_text = [ctx, refresh](const char *attr, std::string ClimateControlCtx::*field) {
-    esphome::api::global_api_server->subscribe_home_assistant_state(
+    ha_subscribe_attribute(
       ctx->entity_id, std::string(attr),
       std::function<void(esphome::StringRef)>(
         [ctx, refresh, field](esphome::StringRef value) {
@@ -1889,7 +1889,7 @@ inline void subscribe_climate_control_state(ClimateControlCtx *ctx) {
   subscribe_text("swing_mode", &ClimateControlCtx::swing_mode);
   subscribe_text("preset_mode", &ClimateControlCtx::preset_mode);
   auto subscribe_list = [ctx, refresh](const char *attr, std::vector<std::string> ClimateControlCtx::*field) {
-    esphome::api::global_api_server->subscribe_home_assistant_state(
+    ha_subscribe_attribute(
       ctx->entity_id, std::string(attr),
       std::function<void(esphome::StringRef)>(
         [ctx, refresh, field](esphome::StringRef value) {
