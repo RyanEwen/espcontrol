@@ -1,13 +1,14 @@
 // =============================================================================
-// ESPCONTROL WEB UI - Custom device configuration interface
+// ESPCONTROL WEB UI ENTRY - Custom device configuration interface
 // =============================================================================
 // Replaces the default ESPHome webserver UI with a two-tab layout:
 //   Screen  - Live grid preview with drag-and-drop button arrangement
 //   Settings - Display, brightness, firmware, and entity configuration
 //
-// Per-device config, web UI modules, and button type plugins are injected by
+// Per-device config, web UI modules, and button type plugins are assembled by
 // scripts/build.py. Button types stay in src/webserver/types; the larger UI
-// sections live in src/webserver/modules.
+// sections live in src/webserver/modules. Generated device bundles are written
+// to docs/public/webserver/<device>/www.js.
 // Icon data is generated between GENERATED:ICONS / GENERATED:DOMAIN_ICONS.
 // =============================================================================
 

@@ -891,7 +891,7 @@ def check_duplicate_icon_fields(data):
 def check_mdi_versions():
     """Make sure the browser CSS and device font URLs stay on the same MDI version."""
     files = [
-        ROOT / "src" / "webserver" / "www.js",
+        ROOT / "src" / "webserver" / "entry.js",
         ROOT / "common" / "assets" / "icons.yaml",
         *sorted(ROOT.glob("devices/*/device/fonts.yaml")),
     ]
@@ -993,7 +993,7 @@ def gen_icons_h_domain_icons(data):
 
 
 def gen_www_js_icon_map(data):
-    """JS ICON_EXCEPTIONS + ICON_NAMES for www.js."""
+    """JS ICON_EXCEPTIONS + ICON_NAMES for the web entry bundle."""
     fb = data["fallback"]
     exceptions = [f'    Auto: "{fb["mdi"]}",\n']
     names = []
@@ -1037,14 +1037,14 @@ def sync_icons(check_only=False):
 
     icons_h = ROOT / "components" / "espcontrol" / "icons.h"
     icon_glyphs = ROOT / "common" / "assets" / "icon_glyphs.yaml"
-    www_js = ROOT / "src" / "webserver" / "www.js"
+    web_entry = ROOT / "src" / "webserver" / "entry.js"
 
     patches = [
         (icon_glyphs, "GENERATED:ICONS START", "GENERATED:ICONS END", gen_icon_glyphs),
         (icons_h, "GENERATED:ICONS START", "GENERATED:ICONS END", gen_icons_h_entries),
         (icons_h, "GENERATED:DOMAIN_ICONS START", "GENERATED:DOMAIN_ICONS END", gen_icons_h_domain_icons),
-        (www_js, "GENERATED:ICONS START", "GENERATED:ICONS END", gen_www_js_icon_map),
-        (www_js, "GENERATED:DOMAIN_ICONS START", "GENERATED:DOMAIN_ICONS END", gen_www_js_domain_icons),
+        (web_entry, "GENERATED:ICONS START", "GENERATED:ICONS END", gen_www_js_icon_map),
+        (web_entry, "GENERATED:DOMAIN_ICONS START", "GENERATED:DOMAIN_ICONS END", gen_www_js_domain_icons),
     ]
 
     file_contents = {}
@@ -1077,7 +1077,7 @@ def sync_icons(check_only=False):
 # www.js build (formerly build_www.py)
 # ===========================================================================
 
-WWW_SOURCE = ROOT / "src" / "webserver" / "www.js"
+WWW_SOURCE = ROOT / "src" / "webserver" / "entry.js"
 MODULES_DIR = ROOT / "src" / "webserver" / "modules"
 TYPES_DIR = ROOT / "src" / "webserver" / "types"
 WWW_OUTPUT_DIR = ROOT / "docs" / "public" / "webserver"
