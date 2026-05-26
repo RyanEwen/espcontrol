@@ -391,7 +391,7 @@ inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
   }
   if (p.type == "option_select") {
     p.type = "action";
-    p.sensor = CARD_CONTRACT_OPTION_SELECT_ACTION;
+    p.sensor = card_runtime_option_select_canonical_action();
     p.unit.clear();
     p.precision.clear();
     p.options.clear();
@@ -399,7 +399,7 @@ inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
     if (p.icon.empty() || p.icon == "Auto" || p.icon == "Chevron Down") p.icon = "Flash";
   }
   if (action_card_option_select(p)) {
-    p.sensor = CARD_CONTRACT_OPTION_SELECT_ACTION;
+    p.sensor = card_runtime_option_select_canonical_action();
     p.unit.clear();
     p.precision.clear();
     p.options.clear();
