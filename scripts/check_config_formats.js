@@ -1541,8 +1541,8 @@ assert.strictEqual(
 );
 assert.strictEqual(
   hooks.buttonTypePickerKeysForExperimental(false, false, "todo").indexOf("todo") >= 0,
-  true,
-  "saved todo type remains selectable while hidden");
+  false,
+  "saved todo type stays hidden while developer flag is off");
 
 const subpageStateOff = buttonShape({
   label: "Windows",

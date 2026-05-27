@@ -27,7 +27,8 @@ function buttonTypePickerOptionList(isSub, selectedTypeKey) {
     if (td.isAvailable && !td.isAvailable({ isSub: isSub }) && selectedTypeKey !== td.key) continue;
     var experimentalHidden = experimental && !isExperimentalEnabled(experimental);
     if (experimentalHidden) {
-      if (selectedTypeKey === td.key) selectedHiddenExperimental = td;
+      var showSelectedExperimental = buttonTypeRegistryValue(td, "showSelectedWhenExperimentalHidden", true);
+      if (selectedTypeKey === td.key && showSelectedExperimental !== false) selectedHiddenExperimental = td;
       continue;
     }
     typeOpts.push({ key: td.key, label: label, disabled: false });

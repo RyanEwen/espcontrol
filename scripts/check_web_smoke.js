@@ -186,8 +186,8 @@ assert(
   "saved fan cards remain represented while hidden"
 );
 assert(
-  hooks.buttonTypePickerKeysForExperimental(false, false, "todo").includes("todo"),
-  "saved todo cards remain represented while hidden"
+  !hooks.buttonTypePickerKeysForExperimental(false, false, "todo").includes("todo"),
+  "saved todo cards stay hidden in the picker while developer flag is off"
 );
 
 assert.strictEqual(hooks.normalizeTemperatureUnit("fahrenheit"), "\u00b0F");
