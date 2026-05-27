@@ -108,6 +108,10 @@ int main() {
   assert(todo_icon.options == "count_display=icon");
   assert(!todo_card_show_count(todo_icon));
 
+  auto todo_label_count = parse_cfg("todo.shopping;Shopping;Check;Auto;;;todo;;label_display=count");
+  assert(todo_label_count.options == "label_display=count");
+  assert(todo_card_label_shows_count(todo_label_count));
+
   assert(cfg_option_token_present("large_numbers,active_color", "active_color"));
   assert(cfg_option_value("state_entity=sensor.room%2Ctemp,state_unit=%25", "state_entity") == "sensor.room,temp");
   assert(cfg_option_value("state_entity=sensor.room%2Ctemp,state_unit=%25", "state_unit") == "%");

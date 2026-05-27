@@ -343,6 +343,15 @@ const todoIconPreview = hooks.buttonTypePreviewFor("todo", {
 });
 assert(todoIconPreview.iconHtml.includes("mdi-check"), "todo preview can show the icon instead of the item count");
 assert(!todoIconPreview.iconHtml.includes("sp-sensor-value"), "todo icon preview hides the item count");
+const todoLabelCountPreview = hooks.buttonTypePreviewFor("todo", {
+  entity: "todo.shopping",
+  label: "Shopping",
+  icon: "Check",
+  type: "todo",
+  options: "label_display=count",
+});
+assert(todoLabelCountPreview.labelHtml.includes("3 items"), "todo preview can show item count in the label");
+assert(!todoLabelCountPreview.labelHtml.includes("Shopping"), "todo count-label preview hides the static label");
 assert.deepStrictEqual(Array.from(hooks.buttonTypeRuntimeSpec("todo").domains), ["todo"], "todo entity field is limited to todo entities");
 
 const legacyForecastPreview = hooks.buttonTypePreviewFor("weather_forecast", {

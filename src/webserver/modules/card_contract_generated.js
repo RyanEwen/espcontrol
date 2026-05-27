@@ -827,6 +827,16 @@ var CARD_CONTRACT_CARDS = {
           "icon"
         ],
         "defaultValue": "count"
+      },
+      {
+        "name": "label_display",
+        "label": "Label Display",
+        "kind": "choice",
+        "values": [
+          "label",
+          "count"
+        ],
+        "defaultValue": "label"
       }
     ],
     "default": {

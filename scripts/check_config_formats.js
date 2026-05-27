@@ -1497,14 +1497,27 @@ assertButtonRoundTrip(hooks, "todo button icon display", {
   precision: "",
   options: "count_display=icon",
 }, false);
+assertButtonRoundTrip(hooks, "todo button label count display", {
+  entity: "todo.shopping",
+  label: "Shopping",
+  icon: "Check",
+  icon_on: "Auto",
+  sensor: "",
+  unit: "",
+  type: "todo",
+  precision: "",
+  options: "label_display=count",
+}, false);
 assert.deepStrictEqual(Array.from(hooks.cardContractDomains("todo")), ["todo"], "todo card only accepts todo entities");
 assert.deepStrictEqual(
   Array.from(hooks.cardContractOptions("todo"), (option) => option.name),
-  ["count_display"],
-  "todo card exposes count/icon display option"
+  ["count_display", "label_display"],
+  "todo card exposes display options"
 );
 assert.strictEqual(hooks.todoCardShowCount({ type: "todo", options: "" }), true, "todo shows item count by default");
 assert.strictEqual(hooks.todoCardShowCount({ type: "todo", options: "count_display=icon" }), false, "todo can show the icon instead of the count");
+assert.strictEqual(hooks.todoCardLabelShowsCount({ type: "todo", options: "" }), false, "todo label is static by default");
+assert.strictEqual(hooks.todoCardLabelShowsCount({ type: "todo", options: "label_display=count" }), true, "todo label can show item count");
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("todo", false, false), false, "todo picker hidden without developer flag");
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("todo", true, false), true, "todo picker visible with developer flag");
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("todo", true, true), true, "todo picker visible in subpages with developer flag");

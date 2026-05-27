@@ -32,6 +32,7 @@ struct TodoCardCtx {
   int width_compensation_percent = 100;
   bool available = false;
   bool show_count = true;
+  bool label_shows_count = false;
 };
 
 struct TodoItemClick {
@@ -75,9 +76,17 @@ inline std::string todo_card_label(TodoCardCtx *ctx) {
   return "Todo";
 }
 
+inline std::string todo_card_count_label(TodoCardCtx *ctx) {
+  if (!ctx || !ctx->available || ctx->count_text.empty() || ctx->count_text == "--") return "--";
+  return ctx->count_text + (ctx->count_text == "1" ? " item" : " items");
+}
+
 inline void todo_apply_card_text(TodoCardCtx *ctx) {
   if (!ctx) return;
-  if (ctx->label_lbl) lv_label_set_text(ctx->label_lbl, todo_card_label(ctx).c_str());
+  if (ctx->label_lbl) {
+    std::string label = ctx->label_shows_count ? todo_card_count_label(ctx) : todo_card_label(ctx);
+    lv_label_set_text(ctx->label_lbl, label.c_str());
+  }
   if (!ctx->show_count) return;
   if (ctx->value_lbl) lv_label_set_text(ctx->value_lbl, ctx->available ? ctx->count_text.c_str() : "--");
   if (ctx->unit_lbl) {
@@ -107,7 +116,7 @@ inline void setup_todo_card(BtnSlot &s, const ParsedCfg &p,
     (!p.icon.empty() && p.icon != "Auto") ? find_icon(p.icon.c_str()) : find_icon("Check"));
   lv_label_set_text(s.sensor_lbl, "--");
   lv_label_set_text(s.unit_lbl, "");
-  lv_label_set_text(s.text_lbl, p.label.empty() ? "Todo" : p.label.c_str());
+  lv_label_set_text(s.text_lbl, todo_card_label_shows_count(p) ? "--" : (p.label.empty() ? "Todo" : p.label.c_str()));
   apply_push_button_transition(s.btn);
 }
 
@@ -369,6 +378,7 @@ inline TodoCardCtx *create_todo_card_context(
   ctx->icon_font = icon_font;
   ctx->width_compensation_percent = width_compensation_percent;
   ctx->show_count = todo_card_show_count(p);
+  ctx->label_shows_count = todo_card_label_shows_count(p);
   lv_obj_set_user_data(s.btn, ctx);
   todo_apply_card_text(ctx);
   return ctx;

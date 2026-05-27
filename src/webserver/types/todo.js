@@ -31,6 +31,15 @@ var TODO_CARD_METADATA = {
       cardHelpers.saveField("options", button.options);
     },
   },
+  labelDisplay: {
+    label: "Label Shows Item Count",
+    idSuffix: "todo-label-count",
+    checked: function (b) { return todoCardLabelShowsCount(b); },
+    onChange: function (button, cardHelpers, checked) {
+      setTodoCardLabelShowsCount(button, checked);
+      cardHelpers.saveField("options", button.options);
+    },
+  },
   preview: {
     badge: "check",
   },
@@ -64,7 +73,15 @@ registerButtonType("todo", {
   renderSettings: function (panel, b, slot, helpers) {
     normalizeTodoConfig(b);
     helpers.renderCardEntityField(panel, b, helpers, TODO_CARD_METADATA);
-    helpers.renderCardTextField(panel, b, helpers, TODO_CARD_METADATA.labelField);
+    var labelControl = helpers.renderCardTextField(panel, b, helpers, TODO_CARD_METADATA.labelField);
+    var labelDisplayToggle = helpers.renderCardOptionToggle(panel, b, helpers, Object.assign({}, TODO_CARD_METADATA.labelDisplay, {
+      onChange: function (button, cardHelpers, checked) {
+        setTodoCardLabelShowsCount(button, checked);
+        cardHelpers.saveField("options", button.options);
+        syncLabelField();
+        scheduleRender();
+      },
+    }));
     var iconPicker = helpers.renderCardIconPicker(panel, b, helpers, TODO_CARD_METADATA.icon);
     var countToggle = helpers.renderCardOptionToggle(panel, b, helpers, Object.assign({}, TODO_CARD_METADATA.countDisplay, {
       onChange: function (button, cardHelpers, checked) {
@@ -74,14 +91,19 @@ registerButtonType("todo", {
         scheduleRender();
       },
     }));
+    function syncLabelField() {
+      labelControl.field.style.display = todoCardLabelShowsCount(b) ? "none" : "";
+      labelDisplayToggle.input.checked = todoCardLabelShowsCount(b);
+    }
     function syncIconPicker() {
       iconPicker.style.display = todoCardShowCount(b) ? "none" : "";
       countToggle.input.checked = todoCardShowCount(b);
     }
+    syncLabelField();
     syncIconPicker();
   },
   renderPreview: function (b, helpers) {
-    var label = b.label || b.entity || "Todo";
+    var label = todoCardLabelShowsCount(b) ? "3 items" : (b.label || b.entity || "Todo");
     return {
       iconHtml: todoCardShowCount(b)
         ? cardSensorPreviewHtml(b, helpers, "3", "")

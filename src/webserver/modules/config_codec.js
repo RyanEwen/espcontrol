@@ -171,6 +171,7 @@ var GARAGE_LABEL_DISPLAY_OPTION = "label_display";
 var CLIMATE_LABEL_DISPLAY_OPTION = "label_display";
 var CLIMATE_NUMBER_DISPLAY_OPTION = "number_display";
 var TODO_COUNT_DISPLAY_OPTION = "count_display";
+var TODO_LABEL_DISPLAY_OPTION = "label_display";
 var ALARM_ACTIONS = [
   { value: "away", label: "Arm Away", service: "alarm_control_panel.alarm_arm_away", icon: "Shield Lock" },
   { value: "home", label: "Arm Home", service: "alarm_control_panel.alarm_arm_home", icon: "Shield Home" },
@@ -320,10 +321,22 @@ function normalizeTodoCountDisplayMode(value) {
   return values.indexOf(value) >= 0 ? value : "count";
 }
 
+function normalizeTodoLabelDisplayMode(value) {
+  value = String(value || "").trim();
+  var spec = cardContractOptionSpec("todo", TODO_LABEL_DISPLAY_OPTION);
+  var values = spec && spec.values ? spec.values : ["label", "count"];
+  return values.indexOf(value) >= 0 ? value : "label";
+}
+
 function normalizeTodoOptions(options) {
-  return normalizeTodoCountDisplayMode(configOptionValue(options, TODO_COUNT_DISPLAY_OPTION)) === "icon"
-    ? setConfigOptionValue("", TODO_COUNT_DISPLAY_OPTION, "icon")
-    : "";
+  var out = "";
+  if (normalizeTodoCountDisplayMode(configOptionValue(options, TODO_COUNT_DISPLAY_OPTION)) === "icon") {
+    out = setConfigOptionValue(out, TODO_COUNT_DISPLAY_OPTION, "icon");
+  }
+  if (normalizeTodoLabelDisplayMode(configOptionValue(options, TODO_LABEL_DISPLAY_OPTION)) === "count") {
+    out = setConfigOptionValue(out, TODO_LABEL_DISPLAY_OPTION, "count");
+  }
+  return out;
 }
 
 function todoCardShowCount(b) {
@@ -333,6 +346,17 @@ function todoCardShowCount(b) {
 function setTodoCardShowCount(b, enabled) {
   if (!b) return "";
   b.options = setConfigOptionValue(b.options, TODO_COUNT_DISPLAY_OPTION, enabled ? "" : "icon");
+  b.options = normalizeTodoOptions(b.options);
+  return b.options;
+}
+
+function todoCardLabelShowsCount(b) {
+  return normalizeTodoLabelDisplayMode(configOptionValue(b && b.options, TODO_LABEL_DISPLAY_OPTION)) === "count";
+}
+
+function setTodoCardLabelShowsCount(b, enabled) {
+  if (!b) return "";
+  b.options = setConfigOptionValue(b.options, TODO_LABEL_DISPLAY_OPTION, enabled ? "count" : "");
   b.options = normalizeTodoOptions(b.options);
   return b.options;
 }

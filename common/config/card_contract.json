@@ -689,6 +689,13 @@
           "kind": "choice",
           "values": ["count", "icon"],
           "defaultValue": "count"
+        },
+        {
+          "name": "label_display",
+          "label": "Label Display",
+          "kind": "choice",
+          "values": ["label", "count"],
+          "defaultValue": "label"
         }
       ],
       "default": {

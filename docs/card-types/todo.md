@@ -19,6 +19,7 @@ Todo cards are currently hidden behind **Developer Experimental Features** while
 3. Choose a `todo.*` entity, such as `todo.shopping`.
 4. Optionally set a label and icon.
 5. Use **Show Item Count** to choose whether the card shows the incomplete count or the icon.
+6. Use **Label Shows Item Count** to choose whether the label stays static or shows the incomplete count.
 
 ## How It Works
 
