@@ -7,6 +7,7 @@
 constexpr uint32_t TODO_CARD_CTX_MAGIC = 0x544F444F;  // TODO
 constexpr int TODO_MAX_ITEMS = 8;
 constexpr size_t TODO_RESPONSE_TEXT_MAX_LEN = 1536;
+constexpr uint32_t TODO_COMPLETED_TEXT_COLOR = 0x707070;
 
 struct TodoItem {
   std::string key;
@@ -305,7 +306,7 @@ inline lv_obj_t *todo_modal_create_list_item_row(
   lv_coord_t label_x = 0;
   lv_coord_t label_w = content_width;
   if (show_checkbox) {
-    uint32_t checkbox_color = completed ? DARK_TEXT_MUTED : (checked ? accent_color : DARK_TEXT_MUTED);
+    uint32_t checkbox_color = completed ? TODO_COMPLETED_TEXT_COLOR : (checked ? accent_color : DARK_TEXT_MUTED);
     lv_obj_t *box = lv_obj_create(row);
     lv_obj_set_size(box, checkbox_size, checkbox_size);
     lv_obj_set_style_radius(box, checkbox_size / 4, LV_PART_MAIN);
@@ -343,7 +344,7 @@ inline lv_obj_t *todo_modal_create_list_item_row(
   lv_label_set_long_mode(value, LV_LABEL_LONG_DOT);
   lv_obj_set_width(value, label_w);
   lv_obj_set_style_text_color(value,
-    lv_color_hex(completed ? DARK_TEXT_MUTED : (show_checkbox ? DARK_TEXT_SOFT : DARK_TEXT_MUTED)), LV_PART_MAIN);
+    lv_color_hex(completed ? TODO_COMPLETED_TEXT_COLOR : (show_checkbox ? DARK_TEXT_SOFT : DARK_TEXT_MUTED)), LV_PART_MAIN);
   lv_obj_set_style_text_align(value, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
   if (font) lv_obj_set_style_text_font(value, font, LV_PART_MAIN);
   apply_width_compensation(value, width_compensation_percent);
