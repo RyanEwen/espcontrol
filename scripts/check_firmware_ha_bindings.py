@@ -87,8 +87,10 @@ def firmware_todo_request_errors(firmware_dir: Path, root: Path) -> list[str]:
     body = helper.group("body")
     if '"todo.get_items"' not in body:
         errors.append(f"{rel}: todo_begin_get_items_request must call todo.get_items")
-    if '"status"' not in body or '"needs_action"' not in body:
-        errors.append(f"{rel}: todo.get_items requests must stay limited to incomplete items")
+    if "wants_response" not in body or "response_template" not in body:
+        errors.append(f"{rel}: todo.get_items requests must capture a compact response template")
+    if 'ha_action_add_data(req, "status"' in body:
+        errors.append(f"{rel}: filter todo items in the response template, not in action data")
     return errors
 
 
@@ -159,7 +161,24 @@ def run_self_test() -> int:
             encoding="utf-8",
         )
         errors = firmware_todo_request_errors(firmware_dir, root)
-        assert any("must stay limited to incomplete items" in error for error in errors), errors
+        assert any("must capture a compact response template" in error for error in errors), errors
+    with TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        firmware_dir = root / "components" / "espcontrol"
+        firmware_dir.mkdir(parents=True)
+        (firmware_dir / "button_grid_todo.h").write_text(
+            'inline bool todo_begin_get_items_request() {\n'
+            '  ha_action_begin(req, "todo.get_items", false, 2, call_id);\n'
+            '  req.wants_response = true;\n'
+            '  req.response_template = response_template;\n'
+            '  ha_action_add_entity(req, ctx->entity_id);\n'
+            '  ha_action_add_data(req, "status", "needs_action");\n'
+            '  return true;\n'
+            '}\n',
+            encoding="utf-8",
+        )
+        errors = firmware_todo_request_errors(firmware_dir, root)
+        assert any("filter todo items in the response template" in error for error in errors), errors
     print("Firmware Home Assistant binding self-tests passed.")
     return 0
 

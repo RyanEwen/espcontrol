@@ -143,6 +143,46 @@ inline std::vector<TodoItem> parse_todo_response_payload(const std::string &payl
   return items;
 }
 
+inline bool parse_todo_response_json(JsonObjectConst json,
+                                     const std::string &entity_id,
+                                     std::vector<TodoItem> &items) {
+  JsonVariantConst response = json["response"];
+  const char *payload = response.as<const char *>();
+  if (payload != nullptr) {
+    items = parse_todo_response_payload(std::string(payload).substr(0, TODO_RESPONSE_TEXT_MAX_LEN));
+    return true;
+  }
+
+  JsonObjectConst response_obj = response.as<JsonObjectConst>();
+  if (response_obj.isNull()) response_obj = json;
+  JsonArrayConst item_array = response_obj[entity_id]["items"].as<JsonArrayConst>();
+  if (item_array.isNull()) return false;
+
+  int incomplete_count = 0;
+  for (JsonVariantConst value : item_array) {
+    const char *status = value["status"] | "";
+    if (status[0] != '\0' && strcmp(status, "needs_action") != 0) continue;
+    if (incomplete_count < TODO_MAX_ITEMS) {
+      const char *summary = value["summary"] | "";
+      const char *uid = value["uid"] | "";
+      TodoItem item;
+      item.key = uid[0] != '\0' ? uid : summary;
+      item.summary = summary;
+      items.push_back(item);
+    }
+    incomplete_count++;
+  }
+
+  if (incomplete_count > TODO_MAX_ITEMS) {
+    TodoItem more;
+    more.key = "__MORE__";
+    more.summary = std::to_string(incomplete_count - TODO_MAX_ITEMS);
+    more.more = true;
+    items.push_back(more);
+  }
+  return true;
+}
+
 inline std::string todo_item_action_key(const TodoItem &item) {
   return item.key.empty() ? item.summary : item.key;
 }
@@ -380,12 +420,11 @@ inline bool todo_begin_get_items_request(esphome::api::HomeassistantActionReques
                                          TodoCardCtx *ctx,
                                          uint32_t call_id) {
   if (!todo_card_context_valid(ctx) || !todo_entity_id_safe(ctx->entity_id)) return false;
-  if (!ha_action_begin(req, "todo.get_items", false, 2, call_id)) return false;
+  if (!ha_action_begin(req, "todo.get_items", false, 1, call_id)) return false;
   req.wants_response = true;
   std::string response_template = todo_items_response_template(ctx->entity_id);
   req.response_template = decltype(req.response_template)(response_template);
   ha_action_add_entity(req, ctx->entity_id);
-  ha_action_add_data(req, "status", "needs_action");
   return true;
 }
 
@@ -413,13 +452,11 @@ inline void request_todo_items(TodoCardCtx *ctx) {
         return;
       }
       auto json = response.get_json();
-      const char *payload = json["response"].as<const char *>();
-      if (payload == nullptr) {
+      std::vector<TodoItem> items;
+      if (!parse_todo_response_json(json, ctx ? ctx->entity_id : "", items)) {
         todo_modal_set_status("Could not load");
         return;
       }
-      std::vector<TodoItem> items =
-        parse_todo_response_payload(std::string(payload).substr(0, TODO_RESPONSE_TEXT_MAX_LEN));
       todo_modal_render_items(ctx, items);
     });
   ha_action_send(req);
