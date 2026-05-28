@@ -49,6 +49,8 @@ interval:
   - interval: 5s
     then:
       - lambda: |-
+          weather_forecast_cancel_stale_requests();
+          weather_forecast_send_next_queued();
           todo_retry_waiting_modal();
 
   - interval: 1h
