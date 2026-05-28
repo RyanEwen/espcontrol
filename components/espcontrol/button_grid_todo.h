@@ -579,7 +579,7 @@ inline void todo_retry_waiting_modal() {
 }
 
 inline void todo_card_open_modal(TodoCardCtx *ctx) {
-  if (!todo_card_context_valid(ctx) || ctx->entity_id.empty() || !ctx->available) return;
+  if (!todo_card_context_valid(ctx) || ctx->entity_id.empty()) return;
   ControlModalShell shell = control_modal_open_shell(
     ControlModalKind::TODO_LIST, ctx->btn, ctx->width_compensation_percent,
     ctx->icon_font, "\U000F0141", false, todo_modal_hide);

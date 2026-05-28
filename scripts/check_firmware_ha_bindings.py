@@ -137,6 +137,8 @@ def firmware_todo_disconnect_errors(firmware_dir: Path, core_infra_path: Path, r
         errors.append(f"{todo_rel}: expose a helper to reload an open todo modal after HA reconnects")
     if "waiting_for_ha" not in todo_text or "todo_retry_waiting_modal" not in todo_text:
         errors.append(f"{todo_rel}: retry open todo modals that are waiting for Home Assistant")
+    if "ctx->available) return" in todo_text:
+        errors.append(f"{todo_rel}: allow todo modals to open while waiting for Home Assistant availability")
     if "on_client_disconnected:" not in core_text or "todo_cancel_pending_request" not in core_text:
         errors.append(f"{core_rel}: cancel pending todo requests when the HA API disconnects")
     if "on_client_connected:" not in core_text or "todo_reload_active_modal" not in core_text:
@@ -577,6 +579,25 @@ def run_self_test() -> int:
         "  on_client_disconnected:\n"
         "    - lambda: todo_cancel_pending_request(\"api disconnected\");\n",
         ("retry open todo modals that are waiting for Home Assistant",),
+    )
+    expect_todo_disconnect_errors(
+        "availability blocks todo modal",
+        "inline void todo_cancel_pending_request(const char *reason) {}\n"
+        "inline void todo_reload_active_modal() {}\n"
+        "inline void todo_retry_waiting_modal() { waiting_for_ha = true; }\n"
+        "inline void todo_card_open_modal(TodoCardCtx *ctx) {\n"
+        "  if (!todo_card_context_valid(ctx) || ctx->entity_id.empty() || !ctx->available) return;\n"
+        "}\n",
+        "api:\n"
+        "  on_client_connected:\n"
+        "    - lambda: todo_reload_active_modal();\n"
+        "  on_client_disconnected:\n"
+        "    - lambda: todo_cancel_pending_request(\"api disconnected\");\n"
+        "interval:\n"
+        "  - interval: 5s\n"
+        "    then:\n"
+        "      - lambda: todo_retry_waiting_modal();\n",
+        ("allow todo modals to open while waiting",),
     )
     expect_weather_request_errors(
         "weather request during reconnect",
