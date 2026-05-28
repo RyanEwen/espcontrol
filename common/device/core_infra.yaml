@@ -40,6 +40,7 @@ api:
   on_client_disconnected:
     - lambda: |-
         weather_forecast_cancel_pending_requests();
+        cover_stop_cancel_pending_request();
         todo_cancel_pending_request("api disconnected");
 
 interval:

@@ -225,6 +225,28 @@ inline uint32_t next_cover_stop_call_id() {
   return call_id++;
 }
 
+inline uint32_t &cover_stop_pending_call_id() {
+  static uint32_t call_id = 0;
+  return call_id;
+}
+
+inline void cover_stop_clear_pending(uint32_t call_id) {
+  if (cover_stop_pending_call_id() == call_id) cover_stop_pending_call_id() = 0;
+}
+
+inline bool cover_stop_track_pending(uint32_t call_id) {
+  if (call_id == 0 || cover_stop_pending_call_id() != 0) return false;
+  cover_stop_pending_call_id() = call_id;
+  return true;
+}
+
+inline void cover_stop_cancel_pending_request() {
+  uint32_t call_id = cover_stop_pending_call_id();
+  if (call_id == 0) return;
+  cover_stop_pending_call_id() = 0;
+  ha_cancel_action_response_callback(call_id, "api disconnected");
+}
+
 inline void send_cover_command_action(const ParsedCfg &p) {
   const char *service = cover_command_service(p.sensor);
   if (p.entity.empty() || service == nullptr) return;
@@ -243,18 +265,29 @@ inline void send_cover_command_action(const ParsedCfg &p) {
     snprintf(buf, sizeof(buf), "%d", cover_position_value(p.unit));
     ha_action_add_data(req, "position", buf);
   }
+  bool cover_stop_tracked = false;
   if (wants_stop_response) {
     std::string entity_id = p.entity;
-    ha_register_action_response_callback(
-      req.call_id,
-      [entity_id](const esphome::api::ActionResponse &response) {
-        if (response.is_success()) return;
-        ESP_LOGW("cover", "cover.stop_cover failed for %s: %s; falling back to cover toggle",
-                 entity_id.c_str(), response.get_error_message().c_str());
-        send_toggle_action(entity_id);
-      });
+    cover_stop_tracked = cover_stop_track_pending(req.call_id);
+    if (cover_stop_tracked) {
+      if (!ha_register_action_response_callback(
+        req.call_id,
+        [entity_id, call_id = req.call_id](const esphome::api::ActionResponse &response) {
+          cover_stop_clear_pending(call_id);
+          if (response.is_success()) return;
+          ESP_LOGW("cover", "cover.stop_cover failed for %s: %s; falling back to cover toggle",
+                   entity_id.c_str(), response.get_error_message().c_str());
+          send_toggle_action(entity_id);
+        })) {
+        cover_stop_clear_pending(req.call_id);
+        cover_stop_tracked = false;
+      }
+    }
   }
-  ha_action_send(req);
+  if (!ha_action_send(req) && cover_stop_tracked) {
+    cover_stop_clear_pending(req.call_id);
+    ha_cancel_action_response_callback(req.call_id, "send failed");
+  }
 }
 
 // Send HA action for a slider change: toggle (value<0), brightness, or cover position/tilt

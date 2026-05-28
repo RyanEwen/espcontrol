@@ -37,6 +37,10 @@ WEATHER_FORECAST_REQUEST_PATTERN = re.compile(
     r"inline\s+void\s+request_weather_forecast_entity\s*\([^)]*\)\s*\{(?P<body>.*?)\n\}",
     re.DOTALL,
 )
+COVER_COMMAND_REQUEST_PATTERN = re.compile(
+    r"inline\s+void\s+send_cover_command_action\s*\([^)]*\)\s*\{(?P<body>.*?)\n\}",
+    re.DOTALL,
+)
 
 
 def firmware_ha_binding_errors(firmware_dir: Path, root: Path) -> list[str]:
@@ -177,6 +181,32 @@ def firmware_weather_disconnect_errors(firmware_dir: Path, core_infra_path: Path
     return errors
 
 
+def firmware_cover_request_errors(firmware_dir: Path, core_infra_path: Path, root: Path) -> list[str]:
+    path = firmware_dir / "button_grid_actions.h"
+    if not path.exists() or not core_infra_path.exists():
+        return []
+    rel = path.relative_to(root)
+    core_rel = core_infra_path.relative_to(root)
+    text = path.read_text(encoding="utf-8")
+    core_text = core_infra_path.read_text(encoding="utf-8")
+    errors: list[str] = []
+
+    request = COVER_COMMAND_REQUEST_PATTERN.search(text)
+    if not request:
+        errors.append(f"{rel}: missing send_cover_command_action helper")
+        return errors
+    body = request.group("body")
+    if "cover_stop_track_pending" not in text or "cover_stop_clear_pending" not in text:
+        errors.append(f"{rel}: track pending cover stop callbacks")
+    if "cover_stop_cancel_pending_request" not in text:
+        errors.append(f"{rel}: expose a helper to cancel pending cover stop callbacks")
+    if "cover_stop_tracked" not in body or "ha_cancel_action_response_callback(req.call_id" not in body:
+        errors.append(f"{rel}: cancel cover stop callbacks when sends fail")
+    if "on_client_disconnected:" not in core_text or "cover_stop_cancel_pending_request" not in core_text:
+        errors.append(f"{core_rel}: cancel pending cover stop callbacks when the HA API disconnects")
+    return errors
+
+
 def run_scan() -> int:
     errors = firmware_ha_binding_errors(FIRMWARE_DIR, ROOT)
     errors.extend(firmware_ha_boundary_errors(FIRMWARE_DIR, ROOT))
@@ -184,6 +214,7 @@ def run_scan() -> int:
     errors.extend(firmware_todo_disconnect_errors(FIRMWARE_DIR, CORE_INFRA_PATH, ROOT))
     errors.extend(firmware_weather_request_errors(FIRMWARE_DIR, ROOT))
     errors.extend(firmware_weather_disconnect_errors(FIRMWARE_DIR, CORE_INFRA_PATH, ROOT))
+    errors.extend(firmware_cover_request_errors(FIRMWARE_DIR, CORE_INFRA_PATH, ROOT))
     if errors:
         print("Firmware Home Assistant binding check failed:")
         for error in errors:
@@ -289,6 +320,28 @@ def expect_weather_disconnect_errors(
         core_path.write_text(core_text, encoding="utf-8")
 
         errors = firmware_weather_disconnect_errors(firmware_dir, core_path, root)
+        for item in expected:
+            assert any(item in error for error in errors), f"{name}: missing {item!r} in {errors!r}"
+        if not expected:
+            assert not errors, f"{name}: expected no errors, got {errors!r}"
+
+
+def expect_cover_request_errors(
+    name: str,
+    action_text: str,
+    core_text: str,
+    expected: tuple[str, ...],
+) -> None:
+    with TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        firmware_dir = root / "components" / "espcontrol"
+        core_path = root / "common" / "device" / "core_infra.yaml"
+        firmware_dir.mkdir(parents=True)
+        core_path.parent.mkdir(parents=True)
+        (firmware_dir / "button_grid_actions.h").write_text(action_text, encoding="utf-8")
+        core_path.write_text(core_text, encoding="utf-8")
+
+        errors = firmware_cover_request_errors(firmware_dir, core_path, root)
         for item in expected:
             assert any(item in error for error in errors), f"{name}: missing {item!r} in {errors!r}"
         if not expected:
@@ -505,6 +558,29 @@ def run_self_test() -> int:
         "inline void weather_forecast_cancel_pending_requests() {}\n",
         "api:\n  on_client_connected:\n    - lambda: refresh_weather_forecast_cards();\n",
         ("cancel pending forecast callbacks when the HA API disconnects",),
+    )
+    expect_cover_request_errors(
+        "missing cover callback tracking",
+        "inline void cover_stop_cancel_pending_request() {}\n"
+        "inline void send_cover_command_action() {\n"
+        "  ha_register_action_response_callback(req.call_id, cb);\n"
+        "}\n",
+        "api:\n"
+        "  on_client_disconnected:\n"
+        "    - lambda: cover_stop_cancel_pending_request();\n",
+        ("track pending cover stop callbacks",),
+    )
+    expect_cover_request_errors(
+        "missing cover disconnect cleanup",
+        "inline void cover_stop_track_pending() {}\n"
+        "inline void cover_stop_clear_pending() {}\n"
+        "inline void cover_stop_cancel_pending_request() {}\n"
+        "inline void send_cover_command_action() {\n"
+        "  bool cover_stop_tracked = true;\n"
+        "  ha_cancel_action_response_callback(req.call_id, \"send failed\");\n"
+        "}\n",
+        "api:\n  on_client_connected:\n    - lambda: refresh_weather_forecast_cards();\n",
+        ("cancel pending cover stop callbacks when the HA API disconnects",),
     )
     print("Firmware Home Assistant binding self-tests passed.")
     return 0
