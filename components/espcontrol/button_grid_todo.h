@@ -562,8 +562,13 @@ inline void request_todo_items(TodoCardCtx *ctx) {
     (unsigned) req.call_id, ctx->entity_id.c_str());
   if (!ha_action_send(req)) {
     todo_cancel_request(req.call_id, "send failed");
-    ui.waiting_for_ha = false;
-    todo_modal_set_status("Could not load");
+    if (!ha_api_state_connected()) {
+      ui.waiting_for_ha = true;
+      todo_modal_set_status("Waiting for Home Assistant");
+    } else {
+      ui.waiting_for_ha = false;
+      todo_modal_set_status("Could not load");
+    }
   }
 }
 
