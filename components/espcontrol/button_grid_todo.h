@@ -413,7 +413,7 @@ inline void todo_modal_render_items(TodoCardCtx *ctx, const std::vector<TodoItem
       std::string label = item.summary.empty() ? "More items" : item.summary + " more";
       todo_modal_create_list_item_row(
         ui.list, label, false, false, false, false, row_h, content_w,
-        checkbox_size, item_gap, ctx->accent_color, ctx->list_font,
+        checkbox_size, item_gap, ctx->accent_color, ctx->label_font,
         ctx->icon_font, ctx->width_compensation_percent);
       continue;
     }
@@ -421,7 +421,7 @@ inline void todo_modal_render_items(TodoCardCtx *ctx, const std::vector<TodoItem
     lv_obj_t *row = todo_modal_create_list_item_row(
       ui.list, item.summary.empty() ? "(untitled)" : item.summary, true, true, false, false,
       row_h, content_w, checkbox_size, item_gap, ctx->accent_color,
-      ctx->list_font, ctx->icon_font, ctx->width_compensation_percent);
+      ctx->label_font, ctx->icon_font, ctx->width_compensation_percent);
     ui.item_clicks[click_index].ctx = ctx;
     ui.item_clicks[click_index].item = item;
     lv_obj_add_event_cb(row, [](lv_event_t *e) {
@@ -442,7 +442,7 @@ inline void todo_modal_render_items(TodoCardCtx *ctx, const std::vector<TodoItem
       lv_obj_t *row = todo_modal_create_list_item_row(
         ui.list, completed.summary.empty() ? "(untitled)" : completed.summary,
         true, true, true, true, row_h, content_w, checkbox_size, item_gap,
-        ctx->accent_color, ctx->list_font, ctx->icon_font,
+        ctx->accent_color, ctx->label_font, ctx->icon_font,
         ctx->width_compensation_percent);
       ui.item_clicks[click_index].ctx = ctx;
       ui.item_clicks[click_index].item = completed;
