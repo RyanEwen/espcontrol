@@ -10,18 +10,21 @@ var DATE_TIME_CARD_METADATA = {
       { value: "timezone", label: "World Clock" }
     ],
     value: function (b) {
-      if (b.type === "clock") return "clock";
-      if (b.type === "timezone") return "timezone";
-      return b.precision === "datetime" ? "datetime" : "";
+      return dateTimeCardMode(b);
     },
     onChange: function (b, helpers) {
       setDateTimeCardMode(b, this.value, helpers);
     },
   },
   largeNumbers: {
-    label: "Large Clock",
+    label: function (b) {
+      return dateTimeCardMode(b) === "clock" ? "Large Clock" : "Large Clock/Date";
+    },
     idSuffix: "large-date-time-numbers",
-    supportedCardSizes: [3, 4],
+    supportedCardSize: function (b, helpers) {
+      var cardSize = (helpers && helpers.cardSize) || 1;
+      return dateTimeCardMode(b) === "clock" ? cardSize === 3 : cardSize === 4;
+    },
     hideLabelCardSizes: [3],
   },
   preview: {
@@ -29,6 +32,12 @@ var DATE_TIME_CARD_METADATA = {
     timezoneBadge: "map-clock",
   },
 };
+
+function dateTimeCardMode(b) {
+  if (b && b.type === "clock") return "clock";
+  if (b && b.type === "timezone") return "timezone";
+  return b && b.precision === "datetime" ? "datetime" : "";
+}
 
 function defaultTimezoneCardEntity() {
   return (typeof state !== "undefined" && state.timezone) || "UTC (GMT+0)";

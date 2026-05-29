@@ -181,7 +181,7 @@ function renderCardLargeNumbersToggle(panel, b, helpers, metadata) {
   if (!large.showSettingForAnyCardSize && !cardLargeNumbersSupportsCardSize(b, helpers, metadata)) return null;
   if (large.isVisible && !large.isVisible(b, helpers)) return null;
   var toggle = helpers.toggleRow(
-    large.label || "Large Numbers",
+    cardMetadataValue(large.label, b, helpers) || "Large Numbers",
     helpers.idPrefix + (large.idSuffix || "large-numbers"),
     cardLargeNumbersEnabled(b)
   );

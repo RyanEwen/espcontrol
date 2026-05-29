@@ -122,9 +122,9 @@ inline bool large_number_square_card_layout(int row_span, int col_span) {
   return row_span == 2 && col_span == 2;
 }
 
-inline bool large_date_time_card_layout(int row_span, int col_span) {
-  return large_number_square_card_layout(row_span, col_span) ||
-         (row_span == 1 && col_span == 2);
+inline bool card_large_date_time_layout(const ParsedCfg &p, int row_span, int col_span) {
+  if (p.type == "clock") return row_span == 1 && col_span == 2;
+  return large_number_square_card_layout(row_span, col_span);
 }
 
 inline bool wide_large_date_time_card_layout(int row_span, int col_span) {
@@ -182,7 +182,7 @@ inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
   }
   if (p.type == "calendar") {
     setup_calendar_card(s, p, palette.has_sensor_color, palette.sensor_val);
-    if (large_date_time_card_layout(row_span, col_span) &&
+    if (card_large_date_time_layout(p, row_span, col_span) &&
         card_large_numbers_enabled(p) && display_large_sensor_font(display)) {
       apply_large_sensor_number_style(
         s, display_large_sensor_font(display), display_large_sensor_unit_offset_percent(display));
@@ -194,7 +194,7 @@ inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
   }
   if (p.type == "clock") {
     setup_clock_card(s, p, palette.has_sensor_color, palette.sensor_val);
-    if (large_date_time_card_layout(row_span, col_span) &&
+    if (card_large_date_time_layout(p, row_span, col_span) &&
         card_large_numbers_enabled(p) && display_large_sensor_font(display)) {
       apply_large_sensor_number_style(
         s, display_large_sensor_font(display), display_large_sensor_unit_offset_percent(display));
@@ -206,7 +206,7 @@ inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
   }
   if (p.type == "timezone") {
     setup_timezone_card(s, p, palette.has_sensor_color, palette.sensor_val);
-    if (large_date_time_card_layout(row_span, col_span) &&
+    if (card_large_date_time_layout(p, row_span, col_span) &&
         card_large_numbers_enabled(p) && display_large_sensor_font(display)) {
       apply_large_sensor_number_style(
         s, display_large_sensor_font(display), display_large_sensor_unit_offset_percent(display));

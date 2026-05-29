@@ -265,6 +265,15 @@ const datePreview = hooks.buttonTypePreviewFor("calendar", {
 assert(datePreview.labelHtml.includes("mdi-calendar-month"), "date preview uses the calendar badge");
 assert(datePreview.iconHtml.includes("sp-sensor-preview"), "date preview uses the shared sensor preview");
 
+const largeDatePreview = hooks.buttonTypePreviewFor("calendar", {
+  type: "calendar",
+  precision: "",
+  options: "large_numbers",
+}, {
+  cardSize: 4,
+});
+assert(largeDatePreview.iconHtml.includes("sp-sensor-preview-large"), "date 2x2 preview supports large numbers");
+
 const dateTimePreview = hooks.buttonTypePreviewFor("calendar", {
   type: "calendar",
   precision: "datetime",
@@ -284,9 +293,9 @@ const wideDateTimePreview = hooks.buttonTypePreviewFor("calendar", {
   cardSize: 3,
   clockFormat: "24h",
 });
-assert(wideDateTimePreview.iconHtml.includes("sp-sensor-preview-large"), "date/time wide preview supports large numbers");
-assert.strictEqual(wideDateTimePreview.buttonClass, "sp-clock-wide-large", "date/time wide large preview is left aligned");
-assert.strictEqual(wideDateTimePreview.labelHtml, "", "date/time wide large preview hides the date label");
+assert(!wideDateTimePreview.iconHtml.includes("sp-sensor-preview-large"), "date/time wide preview does not support large numbers");
+assert.strictEqual(wideDateTimePreview.buttonClass, undefined, "date/time wide preview uses the standard wrapper");
+assert(wideDateTimePreview.labelHtml.includes("mdi-calendar-month"), "date/time wide preview keeps the date label");
 
 const clockPreview = hooks.buttonTypePreviewFor("clock", {
   type: "clock",
@@ -295,7 +304,7 @@ const clockPreview = hooks.buttonTypePreviewFor("clock", {
   cardSize: 4,
   clockFormat: "24h",
 });
-assert(clockPreview.iconHtml.includes("sp-sensor-preview-large"), "clock preview supports large numbers");
+assert(!clockPreview.iconHtml.includes("sp-sensor-preview-large"), "clock 2x2 preview does not support large numbers");
 assert(previewSensorValue(clockPreview).includes(":"), "clock preview renders a time value");
 assert.strictEqual(clockPreview.labelHtml, "", "clock preview does not render a date label");
 
@@ -328,9 +337,19 @@ const wideTimezonePreview = hooks.buttonTypePreviewFor("timezone", {
   cardSize: 3,
   clockFormat: "24h",
 });
-assert(wideTimezonePreview.iconHtml.includes("sp-sensor-preview-large"), "world clock wide preview supports large numbers");
-assert.strictEqual(wideTimezonePreview.buttonClass, "sp-date-time-wide-large", "world clock wide large preview stays centered");
-assert.strictEqual(wideTimezonePreview.labelHtml, "", "world clock wide large preview hides the city label");
+assert(!wideTimezonePreview.iconHtml.includes("sp-sensor-preview-large"), "world clock wide preview does not support large numbers");
+assert.strictEqual(wideTimezonePreview.buttonClass, undefined, "world clock wide preview uses the standard wrapper");
+assert(wideTimezonePreview.labelHtml.includes("New York"), "world clock wide preview keeps the city label");
+
+const largeTimezonePreview = hooks.buttonTypePreviewFor("timezone", {
+  entity: "America/New_York (GMT-5)",
+  type: "timezone",
+  options: "large_numbers",
+}, {
+  cardSize: 4,
+  clockFormat: "24h",
+});
+assert(largeTimezonePreview.iconHtml.includes("sp-sensor-preview-large"), "world clock 2x2 preview supports large numbers");
 
 const timezoneSamples = [
   "UTC (GMT+0)",
