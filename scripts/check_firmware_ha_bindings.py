@@ -14,6 +14,11 @@ FIRMWARE_DIR = ROOT / "components" / "espcontrol"
 CORE_INFRA_PATH = ROOT / "common" / "device" / "core_infra.yaml"
 TIME_ADDON_PATH = ROOT / "common" / "addon" / "time.yaml"
 S3_DEVICE_PATH = ROOT / "devices" / "guition-esp32-s3-4848s040" / "device" / "device.yaml"
+CONNECTIVITY_PATHS = (
+    ROOT / "common" / "addon" / "connectivity.yaml",
+    ROOT / "common" / "addon" / "connectivity_deployed.yaml",
+    ROOT / "common" / "addon" / "connectivity_ethernet.yaml",
+)
 HA_BOUNDARY_ALLOWLIST = {
     "button_grid_ha.h",
 }
@@ -276,6 +281,20 @@ def firmware_s3_api_errors(device_path: Path, root: Path) -> list[str]:
     return errors
 
 
+def firmware_connectivity_api_errors(paths: tuple[Path, ...], root: Path) -> list[str]:
+    errors: list[str] = []
+    for path in paths:
+        if not path.exists():
+            continue
+        rel = path.relative_to(root)
+        text = path.read_text(encoding="utf-8")
+        if re.search(r"(?m)^\s*api\.connected:\s*$", text):
+            errors.append(f"{rel}: wait for Home Assistant state subscription, not any API client")
+        if "on_client_connected:" in text and "ha_api_state_connected()" not in text:
+            errors.append(f"{rel}: only navigate after a Home Assistant state connection is ready")
+    return errors
+
+
 def run_scan() -> int:
     errors = firmware_ha_binding_errors(FIRMWARE_DIR, ROOT)
     errors.extend(firmware_ha_boundary_errors(FIRMWARE_DIR, ROOT))
@@ -286,6 +305,7 @@ def run_scan() -> int:
     errors.extend(firmware_weather_disconnect_errors(FIRMWARE_DIR, CORE_INFRA_PATH, ROOT))
     errors.extend(firmware_cover_request_errors(FIRMWARE_DIR, CORE_INFRA_PATH, ROOT))
     errors.extend(firmware_s3_api_errors(S3_DEVICE_PATH, ROOT))
+    errors.extend(firmware_connectivity_api_errors(CONNECTIVITY_PATHS, ROOT))
     if errors:
         print("Firmware Home Assistant binding check failed:")
         for error in errors:
@@ -441,6 +461,20 @@ def expect_s3_api_errors(name: str, text: str, expected: tuple[str, ...]) -> Non
         device_path.write_text(text, encoding="utf-8")
 
         errors = firmware_s3_api_errors(device_path, root)
+        for item in expected:
+            assert any(item in error for error in errors), f"{name}: missing {item!r} in {errors!r}"
+        if not expected:
+            assert not errors, f"{name}: expected no errors, got {errors!r}"
+
+
+def expect_connectivity_api_errors(name: str, text: str, expected: tuple[str, ...]) -> None:
+    with TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        path = root / "common" / "addon" / "connectivity.yaml"
+        path.parent.mkdir(parents=True)
+        path.write_text(text, encoding="utf-8")
+
+        errors = firmware_connectivity_api_errors((path,), root)
         for item in expected:
             assert any(item in error for error in errors), f"{name}: missing {item!r} in {errors!r}"
         if not expected:
@@ -922,6 +956,33 @@ def run_self_test() -> int:
         "low S3 API queue",
         "api:\n  max_connections: 2\n  max_send_queue: 8\n",
         ("keep the S3 native API send queue high enough",),
+    )
+    expect_connectivity_api_errors(
+        "raw api connected navigation",
+        "wifi:\n"
+        "  on_connect:\n"
+        "    - if:\n"
+        "        condition:\n"
+        "          api.connected:\n"
+        "api:\n"
+        "  on_client_connected:\n"
+        "    - script.execute: navigate_after_api\n",
+        ("wait for Home Assistant state subscription", "only navigate after a Home Assistant state connection"),
+    )
+    expect_connectivity_api_errors(
+        "home assistant state connected navigation",
+        "wifi:\n"
+        "  on_connect:\n"
+        "    - if:\n"
+        "        condition:\n"
+        "          lambda: 'return ha_api_state_connected();'\n"
+        "api:\n"
+        "  on_client_connected:\n"
+        "    - delay: 2s\n"
+        "    - if:\n"
+        "        condition:\n"
+        "          lambda: 'return ha_api_state_connected();'\n",
+        (),
     )
     print("Firmware Home Assistant binding self-tests passed.")
     return 0

@@ -47,7 +47,7 @@ wifi:
     - delay: 200ms
     - if:
         condition:
-          api.connected:
+          lambda: 'return ha_api_state_connected();'
         then:
           - script.execute: navigate_after_api
         else:
@@ -68,14 +68,19 @@ wifi:
 
 api:
   on_client_connected:
+    - delay: 2s
     - if:
         condition:
-          lambda: 'return lv_scr_act() == id(ha_setup_page)->obj;'
+          lambda: 'return ha_api_state_connected();'
         then:
-          - script.stop: setup_screen_dim
-          - lvgl.page.show: ha_actions_page
-        else:
-          - script.execute: navigate_after_api
+          - if:
+              condition:
+                lambda: 'return lv_scr_act() == id(ha_setup_page)->obj;'
+              then:
+                - script.stop: setup_screen_dim
+                - lvgl.page.show: ha_actions_page
+              else:
+                - script.execute: navigate_after_api
 
 script:
   - id: wifi_show_reconnecting
