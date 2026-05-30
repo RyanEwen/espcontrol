@@ -31,7 +31,6 @@
     "check:web-smoke": "node scripts/check_web_smoke.js",
     "check:web-browser-smoke": "node scripts/check_web_browser_smoke.js",
     "changelog:release": "python3 scripts/release_changelog.py",
-    "release:local": "python3 scripts/local_release.py",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
