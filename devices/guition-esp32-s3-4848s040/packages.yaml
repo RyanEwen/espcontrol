@@ -24,7 +24,7 @@ substitutions:
   setup_action_button_height: "56"
   setup_action_button_radius: "12"
   icon_font: font_mdi_44_icons
-  subpage_chevron_font: font_mdi_33_icons
+  subpage_chevron_font: font_mdi_19_network
   label_font: font_roboto_regular_22_text
   media_title_font: font_roboto_light_34_text
   unit_font: font_roboto_regular_22_text

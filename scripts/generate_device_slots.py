@@ -270,6 +270,10 @@ def cfg_lines(device: dict) -> list[str]:
         lines.append(
             f"            cfg.climate_card_icon_font = id({device['climate_card_icon_font']})->get_lv_font();"
         )
+    if device.get("subpage_chevron_font"):
+        lines.append(
+            f"            cfg.subpage_chevron_font = id({device['subpage_chevron_font']})->get_lv_font();"
+        )
     if device.get("climate_option_title_font"):
         lines.append(
             f"            cfg.climate_option_title_font = id({device['climate_option_title_font']})->get_lv_font();"

@@ -520,6 +520,7 @@ def slot_device(profile: dict[str, Any]) -> dict[str, Any]:
         "volume_number_font": fonts["volumeNumber"],
         "volume_label_font": fonts["volumeLabel"],
         "climate_card_icon_font": fonts.get("climateCardIcon"),
+        "subpage_chevron_font": fonts.get("subpageChevron"),
         "climate_option_title_font": fonts.get("climateOptionTitle"),
         "climate_option_value_font": fonts.get("climateOptionValue"),
         "wrap_tall_labels": display["wrapTallLabels"],

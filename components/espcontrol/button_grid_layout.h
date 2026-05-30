@@ -167,11 +167,11 @@ inline void set_subpage_chevron_visible(BtnSlot &s, bool visible) {
   if (visible) {
     lv_obj_clear_flag(s.subpage_lbl, LV_OBJ_FLAG_HIDDEN);
     lv_obj_set_style_text_opa(s.subpage_lbl, LV_OPA_50, LV_PART_MAIN);
-    lv_obj_align(s.subpage_lbl, LV_ALIGN_BOTTOM_RIGHT, 0, 0);
+    lv_obj_align(s.subpage_lbl, LV_ALIGN_BOTTOM_RIGHT, 0, 2);
     lv_obj_move_foreground(s.subpage_lbl);
     if (s.text_lbl) {
       configure_button_label_wrap(s.text_lbl);
-      lv_obj_set_width(s.text_lbl, lv_pct(88));
+      lv_obj_set_width(s.text_lbl, lv_pct(94));
       lv_obj_align(s.text_lbl, LV_ALIGN_BOTTOM_LEFT, 0, 0);
     }
   } else {

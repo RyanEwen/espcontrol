@@ -35,6 +35,7 @@ struct GridConfig {
   const lv_font_t *climate_option_title_font = nullptr;
   const lv_font_t *climate_option_value_font = nullptr;
   const lv_font_t *volume_icon_font = nullptr;
+  const lv_font_t *subpage_chevron_font = nullptr;
   std::string temperature_unit;
   std::string timezone;
   std::function<void()> pause_home_idle;
@@ -1157,7 +1158,7 @@ inline void grid_phase2(
       LV_GRID_ALIGN_STRETCH, sp_ord.back_pos / COLS, sp_ord.back_row_span);
     BtnSlot back_slot = create_dynamic_card_slot(
       back_btn, sp_icon_fnt, display_sensor_font(display), sp_btn_fnt, sp_txt_color,
-      display_climate_card_icon_font(display));
+      cfg.subpage_chevron_font);
     display_apply_main_width(back_slot.icon_lbl, display);
     display_apply_slot_text_width(back_slot, display);
     lv_label_set_text(back_slot.icon_lbl, "\U000F0141");
@@ -1223,7 +1224,7 @@ inline void grid_phase2(
       lv_obj_set_grid_cell(sb_btn, LV_GRID_ALIGN_STRETCH, col, cs, LV_GRID_ALIGN_STRETCH, row, rs);
       BtnSlot sub_slot = create_dynamic_card_slot(
         sb_btn, sp_icon_fnt, display_sensor_font(display), sp_btn_fnt, sp_txt_color,
-        display_climate_card_icon_font(display));
+        cfg.subpage_chevron_font);
       display_apply_main_width(sub_slot.icon_lbl, display);
       display_apply_slot_text_width(sub_slot, display);
       setup_card_visual(sub_slot, sb_cfg, cfg, palette, rs, cs);
