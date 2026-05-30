@@ -246,6 +246,14 @@ def cfg_lines(device: dict) -> list[str]:
     else:
         lines.append(f"            cfg.cols = {device['cols']};")
     lines.append("            cfg.subpage_chevrons_enabled = id(subpage_chevrons_enabled).state;")
+    if device.get("subpage_chevron_x", 0) != 0:
+        lines.append(f"            cfg.subpage_chevron_x = {device['subpage_chevron_x']};")
+    if device.get("subpage_chevron_y", 2) != 2:
+        lines.append(f"            cfg.subpage_chevron_y = {device['subpage_chevron_y']};")
+    if device.get("subpage_chevron_text_width_percent", 94) != 94:
+        lines.append(
+            f"            cfg.subpage_chevron_text_width_percent = {device['subpage_chevron_text_width_percent']};"
+        )
     if device["wrap_tall_labels"]:
         lines.append("            cfg.wrap_tall_labels = true;")
     if device.get("width_compensation_percent", 100) != 100:

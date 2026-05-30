@@ -226,12 +226,15 @@
           "volumeNumber": "font_roboto_thin_135_text",
           "volumeLabel": "font_roboto_regular_31_text",
           "climateCardIcon": "font_mdi_47_icons",
-          "subpageChevron": "font_mdi_23_network",
+          "subpageChevron": "font_mdi_27_subpage",
           "climateOptionTitle": "font_roboto_regular_24_text",
           "climateOptionValue": "font_roboto_regular_31_text"
         },
         "display": {
-          "wrapTallLabels": false
+          "wrapTallLabels": false,
+          "subpageChevronX": 3,
+          "subpageChevronY": -2,
+          "subpageChevronTextWidthPercent": 96
         },
         "package": {
           "firmwareVersion": "dev-jc4880p443-20260522-otawdt",
@@ -248,7 +251,7 @@
             "setup_action_button_height": "\"56\"",
             "setup_action_button_radius": "\"12\"",
             "icon_font": "font_mdi_62_icons",
-            "subpage_chevron_font": "font_mdi_23_network",
+            "subpage_chevron_font": "font_mdi_27_subpage",
             "label_font": "font_roboto_regular_31_text",
             "media_title_font": "font_roboto_light_56_text",
             "unit_font": "font_roboto_regular_31_text",

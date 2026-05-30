@@ -659,13 +659,18 @@ inline bool subpage_parent_icon_entity_state_enabled(const ParsedCfg &p) {
 
 inline void setup_subpage_parent_state_card(BtnSlot &s, const ParsedCfg &p,
                                             const lv_font_t *value_font,
-                                            bool subpage_chevron_enabled = true) {
+                                            bool subpage_chevron_enabled = true,
+                                            int subpage_chevron_x = 0,
+                                            int subpage_chevron_y = 2,
+                                            int subpage_chevron_text_width_percent = 94) {
   setup_toggle_visual(s, p);
   if (p.precision == "text") {
     lv_obj_clear_flag(s.icon_lbl, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(s.sensor_container, LV_OBJ_FLAG_HIDDEN);
     set_wrapped_button_label_text(s.text_lbl, "--");
-    set_subpage_chevron_visible(s, subpage_chevron_enabled);
+    set_subpage_chevron_visible(
+      s, subpage_chevron_enabled, subpage_chevron_x, subpage_chevron_y,
+      subpage_chevron_text_width_percent);
     return;
   }
 
@@ -676,5 +681,7 @@ inline void setup_subpage_parent_state_card(BtnSlot &s, const ParsedCfg &p,
   std::string unit = trim_display_unit(p.unit);
   lv_label_set_text(s.unit_lbl, unit.c_str());
   lv_label_set_text(s.text_lbl, p.label.empty() ? "Subpage" : p.label.c_str());
-  set_subpage_chevron_visible(s, subpage_chevron_enabled);
+  set_subpage_chevron_visible(
+    s, subpage_chevron_enabled, subpage_chevron_x, subpage_chevron_y,
+    subpage_chevron_text_width_percent);
 }

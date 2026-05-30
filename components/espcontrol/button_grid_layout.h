@@ -162,16 +162,19 @@ inline void set_wrapped_button_label_text(lv_obj_t *label, const std::string &te
   lv_obj_align(label, LV_ALIGN_BOTTOM_LEFT, 0, 0);
 }
 
-inline void set_subpage_chevron_visible(BtnSlot &s, bool visible) {
+inline void set_subpage_chevron_visible(BtnSlot &s, bool visible,
+                                        int x_offset = 0,
+                                        int y_offset = 2,
+                                        int text_width_percent = 94) {
   if (!s.subpage_lbl) return;
   if (visible) {
     lv_obj_clear_flag(s.subpage_lbl, LV_OBJ_FLAG_HIDDEN);
     lv_obj_set_style_text_opa(s.subpage_lbl, LV_OPA_50, LV_PART_MAIN);
-    lv_obj_align(s.subpage_lbl, LV_ALIGN_BOTTOM_RIGHT, 0, 2);
+    lv_obj_align(s.subpage_lbl, LV_ALIGN_BOTTOM_RIGHT, x_offset, y_offset);
     lv_obj_move_foreground(s.subpage_lbl);
     if (s.text_lbl) {
       configure_button_label_wrap(s.text_lbl);
-      lv_obj_set_width(s.text_lbl, lv_pct(94));
+      lv_obj_set_width(s.text_lbl, lv_pct(text_width_percent));
       lv_obj_align(s.text_lbl, LV_ALIGN_BOTTOM_LEFT, 0, 0);
     }
   } else {

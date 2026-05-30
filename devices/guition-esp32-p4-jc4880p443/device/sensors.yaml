@@ -35,6 +35,9 @@ script:
           bool portrait = id(screen_rotation_select).current_option() == "90" || id(screen_rotation_select).current_option() == "270";
           cfg.cols = portrait ? 3 : 2;
           cfg.subpage_chevrons_enabled = id(subpage_chevrons_enabled).state;
+          cfg.subpage_chevron_x = 3;
+          cfg.subpage_chevron_y = -2;
+          cfg.subpage_chevron_text_width_percent = 96;
           cfg.icon_font = id(font_mdi_62_icons)->get_lv_font();
           cfg.sp_sensor_font = id(font_roboto_light_62_digits)->get_lv_font();
           cfg.sp_large_sensor_font = id(font_roboto_thin_155_digits)->get_lv_font();
@@ -43,7 +46,7 @@ script:
           cfg.volume_number_font = id(font_roboto_thin_135_text)->get_lv_font();
           cfg.volume_label_font = id(font_roboto_regular_31_text)->get_lv_font();
           cfg.climate_card_icon_font = id(font_mdi_47_icons)->get_lv_font();
-          cfg.subpage_chevron_font = id(font_mdi_23_network)->get_lv_font();
+          cfg.subpage_chevron_font = id(font_mdi_27_subpage)->get_lv_font();
           cfg.climate_option_title_font = id(font_roboto_regular_24_text)->get_lv_font();
           cfg.climate_option_value_font = id(font_roboto_regular_31_text)->get_lv_font();
           cfg.temperature_unit = id(temperature_unit_select).current_option();
@@ -102,6 +105,9 @@ esphome:
             bool portrait = id(screen_rotation_select).current_option() == "90" || id(screen_rotation_select).current_option() == "270";
             cfg.cols = portrait ? 3 : 2;
             cfg.subpage_chevrons_enabled = id(subpage_chevrons_enabled).state;
+            cfg.subpage_chevron_x = 3;
+            cfg.subpage_chevron_y = -2;
+            cfg.subpage_chevron_text_width_percent = 96;
             cfg.icon_font = id(font_mdi_62_icons)->get_lv_font();
             cfg.sp_sensor_font = id(font_roboto_light_62_digits)->get_lv_font();
             cfg.sp_large_sensor_font = id(font_roboto_thin_155_digits)->get_lv_font();
@@ -110,7 +116,7 @@ esphome:
             cfg.volume_number_font = id(font_roboto_thin_135_text)->get_lv_font();
             cfg.volume_label_font = id(font_roboto_regular_31_text)->get_lv_font();
             cfg.climate_card_icon_font = id(font_mdi_47_icons)->get_lv_font();
-            cfg.subpage_chevron_font = id(font_mdi_23_network)->get_lv_font();
+            cfg.subpage_chevron_font = id(font_mdi_27_subpage)->get_lv_font();
             cfg.climate_option_title_font = id(font_roboto_regular_24_text)->get_lv_font();
             cfg.climate_option_value_font = id(font_roboto_regular_31_text)->get_lv_font();
             cfg.temperature_unit = id(temperature_unit_select).current_option();
@@ -218,6 +224,9 @@ esphome:
             bool portrait = id(screen_rotation_select).current_option() == "90" || id(screen_rotation_select).current_option() == "270";
             cfg.cols = portrait ? 3 : 2;
             cfg.subpage_chevrons_enabled = id(subpage_chevrons_enabled).state;
+            cfg.subpage_chevron_x = 3;
+            cfg.subpage_chevron_y = -2;
+            cfg.subpage_chevron_text_width_percent = 96;
             cfg.icon_font = id(font_mdi_62_icons)->get_lv_font();
             cfg.sp_sensor_font = id(font_roboto_light_62_digits)->get_lv_font();
             cfg.sp_large_sensor_font = id(font_roboto_thin_155_digits)->get_lv_font();
@@ -226,7 +235,7 @@ esphome:
             cfg.volume_number_font = id(font_roboto_thin_135_text)->get_lv_font();
             cfg.volume_label_font = id(font_roboto_regular_31_text)->get_lv_font();
             cfg.climate_card_icon_font = id(font_mdi_47_icons)->get_lv_font();
-            cfg.subpage_chevron_font = id(font_mdi_23_network)->get_lv_font();
+            cfg.subpage_chevron_font = id(font_mdi_27_subpage)->get_lv_font();
             cfg.climate_option_title_font = id(font_roboto_regular_24_text)->get_lv_font();
             cfg.climate_option_value_font = id(font_roboto_regular_31_text)->get_lv_font();
             cfg.temperature_unit = id(temperature_unit_select).current_option();

@@ -36,6 +36,9 @@ struct GridConfig {
   const lv_font_t *climate_option_value_font = nullptr;
   const lv_font_t *volume_icon_font = nullptr;
   const lv_font_t *subpage_chevron_font = nullptr;
+  int subpage_chevron_x = 0;
+  int subpage_chevron_y = 2;
+  int subpage_chevron_text_width_percent = 94;
   std::string temperature_unit;
   std::string timezone;
   std::function<void()> pause_home_idle;
@@ -160,7 +163,10 @@ inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
   if (s.unit_lbl) lv_obj_clear_flag(s.unit_lbl, LV_OBJ_FLAG_HIDDEN);
   if (s.text_lbl) lv_obj_clear_flag(s.text_lbl, LV_OBJ_FLAG_HIDDEN);
   if (s.sensor_container) lv_obj_align(s.sensor_container, LV_ALIGN_TOP_LEFT, 0, 0);
-  set_subpage_chevron_visible(s, p.type == "subpage" && cfg.subpage_chevrons_enabled);
+  set_subpage_chevron_visible(
+    s, p.type == "subpage" && cfg.subpage_chevrons_enabled,
+    cfg.subpage_chevron_x, cfg.subpage_chevron_y,
+    cfg.subpage_chevron_text_width_percent);
 
   if (is_text_sensor_card(p)) {
     setup_text_sensor_card(s, p, palette.has_sensor_color, palette.sensor_val);
@@ -242,7 +248,9 @@ inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
   }
   if (subpage_parent_sensor_state_enabled(p)) {
     setup_subpage_parent_state_card(
-      s, p, display_sensor_font(display), cfg.subpage_chevrons_enabled);
+      s, p, display_sensor_font(display), cfg.subpage_chevrons_enabled,
+      cfg.subpage_chevron_x, cfg.subpage_chevron_y,
+      cfg.subpage_chevron_text_width_percent);
     return;
   }
   if (p.type == "lock") {
@@ -484,7 +492,11 @@ inline void refresh_card_layout(BtnSlot &s, const ParsedCfg &p,
   }
   display_apply_main_width(s.icon_lbl, display);
   display_apply_slot_text_width(s, display);
-  if (p.type == "subpage") set_subpage_chevron_visible(s, cfg.subpage_chevrons_enabled);
+  if (p.type == "subpage") {
+    set_subpage_chevron_visible(
+      s, cfg.subpage_chevrons_enabled, cfg.subpage_chevron_x,
+      cfg.subpage_chevron_y, cfg.subpage_chevron_text_width_percent);
+  }
 
   if (p.type == "media") {
     refresh_media_card_layout(s, p, cfg, row_span);
