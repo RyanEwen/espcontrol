@@ -794,11 +794,26 @@ def gen_device_grid_snippet(capability):
     relays = capability.get("relays", 0)
     relay_text = "No built-in relays" if relays == 0 else f"{relays} built-in relay" + ("" if relays == 1 else "s")
     ethernet = "Yes, manual ESPHome install only" if capability.get("ethernetManualInstall") else "No"
+    if capability.get("dashboardPages"):
+        layout_text = (
+            f"The display uses a **{rows}-row x {cols}-column** grid, giving you "
+            f"**{slots} card slots** per page across **{capability['dashboardPages']} physical "
+            f"dashboard pages**. Use the device buttons to move between pages; touch subpages are not used.\n\n"
+        )
+    elif capability.get("subpages", True):
+        layout_text = (
+            f"The home screen uses a **{rows}-row x {cols}-column** grid, giving you "
+            f"**{slots} card slots**. Any home-screen card can be turned into a "
+            f"[Subpage](/features/subpages) folder containing up to {slots - 1} more cards.\n\n"
+        )
+    else:
+        layout_text = (
+            f"The home screen uses a **{rows}-row x {cols}-column** grid, giving you "
+            f"**{slots} card slots**. Touch subpages are not available on this device.\n\n"
+        )
     return (
         generated_markdown_header("SCREEN GRID CAPABILITIES") +
-        f"The home screen uses a **{rows}-row x {cols}-column** grid, giving you "
-        f"**{slots} card slots**. Any home-screen card can be turned into a "
-        f"[Subpage](/features/subpages) folder containing up to {slots - 1} more cards.\n\n"
+        layout_text +
         "Flexible card sizes are supported: Single, Tall, Wide, and Large.\n\n"
         "| Capability | Value |\n"
         "|---|---|\n"
@@ -808,6 +823,7 @@ def gen_device_grid_snippet(capability):
         f"| Rotation support | {'Yes' if capability.get('rotation') else 'No'} |\n"
         f"| Browser install slug | `{capability['installSlug']}` |\n"
         f"| Ethernet option | {ethernet} |\n"
+        + (f"| Dashboard pages | {capability['dashboardPages']} |\n" if capability.get("dashboardPages") else "")
     )
 
 

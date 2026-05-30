@@ -588,6 +588,7 @@ def public_device_capability(profile: dict[str, Any]) -> dict[str, Any]:
         "relays": len(profile["internalRelays"]),
         "rotation": bool((profile.get("rotation") or {}).get("enabled")),
         "ethernetManualInstall": bool(package.get("ethernetSelectable")),
+        "subpages": "subpage" not in profile["web"].get("disabledCardTypes", []),
     }
     display = profile["firmware"].get("display") or {}
     if display.get("mode") == "monochrome":

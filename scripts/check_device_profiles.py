@@ -52,6 +52,15 @@ def test_public_device_capabilities(profile_slugs: list[str]) -> None:
         assert f'{capability["grid"]["rows"]}-row x {capability["grid"]["cols"]}-column' in grid, (
             f"{stem}: grid snippet missing grid shape"
         )
+        if capability.get("dashboardPages"):
+            assert f'**{capability["dashboardPages"]} physical dashboard pages**' in grid, (
+                f"{stem}: grid snippet missing dashboard page count"
+            )
+            assert "touch subpages are not used" in grid, f"{stem}: grid snippet should not describe touch subpages"
+        elif capability.get("subpages", True):
+            assert "[Subpage](/features/subpages)" in grid, f"{stem}: grid snippet missing subpage support"
+        else:
+            assert "Touch subpages are not available" in grid, f"{stem}: grid snippet missing no-subpage note"
         assert capability["screenSize"] in grid, f"{stem}: grid snippet missing screen size"
         assert capability["resolution"] in grid, f"{stem}: grid snippet missing resolution"
         assert capability["chipFamily"] in grid, f"{stem}: grid snippet missing chip family"
