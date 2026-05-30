@@ -87,21 +87,30 @@ function buildScreenPage(parent) {
 
   var wrap = document.createElement("div");
   wrap.className = "sp-wrap";
-  wrap.innerHTML =
-    '<div class="sp-screen">' +
-    '<div class="sp-topbar">' +
-    '<span class="sp-temp"></span>' +
-    '<span class="sp-clock">--:--</span>' +
-    '<span class="sp-network-preview mdi mdi-wifi-strength-4"></span>' +
-    "</div>" +
-    '<div class="sp-main"></div>' +
-    "</div>";
+  var epaperPreview = CFG.features && CFG.features.epaperDisplay;
+  wrap.innerHTML = epaperPreview
+    ? '<div class="sp-screen sp-epaper-screen">' +
+      '<div class="sp-topbar">' +
+      '<span class="sp-epaper-title">ESPControl</span>' +
+      '<span class="sp-epaper-page">Page 1/' + PAGE_COUNT + '</span>' +
+      "</div>" +
+      '<div class="sp-main"></div>' +
+      "</div>"
+    : '<div class="sp-screen">' +
+      '<div class="sp-topbar">' +
+      '<span class="sp-temp"></span>' +
+      '<span class="sp-clock">--:--</span>' +
+      '<span class="sp-network-preview mdi mdi-wifi-strength-4"></span>' +
+      "</div>" +
+      '<div class="sp-main"></div>' +
+      "</div>";
   page.appendChild(wrap);
 
   els.topbar = wrap.querySelector(".sp-topbar");
   els.temp = wrap.querySelector(".sp-temp");
   els.clock = wrap.querySelector(".sp-clock");
   els.networkPreview = wrap.querySelector(".sp-network-preview");
+  els.epaperPage = wrap.querySelector(".sp-epaper-page");
   els.previewMain = wrap.querySelector(".sp-main");
   els.previewMain.setAttribute("role", "grid");
   els.previewMain.setAttribute("aria-label", "Button grid");

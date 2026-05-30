@@ -39,6 +39,7 @@ function buildSettingsPage(parent) {
   }
 
   config.appendChild(makeCollapsibleCard("Appearance", appearBody, true));
+  var epaperDisplay = CFG.features && CFG.features.epaperDisplay;
 
   var blBody = document.createElement("div");
 
@@ -68,7 +69,9 @@ function buildSettingsPage(parent) {
   els.sunInfo = sunInfo;
   updateSunInfo();
 
-  config.appendChild(makeCollapsibleCard("Backlight", blBody, true));
+  if (!epaperDisplay) {
+    config.appendChild(makeCollapsibleCard("Backlight", blBody, true));
+  }
 
   var scheduleBody = document.createElement("div");
   var scheduleToggle = toggleRow("Night Schedule", "sp-set-schedule-enabled", state.scheduleEnabled);
@@ -449,7 +452,9 @@ function buildSettingsPage(parent) {
   els.setClockBarBadge = clockBarBadge;
   syncClockBarUi();
   syncTemperatureUi();
-  config.appendChild(makeCollapsibleCard("Clock Bar", clockBarBody, true, clockBarBadge));
+  if (!epaperDisplay) {
+    config.appendChild(makeCollapsibleCard("Clock Bar", clockBarBody, true, clockBarBadge));
+  }
 
   if (CFG.features && CFG.features.screenRotation) {
     var rotationBody = document.createElement("div");
@@ -685,9 +690,11 @@ function buildSettingsPage(parent) {
   idleBadge.innerHTML = '<span class="sp-card-badge-dot"></span><span>ON</span>';
   els.setIdleBadge = idleBadge;
   syncIdleUi();
-  config.appendChild(makeCollapsibleCard("Idle", idleBody, true, idleBadge));
-  config.appendChild(screensaverCard);
-  config.appendChild(scheduleCard);
+  if (!epaperDisplay) {
+    config.appendChild(makeCollapsibleCard("Idle", idleBody, true, idleBadge));
+    config.appendChild(screensaverCard);
+    config.appendChild(scheduleCard);
+  }
 
   var backupBody = document.createElement("div");
 

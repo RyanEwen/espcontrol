@@ -49,6 +49,8 @@ var CSS =
   ".sp-temp.sp-visible{opacity:1}" +
   ".sp-clock{position:absolute;left:50%;transform:translateX(-50%);" +
   "color:#fff;font-size:var(--clock-fs,var(--topbar-fs));white-space:nowrap}" +
+  ".sp-epaper-title,.sp-epaper-page{color:#fff;font-size:var(--topbar-fs);font-weight:700;white-space:nowrap}" +
+  ".sp-epaper-page{margin-left:auto}" +
   ".sp-network-preview{margin-left:auto;margin-right:1cqw;color:#fff;font-size:calc(var(--topbar-fs)*.86);" +
   "line-height:1;width:calc(var(--topbar-fs)*1.2);height:100%;display:flex;align-items:center;" +
   "justify-content:center;opacity:0;transition:opacity .3s}" +
@@ -132,6 +134,8 @@ var CSS =
   (CFG.features && CFG.features.monochromeDisplay ?
   ".sp-screen{background:#fff;border-color:#111;border-radius:2px;box-shadow:none;color:#111}" +
   ".sp-topbar{border-bottom:1px solid #111;color:#111}" +
+  ".sp-epaper-screen .sp-topbar{background:#111;border-bottom:0}" +
+  ".sp-epaper-screen .sp-epaper-title,.sp-epaper-screen .sp-epaper-page{color:#fff}" +
   ".sp-temp,.sp-clock,.sp-network-preview{color:#111}" +
   ".sp-btn{background:#fff !important;border:1px solid #111 !important;border-radius:2px;box-shadow:none}" +
   ".sp-btn:hover{filter:none;outline:2px solid #111;outline-offset:-2px}" +

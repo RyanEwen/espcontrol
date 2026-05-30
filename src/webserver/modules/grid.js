@@ -54,6 +54,9 @@ function setDashboardPage(page) {
 }
 
 function syncDashboardPageControls() {
+  if (els.epaperPage) {
+    els.epaperPage.textContent = "Page " + (state.dashboardPage + 1) + "/" + PAGE_COUNT;
+  }
   if (!els.dashboardPages) return;
   els.dashboardPages.querySelectorAll(".sp-page-btn").forEach(function (btn) {
     var page = parseInt(btn.getAttribute("data-page"), 10) || 0;

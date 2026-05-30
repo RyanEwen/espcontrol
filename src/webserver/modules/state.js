@@ -513,7 +513,8 @@ function syncMonthNameUi() {
 
 function syncClockBarUi() {
   syncPreviewGridTop();
-  if (els.topbar) els.topbar.className = "sp-topbar" + (state.clockBarOn ? "" : " sp-hidden");
+  var fixedEpaperTopbar = CFG.features && CFG.features.epaperDisplay;
+  if (els.topbar) els.topbar.className = "sp-topbar" + (state.clockBarOn || fixedEpaperTopbar ? "" : " sp-hidden");
   if (els.setClockBarToggle) els.setClockBarToggle.checked = !!state.clockBarOn;
   if (els.setNetworkStatusToggle) {
     els.setNetworkStatusToggle.checked = !!state.networkStatusOn;
