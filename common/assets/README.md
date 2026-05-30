@@ -6,24 +6,24 @@ public docs site.
 
 ## Font naming and ramp
 
-Font component IDs should describe the font itself, not the UI place where it is
-used. Use this pattern:
+Font component IDs are generic style names. New firmware features should reuse
+these names directly instead of adding size- or font-family-based IDs:
 
-```text
-font_<source>_<weight-or-set>_<size>[_glyphset]
-```
+| Font ID | Use |
+| --- | --- |
+| `font_icon_main` | Main icons, setup icons, modal icons, and climate card icons |
+| `font_icon_status` | Small status and subpage icons |
+| `font_text_body` | Labels, setup body text, modal labels, climate option text, and general UI text |
+| `font_text_title` | Media titles, setup headings, and larger text headings |
+| `font_number_value` | Normal sensor values |
+| `font_number_value_large` | Large sensor values |
+| `font_number_modal` | Large modal numbers |
+| `font_number_clock` | Screensaver clock |
 
-Examples:
-
-- `font_roboto_regular_22_text`
-- `font_roboto_light_55_digits`
-- `font_mdi_41_icons`
-- `font_mdi_19_network`
-
-The current type ramp is not encoded as a shared generator or token file. It is
-implemented by the sizes in `common/assets/fonts.yaml`, `common/assets/icons.yaml`,
-and each `devices/*/device/fonts.yaml`, then assigned to UI roles in
-`devices/manifest.json` and the device `packages.yaml` files.
+Each device implements those IDs at the physical size that fits its panel in
+`devices/*/device/fonts.yaml`. Shared setup screens and generated device files
+then refer to the generic names, so adding a feature does not require knowing
+each device's pixel sizes.
 
 ### Shared ratios
 
@@ -33,28 +33,29 @@ device:
 | Relationship | Current rule |
 | --- | --- |
 | Large sensor numbers | `2.5x` the normal sensor value font |
-| Climate card icons | About `75%` of the main card icon font |
+| Status icons | Small enough for top-bar and subpage indicators |
 | 720x720 square panel | Mostly `1.5x` the 480x480 square panel |
 
 Examples of the current ratios:
 
-| Device class | Main icon | Climate icon | Sensor | Large sensor |
+| Device class | Main icon | Status icon | Sensor | Large sensor |
 | --- | ---: | ---: | ---: | ---: |
-| 480x480 square | 44 | 33 | 44 | 110 |
-| 720x720 square | 66 | 50 | 66 | 165 |
-| 1024x600 landscape | 55 | 41 | 55 | 138 |
-| 480x800 portrait | 62 | 47 | 62 | 155 |
-| 1280x800 landscape | 56 | 42 | 52 | 130 |
+| 480x480 square | 44 | 19 | 44 | 110 |
+| 720x720 square | 66 | 26 | 66 | 165 |
+| 1024x600 landscape | 55 | 19 | 55 | 138 |
+| 480x800 portrait | 62 | 23 | 62 | 155 |
+| 1280x800 landscape | 56 | 21 | 52 | 130 |
 
 ### Current role assignments
 
-The firmware role names in `devices/manifest.json` are intentionally still
-usage-based. They map the standard font IDs to UI roles:
+The firmware role names in `devices/manifest.json` are still usage-based. They
+map UI roles to the generic font IDs:
 
 | Role | Purpose |
 | --- | --- |
 | `icon` | Main card icon |
-| `climateCardIcon` | Smaller climate card icon |
+| `climateCardIcon` | Climate card icon, using the main icon style |
+| `subpageChevron` | Subpage marker, using the status icon style |
 | `sensor` | Normal sensor/statistic value |
 | `largeSensor` | Large-number sensor card value |
 | `mediaTitle` | Media card title text |
@@ -63,7 +64,7 @@ usage-based. They map the standard font IDs to UI roles:
 | `climateOptionTitle` | Climate option chip title |
 | `climateOptionValue` | Climate option chip value |
 
-When changing the ramp, update the font component IDs and the manifest together,
+When changing the ramp, update the device font sizes and the manifest together,
 then run:
 
 ```sh

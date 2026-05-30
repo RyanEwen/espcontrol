@@ -1,17 +1,9 @@
 # =============================================================================
-# ICONS - Material Design Icons for buttons and setup screens
+# ICONS - Shared icon names for buttons and setup screens
 # =============================================================================
 # http://materialdesignicons.com/cdn/7.4.47/
-# Button and setup screens share the same icon font.
+# Device-specific font_icon_main definitions render these glyphs.
 # =============================================================================
-
-font:
-  # Button icons (52px)
-  - file: 'https://github.com/Templarian/MaterialDesign-Webfont/raw/v7.4.47/fonts/materialdesignicons-webfont.ttf'
-    id: font_mdi_48_icons
-    size: 48
-    bpp: 4
-    glyphs: !include icon_glyphs.yaml
 
 substitutions:
   icon_wifi_startup: "\U000F05A9"
