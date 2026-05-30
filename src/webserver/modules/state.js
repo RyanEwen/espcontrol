@@ -24,7 +24,6 @@ var state = {
   offColor: "CECECE",
   sensorColor: "DEDEDE",
   selectedSlots: [],
-  dashboardPage: 0,
   lastClickedSlot: -1,
   activeTab: "screen",
   _indoorOn: false,

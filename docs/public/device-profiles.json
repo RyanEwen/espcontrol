@@ -114,8 +114,7 @@
       "rotation": false,
       "ethernetManualInstall": false,
       "subpages": false,
-      "monochrome": true,
-      "dashboardPages": 4
+      "monochrome": true
     }
   ]
 }

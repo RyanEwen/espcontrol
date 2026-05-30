@@ -18,9 +18,8 @@
   var DEVICE_ID = "guition-esp32-p4-jc1060p470";
   var CFG = {"slots":20,"cols":5,"rows":4,"dragMode":"swap","dragAnimation":true,"screen":{"width":"67%","aspect":"1024/600"},"topbar":{"height":3.2,"padding":"0.39cqw","fontSize":1.95},"grid":{"top":4.4,"left":0.49,"right":0.49,"bottom":0.49,"gap":0.98,"fr":"1fr"},"btn":{"radius":0.78,"padding":1.37,"iconSize":4.69,"labelSize":1.8},"emptyCell":{"radius":0.78},"sensorBadge":{"top":1,"right":1,"fontSize":1.6},"subpageBadge":{"bottom":1,"right":1,"fontSize":2}};
   // __DEVICE_CONFIG_END__
-  var PAGE_COUNT = (CFG.features && CFG.features.dashboardPages) || 1;
   var NUM_SLOTS = CFG.slots;
-  var TOTAL_SLOTS = NUM_SLOTS * PAGE_COUNT;
+  var TOTAL_SLOTS = NUM_SLOTS;
   var GRID_COLS = CFG.cols;
   var GRID_ROWS = CFG.rows;
 

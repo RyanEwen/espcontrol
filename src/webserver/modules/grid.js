@@ -13,22 +13,6 @@ function ctx() {
       save: function () { saveSubpageConfig(state.editingSubpage); },
     };
   }
-  if (PAGE_COUNT > 1) {
-    var start = state.dashboardPage * NUM_SLOTS;
-    var pageGrid = [];
-    for (var i = 0; i < NUM_SLOTS; i++) {
-      pageGrid.push(start + i + 1);
-    }
-    return {
-      grid: pageGrid, sizes: state.sizes, buttons: state.buttons,
-      maxSlots: NUM_SLOTS, selected: state.selectedSlots,
-      isSub: false,
-      setSelected: function (s) { state.selectedSlots = s; },
-      setLastClicked: function (s) { state.lastClickedSlot = s; },
-      getLastClicked: function () { return state.lastClickedSlot; },
-      save: function () {},
-    };
-  }
   return {
     grid: state.grid, sizes: state.sizes, buttons: state.buttons,
     maxSlots: NUM_SLOTS, selected: state.selectedSlots,
@@ -38,27 +22,6 @@ function ctx() {
     getLastClicked: function () { return state.lastClickedSlot; },
     save: function () { postText(entityName("button_order"), serializeGrid(state.grid)); },
   };
-}
-
-function setDashboardPage(page) {
-  if (PAGE_COUNT <= 1) return;
-  page = Math.max(0, Math.min(PAGE_COUNT - 1, parseInt(page, 10) || 0));
-  if (state.dashboardPage === page) return;
-  state.dashboardPage = page;
-  state.selectedSlots = [];
-  state.lastClickedSlot = -1;
-  state.settingsDraft = null;
-  syncDashboardPageControls();
-  renderPreview();
-  renderButtonSettings();
-}
-
-function syncDashboardPageControls() {
-  if (!els.dashboardPages) return;
-  els.dashboardPages.querySelectorAll(".sp-page-btn").forEach(function (btn) {
-    var page = parseInt(btn.getAttribute("data-page"), 10) || 0;
-    btn.className = "sp-page-btn" + (page === state.dashboardPage ? " active" : "");
-  });
 }
 
 // ── Grid helpers ───────────────────────────────────────────────────────

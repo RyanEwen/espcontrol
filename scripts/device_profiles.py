@@ -365,8 +365,6 @@ def validate_web(slug: str, device: dict[str, Any], errors: list[str]) -> None:
     ):
         errors.append(device_error(slug, "web.disabledCardTypes must be a list of non-empty strings"))
 
-    if "dashboardPages" in web and not is_positive_int(web["dashboardPages"]):
-        errors.append(device_error(slug, "web.dashboardPages must be a positive integer when set"))
 
     validate_screen_box(slug, errors, web.get("screen"), "web.screen")
 
@@ -492,8 +490,6 @@ def web_features(profile: dict[str, Any]) -> dict[str, Any]:
     if display.get("mode") == "monochrome":
         features["monochromeDisplay"] = True
         features["epaperDisplay"] = True
-    if profile["web"].get("dashboardPages"):
-        features["dashboardPages"] = profile["web"]["dashboardPages"]
     return features
 
 
@@ -593,8 +589,6 @@ def public_device_capability(profile: dict[str, Any]) -> dict[str, Any]:
     display = profile["firmware"].get("display") or {}
     if display.get("mode") == "monochrome":
         capability["monochrome"] = True
-    if profile["web"].get("dashboardPages"):
-        capability["dashboardPages"] = profile["web"]["dashboardPages"]
     return capability
 
 

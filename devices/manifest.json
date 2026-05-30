@@ -687,7 +687,6 @@
       "web": {
         "dragMode": "swap",
         "dragAnimation": false,
-        "dashboardPages": 4,
         "disabledCardTypes": [
           "subpage"
         ],

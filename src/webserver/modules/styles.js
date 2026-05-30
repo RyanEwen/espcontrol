@@ -124,10 +124,6 @@ var CSS =
   ".sp-empty-cell.sp-drop-placeholder{border-color:rgba(92,156,245,.5)}" : "") +
 
   ".sp-hint{text-align:center;font-size:.7rem;color:var(--text3);padding:8px 0 12px;user-select:none}" +
-  ".sp-page-tabs{display:flex;justify-content:center;gap:8px;padding:10px var(--gap) 2px}" +
-  ".sp-page-btn{border:1px solid var(--border);background:var(--surface);color:var(--text2);" +
-  "border-radius:999px;padding:7px 12px;font:inherit;font-size:.78rem;cursor:pointer}" +
-  ".sp-page-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}" +
 
   (CFG.features && CFG.features.monochromeDisplay ?
   ".sp-screen{background:#fff;border-color:#111;border-radius:2px;box-shadow:none;color:#111}" +

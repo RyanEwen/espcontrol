@@ -106,24 +106,6 @@ function buildScreenPage(parent) {
   els.previewMain.setAttribute("role", "grid");
   els.previewMain.setAttribute("aria-label", "Button grid");
 
-  if (PAGE_COUNT > 1) {
-    var pages = document.createElement("div");
-    pages.className = "sp-page-tabs";
-    for (var pageIndex = 0; pageIndex < PAGE_COUNT; pageIndex++) {
-      var pageBtn = document.createElement("button");
-      pageBtn.type = "button";
-      pageBtn.className = "sp-page-btn" + (pageIndex === state.dashboardPage ? " active" : "");
-      pageBtn.setAttribute("data-page", String(pageIndex));
-      pageBtn.textContent = "Page " + (pageIndex + 1);
-      pageBtn.addEventListener("click", function () {
-        setDashboardPage(this.getAttribute("data-page"));
-      });
-      pages.appendChild(pageBtn);
-    }
-    els.dashboardPages = pages;
-    page.appendChild(pages);
-  }
-
   var hint = document.createElement("div");
   hint.className = "sp-hint";
   hint.textContent = "tap to select \u2022 shift/ctrl+tap to multi-select \u2022 right click to manage";
