@@ -120,11 +120,13 @@ for (const [slug, device] of Object.entries(manifest.devices || {})) {
   const slug = "trmnl-75-og";
   const webOutput = path.join(WEB_OUTPUT_DIR, slug, "www.js");
   const generated = fs.readFileSync(webOutput, "utf8");
-  assert(generated.includes("monochromeDisplay:!0"), "TRMNL web UI must enable monochrome preview styling");
+  assert(generated.includes("monochromeDisplay:!0"), "TRMNL web UI must expose monochrome display capability");
   assert(generated.includes("epaperDisplay:!0"), "TRMNL web UI must expose e-paper capability");
   assert(!generated.includes("dashboardPages"), "TRMNL web UI must use the normal single dashboard editor");
   assert(generated.includes('disabledCardTypes:["subpage"]'), "TRMNL web UI must hide subpage cards");
   assert(generated.includes("slots:12,cols:4,rows:3"), "TRMNL web UI must use a 4x3 dashboard layout");
+  assert(generated.includes("sp-set-on-color"), "TRMNL web UI must keep the normal appearance colour controls");
+  assert(!generated.includes("E-paper theme: black and white"), "TRMNL web UI must not replace colour controls with an e-paper note");
   assert(generated.includes("sp-clock"), "TRMNL web preview must keep the normal clock bar");
   assert(generated.includes("sp-network-preview"), "TRMNL web preview must keep the normal network status icon");
   assert(!generated.includes("sp-epaper-title"), "TRMNL web preview must not use a custom e-paper title bar");

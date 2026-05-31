@@ -255,21 +255,13 @@ async function assertSettingsPage(page, label, options = {}) {
   await page.waitForSelector("#sp-settings.sp-page.active");
   const settingsVisible = await page.locator("#sp-settings").isVisible();
   const appearanceVisible = await page.locator("text=Appearance").first().isVisible();
-  if (options.monochromeDisplay && !(await page.locator("text=E-paper theme: black and white").isVisible())) {
-    await page.getByText("Appearance", { exact: true }).click();
-  } else if (!options.monochromeDisplay && !(await page.locator("#sp-set-on-color").isVisible())) {
+  if (!(await page.locator("#sp-set-on-color").isVisible())) {
     await page.getByText("Appearance", { exact: true }).click();
   }
   const onColorVisible = await page.locator("#sp-set-on-color").isVisible();
-  const monoHintVisible = await page.locator("text=E-paper theme: black and white").isVisible();
   assert(settingsVisible, `${label}: settings page should be visible`);
   assert(appearanceVisible, `${label}: settings content should render`);
-  if (options.monochromeDisplay) {
-    assert(!onColorVisible, `${label}: monochrome devices should hide colour pickers`);
-    assert(monoHintVisible, `${label}: monochrome appearance note should render`);
-  } else {
-    assert(onColorVisible, `${label}: appearance controls should render`);
-  }
+  assert(onColorVisible, `${label}: appearance controls should render`);
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
   assert(!overflow, `${label}: settings page has horizontal overflow`);
   await page.getByRole("tab", { name: "Screen" }).click();

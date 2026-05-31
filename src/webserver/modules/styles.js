@@ -125,20 +125,6 @@ var CSS =
 
   ".sp-hint{text-align:center;font-size:.7rem;color:var(--text3);padding:8px 0 12px;user-select:none}" +
 
-  (CFG.features && CFG.features.monochromeDisplay ?
-  ".sp-screen{background:#fff;border-color:#111;border-radius:2px;box-shadow:none;color:#111}" +
-  ".sp-topbar{border-bottom:1px solid #111;color:#111}" +
-  ".sp-temp,.sp-clock,.sp-network-preview{color:#111}" +
-  ".sp-btn{background:#fff !important;border:1px solid #111 !important;border-radius:2px;box-shadow:none}" +
-  ".sp-btn:hover{filter:none;outline:2px solid #111;outline-offset:-2px}" +
-  ".sp-btn.sp-selected{outline:3px solid #111;outline-offset:-3px}" +
-  ".sp-btn-icon,.sp-btn-label,.sp-sensor-preview,.sp-sensor-unit,.sp-media-now-title,.sp-media-now-artist{color:#111}" +
-  ".sp-sensor-value{color:#111;font-weight:700}" +
-  ".sp-empty-cell{border:1px dashed #111;background:#fff;border-radius:2px}" +
-  ".sp-add-pill{background:#fff;border-color:#111;box-shadow:none;border-radius:2px}" +
-  ".sp-empty-cell .sp-add-icon{color:#111}" +
-  ".sp-slider-fill,.sp-media-h-slider span{background:#111}" +
-  ".sp-media-h-slider{background:#fff;border:1px solid #111}" : "") +
   ".sp-selection-bar{display:none;align-items:center;justify-content:space-between;gap:12px;" +
   "margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);box-sizing:border-box;" +
   "padding:14px max(var(--gap),calc((100vw - 960px)/2 + var(--gap)));background:var(--surface);" +
