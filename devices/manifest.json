@@ -629,7 +629,7 @@
           "climateCardIcon": "font_mdi_33_icons",
           "subpageChevron": "font_mdi_23_subpage",
           "climateOptionTitle": "font_roboto_regular_20_text",
-          "climateOptionValue": "font_roboto_regular_18_text"
+          "climateOptionValue": "font_roboto_regular_20_text"
         },
         "display": {
           "wrapTallLabels": false,
