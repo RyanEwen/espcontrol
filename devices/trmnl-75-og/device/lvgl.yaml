@@ -25,10 +25,10 @@ lvgl:
       - obj:
           id: network_status_button
           align: top_right
-          x: -12
-          y: 3
-          width: 30
-          height: 30
+          x: -8
+          y: 0
+          width: 24
+          height: 60
           bg_opa: transp
           border_width: 0
           pad_all: 0

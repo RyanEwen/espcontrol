@@ -157,6 +157,7 @@ def test_generated_yaml(profiles: dict[str, dict]) -> None:
                     "id: font_trmnl_mdi_topbar_18_icons\n    size: 18" in trmnl_fonts
                     and '- "\\U000F0200"' in trmnl_fonts
                     and '- "\\U000F0928"' in trmnl_fonts
+                    and "id: network_status_button\n          align: top_right\n          x: -8\n          y: 0\n          width: 24\n          height: 60" in lvgl
                     and "id: network_status_icon_label\n                text: \"\\U000F0928\"\n                text_font: font_trmnl_mdi_topbar_18_icons" in lvgl
                 ), f"{slug}: top bar network icon must match the generated web preview scale"
                 assert "id: button_${num}_unit_label\n              text: \"\"\n              text_font: font_trmnl_label_14" in (
