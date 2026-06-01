@@ -120,6 +120,12 @@ def test_generated_yaml(profiles: dict[str, dict]) -> None:
                     f"{slug}: TRMNL theme must paint the full e-paper screen background"
                 )
                 assert (
+                    "id: trmnl_topbar_separator" in lvgl
+                    and "y: 60" in lvgl
+                    and "height: 1" in lvgl
+                    and "lv_obj_set_style_bg_color(id(trmnl_topbar_separator), lv_color_hex(0x000000), LV_PART_MAIN)" in sensors
+                ), f"{slug}: TRMNL top bar must match the web preview divider"
+                assert (
                     "align: top_left\n      x: 10\n      y: 68" in lvgl
                     and "pad_row: 6\n        pad_column: 6" in lvgl
                     and "width: 780\n      height: 402" in lvgl
