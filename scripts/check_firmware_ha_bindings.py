@@ -243,8 +243,9 @@ def firmware_weather_request_errors(firmware_dir: Path, root: Path) -> list[str]
     if "WEATHER_FORECAST_RETRY_DELAY_MS" not in text or "weather_forecast_schedule_retry" not in text:
         errors.append(f"{rel}: retry failed weather forecast requests later")
     if (
-        "'forecast' in response" not in text
-        or "response[entity] if entity in response else none" not in text
+        "response if response is defined and response is not none else none" not in text
+        or "'forecast' in response_data" not in text
+        or "response_data[entity] if response_data is not none and entity in response_data else none" not in text
     ):
         errors.append(f"{rel}: accept both direct and entity-keyed Home Assistant forecast response shapes")
     if "entity_response['temperature_unit']" not in text or "state_attr(entity, 'temperature_unit')" not in text:

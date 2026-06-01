@@ -1415,7 +1415,8 @@ inline bool parse_weather_forecast_payload(const std::string &payload,
 
 inline std::string weather_forecast_response_template(const std::string &entity_id) {
   return std::string("{% set entity = '") + entity_id + "' %}"
-    "{% set entity_response = response if response is not none and 'forecast' in response else (response[entity] if entity in response else none) %}"
+    "{% set response_data = response if response is defined and response is not none else none %}"
+    "{% set entity_response = response_data if response_data is not none and 'forecast' in response_data else (response_data[entity] if response_data is not none and entity in response_data else none) %}"
     "{% set forecasts = entity_response['forecast'] if entity_response is not none and 'forecast' in entity_response else [] %}"
     "{% set today = forecasts[0] if forecasts|length > 0 else none %}"
     "{% set tomorrow = forecasts[1] if forecasts|length > 1 else none %}"
