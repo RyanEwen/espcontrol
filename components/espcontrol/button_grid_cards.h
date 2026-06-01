@@ -447,7 +447,11 @@ inline void setup_weather_card(BtnSlot &s, bool has_sensor_color, uint32_t senso
       static_cast<lv_style_selector_t>(LV_PART_MAIN) | static_cast<lv_style_selector_t>(LV_STATE_DEFAULT));
   }
   lv_obj_clear_flag(s.btn, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_clear_flag(s.icon_lbl, LV_OBJ_FLAG_HIDDEN);
+  lv_obj_add_flag(s.sensor_container, LV_OBJ_FLAG_HIDDEN);
   lv_label_set_text(s.icon_lbl, find_icon("Weather Cloudy"));
+  lv_label_set_text(s.sensor_lbl, "");
+  lv_label_set_text(s.unit_lbl, "");
   lv_label_set_text(s.text_lbl, "Weather");
   set_weather_card_badge(s, "Weather Cloudy");
 }

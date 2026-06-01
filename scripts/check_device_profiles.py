@@ -148,6 +148,22 @@ def test_weather_card_device_badges() -> None:
     )
 
 
+def test_weather_card_mode_visibility_reset() -> None:
+    cards = BUTTON_GRID_CARDS.read_text(encoding="utf-8")
+    match = re.search(
+        r"inline void setup_weather_card\(BtnSlot &s,[\s\S]*?\n\}",
+        cards,
+    )
+    assert match, "current weather setup is missing"
+    body = match.group(0)
+    assert "lv_obj_clear_flag(s.icon_lbl, LV_OBJ_FLAG_HIDDEN)" in body, (
+        "current weather cards must restore the icon after forecast mode hid it"
+    )
+    assert "lv_obj_add_flag(s.sensor_container, LV_OBJ_FLAG_HIDDEN)" in body, (
+        "current weather cards must hide the forecast sensor row"
+    )
+
+
 def test_firmware_matrices(profile_slugs: list[str]) -> None:
     profiles = load_device_profiles()
     release = device_matrix.release_matrix(profiles)
@@ -172,6 +188,7 @@ def main() -> int:
     test_setup_icon_glyphs()
     test_trmnl_epaper_icon_literals()
     test_weather_card_device_badges()
+    test_weather_card_mode_visibility_reset()
     test_firmware_matrices(profile_slugs)
     test_public_firmware_slugs(profile_slugs)
     print("Device profile cross-checks passed.")
