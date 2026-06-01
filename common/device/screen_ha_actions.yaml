@@ -8,7 +8,7 @@
 lvgl:
   pages:
     - id: ha_actions_page
-      bg_color: 0xFFFFFF
+      bg_color: 0x000000
       scrollable: false
       pad_all: 0
       widgets:
@@ -47,24 +47,24 @@ lvgl:
                     - label:
                         text_font: $setup_icon_font_id
                         text: $icon_home_assistant
-                        text_color: 0x000000
+                        text_color: 0xFFFFFF
                         text_align: center
                     - label:
                         text: "Home Assistant"
                         text_font: $setup_title_font_id
-                        text_color: 0x000000
+                        text_color: 0xFFFFFF
                         width: $content_width
                         text_align: center
                     - label:
                         text: "Allow this device to perform\nHome Assistant actions"
                         text_font: $setup_body_font_id
-                        text_color: 0x888888
+                        text_color: 0xB0B0B0
                         width: $content_width
                         text_align: center
                     - label:
                         text: "See the install guide for help"
                         text_font: $setup_body_font_id
-                        text_color: 0x555555
+                        text_color: 0xB0B0B0
                         width: $content_width
                         text_align: center
                     - button:
@@ -81,4 +81,4 @@ lvgl:
                               align: center
                               text: "Done"
                               text_font: $setup_body_font_id
-                              text_color: 0x000000
+                              text_color: 0xFFFFFF

@@ -7,7 +7,7 @@
 lvgl:
   pages:
     - id: ethernet_setup_page
-      bg_color: 0xFFFFFF
+      bg_color: 0x000000
       scrollable: false
       pad_all: 0
       widgets:
@@ -46,17 +46,17 @@ lvgl:
                     - label:
                         text_font: $setup_icon_font_id
                         text: $icon_ethernet
-                        text_color: 0x000000
+                        text_color: 0xFFFFFF
                         text_align: center
                     - label:
                         text: "Ethernet Setup"
                         text_font: $setup_title_font_id
-                        text_color: 0x000000
+                        text_color: 0xFFFFFF
                         width: $content_width
                         text_align: center
                     - label:
                         text: "Connect an Ethernet cable\nand wait for a network address"
                         text_font: $setup_body_font_id
-                        text_color: 0x888888
+                        text_color: 0xB0B0B0
                         width: $content_width
                         text_align: center
