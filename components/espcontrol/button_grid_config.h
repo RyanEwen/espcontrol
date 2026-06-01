@@ -1476,7 +1476,7 @@ inline std::string weather_forecast_response_template(const std::string &entity_
     "{% set ns = namespace(today=none, tomorrow=none) %}"
     "{% for item in forecasts %}"
     "{% set item_dt = as_datetime(item['datetime']) if 'datetime' in item else none %}"
-    "{% set item_date = as_local(item_dt).date() if item_dt is not none else none %}"
+    "{% set item_date = as_local(item_dt).date() if item_dt is not none else (as_datetime(item['date']).date() if 'date' in item else none) %}"
     "{% if item_date == today_date and ns.today is none %}{% set ns.today = item %}{% endif %}"
     "{% if item_date == tomorrow_date and ns.tomorrow is none %}{% set ns.tomorrow = item %}{% endif %}"
     "{% endfor %}"

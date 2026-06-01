@@ -253,10 +253,11 @@ def firmware_weather_request_errors(firmware_dir: Path, root: Path) -> list[str]
         or "tomorrow_date = (now() + timedelta(days=1)).date()" not in text
         or "as_datetime(item['datetime'])" not in text
         or "as_local(item_dt).date()" not in text
+        or "as_datetime(item['date']).date()" not in text
         or "ns.today if ns.today is not none else (forecasts[0]" not in text
         or "ns.tomorrow if ns.tomorrow is not none else (forecasts[1]" not in text
     ):
-        errors.append(f"{rel}: select today/tomorrow weather forecasts by datetime before falling back to list order")
+        errors.append(f"{rel}: select today/tomorrow weather forecasts by date/datetime before falling back to list order")
     if (
         "entity_response['temperature_unit']" not in text
         or "entity_response['unit_of_measurement']" not in text
