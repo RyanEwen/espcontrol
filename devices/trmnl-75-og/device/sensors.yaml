@@ -156,6 +156,40 @@ script:
             lv_obj_clear_flag(slot.btn, LV_OBJ_FLAG_CLICKABLE);
             lv_obj_invalidate(slot.btn);
           }
+          for (auto &entry : navigation_subpages()) {
+            if (!entry.screen) continue;
+            lv_obj_set_style_bg_color(entry.screen, page_bg, LV_PART_MAIN);
+            lv_obj_set_style_bg_opa(entry.screen, LV_OPA_COVER, LV_PART_MAIN);
+            int32_t child_count = static_cast<int32_t>(lv_obj_get_child_cnt(entry.screen));
+            for (int32_t i = 0; i < child_count; i++) {
+              lv_obj_t *card = lv_obj_get_child(entry.screen, i);
+              if (!card) continue;
+              bool active = lv_obj_has_state(card, LV_STATE_CHECKED);
+              lv_color_t bg = lv_color_hex(dark_theme || active ? 0x000000 : 0xFFFFFF);
+              lv_color_t fg = lv_color_hex(dark_theme || active ? 0xFFFFFF : 0x000000);
+              lv_obj_set_style_bg_color(card, bg, LV_PART_MAIN);
+              lv_obj_set_style_bg_opa(card, LV_OPA_COVER, LV_PART_MAIN);
+              lv_obj_set_style_border_color(card, border, LV_PART_MAIN);
+              lv_obj_set_style_border_width(card, 2, LV_PART_MAIN);
+              lv_obj_set_style_radius(card, 2, LV_PART_MAIN);
+              lv_obj_set_style_shadow_width(card, 0, LV_PART_MAIN);
+              lv_obj_set_style_pad_all(card, 9, LV_PART_MAIN);
+              int32_t label_count = static_cast<int32_t>(lv_obj_get_child_cnt(card));
+              for (int32_t j = 0; j < label_count; j++) {
+                lv_obj_t *label = lv_obj_get_child(card, j);
+                if (!label) continue;
+                lv_obj_set_style_text_color(label, fg, LV_PART_MAIN);
+                int32_t nested_count = static_cast<int32_t>(lv_obj_get_child_cnt(label));
+                for (int32_t k = 0; k < nested_count; k++) {
+                  lv_obj_t *nested = lv_obj_get_child(label, k);
+                  if (nested) lv_obj_set_style_text_color(nested, fg, LV_PART_MAIN);
+                }
+              }
+              lv_obj_clear_flag(card, LV_OBJ_FLAG_CLICKABLE);
+              lv_obj_invalidate(card);
+            }
+            lv_obj_invalidate(entry.screen);
+          }
           lv_color_t topbar_fg = lv_color_hex(dark_theme ? 0xFFFFFF : 0x000000);
           lv_obj_set_style_text_color(id(temperatures), topbar_fg, LV_PART_MAIN);
           lv_obj_set_style_text_color(id(display_time), topbar_fg, LV_PART_MAIN);

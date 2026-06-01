@@ -126,6 +126,12 @@ def test_generated_yaml(profiles: dict[str, dict]) -> None:
                     and 'lv_color_t bg = lv_color_hex(dark_theme || active ? 0x000000 : 0xFFFFFF);' in sensors
                     and 'lv_color_t fg = lv_color_hex(dark_theme || active ? 0xFFFFFF : 0x000000);' in sensors
                 ), f"{slug}: TRMNL e-paper theme must follow the web preview Light/Dark theme"
+                assert (
+                    "for (auto &entry : navigation_subpages())" in sensors
+                    and "lv_obj_set_style_bg_color(entry.screen, page_bg, LV_PART_MAIN);" in sensors
+                    and "lv_obj_set_style_text_color(nested, fg, LV_PART_MAIN);" in sensors
+                    and "lv_obj_set_style_pad_all(card, 9, LV_PART_MAIN);" in sensors
+                ), f"{slug}: TRMNL subpage weather cards must use the same custom theme as the main grid"
                 colors = (ROOT / "common" / "config" / "colors.yaml").read_text(encoding="utf-8")
                 refresh_script_match = re.search(
                     r"- id: refresh_button_grid\n    then:\n      - script.execute: trmnl_dashboard_config_changed",
@@ -166,6 +172,9 @@ def test_generated_yaml(profiles: dict[str, dict]) -> None:
                     f"{slug}: TRMNL card labels must clamp to the generated web preview line counts"
                 )
                 grid_header = (ROOT / "components" / "espcontrol" / "button_grid_grid.h").read_text(encoding="utf-8")
+                assert "lv_obj_set_style_bg_color(sub_scr, lv_obj_get_style_bg_color(main_page_obj, LV_PART_MAIN), LV_PART_MAIN);" in grid_header, (
+                    f"{slug}: subpage weather screens must inherit the main page theme background"
+                )
                 assert "lv_obj_align(label, LV_ALIGN_BOTTOM_LEFT, 0, 0);" in grid_header, (
                     f"{slug}: clamped card labels must stay bottom-aligned like the web preview"
                 )
