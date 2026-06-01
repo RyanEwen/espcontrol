@@ -158,6 +158,12 @@ def test_generated_yaml(profiles: dict[str, dict]) -> None:
                     setup_match
                     and "lv_obj_set_style_text_font(s.sensor_lbl, display_sensor_font(display), LV_PART_MAIN)" in setup_match.group(0)
                 ), f"{slug}: normal weather values must reset after large-number card layouts"
+                phase1_match = re.search(r"inline void grid_phase1\([\s\S]*?ESP_LOGI\(\"sensors\", \"Phase 1: done", grid_header)
+                assert (
+                    phase1_match
+                    and "setup_card_visual(s, p, cfg, palette, row_span, col_span);" in phase1_match.group(0)
+                    and "refresh_card_layout(s, p, cfg, row_span);" in phase1_match.group(0)
+                ), f"{slug}: initial TRMNL weather render must apply the same shared layout refresh as later updates"
                 assert "id(font_trmnl_value_32)->get_lv_font()" in sensors, (
                     f"{slug}: normal weather cards must use the TRMNL web preview value font"
                 )

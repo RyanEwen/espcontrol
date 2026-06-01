@@ -672,6 +672,7 @@ inline void grid_phase1(
     display_apply_main_width(s.icon_lbl, display);
     display_apply_slot_text_width(s, display);
     setup_card_visual(s, p, cfg, palette, row_span, col_span);
+    refresh_card_layout(s, p, cfg, row_span);
   }
   ESP_LOGI("sensors", "Phase 1: done (%lu ms)", esphome::millis());
 }
