@@ -373,10 +373,17 @@ def test_weather_card_visual_matches_preview() -> None:
         "subpage weather cards must normalize invalid weather modes like main grid cards"
     )
     for alias, state in (
+        ("broken-clouds", "cloudy"),
+        ("clear", "sunny"),
         ("clear-day", "sunny"),
+        ("few-clouds", "partlycloudy"),
         ("foggy", "fog"),
+        ("mostly-clear", "sunny"),
+        ("mostly-sunny", "sunny"),
+        ("overcast", "cloudy"),
         ("partly-cloudy-day", "partlycloudy"),
         ("partly-cloudy-night", "partlycloudy"),
+        ("partly-sunny", "partlycloudy"),
         ("possibly-rainy-day", "rainy"),
         ("possibly-rainy-night", "rainy"),
         ("possibly-sleet-day", "snowy-rainy"),
@@ -387,6 +394,7 @@ def test_weather_card_visual_matches_preview() -> None:
         ("possibly-thunderstorm-night", "lightning-rainy"),
         ("sleet", "snowy-rainy"),
         ("snow", "snowy"),
+        ("scattered-clouds", "cloudy"),
         ("thunderstorm", "lightning"),
     ):
         assert f'if (normalized == "{alias}") return "{state}";' in config or (

@@ -1097,10 +1097,13 @@ inline std::string normalize_weather_state(std::string state) {
   while (!normalized.empty() && normalized.back() == '-') normalized.pop_back();
   if (normalized.compare(0, 4, "mdi-") == 0) normalized = normalized.substr(4);
   if (normalized.compare(0, 8, "weather-") == 0) normalized = normalized.substr(8);
+  if (normalized == "clear" || normalized == "mostly-clear" || normalized == "mostly-sunny") return "sunny";
   if (normalized == "clear-day") return "sunny";
+  if (normalized == "overcast" || normalized == "broken-clouds" || normalized == "scattered-clouds") return "cloudy";
   if (normalized == "foggy") return "fog";
   if (normalized == "night") return "clear-night";
   if (normalized == "partly-cloudy") return "partlycloudy";
+  if (normalized == "partly-sunny" || normalized == "few-clouds") return "partlycloudy";
   if (normalized == "partly-cloudy-day") return "partlycloudy";
   if (normalized == "partly-cloudy-night") return "partlycloudy";
   if (normalized == "night-cloudy") return "night-partly-cloudy";
