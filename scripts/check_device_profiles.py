@@ -256,6 +256,15 @@ def test_weather_card_visual_matches_preview() -> None:
     assert 'lv_label_set_text(ref.unit_lbl, normalized_unit.c_str())' in config, (
         "forecast weather unavailable state should keep showing the configured unit"
     )
+    assert "inline std::string normalize_weather_state" in config, (
+        "current weather device cards should normalize equivalent weather state spellings before mapping icons"
+    )
+    assert 'if (normalized == "partly-cloudy") return "partlycloudy";' in config, (
+        "current weather device cards should accept the dashed partly-cloudy spelling"
+    )
+    assert 'if (normalized == "night-cloudy" || normalized == "weather-night-cloudy") return "night-partly-cloudy";' in config, (
+        "current weather device cards should accept night cloudy aliases for the web weather icon"
+    )
     for state, icon_name, label in (
         ("dust", "Weather Dust", "Dust"),
         ("hazy", "Weather Hazy", "Hazy"),
@@ -272,10 +281,10 @@ def test_weather_card_visual_matches_preview() -> None:
         ("sunset-up", "Weather Sunset Up", "Sunset Up"),
         ("tornado", "Weather Tornado", "Tornado"),
     ):
-        assert f'if (state == "{state}") return find_icon("{icon_name}");' in config, (
+        assert f'if (normalized == "{state}") return find_icon("{icon_name}");' in config, (
             f"current weather device card should map {state} to the matching web weather icon"
         )
-        assert f'if (state == "{state}") return "{label}";' in config, (
+        assert f'if (normalized == "{state}") return "{label}";' in config, (
             f"current weather device card should label {state} like the web preview"
         )
 

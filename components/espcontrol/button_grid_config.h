@@ -1077,71 +1077,94 @@ inline std::string sentence_cap_text(const std::string &state) {
   return out;
 }
 
+inline std::string normalize_weather_state(std::string state) {
+  state = trim_display_unit(state);
+  std::string normalized;
+  normalized.reserve(state.size());
+  bool last_dash = false;
+  for (char ch : state) {
+    unsigned char uch = static_cast<unsigned char>(ch);
+    if (std::isalnum(uch)) {
+      normalized.push_back(static_cast<char>(std::tolower(uch)));
+      last_dash = false;
+    } else if (!last_dash) {
+      normalized.push_back('-');
+      last_dash = true;
+    }
+  }
+  while (!normalized.empty() && normalized.back() == '-') normalized.pop_back();
+  if (normalized == "partly-cloudy") return "partlycloudy";
+  if (normalized == "night-cloudy" || normalized == "weather-night-cloudy") return "night-partly-cloudy";
+  return normalized;
+}
+
 inline const char* weather_icon_for_state(const std::string &state) {
-  if (state == "sunny") return find_icon("Weather Sunny");
-  if (state == "clear-night") return find_icon("Weather Night");
-  if (state == "partlycloudy") return find_icon("Weather Partly Cloudy");
-  if (state == "cloudy") return find_icon("Weather Cloudy");
-  if (state == "dust") return find_icon("Weather Dust");
-  if (state == "fog") return find_icon("Weather Fog");
-  if (state == "hail") return find_icon("Weather Hail");
-  if (state == "hazy") return find_icon("Weather Hazy");
-  if (state == "hurricane") return find_icon("Weather Hurricane");
-  if (state == "lightning") return find_icon("Weather Lightning");
-  if (state == "lightning-rainy") return find_icon("Weather Lightning Rainy");
-  if (state == "night-partly-cloudy") return find_icon("Weather Night Cloudy");
-  if (state == "partly-lightning") return find_icon("Weather Partly Lightning");
-  if (state == "partly-rainy") return find_icon("Weather Partly Rainy");
-  if (state == "partly-snowy") return find_icon("Weather Partly Snowy");
-  if (state == "partly-snowy-rainy") return find_icon("Weather Partly Snowy Rainy");
-  if (state == "pouring") return find_icon("Weather Pouring");
-  if (state == "rainy") return find_icon("Weather Rainy");
-  if (state == "snowy") return find_icon("Weather Snowy");
-  if (state == "snowy-heavy") return find_icon("Weather Snowy Heavy");
-  if (state == "snowy-rainy") return find_icon("Weather Snowy Rainy");
-  if (state == "sunny-alert") return find_icon("Weather Sunny Alert");
-  if (state == "sunset") return find_icon("Weather Sunset");
-  if (state == "sunset-down") return find_icon("Weather Sunset Down");
-  if (state == "sunset-up") return find_icon("Weather Sunset Up");
-  if (state == "tornado") return find_icon("Weather Tornado");
-  if (state == "windy") return find_icon("Weather Windy");
-  if (state == "windy-variant") return find_icon("Weather Windy Variant");
-  if (state == "unavailable" || state.empty()) return find_icon("Weather Sunny Off");
+  std::string normalized = normalize_weather_state(state);
+  if (normalized == "sunny") return find_icon("Weather Sunny");
+  if (normalized == "clear-night") return find_icon("Weather Night");
+  if (normalized == "partlycloudy") return find_icon("Weather Partly Cloudy");
+  if (normalized == "cloudy") return find_icon("Weather Cloudy");
+  if (normalized == "dust") return find_icon("Weather Dust");
+  if (normalized == "fog") return find_icon("Weather Fog");
+  if (normalized == "hail") return find_icon("Weather Hail");
+  if (normalized == "hazy") return find_icon("Weather Hazy");
+  if (normalized == "hurricane") return find_icon("Weather Hurricane");
+  if (normalized == "lightning") return find_icon("Weather Lightning");
+  if (normalized == "lightning-rainy") return find_icon("Weather Lightning Rainy");
+  if (normalized == "night-partly-cloudy") return find_icon("Weather Night Cloudy");
+  if (normalized == "partly-lightning") return find_icon("Weather Partly Lightning");
+  if (normalized == "partly-rainy") return find_icon("Weather Partly Rainy");
+  if (normalized == "partly-snowy") return find_icon("Weather Partly Snowy");
+  if (normalized == "partly-snowy-rainy") return find_icon("Weather Partly Snowy Rainy");
+  if (normalized == "pouring") return find_icon("Weather Pouring");
+  if (normalized == "rainy") return find_icon("Weather Rainy");
+  if (normalized == "snowy") return find_icon("Weather Snowy");
+  if (normalized == "snowy-heavy") return find_icon("Weather Snowy Heavy");
+  if (normalized == "snowy-rainy") return find_icon("Weather Snowy Rainy");
+  if (normalized == "sunny-alert") return find_icon("Weather Sunny Alert");
+  if (normalized == "sunset") return find_icon("Weather Sunset");
+  if (normalized == "sunset-down") return find_icon("Weather Sunset Down");
+  if (normalized == "sunset-up") return find_icon("Weather Sunset Up");
+  if (normalized == "tornado") return find_icon("Weather Tornado");
+  if (normalized == "windy") return find_icon("Weather Windy");
+  if (normalized == "windy-variant") return find_icon("Weather Windy Variant");
+  if (normalized == "unavailable" || normalized.empty()) return find_icon("Weather Sunny Off");
   return find_icon("Weather Cloudy Alert");
 }
 
 inline std::string weather_label_for_state(const std::string &state) {
-  if (state == "sunny") return "Sunny";
-  if (state == "clear-night") return "Clear Night";
-  if (state == "partlycloudy") return "Partly Cloudy";
-  if (state == "cloudy") return "Cloudy";
-  if (state == "dust") return "Dust";
-  if (state == "fog") return "Fog";
-  if (state == "hail") return "Hail";
-  if (state == "hazy") return "Hazy";
-  if (state == "hurricane") return "Hurricane";
-  if (state == "lightning") return "Lightning";
-  if (state == "lightning-rainy") return "Lightning And Rain";
-  if (state == "night-partly-cloudy") return "Partly Cloudy Night";
-  if (state == "partly-lightning") return "Partly Lightning";
-  if (state == "partly-rainy") return "Partly Rainy";
-  if (state == "partly-snowy") return "Partly Snowy";
-  if (state == "partly-snowy-rainy") return "Partly Snow And Rain";
-  if (state == "pouring") return "Pouring";
-  if (state == "rainy") return "Rainy";
-  if (state == "snowy") return "Snowy";
-  if (state == "snowy-heavy") return "Heavy Snow";
-  if (state == "snowy-rainy") return "Snowy And Rain";
-  if (state == "sunny-alert") return "Sunny Alert";
-  if (state == "sunset") return "Sunset";
-  if (state == "sunset-down") return "Sunset Down";
-  if (state == "sunset-up") return "Sunset Up";
-  if (state == "tornado") return "Tornado";
-  if (state == "windy") return "Windy";
-  if (state == "windy-variant") return "Windy And Cloudy";
-  if (state == "exceptional") return "Exceptional";
-  if (state == "unknown") return "Unknown";
-  if (state == "unavailable" || state.empty()) return "Unavailable";
+  std::string normalized = normalize_weather_state(state);
+  if (normalized == "sunny") return "Sunny";
+  if (normalized == "clear-night") return "Clear Night";
+  if (normalized == "partlycloudy") return "Partly Cloudy";
+  if (normalized == "cloudy") return "Cloudy";
+  if (normalized == "dust") return "Dust";
+  if (normalized == "fog") return "Fog";
+  if (normalized == "hail") return "Hail";
+  if (normalized == "hazy") return "Hazy";
+  if (normalized == "hurricane") return "Hurricane";
+  if (normalized == "lightning") return "Lightning";
+  if (normalized == "lightning-rainy") return "Lightning And Rain";
+  if (normalized == "night-partly-cloudy") return "Partly Cloudy Night";
+  if (normalized == "partly-lightning") return "Partly Lightning";
+  if (normalized == "partly-rainy") return "Partly Rainy";
+  if (normalized == "partly-snowy") return "Partly Snowy";
+  if (normalized == "partly-snowy-rainy") return "Partly Snow And Rain";
+  if (normalized == "pouring") return "Pouring";
+  if (normalized == "rainy") return "Rainy";
+  if (normalized == "snowy") return "Snowy";
+  if (normalized == "snowy-heavy") return "Heavy Snow";
+  if (normalized == "snowy-rainy") return "Snowy And Rain";
+  if (normalized == "sunny-alert") return "Sunny Alert";
+  if (normalized == "sunset") return "Sunset";
+  if (normalized == "sunset-down") return "Sunset Down";
+  if (normalized == "sunset-up") return "Sunset Up";
+  if (normalized == "tornado") return "Tornado";
+  if (normalized == "windy") return "Windy";
+  if (normalized == "windy-variant") return "Windy And Cloudy";
+  if (normalized == "exceptional") return "Exceptional";
+  if (normalized == "unknown") return "Unknown";
+  if (normalized == "unavailable" || normalized.empty()) return "Unavailable";
 
   return sentence_cap_text(state);
 }
