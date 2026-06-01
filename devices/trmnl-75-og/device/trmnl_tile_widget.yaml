@@ -7,7 +7,7 @@ button:
   border_width: 1
   radius: 2
   shadow_width: 0
-  pad_all: 8
+  pad_all: 9
   scrollable: false
   clickable: false
   widgets:

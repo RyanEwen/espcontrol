@@ -143,7 +143,7 @@ script:
             lv_obj_set_style_border_width(slot.btn, 2, LV_PART_MAIN);
             lv_obj_set_style_radius(slot.btn, 2, LV_PART_MAIN);
             lv_obj_set_style_shadow_width(slot.btn, 0, LV_PART_MAIN);
-            lv_obj_set_style_pad_all(slot.btn, 8, LV_PART_MAIN);
+            lv_obj_set_style_pad_all(slot.btn, 9, LV_PART_MAIN);
             if (slot.icon) lv_obj_set_style_text_color(slot.icon, fg, LV_PART_MAIN);
             if (slot.label) lv_obj_set_style_text_color(slot.label, fg, LV_PART_MAIN);
             if (slot.value) lv_obj_set_style_text_color(slot.value, fg, LV_PART_MAIN);

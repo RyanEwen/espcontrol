@@ -175,6 +175,9 @@ def test_generated_yaml(profiles: dict[str, dict]) -> None:
                 assert "radius: 2" in tile and "lv_obj_set_style_radius(slot.btn, 2, LV_PART_MAIN)" in sensors, (
                     f"{slug}: TRMNL card corner radius must match the nearly-square web preview cards"
                 )
+                assert "pad_all: 9" in tile and "lv_obj_set_style_pad_all(slot.btn, 9, LV_PART_MAIN)" in sensors, (
+                    f"{slug}: TRMNL card padding must match the generated web preview spacing"
+                )
                 assert "set_display_temperature_unit(id(temperature_unit_select).current_option(),\n                                         id(timezone_select).current_option())" in device, (
                     f"{slug}: temperature unit and timezone changes must update the shared display unit helper"
                 )
