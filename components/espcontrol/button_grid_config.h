@@ -1099,7 +1099,8 @@ inline std::string normalize_weather_state(std::string state) {
   if (normalized.compare(0, 8, "weather-") == 0) normalized = normalized.substr(8);
   if (normalized == "clear" || normalized == "mostly-clear" || normalized == "mostly-sunny") return "sunny";
   if (normalized == "clear-day") return "sunny";
-  if (normalized == "overcast" || normalized == "broken-clouds" || normalized == "scattered-clouds") return "cloudy";
+  if (normalized == "overcast" || normalized == "broken-clouds" ||
+      normalized == "mostly-cloudy" || normalized == "scattered-clouds") return "cloudy";
   if (normalized == "foggy") return "fog";
   if (normalized == "night") return "clear-night";
   if (normalized == "partly-cloudy") return "partlycloudy";
@@ -1107,13 +1108,19 @@ inline std::string normalize_weather_state(std::string state) {
   if (normalized == "partly-cloudy-day") return "partlycloudy";
   if (normalized == "partly-cloudy-night") return "partlycloudy";
   if (normalized == "night-cloudy") return "night-partly-cloudy";
+  if (normalized == "drizzle" || normalized == "light-rain" ||
+      normalized == "rain" || normalized == "showers") return "rainy";
+  if (normalized == "heavy-rain" || normalized == "heavy-showers") return "pouring";
   if (normalized == "possibly-rainy-day" || normalized == "possibly-rainy-night") return "rainy";
   if (normalized == "possibly-sleet-day" || normalized == "possibly-sleet-night") return "snowy-rainy";
   if (normalized == "possibly-snow-day" || normalized == "possibly-snow-night") return "snowy";
   if (normalized == "possibly-thunderstorm-day" || normalized == "possibly-thunderstorm-night") return "lightning-rainy";
+  if (normalized == "freezing-rain") return "snowy-rainy";
+  if (normalized == "blizzard" || normalized == "heavy-snow") return "snowy-heavy";
   if (normalized == "sleet") return "snowy-rainy";
   if (normalized == "snow") return "snowy";
-  if (normalized == "thunderstorm") return "lightning";
+  if (normalized == "storm" || normalized == "stormy" ||
+      normalized == "thunderstorm" || normalized == "thunderstorms") return "lightning";
   if (normalized == "sunny-off") return "unavailable";
   return normalized;
 }
