@@ -1370,6 +1370,7 @@ inline bool parse_weather_forecast_temp(const std::string &value, float &out) {
   char *end = nullptr;
   float parsed = strtof(value.c_str(), &end);
   if (end == value.c_str()) return false;
+  if (!std::isfinite(parsed)) return false;
   out = parsed;
   return true;
 }
