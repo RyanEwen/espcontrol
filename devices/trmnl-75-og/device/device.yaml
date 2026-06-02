@@ -14,6 +14,10 @@ esp32:
   framework:
     type: arduino
 
+psram:
+  mode: octal
+  speed: 80MHz
+
 external_components:
   - source:
       type: git
@@ -33,20 +37,6 @@ esphome:
       - "-DLV_USE_BIDI=1"
       - "-DESPCONTROL_DISABLE_TODO=1"
       - "-DESPCONTROL_MAX_GRID_SLOTS=12"
-  on_boot:
-    - priority: 600
-      then:
-        - lambda: |-
-            std::string mac = get_mac_address();
-            std::string compact;
-            for (char c : mac) {
-              if (c != ':' && c != '-') compact.push_back(c);
-            }
-            std::string suffix = compact.length() > 6 ? compact.substr(compact.length() - 6) : compact;
-            if (suffix.empty()) suffix = "SETUP";
-            wifi::WiFiAP ap;
-            ap.set_ssid("ESP_" + suffix);
-            wifi::global_wifi_component->set_ap(ap);
 
 logger:
 
@@ -113,6 +103,7 @@ web_server:
 wifi:
   power_save_mode: none
   reboot_timeout: 30min
+  use_psram: true
   ap:
     ap_timeout: 90s
 
