@@ -28,6 +28,8 @@ web_server:
   js_include: "../docs/public/webserver/trmnl-75-og/www.js"
 
 wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
   ap:
     ssid: "${friendly_name}"
 
