@@ -343,6 +343,7 @@ script:
   - id: refresh_button_grid
     mode: restart
     then:
+      - script.execute: trmnl_clock_bar_apply
       - script.execute: trmnl_sync_dashboard_config
       - script.execute: trmnl_dashboard_config_changed
 
