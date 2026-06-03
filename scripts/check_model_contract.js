@@ -156,6 +156,7 @@ assert.deepStrictEqual(
 
 const panelSettings = model.normalizeBackupPanelSettings({
   temperature_unit: "centigrade",
+  clock_bar_time: false,
   language: "it",
   clock_format: "24h",
   ntp_server_1: "pool.ntp.org",
@@ -179,6 +180,7 @@ const panelSettings = model.normalizeBackupPanelSettings({
   screenRotationOptions: ["0", "90", "180", "270"],
 });
 assert.strictEqual(panelSettings.temperatureUnit, "\u00B0C", "panel temperature unit normalizes");
+assert.strictEqual(panelSettings.clockBarTime, false, "panel clock bar time imports");
 assert.strictEqual(panelSettings.language, "it", "panel language imports");
 assert.strictEqual(panelSettings.clockFormat, "24h", "panel clock format validates against options");
 assert.strictEqual(panelSettings.ntpServer1, "pool.ntp.org", "panel NTP server imports");
@@ -189,5 +191,20 @@ assert.strictEqual(panelSettings.clockBrightnessDay, 44, "panel day clock bright
 assert.strictEqual(panelSettings.clockBrightnessNight, 22, "panel night clock brightness imports");
 assert.strictEqual(panelSettings.subpageChevron, true, "panel subpage chevron defaults on");
 assert.strictEqual(panelSettings.screenRotation, "90", "panel rotation validates against options");
+
+const legacyPanelSettings = model.normalizeBackupPanelSettings({}, {
+  timezone: "UTC (GMT+0)",
+  language: "en",
+  clockFormat: "12h",
+  clockFormatOptions: ["12h", "24h"],
+  developerExperimentalFeatures: false,
+  ntpDefaults: ["0.pool.ntp.org", "1.pool.ntp.org", "2.pool.ntp.org"],
+  ntpServer1: "0.pool.ntp.org",
+  ntpServer2: "1.pool.ntp.org",
+  ntpServer3: "2.pool.ntp.org",
+  monthNames: model.MONTH_NAME_DEFAULTS,
+  screenRotationOptions: ["0", "90", "180", "270"],
+});
+assert.strictEqual(legacyPanelSettings.clockBarTime, true, "legacy panel settings default clock bar time on");
 
 console.log("Model contract tests passed.");

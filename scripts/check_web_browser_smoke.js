@@ -158,7 +158,14 @@ function seededEvents() {
     { id: "text-sensor_card_color", state: "DEDEDE" },
     { id: "select-screen__theme", state: "Light", value: "Light", option: ["Light", "Dark"] },
     { id: "switch-screen__clock_bar", state: "ON", value: true },
+    { id: "switch-screen__clock_bar_time", state: "ON", value: true },
     { id: "switch-screen__network_status_icon", state: "ON", value: true },
+    { id: "switch-indoor_temp_enable", state: "ON", value: true },
+    { id: "switch-outdoor_temp_enable", state: "ON", value: true },
+    { id: "text-indoor_temp_entity", state: "sensor.indoor_temperature" },
+    { id: "text-outdoor_temp_entity", state: "sensor.outdoor_temperature" },
+    { id: "select-screen__temperature_unit", state: "Auto", value: "Auto", option: ["Auto", "°C", "°F"] },
+    { id: "switch-screen__temperature_degree_symbol", state: "ON", value: true },
     { id: "select-screen__timezone", state: "Europe/London (GMT+0)", value: "Europe/London (GMT+0)", option: ["Europe/London (GMT+0)", "America/New_York (GMT-5)"] },
     { id: "select-screen__language", state: "en", value: "en", option: ["en"] },
     { id: "select-screen__clock_format", state: "24h", value: "24h", option: ["12h", "24h"] },
@@ -364,6 +371,7 @@ function backupFixture(device, slots) {
       outdoor_temp_entity: "sensor.outdoor_temperature",
       temperature_unit: "°C",
       clock_bar: true,
+      clock_bar_time: true,
       network_status_icon: true,
       temperature_degree_symbol: true,
       timezone: "Europe/London (GMT+0)",
@@ -471,6 +479,7 @@ async function assertBackupImportSmoke(page, posts, slug) {
   await waitForPost(posts, { domain: "text", name: "Subpage 3 Config", action: "set" }, "backup subpage config", before);
   await waitForPost(posts, { domain: "select", name: "screen__timezone", action: "set", option: "Europe/London (GMT+0)" }, "backup timezone import", before);
   await waitForPost(posts, { domain: "select", name: "screen__language", action: "set", option: "en" }, "backup language import", before);
+  await waitForPost(posts, { domain: "switch", name: "screen__clock_bar_time", action: "turn_on" }, "backup clock bar time import", before);
   await waitForPost(posts, { domain: "number", name: "Screen: Daytime Brightness", action: "set", value: "88" }, "backup brightness import", before);
   await waitForPost(posts, { domain: "select", name: "screen__rotation", action: "set", option: "90" }, "backup rotation import", before);
 
@@ -503,7 +512,7 @@ async function assertEditAndApplySmoke(page, posts, errors) {
   await page.waitForSelector("#sp-screen.sp-page.active");
 
   await page.locator('.sp-main [data-slot="1"]').click();
-  await page.getByRole("button", { name: /Edit/ }).click();
+  await page.getByRole("button", { name: "Edit", exact: true }).click();
   const switchSuggestions = await entitySuggestionValues(page, "#sp-inp-entity");
   assert(switchSuggestions.includes("light.kitchen"), "switch card suggestions include a recently used light");
   assert(!switchSuggestions.includes("sensor.energy"), "switch card suggestions exclude recently used sensors");
@@ -519,7 +528,7 @@ async function assertEditAndApplySmoke(page, posts, errors) {
   }, "switch card edit", before);
 
   await page.locator('.sp-main [data-slot="2"]').click();
-  await page.getByRole("button", { name: /Edit/ }).click();
+  await page.getByRole("button", { name: "Edit", exact: true }).click();
   await page.locator("#sp-inp-label").fill("Energy Usage");
   await page.getByRole("button", { name: "Save" }).click();
   await waitForPost(posts, {
@@ -530,7 +539,7 @@ async function assertEditAndApplySmoke(page, posts, errors) {
   }, "sensor card edit", before);
 
   await page.locator('.sp-main [data-slot="4"]').click();
-  await page.getByRole("button", { name: /Edit/ }).click();
+  await page.getByRole("button", { name: "Edit", exact: true }).click();
   await page.locator("#sp-inp-label").fill("Living Media");
   await page.getByRole("button", { name: "Save" }).click();
   await waitForPost(posts, {
@@ -546,6 +555,64 @@ async function assertEditAndApplySmoke(page, posts, errors) {
     action: "press",
   }, "apply configuration", before);
   assert.deepStrictEqual(errors, [], "browser errors were reported during edit interactions");
+}
+
+async function assertClockBarEditorSmoke(page, posts, label) {
+  await page.getByRole("tab", { name: "Screen" }).click();
+  await page.waitForSelector("#sp-screen.sp-page.active");
+
+  let before = posts.length;
+  await page.locator('[data-clockbar-item="time"]').click();
+  await page.waitForSelector(".sp-settings-overlay.sp-visible");
+  await page.locator("#sp-clockbar-clock-format").waitFor({ state: "visible" });
+  assert(await page.locator(".sp-section-title", { hasText: "Time" }).isVisible(), `${label}: time editor opens`);
+  await page.getByRole("button", { name: "Delete" }).click();
+  await waitForPost(posts, { domain: "switch", name: "screen__clock_bar_time", action: "turn_off" }, `${label}: delete time`, before);
+  await page.locator('[data-clockbar-item="time"].sp-clockbar-inactive').waitFor({ state: "visible" });
+  before = posts.length;
+  await page.locator('[data-clockbar-item="time"]').click();
+  await waitForPost(posts, { domain: "switch", name: "screen__clock_bar_time", action: "turn_on" }, `${label}: add time`, before);
+  await page.locator("#sp-clockbar-clock-format").waitFor({ state: "visible" });
+  await page.locator(".sp-settings-close").click();
+
+  before = posts.length;
+  await page.locator('[data-clockbar-item="network"]').click();
+  await page.getByText("Show Network Status Icon", { exact: true }).waitFor({ state: "visible" });
+  assert(await page.locator(".sp-section-title", { hasText: "Network Status" }).isVisible(), `${label}: network editor opens`);
+  await page.getByRole("button", { name: "Delete" }).click();
+  await waitForPost(posts, { domain: "switch", name: "screen__network_status_icon", action: "turn_off" }, `${label}: delete network`, before);
+  await page.locator('[data-clockbar-item="network"].sp-clockbar-inactive').waitFor({ state: "visible" });
+  before = posts.length;
+  await page.locator('[data-clockbar-item="network"]').click();
+  await waitForPost(posts, { domain: "switch", name: "screen__network_status_icon", action: "turn_on" }, `${label}: add network`, before);
+  await page.getByText("Show Network Status Icon", { exact: true }).waitFor({ state: "visible" });
+  await page.locator(".sp-settings-close").click();
+
+  before = posts.length;
+  await page.locator('[data-clockbar-item="temperature"]').click();
+  await page.locator("#sp-clockbar-temperature-unit").waitFor({ state: "visible" });
+  assert(await page.locator(".sp-section-title", { hasText: "Temperature" }).isVisible(), `${label}: temperature editor opens`);
+  await page.getByRole("button", { name: "Delete" }).click();
+  await waitForPost(posts, { domain: "switch", name: "indoor_temp_enable", action: "turn_off" }, `${label}: delete indoor temperature`, before);
+  await waitForPost(posts, { domain: "switch", name: "outdoor_temp_enable", action: "turn_off" }, `${label}: delete outdoor temperature`, before);
+  await page.locator('[data-clockbar-item="temperature"].sp-clockbar-inactive').waitFor({ state: "visible" });
+  before = posts.length;
+  await page.locator('[data-clockbar-item="temperature"]').click();
+  await waitForPost(posts, { domain: "switch", name: "indoor_temp_enable", action: "turn_on" }, `${label}: add indoor temperature`, before);
+  await waitForPost(posts, { domain: "switch", name: "outdoor_temp_enable", action: "turn_on" }, `${label}: add outdoor temperature`, before);
+  await page.locator("#sp-clockbar-temperature-unit").waitFor({ state: "visible" });
+  await page.locator(".sp-settings-close").click();
+
+  await page.getByRole("tab", { name: "Settings" }).click();
+  await page.waitForSelector("#sp-settings.sp-page.active");
+  const clockBarCard = page.locator("#sp-settings .card").filter({ hasText: "Clock Bar" }).first();
+  const clockBarText = await clockBarCard.textContent();
+  assert(clockBarText.includes("Show Clock Bar"), `${label}: clock bar settings keep the master toggle`);
+  assert(!clockBarText.includes("Show Network Status Icon"), `${label}: network toggle moved out of clock bar settings`);
+  assert(!clockBarText.includes("Outdoor Temperature"), `${label}: outdoor controls moved out of clock bar settings`);
+  assert(!clockBarText.includes("Indoor Temperature"), `${label}: indoor controls moved out of clock bar settings`);
+  assert(!clockBarText.includes("Show Degree Symbol"), `${label}: degree-symbol control moved out of clock bar settings`);
+  await page.getByRole("tab", { name: "Screen" }).click();
 }
 
 async function runCase(browser, testCase) {
@@ -581,6 +648,7 @@ async function runCase(browser, testCase) {
     assertNoLayoutBreaks(await measureCoreLayout(page), `${testCase.name} after settings`, testCase);
     await assertEmptyCellSettings(page, testCase.name);
     if (testCase.exerciseInteractions) {
+      await assertClockBarEditorSmoke(page, posts, testCase.name);
       await assertBackupImportSmoke(page, posts, testCase.slug);
       await assertEditAndApplySmoke(page, posts, errors);
     }

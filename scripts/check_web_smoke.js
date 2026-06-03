@@ -61,6 +61,11 @@ assert.deepStrictEqual(Array.from(hooks.SSE_ALIAS_GROUPS.clockBar), [
   "switch-screen_clock_bar",
   "switch-clock_bar_enabled",
 ], "clock bar SSE aliases are registered together");
+assert.deepStrictEqual(Array.from(hooks.SSE_ALIAS_GROUPS.clockBarTime), [
+  "switch-screen__clock_bar_time",
+  "switch-screen_clock_bar_time",
+  "switch-clock_bar_time_enabled",
+], "clock bar time SSE aliases are registered together");
 assert.deepStrictEqual(Array.from(hooks.SSE_ALIAS_GROUPS.scheduleWakeTimeout), [
   "number-screen__schedule_wake_timeout",
   "number-screen_schedule_wake_timeout",

@@ -210,6 +210,7 @@ export interface BackupPanelSettingsState {
   indoorTempEntity: string;
   outdoorTempEntity: string;
   clockBar: boolean;
+  clockBarTime: boolean;
   networkStatusIcon: boolean;
   temperatureDegreeSymbol: boolean;
   subpageChevron: boolean;
@@ -290,6 +291,7 @@ export function normalizeBackupPanelSettings(
     indoorTempEntity: String(settings.indoor_temp_entity || ""),
     outdoorTempEntity: String(settings.outdoor_temp_entity || ""),
     clockBar: objectValue(settings, "clock_bar") != null ? !!settings.clock_bar : false,
+    clockBarTime: objectValue(settings, "clock_bar_time") != null ? !!settings.clock_bar_time : true,
     networkStatusIcon: objectValue(settings, "network_status_icon") != null ? !!settings.network_status_icon : true,
     temperatureDegreeSymbol: objectValue(settings, "temperature_degree_symbol") != null
       ? !!settings.temperature_degree_symbol

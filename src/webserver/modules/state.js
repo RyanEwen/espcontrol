@@ -56,6 +56,7 @@ var state = {
   outdoorEntity: "",
   temperatureUnit: "Auto",
   clockBarOn: false,
+  clockBarTimeOn: true,
   networkStatusOn: true,
   networkTransport: "wifi",
   wifiStrengthPercent: 100,
@@ -135,6 +136,9 @@ var state = {
   developerExperimentalFeatures: false,
   configLocked: false,
   configLockReason: "",
+  clockBarSelectedItem: "",
+  clockBarTempRestoreIndoor: false,
+  clockBarTempRestoreOutdoor: true,
   subpages: {},
   subpageRaw: {},
   subpageSavePending: {},
@@ -626,6 +630,7 @@ function syncClockBarUi() {
   syncPreviewGridTop();
   if (els.topbar) els.topbar.className = "sp-topbar" + (state.clockBarOn ? "" : " sp-hidden");
   if (els.setClockBarToggle) els.setClockBarToggle.checked = !!state.clockBarOn;
+  if (els.setClockBarTimeToggle) els.setClockBarTimeToggle.checked = !!state.clockBarTimeOn;
   if (els.setNetworkStatusToggle) {
     els.setNetworkStatusToggle.checked = !!state.networkStatusOn;
   }
@@ -638,6 +643,7 @@ function syncClockBarUi() {
   if (els.setSubpageChevronToggle) {
     els.setSubpageChevronToggle.checked = !!state.subpageChevronsOn;
   }
+  updateClockBarItemUi();
   updateNetworkPreview();
   updateTempPreview();
 }

@@ -588,6 +588,18 @@ function postClockBar(on) {
   postSwitchWithObjectIds(entityName("screen_clock_bar"), entityObjectIds("screen_clock_bar"), on, CLOCK_BAR_UNAVAILABLE);
 }
 
+var CLOCK_BAR_TIME_UNAVAILABLE =
+  "Clock bar time setting is not available on this firmware. Update the device firmware, then reload this page.";
+
+function postClockBarTime(on) {
+  postSwitchWithObjectIds(
+    entityName("screen_clock_bar_time"),
+    entityObjectIds("screen_clock_bar_time"),
+    on,
+    CLOCK_BAR_TIME_UNAVAILABLE
+  );
+}
+
 var NETWORK_STATUS_ICON_UNAVAILABLE =
   "Network status icon setting is not available on this firmware. Update the device firmware, then reload this page.";
 

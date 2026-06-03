@@ -455,50 +455,6 @@ function buildSettingsPage(parent) {
     postClockBar(state.clockBarOn);
   });
 
-  var networkStatus = toggleRow("Show Network Status Icon", "sp-set-network-status-icon", state.networkStatusOn);
-  clockBarBody.appendChild(networkStatus.row);
-  els.setNetworkStatusToggle = networkStatus.input;
-  networkStatus.input.addEventListener("change", function () {
-    state.networkStatusOn = this.checked;
-    syncClockBarUi();
-    postNetworkStatusIcon(state.networkStatusOn);
-  });
-
-  var outdoor = createEntityToggleSection("Outdoor Temperature", "sp-set-outdoor-toggle", state._outdoorOn,
-    entityName("outdoor_temp_enable"), entityName("outdoor_temp_entity"), "Outdoor Temp Entity", "sensor.outdoor_temperature");
-  clockBarBody.appendChild(outdoor.toggle.row);
-  clockBarBody.appendChild(outdoor.field);
-  els.setOutdoorToggle = outdoor.toggle.input;
-  els.setOutdoorField = outdoor.field;
-  els.setOutdoorEntity = outdoor.input;
-  outdoor.toggle.input.addEventListener("change", function () {
-    state._outdoorOn = this.checked;
-    syncTemperatureUi();
-    updateTempPreview();
-  });
-
-  var indoor = createEntityToggleSection("Indoor Temperature", "sp-set-indoor-toggle", state._indoorOn,
-    entityName("indoor_temp_enable"), entityName("indoor_temp_entity"), "Indoor Temp Entity", "sensor.indoor_temperature");
-  clockBarBody.appendChild(indoor.toggle.row);
-  clockBarBody.appendChild(indoor.field);
-  els.setIndoorToggle = indoor.toggle.input;
-  els.setIndoorField = indoor.field;
-  els.setIndoorEntity = indoor.input;
-  indoor.toggle.input.addEventListener("change", function () {
-    state._indoorOn = this.checked;
-    syncTemperatureUi();
-    updateTempPreview();
-  });
-
-  var degreeSymbol = toggleRow("Show Degree Symbol", "sp-set-temperature-degree-symbol", state.temperatureDegreeSymbolOn);
-  clockBarBody.appendChild(degreeSymbol.row);
-  els.setTemperatureDegreeSymbolToggle = degreeSymbol.input;
-  degreeSymbol.input.addEventListener("change", function () {
-    state.temperatureDegreeSymbolOn = this.checked;
-    syncClockBarUi();
-    postTemperatureDegreeSymbol(state.temperatureDegreeSymbolOn);
-  });
-
   var clockBarBadge = document.createElement("span");
   clockBarBadge.setAttribute("aria-label", "Clock bar on");
   clockBarBadge.innerHTML = '<span class="sp-card-badge-dot"></span><span>ON</span>';

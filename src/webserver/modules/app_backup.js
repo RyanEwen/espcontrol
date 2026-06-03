@@ -21,6 +21,7 @@ function exportConfig() {
       outdoor_temp_entity: state.outdoorEntity,
       temperature_unit: normalizeTemperatureUnit(state.temperatureUnit),
       clock_bar: state.clockBarOn,
+      clock_bar_time: state.clockBarTimeOn,
       network_status_icon: state.networkStatusOn,
       temperature_degree_symbol: state.temperatureDegreeSymbolOn,
       subpage_chevron: state.subpageChevronsOn,
@@ -177,6 +178,7 @@ function importConfig() {
         postText(entityName("indoor_temp_entity"), importedSettings.indoorTempEntity);
         postText(entityName("outdoor_temp_entity"), importedSettings.outdoorTempEntity);
         postClockBar(importedSettings.clockBar);
+        postClockBarTime(importedSettings.clockBarTime);
         postNetworkStatusIcon(importedSettings.networkStatusIcon);
         postTemperatureDegreeSymbol(importedSettings.temperatureDegreeSymbol);
         postSubpageChevron(importedSettings.subpageChevron);
@@ -247,6 +249,7 @@ function importConfig() {
         state.outdoorEntity = importedSettings.outdoorTempEntity;
         state.temperatureUnit = importedTemperatureUnit;
         state.clockBarOn = importedSettings.clockBar;
+        state.clockBarTimeOn = importedSettings.clockBarTime;
         state.networkStatusOn = importedSettings.networkStatusIcon;
         state.temperatureDegreeSymbolOn = importedSettings.temperatureDegreeSymbol;
         state.subpageChevronsOn = importedSettings.subpageChevron;
