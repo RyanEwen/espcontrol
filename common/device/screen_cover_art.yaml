@@ -28,6 +28,9 @@ globals:
 api:
   on_client_connected:
     - delay: 2s
+    - globals.set:
+        id: cover_art_subscribed_entity
+        value: '""'
     - script.execute: cover_art_resubscribe
 
 image:
@@ -157,6 +160,8 @@ script:
   - id: cover_art_download_failed
     mode: restart
     then:
+      - lambda: |-
+          ESP_LOGW("cover_art", "Artwork download failed");
       - if:
           condition:
             lambda: 'return id(cover_art_screensaver_active);'
@@ -170,6 +175,8 @@ script:
           condition:
             lambda: 'return !id(cover_art_url).empty();'
           then:
+            - lambda: |-
+                ESP_LOGI("cover_art", "Downloading artwork URL (%u chars)", (unsigned) id(cover_art_url).size());
             - artwork_image.set_url:
                 id: cover_art_downloaded_image
                 url: !lambda 'return id(cover_art_url);'
@@ -291,6 +298,7 @@ script:
           const std::string cover_entity = id(cover_art_media_player_entity).state;
           if (cover_entity.empty() || cover_entity == id(cover_art_subscribed_entity)) return;
           id(cover_art_subscribed_entity) = cover_entity;
+          ESP_LOGI("cover_art", "Subscribing to artwork entity: %s", cover_entity.c_str());
 
           ha_subscribe_state(
             cover_entity,
@@ -338,7 +346,7 @@ script:
             std::function<void(esphome::StringRef)>(
               [cover_entity](esphome::StringRef picture) {
                 if (cover_entity != id(cover_art_media_player_entity).state) return;
-                std::string path = string_ref_limited(picture, HA_STATE_TEXT_MAX_LEN);
+                std::string path = string_ref_limited(picture, HA_TEXT_SENSOR_STATE_MAX_LEN);
                 if (path.empty() || path == "unknown" || path == "unavailable") return;
                 std::string url = path;
                 if (!(path.rfind("http://", 0) == 0 || path.rfind("https://", 0) == 0)) {
@@ -350,6 +358,7 @@ script:
                   while (!base.empty() && base.back() == '/') base.pop_back();
                   url = base + path;
                 }
+                ESP_LOGI("cover_art", "Artwork entity_picture received (%u chars)", (unsigned) path.size());
                 if (url == id(cover_art_url)) return;
                 id(cover_art_url) = url;
                 id(cover_art_download).execute();

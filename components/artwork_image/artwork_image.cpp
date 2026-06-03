@@ -40,6 +40,12 @@ namespace artwork_image {
 
 using image::ImageType;
 
+static std::string sanitize_artwork_url_for_log(const std::string &url) {
+  auto query = url.find('?');
+  if (query == std::string::npos) return url;
+  return url.substr(0, query) + "?...";
+}
+
 #ifdef USE_ESP_IDF
 class LocalHttpContainer : public http_request::HttpContainer {
  public:
@@ -221,7 +227,7 @@ void ArtworkImage::update() {
     this->queue_pending_update_(this->url_);
     return;
   }
-  ESP_LOGI(TAG, "Updating image %s", this->url_.c_str());
+  ESP_LOGI(TAG, "Updating image %s", sanitize_artwork_url_for_log(this->url_).c_str());
   this->log_state_("request-start");
 
   std::vector<http_request::Header> headers = {};
@@ -379,10 +385,11 @@ std::shared_ptr<http_request::HttpContainer> ArtworkImage::get_local_idf_(
     const std::string &url, const std::vector<http_request::Header> &headers) {
 #ifdef USE_ESP_IDF
   bool secure = url.rfind("https://", 0) == 0;
+  std::string safe_url = sanitize_artwork_url_for_log(url);
   if (secure) {
-    ESP_LOGW(TAG, "Using insecure TLS for local artwork URL: %s", url.c_str());
+    ESP_LOGW(TAG, "Using insecure TLS for local artwork URL: %s", safe_url.c_str());
   } else {
-    ESP_LOGD(TAG, "Using guarded local artwork request: %s", url.c_str());
+    ESP_LOGD(TAG, "Using guarded local artwork request: %s", safe_url.c_str());
   }
   esp_http_client_config_t config = {};
   config.url = url.c_str();

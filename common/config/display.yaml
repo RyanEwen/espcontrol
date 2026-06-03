@@ -465,6 +465,9 @@ text:
       sorting_group_id: sg_screensaver
     on_value:
       then:
+        - globals.set:
+            id: cover_art_subscribed_entity
+            value: '""'
         - script.execute: cover_art_playback_stopped
         - script.execute: cover_art_resubscribe
 
