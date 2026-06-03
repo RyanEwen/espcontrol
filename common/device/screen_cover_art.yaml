@@ -18,6 +18,9 @@ globals:
   - id: cover_art_url
     type: std::string
     initial_value: '""'
+  - id: cover_art_image_available
+    type: bool
+    initial_value: 'false'
   - id: cover_art_home_assistant_base_url
     type: std::string
     initial_value: '"http://192.168.1.31:8123"'
@@ -157,6 +160,7 @@ lvgl:
                 height: ${cover_art_size}px
                 src: cover_art_downloaded_image
                 opa: 100%
+                hidden: true
             - obj:
                 id: cover_art_accent_overlay
                 x: ${cover_art_accent_x}
@@ -254,9 +258,31 @@ script:
   - id: cover_art_apply_downloaded_image
     mode: restart
     then:
+      - globals.set:
+          id: cover_art_image_available
+          value: 'true'
       - lvgl.image.update:
           id: cover_art_image_widget
           src: cover_art_downloaded_image
+      - lvgl.widget.show: cover_art_image_widget
+      - lvgl.widget.hide: cover_art_error_label
+      - if:
+          condition:
+            lambda: 'return id(cover_art_screensaver_active);'
+          then:
+            - script.execute: cover_art_show_track_overlay
+
+  - id: cover_art_show_black_screen
+    mode: restart
+    then:
+      - script.stop: cover_art_show_track_overlay
+      - globals.set:
+          id: cover_art_image_available
+          value: 'false'
+      - lvgl.widget.hide: cover_art_image_widget
+      - lvgl.widget.hide: cover_art_accent_overlay
+      - lvgl.widget.hide: cover_art_track_panel
+      - lvgl.widget.hide: cover_art_progress_bar
       - lvgl.widget.hide: cover_art_error_label
 
   - id: cover_art_download_failed
@@ -264,11 +290,8 @@ script:
     then:
       - lambda: |-
           ESP_LOGW("cover_art", "Artwork download failed");
-      - if:
-          condition:
-            lambda: 'return id(cover_art_screensaver_active);'
-          then:
-            - lvgl.widget.show: cover_art_error_label
+          id(cover_art_url).clear();
+      - script.execute: cover_art_show_black_screen
 
   - id: cover_art_download
     mode: restart
@@ -277,6 +300,7 @@ script:
           condition:
             lambda: 'return !id(cover_art_url).empty();'
           then:
+            - script.execute: cover_art_show_black_screen
             - lambda: |-
                 ESP_LOGI("cover_art", "Downloading artwork URL (%u chars)", (unsigned) id(cover_art_url).size());
             - artwork_image.set_url:
@@ -356,24 +380,28 @@ script:
   - id: cover_art_show_track_overlay
     mode: restart
     then:
-      - script.execute: cover_art_sync_track_text
-      - lambda: |-
-          lv_obj_set_style_text_line_space(id(cover_art_title_label), ${cover_art_title_line_space}, 0);
-      - lvgl.widget.show: cover_art_accent_overlay
-      - lvgl.widget.show: cover_art_track_panel
-      - lvgl.widget.show: cover_art_progress_bar
-      - script.execute: cover_art_refresh_progress
       - if:
           condition:
-            lambda: 'return ${cover_art_square_overlay} && id(cover_art_track_overlay_duration).state > 0;'
+            lambda: 'return id(cover_art_image_available);'
           then:
-            - delay: !lambda 'return (uint32_t)(id(cover_art_track_overlay_duration).state * 1000);'
+            - script.execute: cover_art_sync_track_text
+            - lambda: |-
+                lv_obj_set_style_text_line_space(id(cover_art_title_label), ${cover_art_title_line_space}, 0);
+            - lvgl.widget.show: cover_art_accent_overlay
+            - lvgl.widget.show: cover_art_track_panel
+            - lvgl.widget.show: cover_art_progress_bar
+            - script.execute: cover_art_refresh_progress
             - if:
                 condition:
-                  lambda: 'return id(cover_art_screensaver_active) && ${cover_art_square_overlay};'
+                  lambda: 'return ${cover_art_square_overlay} && id(cover_art_track_overlay_duration).state > 0;'
                 then:
-                  - lvgl.widget.hide: cover_art_accent_overlay
-                  - lvgl.widget.hide: cover_art_track_panel
+                  - delay: !lambda 'return (uint32_t)(id(cover_art_track_overlay_duration).state * 1000);'
+                  - if:
+                      condition:
+                        lambda: 'return id(cover_art_screensaver_active) && id(cover_art_image_available) && ${cover_art_square_overlay};'
+                      then:
+                        - lvgl.widget.hide: cover_art_accent_overlay
+                        - lvgl.widget.hide: cover_art_track_panel
 
   - id: show_cover_art_view
     mode: restart
@@ -403,15 +431,27 @@ script:
       - lvgl.widget.show: cover_art_screensaver
       - if:
           condition:
-            lambda: 'return ${cover_art_square_overlay};'
+            lambda: 'return id(cover_art_image_available) && ${cover_art_square_overlay};'
           then:
+            - lvgl.widget.show: cover_art_image_widget
             - script.execute: cover_art_show_track_overlay
           else:
-            - lambda: |-
-                lv_obj_set_style_text_line_space(id(cover_art_title_label), ${cover_art_title_line_space}, 0);
-            - lvgl.widget.show: cover_art_accent_overlay
-            - lvgl.widget.show: cover_art_track_panel
-      - lvgl.widget.show: cover_art_progress_bar
+            - if:
+                condition:
+                  lambda: 'return id(cover_art_image_available);'
+                then:
+                  - lvgl.widget.show: cover_art_image_widget
+                  - lambda: |-
+                      lv_obj_set_style_text_line_space(id(cover_art_title_label), ${cover_art_title_line_space}, 0);
+                  - lvgl.widget.show: cover_art_accent_overlay
+                  - lvgl.widget.show: cover_art_track_panel
+                else:
+                  - script.execute: cover_art_show_black_screen
+      - if:
+          condition:
+            lambda: 'return id(cover_art_image_available);'
+          then:
+            - lvgl.widget.show: cover_art_progress_bar
       - script.execute: cover_art_refresh_progress
       - script.execute: backlight_apply_brightness
 
@@ -552,7 +592,12 @@ script:
               [cover_entity](esphome::StringRef picture) {
                 if (cover_entity != id(cover_art_media_player_entity).state) return;
                 std::string path = string_ref_limited(picture, HA_TEXT_SENSOR_STATE_MAX_LEN);
-                if (path.empty() || path == "unknown" || path == "unavailable") return;
+                if (path.empty() || path == "unknown" || path == "unavailable") {
+                  ESP_LOGI("cover_art", "Artwork entity_picture unavailable");
+                  id(cover_art_url).clear();
+                  id(cover_art_show_black_screen).execute();
+                  return;
+                }
                 std::string url = path;
                 if (!(path.rfind("http://", 0) == 0 || path.rfind("https://", 0) == 0)) {
                   std::string base = id(cover_art_home_assistant_url).state;
