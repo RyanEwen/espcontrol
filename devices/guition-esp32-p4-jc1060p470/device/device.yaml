@@ -115,6 +115,30 @@ esphome:
       then:
         - lambda: 'id(screen_rotation_ready) = true;'
         - script.execute: apply_screen_rotation
+    - priority: -110
+      then:
+        - lambda: |-
+            if (id(button_on_color).state == "000000" &&
+                id(button_off_color).state == "FFFFFF" &&
+                id(sensor_card_color).state == "FFFFFF") {
+              auto theme = id(screen_theme).make_call();
+              theme.set_option("Dark");
+              theme.perform();
+
+              auto on = id(button_on_color).make_call();
+              on.set_value("FF8C00");
+              on.perform();
+
+              auto off = id(button_off_color).make_call();
+              off.set_value("313131");
+              off.perform();
+
+              auto sensor = id(sensor_card_color).make_call();
+              sensor.set_value("212121");
+              sensor.perform();
+
+              ESP_LOGI("jc1060p470", "Reset e-paper color defaults to color display theme");
+            }
 
 # ---------------------------------------------------------------------------
 # PSRAM (video frame buffer memory)
