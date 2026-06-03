@@ -1,0 +1,2409 @@
+{
+  "$schema": "https://espcontrol.local/schemas/source-strings-v1.json",
+  "language": "en",
+  "description": "English source-string inventory for hard-coded user-facing text. This file is generated for translation review and is not yet used at runtime.",
+  "generatedBy": "scripts/generate_strings_inventory.py",
+  "strings": {
+    "untitled": {
+      "value": "(untitled)",
+      "sources": [
+        "components/espcontrol/button_grid_todo.h:307"
+      ]
+    },
+    "n_1_hour": {
+      "value": "1 hour",
+      "sources": [
+        "src/webserver/modules/settings_page.js:149",
+        "src/webserver/modules/state.js:348"
+      ]
+    },
+    "n_1_minute": {
+      "value": "1 minute",
+      "sources": [
+        "src/webserver/modules/settings_page.js:144",
+        "src/webserver/modules/settings_page.js:675",
+        "src/webserver/modules/state.js:341"
+      ]
+    },
+    "n_10_minutes": {
+      "value": "10 minutes",
+      "sources": [
+        "src/webserver/modules/settings_page.js:147",
+        "src/webserver/modules/state.js:343"
+      ]
+    },
+    "n_10_seconds": {
+      "value": "10 seconds",
+      "sources": [
+        "src/webserver/modules/settings_page.js:142",
+        "src/webserver/modules/settings_page.js:672",
+        "src/webserver/modules/state.js:339"
+      ]
+    },
+    "n_15_minutes": {
+      "value": "15 minutes",
+      "sources": [
+        "src/webserver/modules/state.js:344"
+      ]
+    },
+    "n_2_minutes": {
+      "value": "2 minutes",
+      "sources": [
+        "src/webserver/modules/settings_page.js:145",
+        "src/webserver/modules/settings_page.js:676"
+      ]
+    },
+    "n_20_minutes": {
+      "value": "20 minutes",
+      "sources": [
+        "src/webserver/modules/state.js:345"
+      ]
+    },
+    "n_20_seconds": {
+      "value": "20 seconds",
+      "sources": [
+        "src/webserver/modules/settings_page.js:673"
+      ]
+    },
+    "n_30_minutes": {
+      "value": "30 minutes",
+      "sources": [
+        "src/webserver/modules/settings_page.js:148",
+        "src/webserver/modules/state.js:346"
+      ]
+    },
+    "n_30_seconds": {
+      "value": "30 seconds",
+      "sources": [
+        "src/webserver/modules/settings_page.js:143",
+        "src/webserver/modules/settings_page.js:674",
+        "src/webserver/modules/state.js:340"
+      ]
+    },
+    "n_45_minutes": {
+      "value": "45 minutes",
+      "sources": [
+        "src/webserver/modules/state.js:347"
+      ]
+    },
+    "n_5_minutes": {
+      "value": "5 minutes",
+      "sources": [
+        "src/webserver/modules/settings_page.js:146",
+        "src/webserver/modules/settings_page.js:677",
+        "src/webserver/modules/state.js:342"
+      ]
+    },
+    "n_6_digit_hex_e_g_0073ff": {
+      "value": "6-digit hex e.g. 0073FF",
+      "sources": [
+        "src/webserver/modules/controls_fields.js:66"
+      ]
+    },
+    "account": {
+      "value": "Account",
+      "sources": [
+        "src/webserver/modules/config_codec.js:321"
+      ]
+    },
+    "action": {
+      "value": "Action",
+      "sources": [
+        "common/config/card_contract.json:69",
+        "components/espcontrol/button_grid_cards.h:569",
+        "src/webserver/types/action.js:102",
+        "src/webserver/types/action.js:143",
+        "src/webserver/types/action.js:332"
+      ]
+    },
+    "action_entity": {
+      "value": "Action Entity",
+      "sources": [
+        "src/webserver/types/action.js:190"
+      ]
+    },
+    "active_color": {
+      "value": "Active Color",
+      "sources": [
+        "common/config/card_contract.json:773"
+      ]
+    },
+    "active_display": {
+      "value": "Active Display",
+      "sources": [
+        "src/webserver/types/switch.js:20"
+      ]
+    },
+    "add_a_climate_entity_before_saving": {
+      "value": "Add a climate entity before saving.",
+      "sources": [
+        "src/webserver/types/climate.js:10",
+        "src/webserver/types/subpage.js:71"
+      ]
+    },
+    "add_a_door_or_window_sensor_before_saving": {
+      "value": "Add a door or window sensor before saving.",
+      "sources": [
+        "src/webserver/types/door_window.js:21"
+      ]
+    },
+    "add_a_fan_entity_before_saving": {
+      "value": "Add a fan entity before saving.",
+      "sources": [
+        "src/webserver/types/fan.js:51"
+      ]
+    },
+    "add_a_light_entity_before_saving": {
+      "value": "Add a light entity before saving.",
+      "sources": [
+        "src/webserver/types/subpage.js:53",
+        "src/webserver/types/switch.js:99"
+      ]
+    },
+    "add_a_media_entity_before_saving": {
+      "value": "Add a media entity before saving.",
+      "sources": [
+        "src/webserver/types/subpage.js:62"
+      ]
+    },
+    "add_a_presence_entity_before_saving": {
+      "value": "Add a presence entity before saving.",
+      "sources": [
+        "src/webserver/types/subpage.js:80"
+      ]
+    },
+    "add_a_presence_sensor_before_saving": {
+      "value": "Add a presence sensor before saving.",
+      "sources": [
+        "src/webserver/types/presence.js:10"
+      ]
+    },
+    "add_a_sensor_entity_before_saving": {
+      "value": "Add a sensor entity before saving.",
+      "sources": [
+        "src/webserver/types/sensor.js:10"
+      ]
+    },
+    "add_an_alarm_control_panel_entity_before_saving": {
+      "value": "Add an alarm_control_panel entity before saving.",
+      "sources": [
+        "src/webserver/types/alarm.js:114"
+      ]
+    },
+    "add_an_entity_before_saving": {
+      "value": "Add an entity before saving.",
+      "sources": [
+        "src/webserver/modules/button_settings.js:274",
+        "src/webserver/types/action.js:113",
+        "src/webserver/types/garage.js:57",
+        "src/webserver/types/lock.js:50",
+        "src/webserver/types/media.js:74",
+        "src/webserver/types/slider.js:44",
+        "src/webserver/types/switch.js:7",
+        "src/webserver/types/weather.js:26"
+      ]
+    },
+    "alarm": {
+      "value": "Alarm",
+      "sources": [
+        "common/config/card_contract.json:92",
+        "components/espcontrol/button_grid_alarm.h:127",
+        "components/espcontrol/button_grid_alarm.h:168",
+        "src/webserver/types/alarm.js:258",
+        "src/webserver/types/alarm.js:9"
+      ]
+    },
+    "alarm_action_failed": {
+      "value": "Alarm action failed",
+      "sources": [
+        "components/espcontrol/button_grid_alarm.h:592"
+      ]
+    },
+    "alarm_did_not_change": {
+      "value": "Alarm did not change",
+      "sources": [
+        "components/espcontrol/button_grid_alarm.h:615"
+      ]
+    },
+    "alarm_entity": {
+      "value": "Alarm Entity",
+      "sources": [
+        "src/webserver/types/alarm.js:109"
+      ]
+    },
+    "all_done": {
+      "value": "All done",
+      "sources": [
+        "components/espcontrol/button_grid_todo.h:1079",
+        "components/espcontrol/button_grid_todo.h:1131",
+        "components/espcontrol/button_grid_todo.h:369",
+        "components/espcontrol/button_grid_todo.h:398"
+      ]
+    },
+    "always_on": {
+      "value": "Always On",
+      "sources": [
+        "components/espcontrol/backlight.h:185"
+      ]
+    },
+    "apply_configuration": {
+      "value": "Apply Configuration",
+      "sources": [
+        "src/webserver/modules/app_events.js:36",
+        "src/webserver/modules/controls_shell.js:148",
+        "src/webserver/modules/controls_shell.js:199"
+      ]
+    },
+    "arm_away": {
+      "value": "Arm Away",
+      "sources": [
+        "common/config/card_contract.json:144",
+        "components/espcontrol/button_grid_alarm.h:165",
+        "src/webserver/modules/config_codec.js:193"
+      ]
+    },
+    "arm_home": {
+      "value": "Arm Home",
+      "sources": [
+        "common/config/card_contract.json:151",
+        "components/espcontrol/button_grid_alarm.h:166",
+        "components/espcontrol/button_grid_subpages.h:115",
+        "src/webserver/modules/config_codec.js:194"
+      ]
+    },
+    "armed_away": {
+      "value": "Armed Away",
+      "sources": [
+        "components/espcontrol/button_grid_alarm.h:198"
+      ]
+    },
+    "armed_custom": {
+      "value": "Armed Custom",
+      "sources": [
+        "components/espcontrol/button_grid_alarm.h:201"
+      ]
+    },
+    "armed_home": {
+      "value": "Armed Home",
+      "sources": [
+        "components/espcontrol/button_grid_alarm.h:199"
+      ]
+    },
+    "armed_night": {
+      "value": "Armed Night",
+      "sources": [
+        "components/espcontrol/button_grid_alarm.h:200"
+      ]
+    },
+    "arming": {
+      "value": "Arming",
+      "sources": [
+        "components/espcontrol/button_grid_alarm.h:1066",
+        "components/espcontrol/button_grid_alarm.h:202"
+      ]
+    },
+    "auto": {
+      "value": "Auto",
+      "sources": [
+        "components/espcontrol/button_grid_cards.h:16",
+        "components/espcontrol/button_grid_cards.h:538",
+        "components/espcontrol/button_grid_climate.h:318",
+        "components/espcontrol/button_grid_config.h:526",
+        "components/espcontrol/button_grid_config.h:528",
+        "components/espcontrol/button_grid_config.h:543",
+        "components/espcontrol/button_grid_config.h:584",
+        "components/espcontrol/button_grid_config.h:592",
+        "components/espcontrol/button_grid_config.h:610",
+        "components/espcontrol/button_grid_config.h:629",
+        "components/espcontrol/button_grid_config.h:637",
+        "components/espcontrol/button_grid_config.h:643",
+        "components/espcontrol/button_grid_config.h:644",
+        "components/espcontrol/button_grid_config.h:651",
+        "components/espcontrol/button_grid_config.h:652",
+        "components/espcontrol/button_grid_fan.h:66",
+        "components/espcontrol/button_grid_fan.h:71",
+        "components/espcontrol/button_grid_grid.h:1115",
+        "components/espcontrol/button_grid_grid.h:1193",
+        "components/espcontrol/button_grid_grid.h:1738",
+        "components/espcontrol/button_grid_grid.h:832",
+        "components/espcontrol/button_grid_sliders.h:287",
+        "components/espcontrol/button_grid_sliders.h:292",
+        "components/espcontrol/button_grid_sliders.h:294",
+        "components/espcontrol/button_grid_sliders.h:301",
+        "components/espcontrol/button_grid_sliders.h:303",
+        "components/espcontrol/button_grid_subpages.h:106",
+        "components/espcontrol/button_grid_subpages.h:119",
+        "components/espcontrol/button_grid_subpages.h:137",
+        "components/espcontrol/button_grid_subpages.h:155",
+        "components/espcontrol/button_grid_subpages.h:161",
+        "components/espcontrol/button_grid_subpages.h:162",
+        "components/espcontrol/button_grid_subpages.h:169",
+        "components/espcontrol/button_grid_subpages.h:170",
+        "components/espcontrol/button_grid_subpages.h:47",
+        "components/espcontrol/button_grid_subpages.h:49",
+        "components/espcontrol/button_grid_subpages.h:64",
+        "components/espcontrol/button_grid_subscriptions.h:108",
+        "components/espcontrol/temperature_unit.h:23",
+        "src/webserver/modules/state.js:130",
+        "src/webserver/types/alarm.js:35",
+        "src/webserver/types/alarm.js:9",
+        "src/webserver/types/garage.js:27",
+        "src/webserver/types/internal.js:31",
+        "src/webserver/types/internal.js:36",
+        "src/webserver/types/lock.js:27",
+        "src/webserver/types/media.js:141",
+        "src/webserver/types/push.js:25",
+        "src/webserver/types/subpage.js:123"
+      ]
+    },
+    "away": {
+      "value": "Away",
+      "sources": [
+        "components/espcontrol/button_grid_alarm.h:190"
+      ]
+    },
+    "away_home_disarm": {
+      "value": "away|home|disarm",
+      "sources": [
+        "common/config/card_contract.json:120"
+      ]
+    },
+    "back": {
+      "value": "Back",
+      "sources": [
+        "components/espcontrol/button_grid_alarm.h:1279",
+        "components/espcontrol/button_grid_subpages.h:351",
+        "components/espcontrol/button_grid_subpages.h:353",
+        "components/espcontrol/button_grid_subpages.h:357",
+        "components/espcontrol/button_grid_subpages.h:372",
+        "src/webserver/modules/button_settings.js:135",
+        "src/webserver/modules/button_settings.js:140",
+        "src/webserver/modules/config_codec.js:1287"
+      ]
+    },
+    "back_button": {
+      "value": "Back Button",
+      "sources": [
+        "src/webserver/modules/button_settings.js:127"
+      ]
+    },
+    "button_grid": {
+      "value": "Button grid",
+      "sources": [
+        "src/webserver/modules/controls_shell.js:107"
+      ]
+    },
+    "buttons_selected_right_click_to_copy_cut_or_delete": {
+      "value": "buttons selected • right click to copy, cut, or delete",
+      "sources": [
+        "src/webserver/modules/button_settings.js:14"
+      ]
+    },
+    "cancel_button": {
+      "value": "Cancel Button",
+      "sources": [
+        "common/config/card_contract.json:51",
+        "src/webserver/types/switch.js:80"
+      ]
+    },
+    "card_actions": {
+      "value": "Card actions",
+      "sources": [
+        "src/webserver/modules/button_settings.js:57"
+      ]
+    },
+    "card_settings_are_too_large_to_save_shorten_confirmation_text_labels_or_entity_ids": {
+      "value": "Card settings are too large to save. Shorten confirmation text, labels, or entity IDs.",
+      "sources": [
+        "src/webserver/modules/button_settings.js:320"
+      ]
+    },
+    "check": {
+      "value": "Check",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:610",
+        "components/espcontrol/button_grid_subpages.h:137"
+      ]
+    },
+    "check_for_update": {
+      "value": "Check for Update",
+      "sources": [
+        "src/webserver/modules/settings_page.js:744",
+        "src/webserver/modules/state.js:818"
+      ]
+    },
+    "checking": {
+      "value": "Checking…",
+      "sources": [
+        "src/webserver/modules/state.js:818"
+      ]
+    },
+    "chevron_down": {
+      "value": "Chevron Down",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:629",
+        "components/espcontrol/button_grid_config.h:637",
+        "components/espcontrol/button_grid_subpages.h:155"
+      ]
+    },
+    "clear_icon": {
+      "value": "Clear Icon",
+      "sources": [
+        "src/webserver/types/presence.js:23"
+      ]
+    },
+    "clear_night": {
+      "value": "Clear Night",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1168"
+      ]
+    },
+    "climate": {
+      "value": "Climate",
+      "sources": [
+        "common/config/card_contract.json:257",
+        "components/espcontrol/button_grid_climate.h:1270",
+        "components/espcontrol/button_grid_climate.h:1745",
+        "components/espcontrol/button_grid_climate.h:622",
+        "components/espcontrol/button_grid_climate.h:626",
+        "src/webserver/modules/config_codec.js:318",
+        "src/webserver/types/climate.js:201",
+        "src/webserver/types/climate.js:53",
+        "src/webserver/types/climate.js:85"
+      ]
+    },
+    "climate_entity": {
+      "value": "Climate Entity",
+      "sources": [
+        "src/webserver/types/climate.js:4",
+        "src/webserver/types/subpage.js:65"
+      ]
+    },
+    "clock": {
+      "value": "Clock",
+      "sources": [
+        "components/espcontrol/backlight.h:189",
+        "components/espcontrol/backlight.h:195",
+        "src/webserver/modules/settings_page.js:118",
+        "src/webserver/modules/settings_page.js:917",
+        "src/webserver/types/calendar.js:7"
+      ]
+    },
+    "clock_bar_on": {
+      "value": "Clock bar on",
+      "sources": [
+        "src/webserver/modules/settings_page.js:457"
+      ]
+    },
+    "close": {
+      "value": "Close",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1902",
+        "src/webserver/types/garage.js:22"
+      ]
+    },
+    "closed": {
+      "value": "Closed",
+      "sources": [
+        "src/webserver/types/garage.js:195"
+      ]
+    },
+    "closed_icon": {
+      "value": "Closed Icon",
+      "sources": [
+        "src/webserver/types/door_window.js:76"
+      ]
+    },
+    "cloudy": {
+      "value": "Cloudy",
+      "sources": [
+        "components/espcontrol/button_grid_cards.h:444",
+        "components/espcontrol/button_grid_config.h:1170",
+        "src/webserver/types/weather.js:117"
+      ]
+    },
+    "cloudy_alert": {
+      "value": "Cloudy Alert",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1171"
+      ]
+    },
+    "combined_control": {
+      "value": "Combined Control",
+      "sources": [
+        "src/webserver/types/alarm.js:14"
+      ]
+    },
+    "configure": {
+      "value": "Configure",
+      "sources": [
+        "components/espcontrol/button_grid_subpages.h:276",
+        "src/webserver/modules/grid.js:97",
+        "src/webserver/modules/preview_render.js:118",
+        "src/webserver/types/subpage.js:331",
+        "src/webserver/types/switch.js:269",
+        "src/webserver/types/switch.js:313"
+      ]
+    },
+    "confirm_button": {
+      "value": "Confirm Button",
+      "sources": [
+        "common/config/card_contract.json:45",
+        "src/webserver/types/switch.js:73"
+      ]
+    },
+    "confirmation_required": {
+      "value": "Confirmation Required",
+      "sources": [
+        "common/config/card_contract.json:26",
+        "src/webserver/types/switch.js:53"
+      ]
+    },
+    "controls": {
+      "value": "Controls",
+      "sources": [
+        "common/config/card_contract.json:649",
+        "src/webserver/types/media.js:85"
+      ]
+    },
+    "cool": {
+      "value": "Cool",
+      "sources": [
+        "components/espcontrol/button_grid_climate.h:316"
+      ]
+    },
+    "cooling": {
+      "value": "Cooling",
+      "sources": [
+        "components/espcontrol/button_grid_climate.h:379"
+      ]
+    },
+    "could_not_complete": {
+      "value": "Could not complete",
+      "sources": [
+        "components/espcontrol/button_grid_todo.h:346",
+        "components/espcontrol/button_grid_todo.h:352",
+        "components/espcontrol/button_grid_todo.h:358",
+        "components/espcontrol/button_grid_todo.h:973",
+        "components/espcontrol/button_grid_todo.h:979",
+        "components/espcontrol/button_grid_todo.h:987"
+      ]
+    },
+    "could_not_load": {
+      "value": "Could not load",
+      "sources": [
+        "components/espcontrol/button_grid_todo.h:1212",
+        "components/espcontrol/button_grid_todo.h:1226",
+        "components/espcontrol/button_grid_todo.h:1236",
+        "components/espcontrol/button_grid_todo.h:1247",
+        "components/espcontrol/button_grid_todo.h:1263",
+        "components/espcontrol/button_grid_todo.h:503",
+        "components/espcontrol/button_grid_todo.h:518",
+        "components/espcontrol/button_grid_todo.h:525",
+        "components/espcontrol/button_grid_todo.h:532",
+        "components/espcontrol/button_grid_todo.h:545"
+      ]
+    },
+    "cover": {
+      "value": "Cover",
+      "sources": [
+        "common/config/card_contract.json:301",
+        "components/espcontrol/button_grid_sliders.h:310",
+        "components/espcontrol/button_grid_sliders.h:315"
+      ]
+    },
+    "dark": {
+      "value": "Dark",
+      "sources": [
+        "src/webserver/modules/state.js:14"
+      ]
+    },
+    "date": {
+      "value": "Date",
+      "sources": [
+        "components/espcontrol/button_grid_cards.h:104",
+        "components/espcontrol/button_grid_cards.h:398",
+        "src/webserver/types/calendar.js:9"
+      ]
+    },
+    "date_time": {
+      "value": "Date & Time",
+      "sources": [
+        "common/config/card_contract.json:196"
+      ]
+    },
+    "detected_icon": {
+      "value": "Detected Icon",
+      "sources": [
+        "src/webserver/types/presence.js:30"
+      ]
+    },
+    "dev": {
+      "value": "Dev",
+      "sources": [
+        "components/espcontrol/network_status.h:81"
+      ]
+    },
+    "dev_build": {
+      "value": "Dev build",
+      "sources": [
+        "components/espcontrol/network_status.h:81"
+      ]
+    },
+    "dimmed": {
+      "value": "Dimmed",
+      "sources": [
+        "components/espcontrol/backlight.h:200"
+      ]
+    },
+    "direction": {
+      "value": "Direction",
+      "sources": [
+        "components/espcontrol/button_grid_fan.h:79"
+      ]
+    },
+    "disabled": {
+      "value": "Disabled",
+      "sources": [
+        "src/webserver/modules/settings_page.js:527",
+        "src/webserver/modules/settings_page.js:671"
+      ]
+    },
+    "disarm": {
+      "value": "Disarm",
+      "sources": [
+        "common/config/card_contract.json:158",
+        "components/espcontrol/button_grid_alarm.h:167",
+        "components/espcontrol/button_grid_subpages.h:116",
+        "src/webserver/modules/config_codec.js:195"
+      ]
+    },
+    "disarmed": {
+      "value": "Disarmed",
+      "sources": [
+        "components/espcontrol/button_grid_alarm.h:191",
+        "components/espcontrol/button_grid_alarm.h:197",
+        "src/webserver/types/alarm.js:259"
+      ]
+    },
+    "display": {
+      "value": "Display",
+      "sources": [
+        "common/config/card_contract.json:479",
+        "src/webserver/types/garage.js:44"
+      ]
+    },
+    "display_off": {
+      "value": "Display Off",
+      "sources": [
+        "src/webserver/modules/settings_page.js:915"
+      ]
+    },
+    "display_text": {
+      "value": "Display Text",
+      "sources": [
+        "common/config/card_contract.json:799"
+      ]
+    },
+    "display_text_2": {
+      "value": "Display Text 2",
+      "sources": [
+        "common/config/card_contract.json:815"
+      ]
+    },
+    "done": {
+      "value": "Done",
+      "sources": [
+        "src/webserver/modules/button_settings.js:159"
+      ]
+    },
+    "door": {
+      "value": "Door",
+      "sources": [
+        "components/espcontrol/button_grid_cards.h:619",
+        "components/espcontrol/button_grid_config.h:324",
+        "src/webserver/modules/config_codec.js:528",
+        "src/webserver/types/door_window.js:127"
+      ]
+    },
+    "door_open": {
+      "value": "Door Open",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:328",
+        "src/webserver/modules/config_codec.js:532"
+      ]
+    },
+    "doors_windows": {
+      "value": "Doors & Windows",
+      "sources": [
+        "common/config/card_contract.json:345",
+        "src/webserver/types/door_window.js:38"
+      ]
+    },
+    "dry": {
+      "value": "Dry",
+      "sources": [
+        "components/espcontrol/button_grid_climate.h:319"
+      ]
+    },
+    "drying": {
+      "value": "Drying",
+      "sources": [
+        "components/espcontrol/button_grid_climate.h:380"
+      ]
+    },
+    "dust": {
+      "value": "Dust",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1172"
+      ]
+    },
+    "e_g_50": {
+      "value": "e.g. 50",
+      "sources": [
+        "src/webserver/types/slider.js:77"
+      ]
+    },
+    "e_g_arm_away": {
+      "value": "e.g. Arm Away",
+      "sources": [
+        "src/webserver/types/alarm.js:272"
+      ]
+    },
+    "e_g_bedroom_fan": {
+      "value": "e.g. Bedroom Fan",
+      "sources": [
+        "src/webserver/types/fan.js:57",
+        "src/webserver/types/fan.js:96"
+      ]
+    },
+    "e_g_doorbell": {
+      "value": "e.g. Doorbell",
+      "sources": [
+        "src/webserver/types/push.js:34"
+      ]
+    },
+    "e_g_front_door": {
+      "value": "e.g. Front Door",
+      "sources": [
+        "src/webserver/types/lock.js:125"
+      ]
+    },
+    "e_g_garage_door": {
+      "value": "e.g. Garage Door",
+      "sources": [
+        "src/webserver/types/garage.js:141"
+      ]
+    },
+    "e_g_gate_open": {
+      "value": "e.g. Gate Open",
+      "sources": [
+        "src/webserver/types/webhook.js:68"
+      ]
+    },
+    "e_g_house_alarm": {
+      "value": "e.g. House Alarm",
+      "sources": [
+        "src/webserver/types/alarm.js:150",
+        "src/webserver/types/alarm.js:188"
+      ]
+    },
+    "e_g_kitchen": {
+      "value": "e.g. Kitchen",
+      "sources": [
+        "src/webserver/modules/button_settings.js:551"
+      ]
+    },
+    "e_g_lighting": {
+      "value": "e.g. Lighting",
+      "sources": [
+        "src/webserver/types/subpage.js:120",
+        "src/webserver/types/subpage.js:16"
+      ]
+    },
+    "e_g_living_room": {
+      "value": "e.g. Living Room",
+      "sources": [
+        "src/webserver/types/climate.js:48",
+        "src/webserver/types/light_temperature.js:102",
+        "src/webserver/types/light_temperature.js:148",
+        "src/webserver/types/presence.js:16",
+        "src/webserver/types/sensor.js:77",
+        "src/webserver/types/slider.js:346",
+        "src/webserver/types/slider.js:365",
+        "src/webserver/types/switch.js:103",
+        "src/webserver/types/switch.js:294"
+      ]
+    },
+    "e_g_living_room_speaker": {
+      "value": "e.g. Living Room Speaker",
+      "sources": [
+        "src/webserver/types/media.js:113",
+        "src/webserver/types/media.js:314"
+      ]
+    },
+    "e_g_lock_front_door": {
+      "value": "e.g. lock.front_door",
+      "sources": [
+        "src/webserver/types/lock.js:46"
+      ]
+    },
+    "e_g_movie_mode": {
+      "value": "e.g. Movie Mode",
+      "sources": [
+        "src/webserver/types/action.js:145"
+      ]
+    },
+    "e_g_office_blind": {
+      "value": "e.g. Office Blind",
+      "sources": [
+        "src/webserver/types/slider.js:380"
+      ]
+    },
+    "e_g_patio_door": {
+      "value": "e.g. Patio Door",
+      "sources": [
+        "src/webserver/types/door_window.js:27"
+      ]
+    },
+    "e_g_person_jane": {
+      "value": "e.g. person.jane",
+      "sources": [
+        "src/webserver/types/subpage.js:76"
+      ]
+    },
+    "e_g_porch_light": {
+      "value": "e.g. Porch Light",
+      "sources": [
+        "src/webserver/types/internal.js:110",
+        "src/webserver/types/internal.js:94"
+      ]
+    },
+    "e_g_scene_movie_mode": {
+      "value": "e.g. scene.movie_mode",
+      "sources": [
+        "src/webserver/types/action.js:3"
+      ]
+    },
+    "e_g_vacuum_k11_vacuum_784c": {
+      "value": "e.g. vacuum.k11_vacuum_784c",
+      "sources": [
+        "src/webserver/types/action.js:7",
+        "src/webserver/types/action.js:8"
+      ]
+    },
+    "e_g_weather_forecast_home": {
+      "value": "e.g. weather.forecast_home",
+      "sources": [
+        "src/webserver/types/weather.js:22"
+      ]
+    },
+    "e_g_c": {
+      "value": "e.g. °C",
+      "sources": [
+        "src/webserver/types/sensor.js:86"
+      ]
+    },
+    "edit_subpage": {
+      "value": "Edit Subpage",
+      "sources": [
+        "src/webserver/types/subpage.js:379"
+      ]
+    },
+    "editing_is_paused_while_the_device_reconnects": {
+      "value": "Editing is paused while the device reconnects",
+      "sources": [
+        "src/webserver/modules/button_settings.js:12"
+      ]
+    },
+    "enabled": {
+      "value": "Enabled",
+      "sources": [
+        "src/webserver/modules/controls_fields.js:291"
+      ]
+    },
+    "enter_pin": {
+      "value": "Enter Pin",
+      "sources": [
+        "components/espcontrol/button_grid_alarm.h:784"
+      ]
+    },
+    "entity": {
+      "value": "Entity",
+      "sources": [
+        "src/webserver/modules/controls_fields.js:214",
+        "src/webserver/types/garage.js:51",
+        "src/webserver/types/light_temperature.js:96",
+        "src/webserver/types/lock.js:44",
+        "src/webserver/types/media.js:68",
+        "src/webserver/types/slider.js:38",
+        "src/webserver/types/switch.js:4",
+        "src/webserver/types/switch.js:96"
+      ]
+    },
+    "espcontrol": {
+      "value": "EspControl",
+      "sources": [
+        "src/webserver/modules/controls_shell.js:43"
+      ]
+    },
+    "exceptional": {
+      "value": "Exceptional",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1196"
+      ]
+    },
+    "fan": {
+      "value": "Fan",
+      "sources": [
+        "components/espcontrol/button_grid_climate.h:1291",
+        "components/espcontrol/button_grid_climate.h:320",
+        "components/espcontrol/button_grid_climate.h:381",
+        "components/espcontrol/button_grid_config.h:528",
+        "components/espcontrol/button_grid_fan.h:232",
+        "components/espcontrol/button_grid_fan.h:72",
+        "components/espcontrol/button_grid_fan.h:77",
+        "components/espcontrol/button_grid_fan.h:81",
+        "components/espcontrol/button_grid_subpages.h:49",
+        "src/webserver/types/fan.js:152",
+        "src/webserver/types/fan.js:21"
+      ]
+    },
+    "fan_auto": {
+      "value": "Fan Auto",
+      "sources": [
+        "src/webserver/types/fan.js:23"
+      ]
+    },
+    "fan_entity": {
+      "value": "Fan Entity",
+      "sources": [
+        "src/webserver/types/fan.js:45"
+      ]
+    },
+    "fan_off": {
+      "value": "Fan Off",
+      "sources": [
+        "src/webserver/types/fan.js:20"
+      ]
+    },
+    "fan_speed_2": {
+      "value": "Fan Speed 2",
+      "sources": [
+        "src/webserver/types/fan.js:24"
+      ]
+    },
+    "fans": {
+      "value": "Fans",
+      "sources": [
+        "common/config/card_contract.json:377",
+        "src/webserver/types/fan.js:90"
+      ]
+    },
+    "flash": {
+      "value": "Flash",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:629",
+        "components/espcontrol/button_grid_config.h:637",
+        "components/espcontrol/button_grid_subpages.h:155"
+      ]
+    },
+    "fog": {
+      "value": "Fog",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1173"
+      ]
+    },
+    "front_door": {
+      "value": "Front Door",
+      "sources": [
+        "src/webserver/types/lock.js:125"
+      ]
+    },
+    "garage": {
+      "value": "Garage",
+      "sources": [
+        "src/webserver/types/garage.js:141",
+        "src/webserver/types/garage.js:17",
+        "src/webserver/types/garage.js:27"
+      ]
+    },
+    "garage_door": {
+      "value": "Garage Door",
+      "sources": [
+        "common/config/card_contract.json:466",
+        "components/espcontrol/button_grid_config.h:1903",
+        "src/webserver/types/garage.js:194",
+        "src/webserver/types/garage.js:23"
+      ]
+    },
+    "garage_open": {
+      "value": "Garage Open",
+      "sources": [
+        "src/webserver/types/garage.js:17",
+        "src/webserver/types/garage.js:27"
+      ]
+    },
+    "gesture_tap": {
+      "value": "Gesture Tap",
+      "sources": [
+        "src/webserver/types/internal.js:23",
+        "src/webserver/types/push.js:21"
+      ]
+    },
+    "hail": {
+      "value": "Hail",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1174"
+      ]
+    },
+    "hazy": {
+      "value": "Hazy",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1175"
+      ]
+    },
+    "headers": {
+      "value": "Headers",
+      "sources": [
+        "common/config/card_contract.json:741"
+      ]
+    },
+    "heat": {
+      "value": "Heat",
+      "sources": [
+        "components/espcontrol/button_grid_climate.h:315"
+      ]
+    },
+    "heat_cool": {
+      "value": "Heat/Cool",
+      "sources": [
+        "components/espcontrol/button_grid_climate.h:317"
+      ]
+    },
+    "heating": {
+      "value": "Heating",
+      "sources": [
+        "components/espcontrol/button_grid_climate.h:378"
+      ]
+    },
+    "heavy_snow": {
+      "value": "Heavy Snow",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1187"
+      ]
+    },
+    "high": {
+      "value": "High",
+      "sources": [
+        "components/espcontrol/button_grid_climate.h:871"
+      ]
+    },
+    "high_target": {
+      "value": "High target",
+      "sources": [
+        "components/espcontrol/button_grid_climate.h:1277"
+      ]
+    },
+    "home": {
+      "value": "Home",
+      "sources": [
+        "components/espcontrol/button_grid_alarm.h:189"
+      ]
+    },
+    "hourly": {
+      "value": "Hourly",
+      "sources": [
+        "components/espcontrol/backlight.h:317"
+      ]
+    },
+    "hurricane": {
+      "value": "Hurricane",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1176"
+      ]
+    },
+    "icon": {
+      "value": "Icon",
+      "sources": [
+        "src/webserver/modules/button_settings.js:363",
+        "src/webserver/modules/controls_fields.js:281",
+        "src/webserver/types/alarm.js:216",
+        "src/webserver/types/alarm.js:312",
+        "src/webserver/types/fan.js:146",
+        "src/webserver/types/sensor.js:118",
+        "src/webserver/types/slider.js:278",
+        "src/webserver/types/subpage.js:21",
+        "src/webserver/types/subpage.js:260"
+      ]
+    },
+    "icon_temperatures": {
+      "value": "Icon & Temperatures",
+      "sources": [
+        "common/config/card_contract.json:270",
+        "src/webserver/types/climate.js:22"
+      ]
+    },
+    "icon_display": {
+      "value": "Icon Display",
+      "sources": [
+        "common/config/card_contract.json:124",
+        "src/webserver/types/alarm.js:124"
+      ]
+    },
+    "idle": {
+      "value": "Idle",
+      "sources": [
+        "components/espcontrol/button_grid_climate.h:382",
+        "components/espcontrol/button_grid_climate.h:384",
+        "components/espcontrol/button_grid_media.h:8",
+        "src/webserver/types/climate.js:203"
+      ]
+    },
+    "idle_on": {
+      "value": "Idle on",
+      "sources": [
+        "src/webserver/modules/settings_page.js:694"
+      ]
+    },
+    "input_status": {
+      "value": "Input Status",
+      "sources": [
+        "common/config/card_contract.json:791"
+      ]
+    },
+    "input_status_2": {
+      "value": "Input Status 2",
+      "sources": [
+        "common/config/card_contract.json:807"
+      ]
+    },
+    "install_update": {
+      "value": "Install Update",
+      "sources": [
+        "src/webserver/modules/state.js:815"
+      ]
+    },
+    "installing": {
+      "value": "Installing…",
+      "sources": [
+        "src/webserver/modules/state.js:812"
+      ]
+    },
+    "interaction": {
+      "value": "Interaction",
+      "sources": [
+        "common/config/card_contract.json:472",
+        "src/webserver/types/garage.js:32"
+      ]
+    },
+    "internal_switches": {
+      "value": "Internal Switches",
+      "sources": [
+        "common/config/card_contract.json:498"
+      ]
+    },
+    "label_display": {
+      "value": "Label Display",
+      "sources": [
+        "common/config/card_contract.json:131",
+        "src/webserver/types/alarm.js:117",
+        "src/webserver/types/climate.js:13"
+      ]
+    },
+    "large_active_display_numbers": {
+      "value": "Large Active Display Numbers",
+      "sources": [
+        "common/config/card_contract.json:21",
+        "src/webserver/types/switch.js:25"
+      ]
+    },
+    "large_clock": {
+      "value": "Large Clock",
+      "sources": [
+        "common/config/card_contract.json:209",
+        "src/webserver/types/calendar.js:44"
+      ]
+    },
+    "large_date": {
+      "value": "Large Date",
+      "sources": [
+        "src/webserver/types/calendar.js:47"
+      ]
+    },
+    "large_media_numbers": {
+      "value": "Large Media Numbers",
+      "sources": [
+        "common/config/card_contract.json:665",
+        "src/webserver/types/media.js:94"
+      ]
+    },
+    "large_numbers": {
+      "value": "Large Numbers",
+      "sources": [
+        "src/webserver/modules/controls_fields.js:184"
+      ]
+    },
+    "large_sensor_numbers": {
+      "value": "Large Sensor Numbers",
+      "sources": [
+        "common/config/card_contract.json:765",
+        "src/webserver/types/sensor.js:25"
+      ]
+    },
+    "large_state_numbers": {
+      "value": "Large State Numbers",
+      "sources": [
+        "common/config/card_contract.json:75",
+        "src/webserver/types/action.js:124",
+        "src/webserver/types/subpage.js:105"
+      ]
+    },
+    "large_temperature_numbers": {
+      "value": "Large Temperature Numbers",
+      "sources": [
+        "common/config/card_contract.json:277",
+        "src/webserver/types/climate.js:30",
+        "src/webserver/types/weather.js:36"
+      ]
+    },
+    "large_time": {
+      "value": "Large Time",
+      "sources": [
+        "src/webserver/types/calendar.js:45"
+      ]
+    },
+    "large_world_clock": {
+      "value": "Large World Clock",
+      "sources": [
+        "src/webserver/types/calendar.js:46"
+      ]
+    },
+    "light_entity": {
+      "value": "Light Entity",
+      "sources": [
+        "src/webserver/types/subpage.js:47"
+      ]
+    },
+    "light_temp": {
+      "value": "Light Temp",
+      "sources": [
+        "src/webserver/types/light_temperature.js:222"
+      ]
+    },
+    "lightbulb": {
+      "value": "Lightbulb",
+      "sources": [
+        "src/webserver/modules/config_codec.js:312",
+        "src/webserver/types/internal.js:27"
+      ]
+    },
+    "lightbulb_outline": {
+      "value": "Lightbulb Outline",
+      "sources": [
+        "src/webserver/types/internal.js:23"
+      ]
+    },
+    "lighting": {
+      "value": "Lighting",
+      "sources": [
+        "src/webserver/modules/config_codec.js:312"
+      ]
+    },
+    "lightning": {
+      "value": "Lightning",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1177"
+      ]
+    },
+    "lightning_and_rain": {
+      "value": "Lightning And Rain",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1178"
+      ]
+    },
+    "lights": {
+      "value": "Lights",
+      "sources": [
+        "common/config/card_contract.json:532"
+      ]
+    },
+    "lit_when_detected": {
+      "value": "Lit When Detected",
+      "sources": [
+        "src/webserver/types/presence.js:34"
+      ]
+    },
+    "lit_when_open": {
+      "value": "Lit When Open",
+      "sources": [
+        "src/webserver/types/door_window.js:31"
+      ]
+    },
+    "loading": {
+      "value": "Loading",
+      "sources": [
+        "components/espcontrol/button_grid_todo.h:1189",
+        "components/espcontrol/button_grid_todo.h:485"
+      ]
+    },
+    "lock": {
+      "value": "Lock",
+      "sources": [
+        "common/config/card_contract.json:592",
+        "components/espcontrol/button_grid_config.h:1938",
+        "components/espcontrol/button_grid_config.h:1940",
+        "src/webserver/types/lock.js:155",
+        "src/webserver/types/lock.js:17",
+        "src/webserver/types/lock.js:21",
+        "src/webserver/types/lock.js:23",
+        "src/webserver/types/lock.js:27"
+      ]
+    },
+    "lock_open": {
+      "value": "Lock Open",
+      "sources": [
+        "src/webserver/types/lock.js:17",
+        "src/webserver/types/lock.js:27"
+      ]
+    },
+    "low": {
+      "value": "Low",
+      "sources": [
+        "components/espcontrol/button_grid_climate.h:871"
+      ]
+    },
+    "low_target": {
+      "value": "Low target",
+      "sources": [
+        "components/espcontrol/button_grid_climate.h:1277"
+      ]
+    },
+    "maximum_volume": {
+      "value": "Maximum Volume",
+      "sources": [
+        "common/config/card_contract.json:656",
+        "src/webserver/types/media.js:322"
+      ]
+    },
+    "media": {
+      "value": "Media",
+      "sources": [
+        "common/config/card_contract.json:629",
+        "components/espcontrol/button_grid_config.h:553",
+        "components/espcontrol/button_grid_sliders.h:723",
+        "components/espcontrol/button_grid_subpages.h:76",
+        "src/webserver/modules/config_codec.js:315",
+        "src/webserver/modules/config_codec.js:53",
+        "src/webserver/types/media.js:186",
+        "src/webserver/types/media.js:232"
+      ]
+    },
+    "media_entity": {
+      "value": "Media Entity",
+      "sources": [
+        "src/webserver/types/subpage.js:56"
+      ]
+    },
+    "message": {
+      "value": "Message",
+      "sources": [
+        "common/config/card_contract.json:34",
+        "src/webserver/types/switch.js:66"
+      ]
+    },
+    "method": {
+      "value": "Method",
+      "sources": [
+        "src/webserver/types/webhook.js:47"
+      ]
+    },
+    "modal_closed": {
+      "value": "modal closed",
+      "sources": [
+        "components/espcontrol/button_grid_todo.h:243",
+        "components/espcontrol/button_grid_todo.h:934"
+      ]
+    },
+    "mode": {
+      "value": "Mode",
+      "sources": [
+        "common/config/card_contract.json:504",
+        "components/espcontrol/button_grid_climate.h:1289",
+        "components/espcontrol/button_grid_climate.h:1294",
+        "src/webserver/types/internal.js:82"
+      ]
+    },
+    "monthly": {
+      "value": "Monthly",
+      "sources": [
+        "components/espcontrol/backlight.h:319"
+      ]
+    },
+    "motion_sensor": {
+      "value": "Motion Sensor",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:652",
+        "components/espcontrol/button_grid_subpages.h:170"
+      ]
+    },
+    "motion_sensor_off": {
+      "value": "Motion Sensor Off",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:651",
+        "components/espcontrol/button_grid_subpages.h:169"
+      ]
+    },
+    "music": {
+      "value": "Music",
+      "sources": [
+        "src/webserver/types/media.js:136"
+      ]
+    },
+    "next": {
+      "value": "Next",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:551",
+        "components/espcontrol/button_grid_sliders.h:719",
+        "components/espcontrol/button_grid_subpages.h:74",
+        "src/webserver/modules/config_codec.js:51",
+        "src/webserver/types/media.js:149",
+        "src/webserver/types/media.js:225",
+        "src/webserver/types/media.js:229",
+        "src/webserver/types/media.js:354"
+      ]
+    },
+    "no": {
+      "value": "No",
+      "sources": [
+        "common/config/card_contract.json:53",
+        "components/espcontrol/button_grid_config.h:801"
+      ]
+    },
+    "no_matches": {
+      "value": "No matches",
+      "sources": [
+        "src/webserver/modules/button_settings.js:830"
+      ]
+    },
+    "no_options": {
+      "value": "No options",
+      "sources": [
+        "components/espcontrol/button_grid_option_select.h:281"
+      ]
+    },
+    "no_presets": {
+      "value": "No presets",
+      "sources": [
+        "components/espcontrol/button_grid_fan.h:334"
+      ]
+    },
+    "no_update": {
+      "value": "NO UPDATE",
+      "sources": [
+        "src/webserver/modules/state.js:880"
+      ]
+    },
+    "not_available": {
+      "value": "Not available",
+      "sources": [
+        "components/espcontrol/network_status.h:68"
+      ]
+    },
+    "now_playing": {
+      "value": "Now Playing",
+      "sources": [
+        "src/webserver/types/media.js:357"
+      ]
+    },
+    "number": {
+      "value": "Number",
+      "sources": [
+        "src/webserver/modules/controls_fields.js:251"
+      ]
+    },
+    "numeric": {
+      "value": "Numeric",
+      "sources": [
+        "src/webserver/modules/button_settings.js:599"
+      ]
+    },
+    "off": {
+      "value": "Off",
+      "sources": [
+        "components/espcontrol/button_grid_climate.h:314",
+        "components/espcontrol/button_grid_climate.h:375",
+        "components/espcontrol/button_grid_climate.h:383",
+        "components/espcontrol/button_grid_fan.h:219",
+        "components/espcontrol/button_grid_media.h:9"
+      ]
+    },
+    "off_icon": {
+      "value": "Off Icon",
+      "sources": [
+        "src/webserver/types/climate.js:124",
+        "src/webserver/types/fan.js:131",
+        "src/webserver/types/subpage.js:260",
+        "src/webserver/types/switch.js:108",
+        "src/webserver/types/switch.js:12"
+      ]
+    },
+    "on": {
+      "value": "On",
+      "sources": [
+        "components/espcontrol/button_grid_fan.h:219"
+      ]
+    },
+    "on_icon": {
+      "value": "On Icon",
+      "sources": [
+        "src/webserver/modules/button_settings.js:595",
+        "src/webserver/types/action.js:260",
+        "src/webserver/types/climate.js:132",
+        "src/webserver/types/fan.js:138",
+        "src/webserver/types/sensor.js:125",
+        "src/webserver/types/subpage.js:95",
+        "src/webserver/types/switch.js:113",
+        "src/webserver/types/switch.js:17"
+      ]
+    },
+    "open": {
+      "value": "Open",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1901",
+        "src/webserver/types/garage.js:21"
+      ]
+    },
+    "open_icon": {
+      "value": "Open Icon",
+      "sources": [
+        "src/webserver/types/door_window.js:84"
+      ]
+    },
+    "option": {
+      "value": "Option",
+      "sources": [
+        "components/espcontrol/button_grid_option_select.h:65",
+        "components/espcontrol/button_grid_option_select.h:69"
+      ]
+    },
+    "option_select": {
+      "value": "Option Select",
+      "sources": [
+        "common/config/card_contract.json:696",
+        "src/webserver/types/action.js:12"
+      ]
+    },
+    "oscillating": {
+      "value": "Oscillating",
+      "sources": [
+        "components/espcontrol/button_grid_fan.h:222"
+      ]
+    },
+    "oscillation": {
+      "value": "Oscillation",
+      "sources": [
+        "components/espcontrol/button_grid_fan.h:78"
+      ]
+    },
+    "partly_cloudy": {
+      "value": "Partly Cloudy",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1169"
+      ]
+    },
+    "partly_cloudy_night": {
+      "value": "Partly Cloudy Night",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1179"
+      ]
+    },
+    "partly_lightning": {
+      "value": "Partly Lightning",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1180"
+      ]
+    },
+    "partly_rainy": {
+      "value": "Partly Rainy",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1181"
+      ]
+    },
+    "partly_snow_and_rain": {
+      "value": "Partly Snow And Rain",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1183"
+      ]
+    },
+    "partly_snowy": {
+      "value": "Partly Snowy",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1182"
+      ]
+    },
+    "paused": {
+      "value": "Paused",
+      "sources": [
+        "components/espcontrol/button_grid_media.h:323",
+        "components/espcontrol/button_grid_media.h:7",
+        "src/webserver/types/media.js:372"
+      ]
+    },
+    "pending": {
+      "value": "Pending",
+      "sources": [
+        "components/espcontrol/button_grid_alarm.h:203"
+      ]
+    },
+    "pin_required": {
+      "value": "PIN required",
+      "sources": [
+        "src/webserver/types/alarm.js:317"
+      ]
+    },
+    "pin_required_for_arming": {
+      "value": "PIN required for arming",
+      "sources": [
+        "common/config/card_contract.json:105",
+        "src/webserver/types/alarm.js:245"
+      ]
+    },
+    "pin_required_for_disarming": {
+      "value": "PIN required for disarming",
+      "sources": [
+        "common/config/card_contract.json:111",
+        "src/webserver/types/alarm.js:251"
+      ]
+    },
+    "pin_was_not_accepted": {
+      "value": "PIN was not accepted",
+      "sources": [
+        "components/espcontrol/button_grid_alarm.h:615"
+      ]
+    },
+    "play_pause": {
+      "value": "Play Pause",
+      "sources": [
+        "src/webserver/types/media.js:137"
+      ]
+    },
+    "play_pause_2": {
+      "value": "Play/Pause",
+      "sources": [
+        "components/espcontrol/button_grid_sliders.h:722",
+        "src/webserver/types/media.js:151",
+        "src/webserver/types/media.js:358"
+      ]
+    },
+    "playing": {
+      "value": "Playing",
+      "sources": [
+        "components/espcontrol/button_grid_media.h:6",
+        "src/webserver/types/media.js:410"
+      ]
+    },
+    "position": {
+      "value": "Position",
+      "sources": [
+        "common/config/card_contract.json:314",
+        "components/espcontrol/button_grid_config.h:556",
+        "components/espcontrol/button_grid_sliders.h:721",
+        "components/espcontrol/button_grid_subpages.h:79",
+        "src/webserver/modules/config_codec.js:56",
+        "src/webserver/types/media.js:314",
+        "src/webserver/types/media.js:356",
+        "src/webserver/types/slider.js:72"
+      ]
+    },
+    "pouring": {
+      "value": "Pouring",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1184"
+      ]
+    },
+    "power": {
+      "value": "Power",
+      "sources": [
+        "src/webserver/types/internal.js:36"
+      ]
+    },
+    "power_plug": {
+      "value": "Power Plug",
+      "sources": [
+        "src/webserver/types/internal.js:32"
+      ]
+    },
+    "presence": {
+      "value": "Presence",
+      "sources": [
+        "common/config/card_contract.json:361",
+        "src/webserver/modules/config_codec.js:321",
+        "src/webserver/types/presence.js:79"
+      ]
+    },
+    "presence_entity": {
+      "value": "Presence Entity",
+      "sources": [
+        "src/webserver/types/subpage.js:74"
+      ]
+    },
+    "preset": {
+      "value": "Preset",
+      "sources": [
+        "components/espcontrol/button_grid_climate.h:1290",
+        "components/espcontrol/button_grid_climate.h:1295",
+        "components/espcontrol/button_grid_fan.h:230",
+        "components/espcontrol/button_grid_fan.h:80"
+      ]
+    },
+    "press_button": {
+      "value": "Press Button",
+      "sources": [
+        "src/webserver/types/action.js:6"
+      ]
+    },
+    "press_input_button": {
+      "value": "Press Input Button",
+      "sources": [
+        "src/webserver/types/action.js:9"
+      ]
+    },
+    "previous": {
+      "value": "Previous",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:550",
+        "components/espcontrol/button_grid_sliders.h:718",
+        "components/espcontrol/button_grid_subpages.h:73",
+        "src/webserver/modules/config_codec.js:50",
+        "src/webserver/types/media.js:148",
+        "src/webserver/types/media.js:221",
+        "src/webserver/types/media.js:229",
+        "src/webserver/types/media.js:353"
+      ]
+    },
+    "primary": {
+      "value": "Primary",
+      "sources": [
+        "src/webserver/modules/controls_shell.js:48"
+      ]
+    },
+    "progress_clock": {
+      "value": "Progress Clock",
+      "sources": [
+        "src/webserver/types/media.js:135"
+      ]
+    },
+    "push": {
+      "value": "Push",
+      "sources": [
+        "components/espcontrol/button_grid_cards.h:563"
+      ]
+    },
+    "rainy": {
+      "value": "Rainy",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1185"
+      ]
+    },
+    "relay": {
+      "value": "Relay",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:2037",
+        "src/webserver/types/internal.js:48"
+      ]
+    },
+    "restarts_the_device_to_apply_changes": {
+      "value": "Restarts the device to apply changes",
+      "sources": [
+        "src/webserver/modules/controls_shell.js:168"
+      ]
+    },
+    "run_scene": {
+      "value": "Run Scene",
+      "sources": [
+        "src/webserver/types/action.js:3"
+      ]
+    },
+    "run_script": {
+      "value": "Run Script",
+      "sources": [
+        "src/webserver/types/action.js:4"
+      ]
+    },
+    "save": {
+      "value": "Save",
+      "sources": [
+        "src/webserver/modules/button_settings.js:748"
+      ]
+    },
+    "schedule_on": {
+      "value": "Schedule on",
+      "sources": [
+        "src/webserver/modules/settings_page.js:241"
+      ]
+    },
+    "screen": {
+      "value": "Screen",
+      "sources": [
+        "src/webserver/modules/controls_shell.js:51"
+      ]
+    },
+    "screen_dimmed": {
+      "value": "Screen Dimmed",
+      "sources": [
+        "components/espcontrol/backlight.h:184",
+        "components/espcontrol/backlight.h:199",
+        "src/webserver/modules/settings_page.js:117",
+        "src/webserver/modules/settings_page.js:916"
+      ]
+    },
+    "screen_off": {
+      "value": "Screen Off",
+      "sources": [
+        "src/webserver/modules/settings_page.js:116"
+      ]
+    },
+    "screensaver_on": {
+      "value": "Screensaver on",
+      "sources": [
+        "src/webserver/modules/settings_page.js:630"
+      ]
+    },
+    "security": {
+      "value": "Security",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:584",
+        "components/espcontrol/button_grid_subpages.h:106",
+        "src/webserver/types/alarm.js:9"
+      ]
+    },
+    "select_entity": {
+      "value": "Select Entity",
+      "sources": [
+        "src/webserver/types/action.js:190"
+      ]
+    },
+    "send_failed": {
+      "value": "send failed",
+      "sources": [
+        "components/espcontrol/button_grid_todo.h:1257",
+        "components/espcontrol/button_grid_todo.h:539"
+      ]
+    },
+    "sensor_entity": {
+      "value": "Sensor Entity",
+      "sources": [
+        "src/webserver/types/action.js:244",
+        "src/webserver/types/door_window.js:15",
+        "src/webserver/types/presence.js:4",
+        "src/webserver/types/sensor.js:4",
+        "src/webserver/types/subpage.js:83",
+        "src/webserver/types/switch.js:39"
+      ]
+    },
+    "set_number_helper": {
+      "value": "Set Number Helper",
+      "sources": [
+        "src/webserver/types/action.js:11"
+      ]
+    },
+    "settings": {
+      "value": "Settings",
+      "sources": [
+        "src/webserver/modules/button_settings.js:226",
+        "src/webserver/modules/controls_shell.js:52"
+      ]
+    },
+    "shield_home": {
+      "value": "Shield Home",
+      "sources": [
+        "src/webserver/modules/config_codec.js:194",
+        "src/webserver/types/alarm.js:9"
+      ]
+    },
+    "shield_lock": {
+      "value": "Shield Lock",
+      "sources": [
+        "src/webserver/modules/config_codec.js:193"
+      ]
+    },
+    "shield_off": {
+      "value": "Shield Off",
+      "sources": [
+        "src/webserver/modules/config_codec.js:195"
+      ]
+    },
+    "show_state": {
+      "value": "Show State",
+      "sources": [
+        "src/webserver/types/subpage.js:24"
+      ]
+    },
+    "skip_next": {
+      "value": "Skip Next",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:551",
+        "components/espcontrol/button_grid_subpages.h:74",
+        "src/webserver/modules/config_codec.js:51",
+        "src/webserver/types/media.js:133",
+        "src/webserver/types/media.js:224"
+      ]
+    },
+    "skip_previous": {
+      "value": "Skip Previous",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:550",
+        "components/espcontrol/button_grid_subpages.h:73",
+        "src/webserver/modules/config_codec.js:50",
+        "src/webserver/types/media.js:132",
+        "src/webserver/types/media.js:220"
+      ]
+    },
+    "slider": {
+      "value": "Slider",
+      "sources": [
+        "common/config/card_contract.json:835"
+      ]
+    },
+    "snowy": {
+      "value": "Snowy",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1186"
+      ]
+    },
+    "snowy_and_rain": {
+      "value": "Snowy And Rain",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1188"
+      ]
+    },
+    "speaker": {
+      "value": "Speaker",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:543",
+        "components/espcontrol/button_grid_subpages.h:64",
+        "src/webserver/modules/config_codec.js:315",
+        "src/webserver/types/media.js:142"
+      ]
+    },
+    "start_vacuum": {
+      "value": "Start Vacuum",
+      "sources": [
+        "src/webserver/types/action.js:7"
+      ]
+    },
+    "state_entity": {
+      "value": "State Entity",
+      "sources": [
+        "src/webserver/types/subpage.js:37"
+      ]
+    },
+    "status_translation": {
+      "value": "Status Translation",
+      "sources": [
+        "common/config/card_contract.json:783"
+      ]
+    },
+    "still": {
+      "value": "Still",
+      "sources": [
+        "components/espcontrol/button_grid_fan.h:222"
+      ]
+    },
+    "stop": {
+      "value": "Stop",
+      "sources": [
+        "src/webserver/types/slider.js:134"
+      ]
+    },
+    "subpage": {
+      "value": "Subpage",
+      "sources": [
+        "common/config/card_contract.json:851",
+        "components/espcontrol/button_grid_cards.h:688",
+        "src/webserver/types/subpage.js:117",
+        "src/webserver/types/subpage.js:349"
+      ]
+    },
+    "subpage_is_too_large_to_save_shorten_labels_or_entity_ids": {
+      "value": "Subpage is too large to save. Shorten labels or entity IDs.",
+      "sources": [
+        "src/webserver/modules/api.js:360"
+      ]
+    },
+    "subpage_type": {
+      "value": "Subpage Type",
+      "sources": [
+        "common/config/card_contract.json:857"
+      ]
+    },
+    "sunny": {
+      "value": "Sunny",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1167"
+      ]
+    },
+    "sunny_alert": {
+      "value": "Sunny Alert",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1189"
+      ]
+    },
+    "sunset": {
+      "value": "Sunset",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1190"
+      ]
+    },
+    "sunset_down": {
+      "value": "Sunset Down",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1191"
+      ]
+    },
+    "sunset_up": {
+      "value": "Sunset Up",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1192"
+      ]
+    },
+    "swap_horizontal": {
+      "value": "Swap Horizontal",
+      "sources": [
+        "src/webserver/types/fan.js:22"
+      ]
+    },
+    "swing": {
+      "value": "Swing",
+      "sources": [
+        "components/espcontrol/button_grid_climate.h:1292"
+      ]
+    },
+    "switch": {
+      "value": "Switch",
+      "sources": [
+        "common/config/card_contract.json:15"
+      ]
+    },
+    "temperatures_tomorrow": {
+      "value": "Temperatures Tomorrow",
+      "sources": [
+        "src/webserver/types/weather_forecast.js:29"
+      ]
+    },
+    "thermostat": {
+      "value": "Thermostat",
+      "sources": [
+        "src/webserver/modules/config_codec.js:318"
+      ]
+    },
+    "time_date": {
+      "value": "Time & Date",
+      "sources": [
+        "src/webserver/types/calendar.js:8"
+      ]
+    },
+    "timer": {
+      "value": "Timer",
+      "sources": [
+        "src/webserver/modules/settings_page.js:530"
+      ]
+    },
+    "today": {
+      "value": "Today",
+      "sources": [
+        "components/espcontrol/button_grid_cards.h:470",
+        "components/espcontrol/button_grid_config.h:1277",
+        "src/webserver/types/weather.js:47"
+      ]
+    },
+    "todo": {
+      "value": "Todo",
+      "sources": [
+        "components/espcontrol/button_grid_todo.h:164",
+        "components/espcontrol/button_grid_todo.h:168",
+        "components/espcontrol/button_grid_todo.h:196",
+        "components/espcontrol/button_grid_todo.h:23",
+        "components/espcontrol/button_grid_todo.h:805",
+        "components/espcontrol/button_grid_todo.h:809",
+        "components/espcontrol/button_grid_todo.h:843"
+      ]
+    },
+    "toggle": {
+      "value": "Toggle",
+      "sources": [
+        "src/webserver/modules/app_test_hooks.js:137",
+        "src/webserver/modules/preview_render.js:29",
+        "src/webserver/modules/preview_render.js:45"
+      ]
+    },
+    "toggle_helper": {
+      "value": "Toggle Helper",
+      "sources": [
+        "src/webserver/types/action.js:10"
+      ]
+    },
+    "toggle_this_device": {
+      "value": "Toggle this device?",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:784"
+      ]
+    },
+    "tomorrow": {
+      "value": "Tomorrow",
+      "sources": [
+        "components/espcontrol/button_grid_cards.h:470",
+        "components/espcontrol/button_grid_config.h:1277",
+        "src/webserver/types/weather.js:47"
+      ]
+    },
+    "tornado": {
+      "value": "Tornado",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1193"
+      ]
+    },
+    "track": {
+      "value": "Track",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:556",
+        "components/espcontrol/button_grid_subpages.h:79",
+        "src/webserver/modules/config_codec.js:56"
+      ]
+    },
+    "trigger": {
+      "value": "Trigger",
+      "sources": [
+        "common/config/card_contract.json:713",
+        "src/webserver/types/push.js:45"
+      ]
+    },
+    "trigger_automation": {
+      "value": "Trigger Automation",
+      "sources": [
+        "src/webserver/types/action.js:5"
+      ]
+    },
+    "triggered": {
+      "value": "Triggered",
+      "sources": [
+        "components/espcontrol/button_grid_alarm.h:204"
+      ]
+    },
+    "turn_off_this_device": {
+      "value": "Turn off this device?",
+      "sources": [
+        "common/config/card_contract.json:36",
+        "components/espcontrol/button_grid_config.h:786"
+      ]
+    },
+    "turn_on_this_device": {
+      "value": "Turn on this device?",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:785"
+      ]
+    },
+    "unavailable": {
+      "value": "Unavailable",
+      "sources": [
+        "components/espcontrol/button_grid_alarm.h:196",
+        "components/espcontrol/button_grid_alarm.h:205",
+        "components/espcontrol/button_grid_climate.h:1267",
+        "components/espcontrol/button_grid_climate.h:374",
+        "components/espcontrol/button_grid_config.h:1198",
+        "components/espcontrol/button_grid_fan.h:218",
+        "components/espcontrol/button_grid_media.h:10"
+      ]
+    },
+    "unit_precision": {
+      "value": "Unit Precision",
+      "sources": [
+        "src/webserver/modules/button_settings.js:467",
+        "src/webserver/types/climate.js:141"
+      ]
+    },
+    "unknown": {
+      "value": "Unknown",
+      "sources": [
+        "components/espcontrol/button_grid_alarm.h:206",
+        "components/espcontrol/button_grid_config.h:1197",
+        "components/espcontrol/button_grid_media.h:11"
+      ]
+    },
+    "unlock": {
+      "value": "Unlock",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1939",
+        "src/webserver/types/lock.js:22"
+      ]
+    },
+    "unsupported": {
+      "value": "Unsupported",
+      "sources": [
+        "components/espcontrol/button_grid_fan.h:221",
+        "components/espcontrol/button_grid_fan.h:225",
+        "components/espcontrol/button_grid_fan.h:229"
+      ]
+    },
+    "update_available": {
+      "value": "UPDATE AVAILABLE",
+      "sources": [
+        "src/webserver/modules/state.js:668"
+      ]
+    },
+    "utc_gmt_0": {
+      "value": "UTC (GMT+0)",
+      "sources": [
+        "src/webserver/types/calendar.js:51"
+      ]
+    },
+    "vacuum_return_to_base": {
+      "value": "Vacuum Return to Base",
+      "sources": [
+        "src/webserver/types/action.js:8"
+      ]
+    },
+    "version_unknown": {
+      "value": "Version unknown",
+      "sources": [
+        "components/espcontrol/network_status.h:80"
+      ]
+    },
+    "visible_actions": {
+      "value": "Visible Actions",
+      "sources": [
+        "common/config/card_contract.json:117"
+      ]
+    },
+    "volume": {
+      "value": "Volume",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:553",
+        "components/espcontrol/button_grid_sliders.h:720",
+        "components/espcontrol/button_grid_sliders.h:727",
+        "components/espcontrol/button_grid_sliders.h:943",
+        "components/espcontrol/button_grid_subpages.h:76",
+        "src/webserver/modules/config_codec.js:53",
+        "src/webserver/types/media.js:150",
+        "src/webserver/types/media.js:232",
+        "src/webserver/types/media.js:355"
+      ]
+    },
+    "volume_high": {
+      "value": "Volume High",
+      "sources": [
+        "src/webserver/types/media.js:134"
+      ]
+    },
+    "waiting_for_home_assistant": {
+      "value": "Waiting for Home Assistant",
+      "sources": [
+        "components/espcontrol/button_grid_todo.h:1195",
+        "components/espcontrol/button_grid_todo.h:1202",
+        "components/espcontrol/button_grid_todo.h:1260",
+        "components/espcontrol/button_grid_todo.h:1273",
+        "components/espcontrol/button_grid_todo.h:1286",
+        "components/espcontrol/button_grid_todo.h:1382",
+        "components/espcontrol/button_grid_todo.h:225",
+        "components/espcontrol/button_grid_todo.h:489",
+        "components/espcontrol/button_grid_todo.h:494",
+        "components/espcontrol/button_grid_todo.h:542",
+        "components/espcontrol/button_grid_todo.h:555",
+        "components/espcontrol/button_grid_todo.h:567",
+        "components/espcontrol/button_grid_todo.h:666",
+        "components/espcontrol/button_grid_todo.h:777"
+      ]
+    },
+    "weather": {
+      "value": "Weather",
+      "sources": [
+        "common/config/card_contract.json:912",
+        "components/espcontrol/button_grid_config.h:536",
+        "components/espcontrol/button_grid_subpages.h:57",
+        "src/webserver/modules/config_codec.js:32"
+      ]
+    },
+    "weather_entity": {
+      "value": "Weather Entity",
+      "sources": [
+        "src/webserver/types/weather.js:20"
+      ]
+    },
+    "weather_forecast": {
+      "value": "Weather Forecast",
+      "sources": [
+        "common/config/card_contract.json:945",
+        "src/webserver/types/weather_forecast.js:8"
+      ]
+    },
+    "webhook": {
+      "value": "Webhook",
+      "sources": [
+        "common/config/card_contract.json:735",
+        "src/webserver/types/webhook.js:152"
+      ]
+    },
+    "weekly": {
+      "value": "Weekly",
+      "sources": [
+        "components/espcontrol/backlight.h:318"
+      ]
+    },
+    "when": {
+      "value": "When",
+      "sources": [
+        "src/webserver/types/switch.js:58"
+      ]
+    },
+    "window": {
+      "value": "Window",
+      "sources": [
+        "components/espcontrol/button_grid_cards.h:619",
+        "src/webserver/types/door_window.js:127"
+      ]
+    },
+    "window_closed": {
+      "value": "Window Closed",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:324",
+        "src/webserver/modules/config_codec.js:528"
+      ]
+    },
+    "window_open": {
+      "value": "Window Open",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:328",
+        "src/webserver/modules/config_codec.js:532"
+      ]
+    },
+    "windy": {
+      "value": "Windy",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1194"
+      ]
+    },
+    "windy_and_cloudy": {
+      "value": "Windy And Cloudy",
+      "sources": [
+        "components/espcontrol/button_grid_config.h:1195"
+      ]
+    },
+    "world_clock": {
+      "value": "World Clock",
+      "sources": [
+        "components/espcontrol/button_grid_cards.h:298",
+        "components/espcontrol/button_grid_cards.h:305",
+        "src/webserver/types/calendar.js:10",
+        "src/webserver/types/timezone.js:4"
+      ]
+    },
+    "yes": {
+      "value": "Yes",
+      "sources": [
+        "common/config/card_contract.json:47",
+        "components/espcontrol/button_grid_config.h:796"
+      ]
+    }
+  }
+}
