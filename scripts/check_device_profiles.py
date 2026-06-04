@@ -110,7 +110,7 @@ def test_weather_card_visual_matches_preview() -> None:
     assert 'set_weather_card_badge(s, "Weather Cloudy")' not in cards, (
         "current weather device card should not render a visible weather badge"
     )
-    assert 'lv_label_set_text(s.text_lbl, "Cloudy")' in cards, (
+    assert 'lv_label_set_text(s.text_lbl, espcontrol_i18n("Cloudy"))' in cards, (
         "current weather device card should render the same label as the web preview"
     )
     assert 'set_weather_card_badge(s, "Weather Partly Cloudy")' not in cards, (
@@ -236,7 +236,7 @@ def test_weather_card_visual_matches_preview() -> None:
         assert f'if (normalized == "{state}") return find_icon("{icon_name}");' in config, (
             f"current weather device card should map {state} to the matching web weather icon"
         )
-        assert f'if (normalized == "{state}") return "{label}";' in config, (
+        assert f'if (normalized == "{state}") return espcontrol_i18n(std::string("{label}"));' in config, (
             f"current weather device card should label {state} like the web preview"
         )
 

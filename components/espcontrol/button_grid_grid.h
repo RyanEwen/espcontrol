@@ -463,8 +463,9 @@ inline bool bind_garage_status_card(BtnSlot &s, const ParsedCfg &p) {
     return false;
   }
   bool show_status = garage_card_show_status(p);
+  std::string fallback_label = p.label.empty() ? espcontrol_i18n(std::string("Garage Door")) : p.label;
   TransientStatusLabel *status_label = create_transient_status_label(
-    s.text_lbl, show_status ? "--" : (p.label.empty() ? "Garage Door" : p.label));
+    s.text_lbl, show_status ? "--" : fallback_label);
   subscribe_garage_state(s.btn, s.icon_lbl, status_label,
     garage_closed_icon(p.icon), garage_open_icon(p.icon_on), p.entity, show_status);
   if (!show_status && p.label.empty())
@@ -479,8 +480,9 @@ inline LockCardCtx *bind_lock_status_card(BtnSlot &s, const ParsedCfg &p) {
   LockCardCtx *ctx = new LockCardCtx();
   ctx->entity_id = p.entity;
   lv_obj_set_user_data(s.btn, ctx);
+  std::string fallback_label = p.label.empty() ? espcontrol_i18n(std::string("Lock")) : p.label;
   TransientStatusLabel *status_label = create_transient_status_label(
-    s.text_lbl, p.label.empty() ? "Lock" : p.label);
+    s.text_lbl, fallback_label);
   subscribe_lock_state(s.btn, s.icon_lbl, status_label,
     lock_locked_icon(p.icon), lock_unlocked_icon(p.icon_on), ctx);
   if (p.label.empty())
@@ -952,7 +954,7 @@ inline void grid_phase2(
     if (p.type == "cover" && cover_toggle_mode(p.sensor)) {
       if (!p.entity.empty()) {
         TransientStatusLabel *status_label = create_transient_status_label(
-          s.text_lbl, p.label.empty() ? "Cover" : p.label);
+          s.text_lbl, p.label.empty() ? espcontrol_i18n(std::string("Cover")) : p.label);
         subscribe_cover_toggle_state(s.btn, s.icon_lbl, status_label,
           slider_icon_off(p.type, p.entity, p.icon), slider_icon_on(p.type, p.entity, p.icon, p.icon_on), p.entity);
         if (p.label.empty())
@@ -1351,7 +1353,7 @@ inline void grid_phase2(
       if (sb_cfg.type == "cover" && cover_toggle_mode(sb_cfg.sensor)) {
         if (!sb_cfg.entity.empty()) {
           TransientStatusLabel *status_label = create_transient_status_label(
-            sub_slot.text_lbl, sb_cfg.label.empty() ? "Cover" : sb_cfg.label);
+            sub_slot.text_lbl, sb_cfg.label.empty() ? espcontrol_i18n(std::string("Cover")) : sb_cfg.label);
           subscribe_cover_toggle_state(sub_slot.btn, sub_slot.icon_lbl, status_label,
             slider_icon_off(sb_cfg.type, sb_cfg.entity, sb_cfg.icon),
             slider_icon_on(sb_cfg.type, sb_cfg.entity, sb_cfg.icon, sb_cfg.icon_on),
@@ -1491,7 +1493,7 @@ inline void grid_phase2(
       }
       if (sb_cfg.type == "push") {
         register_ha_control_availability(sb_btn, sb_btn);
-        std::string push_label = sb_cfg.label.empty() ? "Push" : sb_cfg.label;
+        std::string push_label = sb_cfg.label.empty() ? espcontrol_i18n(std::string("Push")) : sb_cfg.label;
         std::string *label = new std::string(push_label);
         lv_obj_add_event_cb(sb_btn, [](lv_event_t *e) {
           std::string *label = (std::string *)lv_event_get_user_data(e);

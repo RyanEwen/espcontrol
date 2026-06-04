@@ -43,6 +43,8 @@ struct lv_obj_t {};
 using lv_coord_t = int;
 using lv_style_selector_t = int;
 using lv_color_t = int;
+inline const char *espcontrol_i18n(const char *text) { return text ? text : ""; }
+inline std::string espcontrol_i18n(const std::string &text) { return text; }
 constexpr int LV_PART_MAIN = 0;
 constexpr int LV_STATE_CHECKED = 1;
 constexpr int LV_STATE_PRESSED = 2;
