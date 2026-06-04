@@ -113,7 +113,9 @@ inline std::string cap_artwork_url(const std::string &url, int max_dim = 600) {
   int w = std::stoi(w_str);
   int h = std::stoi(h_str);
 
-  if (w <= max_dim && h <= max_dim)
+  std::string ext = url.substr(bb_pos + 3);
+  for (char &c : ext) c = static_cast<char>(c >= 'A' && c <= 'Z' ? c - 'A' + 'a' : c);
+  if (w <= max_dim && h <= max_dim && (ext == "jpg" || ext == "jpeg"))
     return url;
 
   return url.substr(0, slash_pos + 1) + dim + "bb.jpg";
