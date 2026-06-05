@@ -1,13 +1,13 @@
 ---
 name: flash-displays
-description: Flash EspControl display firmware from this repository using ESPHome. Use when the user asks to flash, reflash, update, or upload firmware to all known displays in sequence, or to a specific display such as 7inch, 7-inch P4, 10inch, 10-inch P4, P4-86, 4.3-inch P4, 4-inch P4, or 4-inch S3, over the default IP targets or explicitly over USB.
+description: Flash EspControl display firmware from this repository using ESPHome. Use when the user invokes /flash-displays with no extra display name, or asks to flash, reflash, update, or upload firmware to all known displays in sequence, or to a specific display such as 7inch, 7-inch P4, 10inch, 10-inch P4, P4-86, 4.3-inch P4, 4-inch P4, or 4-inch S3, over the default IP targets or explicitly over USB.
 ---
 
 # Flash Displays
 
 ## Overview
 
-Use the local development ESPHome configs to flash the known EspControl displays. Flash one requested display, or flash all displays in the fixed order below. Use IP flashing by default; use USB only when the user explicitly asks for USB.
+Use the local development ESPHome configs to flash the known EspControl displays. If the user invokes `/flash-displays` with no additional display name or target, assume they mean all displays. Flash one requested display, or flash all displays in the fixed order below. Use IP flashing by default; use USB only when the user explicitly asks for USB.
 
 ## Device Map
 
@@ -23,7 +23,7 @@ All screens can also be flashed over USB when explicitly requested. Use the sele
 
 If the user says only `4inch` or `4-inch`, ask whether they mean the P4 screen or the S3 screen.
 
-For `all`, flash in this sequence by default over IP:
+For `/flash-displays` with no extra target, or for `all`, flash in this sequence by default over IP:
 
 1. 7-inch P4 over OTA to `192.168.6.102`.
 2. 10-inch P4 over OTA to `192.168.6.103`.
@@ -38,7 +38,7 @@ For `all`, flash in this sequence by default over IP:
    - Use `main` as the source. If not on `main`, switch only when it is safe and there are no blocking local changes; otherwise explain the issue.
    - If the worktree is dirty, do not revert or commit unrelated changes. Tell the user the flash will use the current local checkout as-is.
    - If the worktree is clean, run `git pull --ff-only` before flashing.
-2. Resolve the requested display names from the device map. If the request is ambiguous, ask one short clarification.
+2. Resolve the requested display names from the device map. If the user invoked `/flash-displays` without naming a display, resolve it as `all`. If the request is ambiguous, ask one short clarification.
 3. If the user says `USB`, `over USB`, `use USB`, `local`, or similar, use USB for the selected display instead of the IP target.
    - For a single display, use that display's config directory and the USB target.
    - For `all over USB`, flash the displays in the normal all-display sequence, but ask the user to connect the correct display before each USB flash if the connected device is not clearly identifiable.
