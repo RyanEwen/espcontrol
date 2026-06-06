@@ -17,7 +17,7 @@ var SSE_ALIAS_GROUPS = {
   coverArtDelay: ["number-screen_saver__cover_art_delay", "number-screen_saver_cover_art_delay", "number-cover_art_delay"],
   trackOverlayDuration: ["number-screen_saver__track_overlay_duration", "number-screen_saver_track_overlay_duration", "number-track_overlay_duration"],
   coverArtProgressBar: ["switch-screen_saver__cover_art_progress_bar", "switch-screen_saver_cover_art_progress_bar", "switch-cover_art_progress_bar"],
-  openMediaSubpage: ["switch-screen_saver__open_media_subpage", "switch-screen_saver_open_media_subpage", "switch-open_media_subpage_while_playing"],
+  openMediaSubpage: ["switch-screen_saver__open_media_subpage_while_playing", "switch-screen_saver_open_media_subpage_while_playing", "switch-screen_saver__open_media_subpage", "switch-screen_saver_open_media_subpage", "switch-open_media_subpage_while_playing"],
   mediaSubpageTarget: ["text-screen_saver__media_subpage", "text-screen_saver_media_subpage", "text-cover_art_media_subpage"],
   scheduleWakeTimeout: ["number-screen__schedule_wake_timeout", "number-screen_schedule_wake_timeout", "number-schedule_wake_timeout"],
   scheduleWakeBrightness: ["number-screen__schedule_wake_brightness", "number-screen_schedule_wake_brightness", "number-schedule_wake_brightness"],

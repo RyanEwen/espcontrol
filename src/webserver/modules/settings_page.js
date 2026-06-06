@@ -649,7 +649,11 @@ function buildSettingsPage(parent) {
     coverArtOpenSubpageToggle.input.addEventListener("change", function () {
       state.coverArtOpenMediaSubpageOn = this.checked;
       syncCoverArtScreensaverUi();
-      postSwitch(entityName("screen_saver_open_media_subpage"), state.coverArtOpenMediaSubpageOn);
+      postSwitchWithObjectIds(
+        entityName("screen_saver_open_media_subpage"),
+        entityObjectIds("screen_saver_open_media_subpage"),
+        state.coverArtOpenMediaSubpageOn
+      );
     });
     els.setCoverArtOpenMediaSubpageToggle = coverArtOpenSubpageToggle.input;
 

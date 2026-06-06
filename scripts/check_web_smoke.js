@@ -80,6 +80,14 @@ assert.deepStrictEqual(Array.from(hooks.SSE_ALIAS_GROUPS.ntpServer1), [
   "text-screen__ntp_server_1",
   "text-ntp_server_1",
 ], "NTP server SSE aliases are registered together");
+assert(
+  Array.from(hooks.SSE_ALIAS_GROUPS.openMediaSubpage).includes("switch-screen_saver__open_media_subpage_while_playing"),
+  "open media subpage SSE aliases include the full generated object id"
+);
+assert(
+  Array.from(hooks.entityLookupNames("screen_saver_open_media_subpage")).includes("screen_saver__open_media_subpage_while_playing"),
+  "open media subpage post aliases include the full generated object id"
+);
 
 const manifest = JSON.parse(fs.readFileSync(DEVICE_MANIFEST, "utf8"));
 for (const slug of Object.keys(manifest.devices || {})) {

@@ -244,6 +244,8 @@ var ENTITY_CATALOG = {
       "domain": "switch",
       "name": "Screen Saver: Open Media Subpage While Playing",
       "objectIds": [
+        "screen_saver__open_media_subpage_while_playing",
+        "screen_saver_open_media_subpage_while_playing",
         "screen_saver__open_media_subpage",
         "screen_saver_open_media_subpage",
         "open_media_subpage_while_playing"
