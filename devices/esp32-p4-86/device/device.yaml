@@ -333,7 +333,7 @@ select:
     icon: "mdi:screen-rotation"
     optimistic: true
     restore_value: true
-    initial_option: "180"
+    initial_option: "0"
     options:
       - "0"
       - "90"
