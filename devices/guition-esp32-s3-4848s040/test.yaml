@@ -1,0 +1,13 @@
+substitutions:
+  name: espcontrol-4inch-13d4
+  friendly_name: Espcontrol 4inch Square
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+packages:
+  setup:
+    url: https://github.com/jtenniswood/espcontrol/
+    file: devices/guition-esp32-s3-4848s040/packages.yaml
+    refresh: 1sec
