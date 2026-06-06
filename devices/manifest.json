@@ -164,6 +164,7 @@
         "displayOffset": 180
       },
       "web": {
+        "coverArtSquareOverlay": true,
         "dragMode": "displace",
         "dragAnimation": true,
         "screen": {
@@ -429,6 +430,7 @@
         }
       ],
       "web": {
+        "coverArtSquareOverlay": true,
         "dragMode": "displace",
         "dragAnimation": true,
         "screen": {

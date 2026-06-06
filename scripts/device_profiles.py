@@ -363,6 +363,8 @@ def validate_web(slug: str, device: dict[str, Any], errors: list[str]) -> None:
         errors.append(device_error(slug, "web.dragAnimation must be true or false"))
     if "infoOnly" in web and not isinstance(web["infoOnly"], bool):
         errors.append(device_error(slug, "web.infoOnly must be true or false when set"))
+    if "coverArtSquareOverlay" in web and not isinstance(web["coverArtSquareOverlay"], bool):
+        errors.append(device_error(slug, "web.coverArtSquareOverlay must be true or false when set"))
     preview_theme = web.get("previewTheme", "default")
     if preview_theme not in ("default", "epaper"):
         errors.append(device_error(slug, "web.previewTheme must be default or epaper"))

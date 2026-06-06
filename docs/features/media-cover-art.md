@@ -15,7 +15,7 @@ You will find these controls in **Settings > Sleep & Schedule > Media Cover Art*
 - **Cover Art While Playing** - enables the cover art display.
 - **Cover Art Media Player** - chooses the media player entity to watch, such as `media_player.living_room`.
 - **Show Cover Art After** - waits for the selected delay before showing cover art.
-- **Track Overlay Duration** - controls how long track information is shown over the artwork.
+- **Track Overlay Duration** - controls how long track information is shown over the artwork on the 4-inch square displays.
 - **Show Track Progress Bar** - shows playback progress over the artwork.
 - **Hide when playing an external source** - hides cover art when the selected media player source is `TV` or `Line-in`.
 - **Open Media Subpage While Playing** - optionally opens a selected media subpage when playback starts.

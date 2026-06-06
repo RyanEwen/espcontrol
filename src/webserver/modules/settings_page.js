@@ -22,6 +22,10 @@ function appendSettingsSection(parent, title, cards) {
   });
 }
 
+function coverArtTrackOverlayDurationSupported() {
+  return !!(CFG && CFG.coverArtSquareOverlay);
+}
+
 function buildSettingsPage(parent) {
   var page = document.createElement("div");
   page.id = "sp-settings";
@@ -603,32 +607,34 @@ function buildSettingsPage(parent) {
     coverArtOptions.appendChild(coverArtDelayField);
     els.setCoverArtDelay = coverArtDelaySelect;
 
-    var trackOverlayField = document.createElement("div");
-    trackOverlayField.className = "sp-field";
-    trackOverlayField.appendChild(fieldLabel("Track Overlay Duration", "sp-set-ss-track-overlay"));
-    var trackOverlaySelect = document.createElement("select");
-    trackOverlaySelect.className = "sp-select";
-    trackOverlaySelect.id = "sp-set-ss-track-overlay";
-    [
-      { label: "Hidden", value: 0 },
-      { label: "3 seconds", value: 3 },
-      { label: "5 seconds", value: 5 },
-      { label: "10 seconds", value: 10 },
-      { label: "30 seconds", value: 30 },
-      { label: "1 minute", value: 60 },
-    ].forEach(function (opt) {
-      var o = document.createElement("option");
-      o.value = opt.value;
-      o.textContent = opt.label;
-      trackOverlaySelect.appendChild(o);
-    });
-    trackOverlaySelect.addEventListener("change", function () {
-      state.coverArtTrackOverlayDuration = parseFloat(this.value) || 0;
-      postNumber(entityName("screen_saver_track_overlay_duration"), state.coverArtTrackOverlayDuration);
-    });
-    trackOverlayField.appendChild(trackOverlaySelect);
-    coverArtOptions.appendChild(trackOverlayField);
-    els.setCoverArtTrackOverlayDuration = trackOverlaySelect;
+    if (coverArtTrackOverlayDurationSupported()) {
+      var trackOverlayField = document.createElement("div");
+      trackOverlayField.className = "sp-field";
+      trackOverlayField.appendChild(fieldLabel("Track Overlay Duration", "sp-set-ss-track-overlay"));
+      var trackOverlaySelect = document.createElement("select");
+      trackOverlaySelect.className = "sp-select";
+      trackOverlaySelect.id = "sp-set-ss-track-overlay";
+      [
+        { label: "Hidden", value: 0 },
+        { label: "3 seconds", value: 3 },
+        { label: "5 seconds", value: 5 },
+        { label: "10 seconds", value: 10 },
+        { label: "30 seconds", value: 30 },
+        { label: "1 minute", value: 60 },
+      ].forEach(function (opt) {
+        var o = document.createElement("option");
+        o.value = opt.value;
+        o.textContent = opt.label;
+        trackOverlaySelect.appendChild(o);
+      });
+      trackOverlaySelect.addEventListener("change", function () {
+        state.coverArtTrackOverlayDuration = parseFloat(this.value) || 0;
+        postNumber(entityName("screen_saver_track_overlay_duration"), state.coverArtTrackOverlayDuration);
+      });
+      trackOverlayField.appendChild(trackOverlaySelect);
+      coverArtOptions.appendChild(trackOverlayField);
+      els.setCoverArtTrackOverlayDuration = trackOverlaySelect;
+    }
 
     var coverArtProgressBarToggle = toggleRow(
       "Show Track Progress Bar",
@@ -682,42 +688,6 @@ function buildSettingsPage(parent) {
     coverArtOptions.appendChild(coverArtSubpageField);
     els.setCoverArtMediaSubpageField = coverArtSubpageField;
     els.setCoverArtMediaSubpage = coverArtSubpageSelect;
-
-    state.coverArtFallbackServerEnabled = !!state.coverArtHomeAssistantUrl;
-    var coverArtServerToggle = toggleRow(
-      "Fallback Server Address",
-      "sp-set-ss-cover-art-server-enable",
-      state.coverArtFallbackServerEnabled);
-    coverArtOptions.appendChild(coverArtServerToggle.row);
-    coverArtServerToggle.input.addEventListener("change", function () {
-      state.coverArtFallbackServerEnabled = this.checked;
-      if (!this.checked) {
-        state.coverArtHomeAssistantUrl = "";
-        syncInput(els.setCoverArtHomeAssistantUrl, "");
-        postText(entityName("screen_saver_cover_art_ha_url"), "");
-      }
-      syncCoverArtScreensaverUi();
-    });
-    els.setCoverArtFallbackServerToggle = coverArtServerToggle.input;
-
-    var coverArtServerField = document.createElement("div");
-    coverArtServerField.className = "sp-field sp-cond-field";
-    coverArtServerField.appendChild(fieldLabel("URL", "sp-set-ss-cover-art-server"));
-    var coverArtServerInp = textInput(
-      "sp-set-ss-cover-art-server",
-      state.coverArtHomeAssistantUrl,
-      "e.g. http://homeassistant.local:8123");
-    coverArtServerField.appendChild(coverArtServerInp);
-    coverArtOptions.appendChild(coverArtServerField);
-    bindTextPost(coverArtServerInp, entityName("screen_saver_cover_art_ha_url"), {
-      onBlur: function (value) {
-        state.coverArtHomeAssistantUrl = value;
-        state.coverArtFallbackServerEnabled = true;
-        syncCoverArtScreensaverUi();
-      },
-    });
-    els.setCoverArtHomeAssistantUrl = coverArtServerInp;
-    els.setCoverArtHomeAssistantUrlField = coverArtServerField;
 
     els.setCoverArtOptions = coverArtOptions;
     coverArtBody.appendChild(coverArtOptions);
@@ -1084,12 +1054,6 @@ function syncCoverArtScreensaverUi() {
   }
   if (els.setCoverArtMediaSubpageField) {
     els.setCoverArtMediaSubpageField.classList.toggle("sp-visible", !!state.coverArtOpenMediaSubpageOn);
-  }
-  if (els.setCoverArtFallbackServerToggle) {
-    els.setCoverArtFallbackServerToggle.checked = !!state.coverArtFallbackServerEnabled;
-  }
-  if (els.setCoverArtHomeAssistantUrlField) {
-    els.setCoverArtHomeAssistantUrlField.classList.toggle("sp-visible", !!state.coverArtFallbackServerEnabled);
   }
 }
 

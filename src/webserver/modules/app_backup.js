@@ -274,7 +274,6 @@ function importConfig() {
         state.coverArtScreensaverOn = importedSettings.coverArtScreensaver;
         state.coverArtMediaPlayerEntity = importedSettings.coverArtMediaPlayerEntity;
         state.coverArtHomeAssistantUrl = importedSettings.coverArtHomeAssistantUrl;
-        state.coverArtFallbackServerEnabled = !!state.coverArtHomeAssistantUrl;
         state.coverArtDelay = importedSettings.coverArtDelay;
         state.coverArtTrackOverlayDuration = importedSettings.coverArtTrackOverlayDuration;
         state.coverArtProgressBarOn = importedSettings.coverArtProgressBar;
@@ -301,7 +300,6 @@ function importConfig() {
         syncInput(els.setMediaPlayerSleepPrevention, state.mediaPlayerSleepPreventionEntity);
         syncMediaPlayerSleepPreventionUi();
         syncInput(els.setCoverArtMediaPlayer, state.coverArtMediaPlayerEntity);
-        syncInput(els.setCoverArtHomeAssistantUrl, state.coverArtHomeAssistantUrl);
         syncCoverArtScreensaverUi();
         syncThemeUi();
         if (els.setTimezone) els.setTimezone.value = state.timezone;

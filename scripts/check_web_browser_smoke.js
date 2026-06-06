@@ -47,6 +47,7 @@ function casesFromManifest() {
       slug,
       viewport: viewportFor(aspect.ratio),
       isEpaper: device.web && device.web.previewTheme === "epaper",
+      coverArtSquareOverlay: !!(device.web && device.web.coverArtSquareOverlay),
       minVisibleCards: device.web && device.web.infoOnly ? 1 : 4,
       exerciseInteractions: slug === "guition-esp32-p4-jc8012p4a1",
     };
@@ -281,14 +282,14 @@ async function assertSettingsPage(page, label, options = {}) {
     assert(await coverArtCard.isVisible(), `${label}: media cover art settings card should render`);
     await coverArtCard.locator(".card-header").click();
     await coverArtCard.locator("#sp-set-ss-cover-art-enable + .sp-toggle-track").click();
-    assert(
-      !(await page.locator("#sp-set-ss-cover-art-server").isVisible()),
-      `${label}: cover art fallback URL should stay hidden by default`
+    assert.strictEqual(
+      await page.locator("#sp-set-ss-track-overlay").count(),
+      options.coverArtSquareOverlay ? 1 : 0,
+      `${label}: track overlay duration visibility should match square cover art layout`
     );
-    await coverArtCard.locator("#sp-set-ss-cover-art-server-enable + .sp-toggle-track").click();
     assert(
-      await page.locator("#sp-set-ss-cover-art-server").isVisible(),
-      `${label}: cover art fallback URL should render when enabled`
+      await page.locator("#sp-set-ss-cover-art-server").count() === 0,
+      `${label}: cover art fallback URL field should not render`
     );
   }
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
