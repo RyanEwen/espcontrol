@@ -767,7 +767,12 @@ function buildSettingsPage(parent) {
   var idleCard = makeCollapsibleCard("Idle", idleBody, true, idleBadge);
   var coverArtCard = null;
   if (!isEpaperPreview()) {
-    coverArtCard = makeCollapsibleCard("Media Cover Art", coverArtBody, true);
+    var coverArtBadge = document.createElement("span");
+    coverArtBadge.setAttribute("aria-label", "Media cover art on");
+    coverArtBadge.innerHTML = '<span class="sp-card-badge-dot"></span><span>ON</span>';
+    els.setCoverArtBadge = coverArtBadge;
+    syncCoverArtScreensaverUi();
+    coverArtCard = makeCollapsibleCard("Media Cover Art", coverArtBody, true, coverArtBadge);
   }
 
   var backupBody = document.createElement("div");
@@ -998,6 +1003,9 @@ function syncCoverArtScreensaverUi() {
   }
   if (els.setCoverArtOptions) {
     els.setCoverArtOptions.classList.toggle("sp-visible", !!state.coverArtScreensaverOn);
+  }
+  if (els.setCoverArtBadge) {
+    els.setCoverArtBadge.className = "sp-card-badge" + (state.coverArtScreensaverOn ? "" : " sp-hidden");
   }
   if (els.setCoverArtDelay) {
     if (state.coverArtDelay < 5) {
