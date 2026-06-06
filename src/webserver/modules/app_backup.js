@@ -272,6 +272,7 @@ function importConfig() {
         state.coverArtScreensaverOn = importedSettings.coverArtScreensaver;
         state.coverArtMediaPlayerEntity = importedSettings.coverArtMediaPlayerEntity;
         state.coverArtHomeAssistantUrl = importedSettings.coverArtHomeAssistantUrl;
+        state.coverArtFallbackServerEnabled = !!state.coverArtHomeAssistantUrl;
         state.coverArtDelay = importedSettings.coverArtDelay;
         state.coverArtTrackOverlayDuration = importedSettings.coverArtTrackOverlayDuration;
         state.coverArtProgressBarOn = importedSettings.coverArtProgressBar;

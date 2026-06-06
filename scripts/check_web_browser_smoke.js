@@ -283,8 +283,13 @@ async function assertSettingsPage(page, label, options = {}) {
     await coverArtCard.locator(".card-header").click();
     await coverArtCard.locator("#sp-set-ss-cover-art-enable + .sp-toggle-track").click();
     assert(
+      !(await page.locator("#sp-set-ss-cover-art-server").isVisible()),
+      `${label}: cover art fallback URL should stay hidden by default`
+    );
+    await coverArtCard.locator("#sp-set-ss-cover-art-server-enable + .sp-toggle-track").click();
+    assert(
       await page.locator("#sp-set-ss-cover-art-server").isVisible(),
-      `${label}: cover art fallback server field should render`
+      `${label}: cover art fallback URL should render when enabled`
     );
   }
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);

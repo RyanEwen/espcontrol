@@ -234,7 +234,9 @@ function connectEvents() {
     },
     "text-screen_saver__home_assistant_url": function (val) {
       state.coverArtHomeAssistantUrl = val;
+      state.coverArtFallbackServerEnabled = !!val;
       syncInput(els.setCoverArtHomeAssistantUrl, val);
+      syncCoverArtScreensaverUi();
     },
     "number-screen_saver__cover_art_delay": function (val) {
       state.coverArtDelay = parseFloat(val) || 0;

@@ -577,20 +577,6 @@ function buildSettingsPage(parent) {
     });
     els.setCoverArtMediaPlayer = coverArtEntityInp;
 
-    var coverArtServerField = document.createElement("div");
-    coverArtServerField.className = "sp-field";
-    coverArtServerField.appendChild(fieldLabel("Fallback Server Address", "sp-set-ss-cover-art-server"));
-    var coverArtServerInp = textInput(
-      "sp-set-ss-cover-art-server",
-      state.coverArtHomeAssistantUrl,
-      "e.g. http://homeassistant.local:8123");
-    coverArtServerField.appendChild(coverArtServerInp);
-    coverArtOptions.appendChild(coverArtServerField);
-    bindTextPost(coverArtServerInp, entityName("screen_saver_cover_art_ha_url"), {
-      onBlur: function (value) { state.coverArtHomeAssistantUrl = value; },
-    });
-    els.setCoverArtHomeAssistantUrl = coverArtServerInp;
-
     var coverArtDelayField = document.createElement("div");
     coverArtDelayField.className = "sp-field";
     coverArtDelayField.appendChild(fieldLabel("Show Cover Art After", "sp-set-ss-cover-art-delay"));
@@ -681,6 +667,42 @@ function buildSettingsPage(parent) {
     coverArtOptions.appendChild(coverArtSubpageField);
     els.setCoverArtMediaSubpageField = coverArtSubpageField;
     els.setCoverArtMediaSubpage = coverArtSubpageSelect;
+
+    state.coverArtFallbackServerEnabled = !!state.coverArtHomeAssistantUrl;
+    var coverArtServerToggle = toggleRow(
+      "Fallback Server Address",
+      "sp-set-ss-cover-art-server-enable",
+      state.coverArtFallbackServerEnabled);
+    coverArtOptions.appendChild(coverArtServerToggle.row);
+    coverArtServerToggle.input.addEventListener("change", function () {
+      state.coverArtFallbackServerEnabled = this.checked;
+      if (!this.checked) {
+        state.coverArtHomeAssistantUrl = "";
+        syncInput(els.setCoverArtHomeAssistantUrl, "");
+        postText(entityName("screen_saver_cover_art_ha_url"), "");
+      }
+      syncCoverArtScreensaverUi();
+    });
+    els.setCoverArtFallbackServerToggle = coverArtServerToggle.input;
+
+    var coverArtServerField = document.createElement("div");
+    coverArtServerField.className = "sp-field sp-cond-field";
+    coverArtServerField.appendChild(fieldLabel("URL", "sp-set-ss-cover-art-server"));
+    var coverArtServerInp = textInput(
+      "sp-set-ss-cover-art-server",
+      state.coverArtHomeAssistantUrl,
+      "e.g. http://homeassistant.local:8123");
+    coverArtServerField.appendChild(coverArtServerInp);
+    coverArtOptions.appendChild(coverArtServerField);
+    bindTextPost(coverArtServerInp, entityName("screen_saver_cover_art_ha_url"), {
+      onBlur: function (value) {
+        state.coverArtHomeAssistantUrl = value;
+        state.coverArtFallbackServerEnabled = true;
+        syncCoverArtScreensaverUi();
+      },
+    });
+    els.setCoverArtHomeAssistantUrl = coverArtServerInp;
+    els.setCoverArtHomeAssistantUrlField = coverArtServerField;
 
     els.setCoverArtOptions = coverArtOptions;
     coverArtBody.appendChild(coverArtOptions);
@@ -1044,6 +1066,12 @@ function syncCoverArtScreensaverUi() {
   }
   if (els.setCoverArtMediaSubpageField) {
     els.setCoverArtMediaSubpageField.classList.toggle("sp-visible", !!state.coverArtOpenMediaSubpageOn);
+  }
+  if (els.setCoverArtFallbackServerToggle) {
+    els.setCoverArtFallbackServerToggle.checked = !!state.coverArtFallbackServerEnabled;
+  }
+  if (els.setCoverArtHomeAssistantUrlField) {
+    els.setCoverArtHomeAssistantUrlField.classList.toggle("sp-visible", !!state.coverArtFallbackServerEnabled);
   }
 }
 

@@ -86,6 +86,7 @@ var state = {
   coverArtScreensaverOn: false,
   coverArtMediaPlayerEntity: "",
   coverArtHomeAssistantUrl: "",
+  coverArtFallbackServerEnabled: false,
   coverArtDelay: 10,
   coverArtTrackOverlayDuration: 5,
   coverArtProgressBarOn: true,
