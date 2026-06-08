@@ -18,8 +18,7 @@
 
 static const char *const TAG = "artwork_image";
 static const char *const CONTENT_TYPE_HEADER_NAME = "content-type";
-static constexpr uint32_t RETIRED_BUFFER_GRACE_MS = 1000;
-static constexpr size_t MAX_RETIRED_BUFFERS = 2;
+static constexpr uint32_t RETIRED_BUFFER_GRACE_MS = 3000;
 static constexpr size_t MAX_DOWNLOAD_BUFFER_SIZE = 2 * 1024 * 1024;
 static constexpr int LOCAL_ARTWORK_HTTP_TIMEOUT_MS = 6500;
 
@@ -933,8 +932,7 @@ void ArtworkImage::cleanup_retired_buffers_(bool force) {
   uint32_t now = millis();
   auto it = this->retired_buffers_.begin();
   while (it != this->retired_buffers_.end()) {
-    if (force || now - it->retired_at >= RETIRED_BUFFER_GRACE_MS ||
-        this->retired_buffers_.size() > MAX_RETIRED_BUFFERS) {
+    if (force || now - it->retired_at >= RETIRED_BUFFER_GRACE_MS) {
       this->allocator_.deallocate(it->data, it->size);
       it = this->retired_buffers_.erase(it);
     } else {
