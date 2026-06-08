@@ -225,6 +225,13 @@ inline void image_card_handle_download_error(ImageCardCtx *ctx) {
     image_card_set_loading_state(ctx, "Loading", true);
     return;
   }
+  if (ctx->image_ready) {
+    image_card_hide_loading(ctx);
+    if (!ctx->source_url.empty()) {
+      ctx->next_download_retry_ms = now + IMAGE_CARD_RETRY_INTERVAL_MS;
+    }
+    return;
+  }
   if (image_card_modal_active_for(ctx)) {
     return;
   } else {
