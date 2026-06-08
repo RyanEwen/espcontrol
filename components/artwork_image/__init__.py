@@ -260,7 +260,7 @@ async def to_code(config):
         try:
             from esphome.core import CORE
 
-            if CORE.is_esp32 and CORE.using_esp_idf:
+            if CORE.is_esp32 and not CORE.using_arduino:
                 esp32.add_idf_sdkconfig_option("CONFIG_ESP_TLS_INSECURE", True)
                 esp32.add_idf_sdkconfig_option(
                     "CONFIG_ESP_TLS_SKIP_SERVER_CERT_VERIFY", True
