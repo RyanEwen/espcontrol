@@ -140,6 +140,25 @@ int main() {
   assert(legacy_weather_forecast.type == "weather");
   assert(legacy_weather_forecast.precision == "tomorrow");
   assert(legacy_weather_forecast.label == "");
+
+  auto image_default = parse_cfg("camera.front_door;;Auto;Auto;;;image;;");
+  assert(image_default.type == "image");
+  assert(image_default.options == "");
+  assert(image_card_refresh_interval_ms(image_default) == 0);
+  assert(!image_card_timer_only_refresh(image_default));
+  auto image_refresh = parse_cfg("~camera.front_door,,Auto,Auto,,,image,,image_refresh=30%2Cimage_refresh_mode=timer");
+  assert(image_refresh.type == "image");
+  assert(image_refresh.options == "image_refresh=30,image_refresh_mode=timer");
+  assert(image_card_refresh_interval_ms(image_refresh) == 30000);
+  assert(image_card_timer_only_refresh(image_refresh));
+  auto image_refresh_default_mode = parse_cfg("camera.front_door;;Auto;Auto;;;image;;image_refresh=60,image_refresh_mode=bad");
+  assert(image_refresh_default_mode.options == "image_refresh=60");
+  assert(image_card_refresh_interval_ms(image_refresh_default_mode) == 60000);
+  assert(!image_card_timer_only_refresh(image_refresh_default_mode));
+  auto image_refresh_invalid = parse_cfg("camera.front_door;;Auto;Auto;;;image;;image_refresh=5,image_refresh_mode=timer");
+  assert(image_refresh_invalid.options == "");
+  assert(image_card_refresh_interval_ms(image_refresh_invalid) == 0);
+
   set_display_temperature_unit("\u00B0F", "UTC (GMT+0)");
   assert(convert_temperature_value_for_display(10, "\u00B0C") == 50);
   assert(convert_temperature_value_for_display(10, "\u00B0F") == 10);

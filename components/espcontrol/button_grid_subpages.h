@@ -128,6 +128,15 @@ inline SubpageBtn normalize_subpage_btn(SubpageBtn b) {
     if (b.icon.empty()) b.icon = "Auto";
     b.options = webhook_card_options_normalized(b.options);
   }
+  if (b.type == "image") {
+    b.label.clear();
+    b.icon = "Auto";
+    b.icon_on = "Auto";
+    b.sensor.clear();
+    b.unit.clear();
+    b.precision.clear();
+    b.options = image_card_options_normalized(b.options);
+  }
   if (b.type == "todo") {
     b.sensor.clear();
     b.unit.clear();

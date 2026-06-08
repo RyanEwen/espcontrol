@@ -11,6 +11,57 @@ var IMAGE_CARD_METADATA = {
   },
 };
 
+function imageRefreshIntervalOptions() {
+  return [
+    ["off", "Off"],
+    ["10", "10 seconds"],
+    ["30", "30 seconds"],
+    ["60", "1 minute"],
+    ["300", "5 minutes"],
+  ];
+}
+
+function imageRefreshModeOptions() {
+  return [
+    ["changes_timer", "Changes + interval"],
+    ["timer", "Interval only"],
+  ];
+}
+
+function renderImageRefreshSettings(panel, b, helpers) {
+  var intervalField = helpers.selectField(
+    "Refresh Interval",
+    helpers.idPrefix + "image-refresh",
+    imageRefreshIntervalOptions(),
+    imageRefreshInterval(b)
+  );
+  panel.appendChild(intervalField.field);
+
+  var modeField = helpers.selectField(
+    "Refresh Mode",
+    helpers.idPrefix + "image-refresh-mode",
+    imageRefreshModeOptions(),
+    imageRefreshMode(b)
+  );
+  panel.appendChild(modeField.field);
+
+  function syncModeVisibility() {
+    modeField.field.hidden = imageRefreshInterval(b) === "off";
+    modeField.select.value = imageRefreshMode(b);
+  }
+
+  intervalField.select.addEventListener("change", function () {
+    setImageRefreshInterval(b, this.value);
+    helpers.saveField("options", b.options);
+    syncModeVisibility();
+  });
+  modeField.select.addEventListener("change", function () {
+    setImageRefreshMode(b, this.value);
+    helpers.saveField("options", b.options);
+  });
+  syncModeVisibility();
+}
+
 registerButtonType("image", {
   label: function () { return cardContractCardLabel("image"); },
   allowInSubpage: function () { return cardContractAllowInSubpage("image"); },
@@ -27,7 +78,7 @@ registerButtonType("image", {
     b.sensor = "";
     b.unit = "";
     b.precision = "";
-    b.options = "";
+    b.options = normalizeImageOptions(b.options);
   },
   renderSettings: function (panel, b, slot, helpers) {
     b.label = "";
@@ -36,8 +87,9 @@ registerButtonType("image", {
     b.sensor = "";
     b.unit = "";
     b.precision = "";
-    b.options = "";
+    b.options = normalizeImageOptions(b.options);
     helpers.renderCardEntityField(panel, b, helpers, IMAGE_CARD_METADATA);
+    renderImageRefreshSettings(panel, b, helpers);
   },
   renderPreview: function () {
     return {

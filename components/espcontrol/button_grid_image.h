@@ -9,9 +9,14 @@ struct ImageCardCtx {
   lv_obj_t *btn = nullptr;
   esphome::artwork_image::ArtworkImage *image = nullptr;
   std::string entity_id;
+  std::string source_url;
   std::string url;
+  uint32_t refresh_interval_ms = 0;
+  uint32_t next_refresh_ms = 0;
   bool active = false;
   bool callbacks_bound = false;
+  bool requested_once = false;
+  bool timer_only = false;
 };
 
 inline ImageCardCtx *image_card_contexts() {
@@ -60,7 +65,12 @@ inline void reset_image_card_pool(const GridConfig &cfg) {
     contexts[i].widget = nullptr;
     contexts[i].btn = nullptr;
     contexts[i].entity_id.clear();
+    contexts[i].source_url.clear();
     contexts[i].url.clear();
+    contexts[i].refresh_interval_ms = 0;
+    contexts[i].next_refresh_ms = 0;
+    contexts[i].requested_once = false;
+    contexts[i].timer_only = false;
     contexts[i].image = cfg.image_card_images ? cfg.image_card_images[i] : nullptr;
     if (contexts[i].image) contexts[i].image->release();
   }
@@ -146,8 +156,27 @@ inline std::string image_card_cache_bust_url(const std::string &url) {
   return next;
 }
 
-inline void image_card_request_url(ImageCardCtx *ctx, const GridConfig &cfg,
-                                   esphome::StringRef picture) {
+inline void image_card_schedule_next_refresh(ImageCardCtx *ctx, uint32_t now = esphome::millis()) {
+  if (!ctx || ctx->refresh_interval_ms == 0) {
+    if (ctx) ctx->next_refresh_ms = 0;
+    return;
+  }
+  ctx->next_refresh_ms = now + ctx->refresh_interval_ms;
+}
+
+inline void image_card_request_source_url(ImageCardCtx *ctx) {
+  if (!ctx || !ctx->active || !ctx->image || ctx->source_url.empty()) return;
+  uint32_t now = esphome::millis();
+  ctx->url = image_card_cache_bust_url(ctx->source_url);
+  ctx->requested_once = true;
+  image_card_schedule_next_refresh(ctx, now);
+  image_card_apply_widget_geometry(ctx->btn, ctx->widget, ctx->image);
+  ESP_LOGI("image_card", "Downloading camera image for %s", ctx->entity_id.c_str());
+  ctx->image->request_update_url(ctx->url);
+}
+
+inline void image_card_handle_picture(ImageCardCtx *ctx, const GridConfig &cfg,
+                                      esphome::StringRef picture) {
   if (!ctx || !ctx->active || !ctx->image) return;
   std::string base = cfg.home_assistant_base_url ? cfg.home_assistant_base_url() : "";
   std::string raw = string_ref_limited(picture, 4096);
@@ -157,10 +186,27 @@ inline void image_card_request_url(ImageCardCtx *ctx, const GridConfig &cfg,
     image_card_hide(ctx);
     return;
   }
-  ctx->url = image_card_cache_bust_url(url);
-  image_card_apply_widget_geometry(ctx->btn, ctx->widget, ctx->image);
-  ESP_LOGI("image_card", "Downloading camera image for %s", ctx->entity_id.c_str());
-  ctx->image->request_update_url(ctx->url);
+  ctx->source_url = url;
+  if (!ctx->requested_once || !ctx->timer_only || ctx->refresh_interval_ms == 0) {
+    image_card_request_source_url(ctx);
+  } else if (ctx->next_refresh_ms == 0) {
+    image_card_schedule_next_refresh(ctx);
+  }
+}
+
+inline void image_card_refresh_due() {
+  ImageCardCtx *contexts = image_card_contexts();
+  uint32_t now = esphome::millis();
+  for (int i = 0; i < 4; i++) {
+    ImageCardCtx *ctx = &contexts[i];
+    if (!ctx->active || ctx->refresh_interval_ms == 0 ||
+        ctx->source_url.empty() || !ctx->requested_once) {
+      continue;
+    }
+    if ((int32_t)(now - ctx->next_refresh_ms) >= 0) {
+      image_card_request_source_url(ctx);
+    }
+  }
 }
 
 inline bool bind_image_card(BtnSlot &s, const ParsedCfg &p, const GridConfig &cfg) {
@@ -181,6 +227,8 @@ inline bool bind_image_card(BtnSlot &s, const ParsedCfg &p, const GridConfig &cf
   ctx->widget = widget;
   ctx->btn = s.btn;
   ctx->entity_id = p.entity;
+  ctx->refresh_interval_ms = image_card_refresh_interval_ms(p);
+  ctx->timer_only = image_card_timer_only_refresh(p);
   image_card_apply_widget_geometry(ctx->btn, ctx->widget, ctx->image);
 
   ha_subscribe_attribute(
@@ -188,7 +236,7 @@ inline bool bind_image_card(BtnSlot &s, const ParsedCfg &p, const GridConfig &cf
     std::string("entity_picture"),
     std::function<void(esphome::StringRef)>(
       [ctx, cfg](esphome::StringRef picture) {
-        image_card_request_url(ctx, cfg, picture);
+        image_card_handle_picture(ctx, cfg, picture);
       })
   );
   ha_get_attribute(
@@ -196,7 +244,7 @@ inline bool bind_image_card(BtnSlot &s, const ParsedCfg &p, const GridConfig &cf
     std::string("entity_picture"),
     std::function<void(esphome::StringRef)>(
       [ctx, cfg](esphome::StringRef picture) {
-        image_card_request_url(ctx, cfg, picture);
+        image_card_handle_picture(ctx, cfg, picture);
       })
   );
   return true;

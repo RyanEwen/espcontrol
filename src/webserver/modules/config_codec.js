@@ -108,7 +108,7 @@ function normalizeButtonConfig(b) {
     b.sensor = "";
     b.unit = "";
     b.precision = "";
-    b.options = "";
+    b.options = normalizeImageOptions(b.options);
   }
   if (b && b.type === "light_switch") {
     b.sensor = "";
@@ -200,6 +200,8 @@ var CLIMATE_LABEL_DISPLAY_OPTION = "label_display";
 var CLIMATE_NUMBER_DISPLAY_OPTION = "number_display";
 var MEDIA_VOLUME_MAX_OPTION = "volume_max";
 var SUBPAGE_KIND_OPTION = "subpage_kind";
+var IMAGE_REFRESH_OPTION = "image_refresh";
+var IMAGE_REFRESH_MODE_OPTION = "image_refresh_mode";
 var ALARM_ACTIONS = [
   { value: "away", label: "Arm Away", service: "alarm_control_panel.alarm_arm_away", icon: "Shield Lock" },
   { value: "home", label: "Arm Home", service: "alarm_control_panel.alarm_arm_home", icon: "Shield Home" },
@@ -317,6 +319,65 @@ function normalizeMediaOptions(options, mode) {
   }
   out = copyLargeNumbersOption(out, options);
   return out;
+}
+
+function imageRefreshIntervalValues() {
+  var spec = cardContractOptionSpec("image", IMAGE_REFRESH_OPTION);
+  return spec && spec.values ? spec.values.slice() : ["off", "10", "30", "60", "300"];
+}
+
+function imageRefreshModeValues() {
+  var spec = cardContractOptionSpec("image", IMAGE_REFRESH_MODE_OPTION);
+  return spec && spec.values ? spec.values.slice() : ["changes_timer", "timer"];
+}
+
+function normalizeImageRefreshInterval(value) {
+  value = String(value || "").trim();
+  return imageRefreshIntervalValues().indexOf(value) >= 0 ? value : "off";
+}
+
+function normalizeImageRefreshMode(value) {
+  value = String(value || "").trim();
+  return imageRefreshModeValues().indexOf(value) >= 0 ? value : "changes_timer";
+}
+
+function imageRefreshInterval(b) {
+  return normalizeImageRefreshInterval(configOptionValue(b && b.options, IMAGE_REFRESH_OPTION));
+}
+
+function imageRefreshMode(b) {
+  return normalizeImageRefreshMode(configOptionValue(b && b.options, IMAGE_REFRESH_MODE_OPTION));
+}
+
+function normalizeImageOptions(options) {
+  var interval = normalizeImageRefreshInterval(configOptionValue(options, IMAGE_REFRESH_OPTION));
+  if (interval === "off") return "";
+  var out = setConfigOptionValue("", IMAGE_REFRESH_OPTION, interval);
+  var mode = normalizeImageRefreshMode(configOptionValue(options, IMAGE_REFRESH_MODE_OPTION));
+  if (mode !== "changes_timer") {
+    out = setConfigOptionValue(out, IMAGE_REFRESH_MODE_OPTION, mode);
+  }
+  return out;
+}
+
+function setImageRefreshInterval(b, value) {
+  if (!b) return "";
+  var interval = normalizeImageRefreshInterval(value);
+  b.options = setConfigOptionValue(b.options, IMAGE_REFRESH_OPTION, interval === "off" ? "" : interval);
+  b.options = normalizeImageOptions(b.options);
+  return b.options;
+}
+
+function setImageRefreshMode(b, value) {
+  if (!b) return "";
+  var mode = normalizeImageRefreshMode(value);
+  b.options = setConfigOptionValue(
+    b.options,
+    IMAGE_REFRESH_MODE_OPTION,
+    mode === "changes_timer" ? "" : mode
+  );
+  b.options = normalizeImageOptions(b.options);
+  return b.options;
 }
 
 function normalizeSubpageKind(value) {
@@ -1044,7 +1105,6 @@ function buttonConfigFields(b) {
     sensor = "";
     unit = "";
     precision = "";
-    options = "";
   }
   if (type === "door_window") precision = normalizeDoorWindowSubtype(precision);
   var options = b && b.options || "";
@@ -1074,9 +1134,11 @@ function buttonConfigFields(b) {
     options = normalizeDoorWindowOptions(options);
   } else if (type === "presence") {
     options = normalizePresenceOptions(options);
+  } else if (type === "image") {
+    options = normalizeImageOptions(options);
   } else if (isActionOptionSelect || isFanCardType(type)) {
     options = "";
-  } else if (type !== "action" && type !== "alarm_action" && type !== "garage" && type !== "webhook" && type !== "media" && type !== "presence" && type !== "image" && !cardLargeNumbersSupported({ type: type, precision: precision })) {
+  } else if (type !== "action" && type !== "alarm_action" && type !== "garage" && type !== "webhook" && type !== "media" && type !== "presence" && !cardLargeNumbersSupported({ type: type, precision: precision })) {
     options = "";
   }
   if (type === "door_window") {

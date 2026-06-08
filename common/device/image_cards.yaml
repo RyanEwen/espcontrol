@@ -12,6 +12,7 @@ artwork_image:
     resize_mode: COVER
     buffer_size: 8192
     allow_insecure_local_urls: true
+
   - url: "https://placehold.co/1x1/000000/000000.jpg"
     id: image_card_download_2
     format: AUTO
@@ -21,6 +22,7 @@ artwork_image:
     resize_mode: COVER
     buffer_size: 8192
     allow_insecure_local_urls: true
+
   - url: "https://placehold.co/1x1/000000/000000.jpg"
     id: image_card_download_3
     format: AUTO
@@ -30,6 +32,7 @@ artwork_image:
     resize_mode: COVER
     buffer_size: 8192
     allow_insecure_local_urls: true
+
   - url: "https://placehold.co/1x1/000000/000000.jpg"
     id: image_card_download_4
     format: AUTO
@@ -39,3 +42,9 @@ artwork_image:
     resize_mode: COVER
     buffer_size: 8192
     allow_insecure_local_urls: true
+
+interval:
+  - interval: 1s
+    then:
+      - lambda: |-
+          image_card_refresh_due();

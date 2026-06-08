@@ -1573,6 +1573,32 @@ assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("fan_speed", t
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("image", false, false), false, "image picker hidden without experimental flag");
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("image", true, false), true, "image picker visible with experimental flag");
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("image", true, true), true, "image picker visible in subpages with experimental flag");
+assert.deepStrictEqual(Array.from(hooks.imageRefreshIntervalValues()), ["off", "10", "30", "60", "300"], "image refresh interval values are contract-backed");
+assert.deepStrictEqual(Array.from(hooks.imageRefreshModeValues()), ["changes_timer", "timer"], "image refresh mode values are contract-backed");
+assert.strictEqual(hooks.normalizeImageOptions("image_refresh=30,image_refresh_mode=timer,unknown=1"), "image_refresh=30,image_refresh_mode=timer", "image refresh options keep valid values");
+assert.strictEqual(hooks.normalizeImageOptions("image_refresh=5,image_refresh_mode=bad"), "", "image refresh options drop invalid values");
+assertButtonRoundTrip(hooks, "image card default options", {
+  entity: "camera.front_door",
+  label: "",
+  icon: "Auto",
+  icon_on: "Auto",
+  sensor: "",
+  unit: "",
+  type: "image",
+  precision: "",
+  options: "",
+}, false);
+assertButtonRoundTrip(hooks, "image card refresh options", {
+  entity: "camera.front_door",
+  label: "",
+  icon: "Auto",
+  icon_on: "Auto",
+  sensor: "",
+  unit: "",
+  type: "image",
+  precision: "",
+  options: "image_refresh=30,image_refresh_mode=timer",
+}, false);
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("fan_switch", true, false), false, "fan subtype hidden from top-level picker");
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("fan_switch", true, true), false, "fan switch subtype hidden from subpage picker");
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("fan_oscillate", true, true), false, "fan oscillation subtype hidden from subpage picker");
