@@ -951,6 +951,7 @@
     "image": {
       "label": "Image",
       "allowInSubpage": true,
+      "experimental": "developer",
       "domains": ["camera"],
       "default": {
         "entity": "",
