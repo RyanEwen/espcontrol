@@ -246,8 +246,14 @@ inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
     return;
   }
 
+  screen_lock_register_controlled_button(s.btn);
+
   if (p.type == "image") {
     setup_image_card(s);
+    return;
+  }
+  if (p.type == "screen_lock") {
+    setup_screen_lock_card(s, p);
     return;
   }
 
@@ -742,6 +748,7 @@ inline void grid_phase1(
   weather_forecast_cancel_pending_requests();
   reset_weather_forecast_cards();
   reset_climate_control_refs();
+  screen_lock_reset_registry();
 
   for (int pos = 0; pos < NS; pos++) {
     int idx = order.positions[pos];
@@ -765,6 +772,7 @@ inline void grid_phase1(
     setup_card_visual(s, p, cfg, palette, row_span, col_span);
     refresh_card_layout(s, p, cfg, row_span);
   }
+  screen_lock_apply();
   ESP_LOGI("sensors", "Phase 1: done (%lu ms)", esphome::millis());
 }
 
@@ -1392,6 +1400,14 @@ inline void grid_phase2(
       display_apply_slot_text_width(sub_slot, display);
       setup_card_visual(sub_slot, sb_cfg, cfg, palette, rs, cs);
 
+      if (sb_cfg.type == "screen_lock") {
+        lv_obj_add_event_cb(sb_btn, [](lv_event_t *e) {
+          lv_obj_t *target = static_cast<lv_obj_t *>(lv_event_get_target(e));
+          if (target && lv_obj_has_state(target, LV_STATE_DISABLED)) return;
+          screen_lock_toggle();
+        }, LV_EVENT_CLICKED, nullptr);
+        continue;
+      }
       if (bind_image_card(sub_slot, sb_cfg, cfg, true)) continue;
       if (bind_basic_sensor_card(sub_slot, sb_cfg, palette)) continue;
       if (bind_passive_card_sources(sub_slot, sb_cfg)) continue;
@@ -1875,6 +1891,7 @@ inline void grid_phase2(
     lv_obj_set_user_data(slots[si].btn, (void *)sub_scr);
   }
   if (!ha_api_state_connected()) apply_registered_ha_control_availability(false);
+  screen_lock_apply();
   refresh_weather_forecast_cards();
   grid_log_memory("end");
   ESP_LOGI("sensors", "Phase 2: done (%lu ms)", esphome::millis());

@@ -482,6 +482,39 @@ inline void setup_lock_card(BtnSlot &s, const ParsedCfg &p) {
   lv_label_set_text(s.text_lbl, lock_card_label(p));
 }
 
+inline const char *screen_lock_locked_icon(const ParsedCfg &p) {
+  return find_icon((p.icon.empty() || p.icon == "Auto") ? "Lock" : p.icon.c_str());
+}
+
+inline const char *screen_lock_unlocked_icon(const ParsedCfg &p) {
+  return find_icon((p.icon_on.empty() || p.icon_on == "Auto") ? "Lock Open" : p.icon_on.c_str());
+}
+
+inline std::string screen_lock_card_label(const ParsedCfg &p) {
+  return p.label.empty() ? espcontrol_i18n(std::string("Screen Lock")) : p.label;
+}
+
+inline void screen_lock_register_card(const BtnSlot &s, const ParsedCfg &p) {
+  ScreenLockCardRef ref;
+  ref.btn = s.btn;
+  ref.icon_lbl = s.icon_lbl;
+  ref.text_lbl = s.text_lbl;
+  ref.locked_icon = screen_lock_locked_icon(p);
+  ref.unlocked_icon = screen_lock_unlocked_icon(p);
+  ref.label = screen_lock_card_label(p);
+  screen_lock_card_refs().push_back(ref);
+  screen_lock_register_controlled_button(s.btn);
+}
+
+inline void setup_screen_lock_card(BtnSlot &s, const ParsedCfg &p) {
+  lv_label_set_text(s.icon_lbl,
+    screen_lock_enabled() ? screen_lock_locked_icon(p) : screen_lock_unlocked_icon(p));
+  std::string label = screen_lock_card_label(p);
+  lv_label_set_text(s.text_lbl, label.c_str());
+  screen_lock_register_card(s, p);
+  apply_push_button_transition(s.btn);
+}
+
 inline void apply_push_button_transition(lv_obj_t *btn) {
   static const lv_style_prop_t push_props[] = {LV_STYLE_BG_COLOR, LV_STYLE_PROP_INV};
   static lv_style_transition_dsc_t push_trans;

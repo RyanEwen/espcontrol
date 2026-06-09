@@ -884,6 +884,22 @@ var CARD_CONTRACT_CARDS = {
       "options": ""
     }
   },
+  "screen_lock": {
+    "label": "Screen Lock",
+    "allowInSubpage": true,
+    "domains": [],
+    "default": {
+      "entity": "",
+      "label": "",
+      "icon": "Lock",
+      "icon_on": "Lock Open",
+      "sensor": "",
+      "unit": "",
+      "type": "screen_lock",
+      "precision": "",
+      "options": ""
+    }
+  },
   "webhook": {
     "label": "Webhook",
     "allowInSubpage": true,
@@ -1251,6 +1267,7 @@ var CARD_CONTRACT_SUBPAGE_TYPE_CODES = {
   "media": "M",
   "climate": "H",
   "push": "P",
+  "screen_lock": "SL",
   "webhook": "WH",
   "internal": "I",
   "subpage": "G"
@@ -1283,6 +1300,7 @@ var CARD_CONTRACT_SUBPAGE_TYPES_BY_CODE = {
   "M": "media",
   "H": "climate",
   "P": "push",
+  "SL": "screen_lock",
   "WH": "webhook",
   "I": "internal",
   "G": "subpage"

@@ -80,6 +80,7 @@ function subpageTypeFromCode(code) {
     H: "climate",
     WH: "webhook",
     P: "push",
+    SL: "screen_lock",
     I: "internal",
     G: "subpage",
   }[code || ""] || (code || "");
@@ -270,6 +271,7 @@ assertButtonTypeSpecBacked("clock", "clock card");
 assertButtonTypeSpecBacked("timezone", "timezone card");
 assertButtonTypeSpecBacked("weather", "weather card");
 assertButtonTypeSpecBacked("push", "push card");
+assertButtonTypeSpecBacked("screen_lock", "screen lock card");
 assertButtonTypeSpecBacked("webhook", "webhook card");
 assertButtonTypeSpecBacked("internal", "internal relay card");
 assertButtonTypeSpecBacked("garage", "garage card");
@@ -780,6 +782,34 @@ assertButtonRoundTrip(hooks, "internal relay push button", {
   type: "internal",
   precision: "",
 }, false);
+
+const screenLockCard = {
+  entity: "",
+  label: "Screen Lock",
+  icon: "Lock",
+  icon_on: "Lock Open",
+  sensor: "",
+  unit: "",
+  type: "screen_lock",
+  precision: "",
+  options: "",
+};
+assertButtonRoundTrip(hooks, "screen lock local card", screenLockCard, false);
+assert.deepStrictEqual(
+  buttonShape(hooks.parseButtonConfig(hooks.serializeButtonConfig({
+    entity: "switch.should_not_save",
+    label: "Screen Lock",
+    icon: "Auto",
+    icon_on: "Auto",
+    sensor: "sensor.should_not_save",
+    unit: "%",
+    type: "screen_lock",
+    precision: "2",
+    options: "large_numbers",
+  }))),
+  buttonShape(screenLockCard),
+  "screen lock card strips non-local config fields"
+);
 
 assertButtonRoundTrip(hooks, "webhook post json", {
   entity: "https://maker.ifttt.com/trigger/door/json/with/key/test",

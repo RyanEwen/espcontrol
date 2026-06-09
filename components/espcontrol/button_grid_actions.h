@@ -495,7 +495,9 @@ inline void handle_button_click(const std::string &cfg, int slot_num,
       p.type == "presence" ||
       p.type == "calendar" || p.type == "clock" || p.type == "timezone" ||
       p.type == "weather_forecast") return;
-  if (p.type == "push") {
+  if (p.type == "screen_lock") {
+    screen_lock_toggle();
+  } else if (p.type == "push") {
     std::string label = p.label;
     if (label.empty()) {
       char buf[16];

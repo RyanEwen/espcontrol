@@ -103,7 +103,109 @@ struct BtnSlot {
   lv_obj_t *subpage_lbl = nullptr;  // small chevron marker for subpage cards
 };
 
+struct ParsedCfg;
 inline void set_card_checked_state(lv_obj_t *btn, bool checked);
+
+struct ScreenLockCardRef {
+  lv_obj_t *btn = nullptr;
+  lv_obj_t *icon_lbl = nullptr;
+  lv_obj_t *text_lbl = nullptr;
+  const char *locked_icon = nullptr;
+  const char *unlocked_icon = nullptr;
+  std::string label;
+};
+
+inline bool &screen_lock_enabled() {
+  static bool locked = false;
+  return locked;
+}
+
+inline std::vector<lv_obj_t *> &screen_lock_controlled_buttons() {
+  static std::vector<lv_obj_t *> buttons;
+  return buttons;
+}
+
+inline std::vector<ScreenLockCardRef> &screen_lock_card_refs() {
+  static std::vector<ScreenLockCardRef> refs;
+  return refs;
+}
+
+inline std::vector<lv_obj_t *> &screen_lock_disabled_buttons() {
+  static std::vector<lv_obj_t *> buttons;
+  return buttons;
+}
+
+inline void screen_lock_reset_registry() {
+  screen_lock_controlled_buttons().clear();
+  screen_lock_card_refs().clear();
+  screen_lock_disabled_buttons().clear();
+}
+
+inline bool screen_lock_button_is_lock_card(lv_obj_t *btn) {
+  for (const auto &ref : screen_lock_card_refs()) {
+    if (ref.btn == btn) return true;
+  }
+  return false;
+}
+
+inline void screen_lock_register_controlled_button(lv_obj_t *btn) {
+  if (!btn) return;
+  auto &buttons = screen_lock_controlled_buttons();
+  if (std::find(buttons.begin(), buttons.end(), btn) == buttons.end()) {
+    buttons.push_back(btn);
+  }
+}
+
+inline void screen_lock_register_card(const BtnSlot &s, const ParsedCfg &p);
+
+inline void screen_lock_apply() {
+  bool locked = screen_lock_enabled();
+  if (screen_lock_card_refs().empty()) {
+    locked = false;
+    screen_lock_enabled() = false;
+  }
+
+  auto &disabled_by_lock = screen_lock_disabled_buttons();
+  for (lv_obj_t *btn : screen_lock_controlled_buttons()) {
+    if (!btn || screen_lock_button_is_lock_card(btn)) continue;
+    if (locked) {
+      if (!lv_obj_has_state(btn, LV_STATE_DISABLED)) {
+        lv_obj_add_state(btn, LV_STATE_DISABLED);
+        if (std::find(disabled_by_lock.begin(), disabled_by_lock.end(), btn) == disabled_by_lock.end()) {
+          disabled_by_lock.push_back(btn);
+        }
+      }
+    } else {
+      if (std::find(disabled_by_lock.begin(), disabled_by_lock.end(), btn) != disabled_by_lock.end()) {
+        lv_obj_clear_state(btn, LV_STATE_DISABLED);
+      }
+    }
+  }
+  if (!locked) disabled_by_lock.clear();
+
+  for (const auto &ref : screen_lock_card_refs()) {
+    if (!ref.btn) continue;
+    lv_obj_clear_state(ref.btn, LV_STATE_DISABLED);
+    set_card_checked_state(ref.btn, locked);
+    if (ref.icon_lbl) {
+      const char *icon = locked ? ref.locked_icon : ref.unlocked_icon;
+      lv_label_set_text(ref.icon_lbl, icon ? icon : "");
+    }
+    if (ref.text_lbl) {
+      lv_label_set_text(ref.text_lbl,
+        ref.label.empty() ? espcontrol_i18n("Screen Lock") : ref.label.c_str());
+    }
+  }
+}
+
+inline void screen_lock_set_enabled(bool locked) {
+  screen_lock_enabled() = locked;
+  screen_lock_apply();
+}
+
+inline void screen_lock_toggle() {
+  screen_lock_set_enabled(!screen_lock_enabled());
+}
 
 // Extract the Nth semicolon-delimited field from a config string
 inline std::string cfg_field(const std::string &cfg, int idx) {
@@ -741,6 +843,15 @@ inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
       : "Auto";
     if (!image_card_label_enabled(p)) p.label.clear();
   }
+  if (p.type == "screen_lock") {
+    p.entity.clear();
+    p.sensor.clear();
+    p.unit.clear();
+    p.precision.clear();
+    p.options.clear();
+    if (p.icon.empty() || p.icon == "Auto") p.icon = "Lock";
+    if (p.icon_on.empty() || p.icon_on == "Auto") p.icon_on = "Lock Open";
+  }
   if (p.type == "todo") {
     p.sensor.clear();
     p.unit.clear();
@@ -794,7 +905,7 @@ inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
     if (p.icon_on.empty() || p.icon_on == "Auto") p.icon_on = "Motion Sensor";
     p.options = presence_card_options_normalized(p.options);
   }
-  if (!p.type.empty() && p.type != "action" && p.type != "alarm" && p.type != "alarm_action" && p.type != "climate" && p.type != "garage" && p.type != "webhook" && p.type != "todo" && p.type != "sensor" && p.type != "door_window" && p.type != "presence" && p.type != "media" && p.type != "subpage" && p.type != "image" && !fan_card_type(p.type) && !card_large_numbers_supported(p)) {
+  if (!p.type.empty() && p.type != "action" && p.type != "alarm" && p.type != "alarm_action" && p.type != "climate" && p.type != "garage" && p.type != "webhook" && p.type != "screen_lock" && p.type != "todo" && p.type != "sensor" && p.type != "door_window" && p.type != "presence" && p.type != "media" && p.type != "subpage" && p.type != "image" && !fan_card_type(p.type) && !card_large_numbers_supported(p)) {
     p.options.clear();
   }
   if (p.type == "sensor") {
