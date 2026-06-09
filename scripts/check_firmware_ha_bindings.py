@@ -737,8 +737,8 @@ def firmware_image_card_startup_errors(
         errors.append(f"{rel}: arm image-card refresh from the Home Assistant API connection")
     if "if (!ha_api_connected())" not in text or "ha_get_attribute(" not in text:
         errors.append(f"{rel}: request image-card attributes once the Home Assistant API is connected")
-    if "image_card_handle_picture(ctx, esphome::StringRef(proxy_path))" not in text:
-        errors.append(f"{rel}: load image cards through Home Assistant proxy URLs without a metadata attribute request")
+    if '"access_token"' not in text or "image_card_proxy_path_with_token" not in text:
+        errors.append(f"{rel}: load Home Assistant image-card proxy URLs with the entity access token")
     if '"/api/image_proxy/" + entity_id' not in text or '"/api/camera_proxy/" + entity_id' not in text:
         errors.append(f"{rel}: fall back to Home Assistant proxy URLs when image-card entity_picture is unavailable")
     if "Waiting for Home Assistant base URL" not in text:
@@ -2355,7 +2355,8 @@ def run_self_test() -> int:
         "}\n"
         "inline void image_card_request_picture(ImageCardCtx *ctx) {\n"
         "  if (!ha_api_connected()) return;\n"
-        "  image_card_handle_picture(ctx, esphome::StringRef(proxy_path));\n"
+        "  ha_get_attribute(ctx->entity_id, std::string(\"access_token\"), callback);\n"
+        "  image_card_proxy_path_with_token(proxy_path, token);\n"
         "  ha_get_attribute(ctx->entity_id, std::string(\"entity_picture\"), callback);\n"
         "}\n"
         "inline bool image_card_context_current(ImageCardCtx *ctx,\n"

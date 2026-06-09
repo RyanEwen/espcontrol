@@ -36,6 +36,7 @@ struct ImageCardCtx {
   std::string source_url;
   std::string url;
   std::string modal_url;
+  std::string access_token;
   uint32_t refresh_interval_ms = 0;
   uint32_t next_refresh_ms = 0;
   uint32_t retry_deadline_ms = 0;
@@ -458,6 +459,7 @@ inline void reset_image_card_pool(const GridConfig &cfg) {
     contexts[i].base_url_provider = nullptr;
     contexts[i].source_url.clear();
     contexts[i].url.clear();
+    contexts[i].access_token.clear();
     contexts[i].refresh_interval_ms = 0;
     contexts[i].next_refresh_ms = 0;
     contexts[i].retry_deadline_ms = 0;
@@ -860,6 +862,15 @@ inline std::string image_card_entity_proxy_url(ImageCardCtx *ctx) {
   return image_card_join_url(image_card_base_url(ctx), image_card_entity_proxy_path(ctx->entity_id));
 }
 
+inline std::string image_card_proxy_path_with_token(const std::string &proxy_path,
+                                                    const std::string &token) {
+  if (proxy_path.empty() || token.empty()) return proxy_path;
+  std::string path = proxy_path;
+  path += (path.find('?') == std::string::npos) ? "?token=" : "&token=";
+  path += token;
+  return path;
+}
+
 inline std::string image_card_cache_bust_url(const std::string &url) {
   if (url.empty()) return "";
   std::string next = url;
@@ -944,7 +955,35 @@ inline void image_card_request_picture(ImageCardCtx *ctx) {
       image_card_set_loading_state(ctx, "Loading", true);
       return;
     }
-    image_card_handle_picture(ctx, esphome::StringRef(proxy_path));
+    if (!ctx->access_token.empty()) {
+      std::string authed_path = image_card_proxy_path_with_token(proxy_path, ctx->access_token);
+      image_card_handle_picture(ctx, esphome::StringRef(authed_path));
+      return;
+    }
+    const uint32_t generation = ha_subscription_generation();
+    bool requested = ha_get_attribute(
+      entity_id,
+      std::string("access_token"),
+      std::function<void(esphome::StringRef)>(
+        [ctx, entity_id, generation, proxy_path](esphome::StringRef token_ref) {
+          if (!image_card_context_current(ctx, entity_id, generation)) return;
+          std::string token = string_ref_limited(token_ref, 512);
+          if (token.empty() || token == "unknown" || token == "unavailable") {
+            image_card_schedule_picture_retry(ctx, IMAGE_CARD_RETRY_INTERVAL_MS);
+            image_card_set_loading_state(ctx, "Loading", true);
+            return;
+          }
+          ctx->access_token = token;
+          std::string authed_path = image_card_proxy_path_with_token(proxy_path, token);
+          image_card_handle_picture(ctx, esphome::StringRef(authed_path));
+        })
+    );
+    if (!requested) {
+      image_card_schedule_picture_retry(
+        ctx,
+        ha_api_connected() ? IMAGE_CARD_API_RETRY_INTERVAL_MS : IMAGE_CARD_RETRY_INTERVAL_MS);
+      image_card_set_loading_state(ctx, "Loading", true);
+    }
     return;
   }
   const uint32_t generation = ha_subscription_generation();
