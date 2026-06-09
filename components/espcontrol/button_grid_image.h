@@ -474,6 +474,16 @@ inline void image_card_apply_widget_geometry(lv_obj_t *btn, lv_obj_t *widget,
   image->set_resize_mode(esphome::artwork_image::ImageResizeMode::COVER);
 }
 
+inline void image_card_reset_resized_tile(ImageCardCtx *ctx) {
+  if (!ctx || !ctx->image) return;
+  image_card_clear_widget_source(ctx->widget);
+  ctx->image->release();
+  ctx->url.clear();
+  ctx->requested_once = false;
+  ctx->image_ready = false;
+  image_card_set_loading_state(ctx, "Loading", true);
+}
+
 inline void image_card_refresh_tile_geometry(ImageCardCtx *ctx) {
   if (!ctx || !ctx->image) return;
   int previous_width = ctx->image->get_fixed_width();
@@ -489,6 +499,7 @@ inline void image_card_refresh_tile_geometry(ImageCardCtx *ctx) {
   if (image_card_modal_active_for(ctx)) {
     image_card_schedule_source_refresh(ctx, IMAGE_CARD_MODAL_REFRESH_DELAY_MS, "resized tile");
   } else {
+    image_card_reset_resized_tile(ctx);
     image_card_schedule_source_refresh(ctx, 1, "resized tile");
   }
 }

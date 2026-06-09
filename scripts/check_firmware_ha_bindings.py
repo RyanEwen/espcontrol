@@ -694,6 +694,8 @@ def firmware_image_card_quality_errors(firmware_dir: Path, root: Path) -> list[s
         errors.append(f"{rel}: apply image card corner clipping to the pressed state")
     if "image_card_refresh_tile_geometry" not in text or "resized tile" not in text:
         errors.append(f"{rel}: refresh image-card downloads when card size changes")
+    if "image_card_reset_resized_tile" not in text or "ctx->image->release()" not in text:
+        errors.append(f"{rel}: clear stale image-card tile buffers when card size changes")
 
     grid_path = firmware_dir / "button_grid_grid.h"
     if grid_path.exists():
@@ -2221,6 +2223,7 @@ def run_self_test() -> int:
             "clip image card modal content to rounded panel corners",
             "preserve image card rounded corners while pressed",
             "apply image card corner clipping to the pressed state",
+            "clear stale image-card tile buffers when card size changes",
         ),
     )
     expect_image_card_quality_errors(
@@ -2244,6 +2247,9 @@ def run_self_test() -> int:
         "}\n"
         "inline void image_card_refresh_tile_geometry(ImageCardCtx *ctx) {\n"
         "  image_card_schedule_source_refresh(ctx, 1, \"resized tile\");\n"
+        "}\n"
+        "inline void image_card_reset_resized_tile(ImageCardCtx *ctx) {\n"
+        "  ctx->image->release();\n"
         "}\n"
         "inline void image_card_request_modal_source_url(ImageCardCtx *ctx) {\n"
         "  ctx->modal_image->request_update_url(ctx->modal_url, max_source_dim);\n"
