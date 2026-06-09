@@ -45,6 +45,12 @@ globals:
   - id: cover_art_image_available
     type: bool
     initial_value: 'false'
+  - id: cover_art_visible_slot_b
+    type: bool
+    initial_value: 'false'
+  - id: cover_art_download_slot_b
+    type: bool
+    initial_value: 'false'
   - id: cover_art_home_assistant_base_url
     type: std::string
     initial_value: '""'
@@ -146,6 +152,20 @@ artwork_image:
     on_error:
       - script.execute: cover_art_download_failed
 
+  - url: "https://placehold.co/${cover_art_size}x${cover_art_size}/111111/333333.jpg"
+    id: cover_art_downloaded_image_b
+    format: AUTO
+    type: RGB565
+    byte_order: LITTLE_ENDIAN
+    placeholder: cover_art_placeholder
+    resize: ${cover_art_size}x${cover_art_size}
+    buffer_size: 65536
+    allow_insecure_local_urls: true
+    on_download_finished:
+      - script.execute: cover_art_apply_downloaded_image
+    on_error:
+      - script.execute: cover_art_download_failed
+
 interval:
   - interval: 5s
     then:
@@ -210,6 +230,15 @@ lvgl:
                 width: ${cover_art_size}px
                 height: ${cover_art_size}px
                 src: cover_art_downloaded_image
+                opa: 100%
+                hidden: true
+            - image:
+                id: cover_art_image_widget_b
+                x: ${cover_art_x}
+                y: ${cover_art_y}
+                width: ${cover_art_size}px
+                height: ${cover_art_size}px
+                src: cover_art_downloaded_image_b
                 opa: 100%
                 hidden: true
             - obj:
@@ -369,6 +398,8 @@ script:
             lv_obj_set_size(id(cover_art_backdrop), art_size, art_size);
             lv_obj_set_pos(id(cover_art_image_widget), art_x, art_y);
             lv_obj_set_size(id(cover_art_image_widget), art_size, art_size);
+            lv_obj_set_pos(id(cover_art_image_widget_b), art_x, art_y);
+            lv_obj_set_size(id(cover_art_image_widget_b), art_size, art_size);
             lv_obj_set_pos(id(cover_art_accent_overlay), accent_x, accent_y);
             lv_obj_set_size(id(cover_art_accent_overlay), accent_w, accent_h);
             lv_obj_set_pos(id(cover_art_track_panel), panel_x, panel_y);
@@ -393,6 +424,8 @@ script:
           lv_obj_set_size(id(cover_art_backdrop), fallback_size, fallback_size);
           lv_obj_set_pos(id(cover_art_image_widget), fallback_x, fallback_y);
           lv_obj_set_size(id(cover_art_image_widget), fallback_size, fallback_size);
+          lv_obj_set_pos(id(cover_art_image_widget_b), fallback_x, fallback_y);
+          lv_obj_set_size(id(cover_art_image_widget_b), fallback_size, fallback_size);
           lv_obj_set_pos(id(cover_art_accent_overlay), fallback_x, fallback_y);
           lv_obj_set_size(id(cover_art_accent_overlay), fallback_size, fallback_size);
           lv_obj_set_pos(id(cover_art_track_panel), fallback_x, fallback_y);
@@ -411,9 +444,12 @@ script:
       - if:
           condition:
             lambda: |-
+              auto *img = id(cover_art_download_slot_b)
+                ? id(cover_art_downloaded_image_b)
+                : id(cover_art_downloaded_image);
               return id(cover_art_screensaver_enabled).state &&
                      !id(cover_art_url).empty() &&
-                     id(cover_art_downloaded_image)->get_url() == id(cover_art_url);
+                     img->get_url() == id(cover_art_url);
           then:
             - script.stop: cover_art_retry_download
             - script.stop: cover_art_deferred_download
@@ -421,23 +457,40 @@ script:
                 id: cover_art_image_available
                 value: 'true'
             - lambda: |-
-                id(cover_art_loaded_url) = id(cover_art_downloaded_image)->get_url();
+                auto *img = id(cover_art_download_slot_b)
+                  ? id(cover_art_downloaded_image_b)
+                  : id(cover_art_downloaded_image);
+                id(cover_art_loaded_url) = img->get_url();
                 id(cover_art_retry_url) = id(cover_art_url);
                 id(cover_art_retry_count) = 0;
-                auto *img = id(cover_art_downloaded_image);
                 ESP_LOGI("cover_art", "Applying artwork image=%dx%d content=%dx%d offset=%d,%d",
                          img->get_width(), img->get_height(), img->get_content_width(), img->get_content_height(),
                          img->get_content_offset_x(), img->get_content_offset_y());
             - script.execute: cover_art_apply_responsive_layout
             - script.execute: cover_art_extract_accent_color
             - script.wait: cover_art_extract_accent_color
-            - lvgl.widget.update:
-                id: cover_art_image_widget
-                opa: 100%
-            - lvgl.image.update:
-                id: cover_art_image_widget
-                src: cover_art_downloaded_image
-            - lvgl.widget.show: cover_art_image_widget
+            - if:
+                condition:
+                  lambda: 'return id(cover_art_download_slot_b);'
+                then:
+                  - lvgl.widget.update:
+                      id: cover_art_image_widget_b
+                      opa: 100%
+                  - lvgl.image.update:
+                      id: cover_art_image_widget_b
+                      src: cover_art_downloaded_image_b
+                  - lvgl.widget.show: cover_art_image_widget_b
+                  - lvgl.widget.hide: cover_art_image_widget
+                else:
+                  - lvgl.widget.update:
+                      id: cover_art_image_widget
+                      opa: 100%
+                  - lvgl.image.update:
+                      id: cover_art_image_widget
+                      src: cover_art_downloaded_image
+                  - lvgl.widget.show: cover_art_image_widget
+                  - lvgl.widget.hide: cover_art_image_widget_b
+            - lambda: 'id(cover_art_visible_slot_b) = id(cover_art_download_slot_b);'
             - if:
                 condition:
                   lambda: 'return id(cover_art_screensaver_active);'
@@ -453,7 +506,9 @@ script:
     mode: queued
     then:
       - lambda: |-
-          auto *img = id(cover_art_downloaded_image);
+          auto *img = id(cover_art_download_slot_b)
+            ? id(cover_art_downloaded_image_b)
+            : id(cover_art_downloaded_image);
           int img_w = img->get_width();
           int img_h = img->get_height();
           if (img_w <= 0 || img_h <= 0) return;
@@ -543,6 +598,7 @@ script:
           lv_obj_set_style_bg_color(id(cover_art_backdrop), black, 0);
           lv_obj_set_style_bg_color(id(cover_art_accent_overlay), black, 0);
       - lvgl.widget.hide: cover_art_image_widget
+      - lvgl.widget.hide: cover_art_image_widget_b
       - script.execute: cover_art_sync_track_text
       - lambda: |-
           lv_obj_set_style_text_line_space(id(cover_art_title_label), ${cover_art_title_line_space}, 0);
@@ -647,8 +703,11 @@ script:
           id(cover_art_media_duration) = 0.0f;
           id(cover_art_position_anchor_epoch) = 0;
           id(cover_art_last_position_timestamp) = 0;
+          id(cover_art_visible_slot_b) = false;
+          id(cover_art_download_slot_b) = false;
           lv_label_set_text(id(cover_art_time_label), "0:00  /  0:00");
       - artwork_image.release: cover_art_downloaded_image
+      - artwork_image.release: cover_art_downloaded_image_b
       - script.execute: hide_cover_art_view
 
   - id: cover_art_download
@@ -679,9 +738,24 @@ script:
                          (unsigned) id(cover_art_url).size(),
                          id(cover_art_screensaver_active) ? "true" : "false",
                          id(cover_art_image_available) ? "true" : "false");
-            - artwork_image.set_url:
-                id: cover_art_downloaded_image
-                url: !lambda 'return id(cover_art_url);'
+                id(cover_art_download_slot_b) = id(cover_art_image_available)
+                  ? !id(cover_art_visible_slot_b)
+                  : false;
+                ESP_LOGI("cover_art", "Staging artwork download in slot %s",
+                         id(cover_art_download_slot_b) ? "B" : "A");
+            - if:
+                condition:
+                  lambda: 'return id(cover_art_download_slot_b);'
+                then:
+                  - artwork_image.release: cover_art_downloaded_image_b
+                  - artwork_image.set_url:
+                      id: cover_art_downloaded_image_b
+                      url: !lambda 'return id(cover_art_url);'
+                else:
+                  - artwork_image.release: cover_art_downloaded_image
+                  - artwork_image.set_url:
+                      id: cover_art_downloaded_image
+                      url: !lambda 'return id(cover_art_url);'
 
   - id: cover_art_deferred_download
     mode: restart
@@ -840,9 +914,19 @@ script:
                   - lambda: |-
                       id(cover_art_retry_count)++;
                       ESP_LOGI("cover_art", "Retrying artwork download %d/5", id(cover_art_retry_count));
-                  - artwork_image.set_url:
-                      id: cover_art_downloaded_image
-                      url: !lambda 'return id(cover_art_url);'
+                  - if:
+                      condition:
+                        lambda: 'return id(cover_art_download_slot_b);'
+                      then:
+                        - artwork_image.release: cover_art_downloaded_image_b
+                        - artwork_image.set_url:
+                            id: cover_art_downloaded_image_b
+                            url: !lambda 'return id(cover_art_url);'
+                      else:
+                        - artwork_image.release: cover_art_downloaded_image
+                        - artwork_image.set_url:
+                            id: cover_art_downloaded_image
+                            url: !lambda 'return id(cover_art_url);'
           else:
             - lambda: |-
                 if (!id(cover_art_url).empty()) {
@@ -970,14 +1054,28 @@ script:
           condition:
             lambda: 'return id(cover_art_image_available) && ${cover_art_square_overlay};'
           then:
-            - lvgl.widget.show: cover_art_image_widget
+            - lambda: |-
+                if (id(cover_art_visible_slot_b)) {
+                  lv_obj_add_flag(id(cover_art_image_widget), LV_OBJ_FLAG_HIDDEN);
+                  lv_obj_clear_flag(id(cover_art_image_widget_b), LV_OBJ_FLAG_HIDDEN);
+                } else {
+                  lv_obj_add_flag(id(cover_art_image_widget_b), LV_OBJ_FLAG_HIDDEN);
+                  lv_obj_clear_flag(id(cover_art_image_widget), LV_OBJ_FLAG_HIDDEN);
+                }
             - script.execute: cover_art_show_track_overlay
           else:
             - if:
                 condition:
                   lambda: 'return id(cover_art_image_available);'
                 then:
-                  - lvgl.widget.show: cover_art_image_widget
+                  - lambda: |-
+                      if (id(cover_art_visible_slot_b)) {
+                        lv_obj_add_flag(id(cover_art_image_widget), LV_OBJ_FLAG_HIDDEN);
+                        lv_obj_clear_flag(id(cover_art_image_widget_b), LV_OBJ_FLAG_HIDDEN);
+                      } else {
+                        lv_obj_add_flag(id(cover_art_image_widget_b), LV_OBJ_FLAG_HIDDEN);
+                        lv_obj_clear_flag(id(cover_art_image_widget), LV_OBJ_FLAG_HIDDEN);
+                      }
                   - lambda: |-
                       lv_obj_set_style_text_line_space(id(cover_art_title_label), ${cover_art_title_line_space}, 0);
                   - lvgl.widget.show: cover_art_accent_overlay
