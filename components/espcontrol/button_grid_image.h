@@ -206,17 +206,29 @@ inline void image_card_refresh_loading_layout(lv_obj_t *loading_widget) {
   if (!loading_widget) return;
   lv_obj_set_layout(loading_widget, 0);
   lv_obj_t *btn = lv_obj_get_parent(loading_widget);
+  image_card_position_widget(btn, loading_widget, nullptr, nullptr);
   lv_obj_set_style_pad_all(loading_widget, 0, LV_PART_MAIN);
+  lv_coord_t pad_left = btn ? lv_obj_get_style_pad_left(btn, LV_PART_MAIN) : 0;
+  lv_coord_t pad_right = btn ? lv_obj_get_style_pad_right(btn, LV_PART_MAIN) : 0;
+  lv_coord_t pad_top = btn ? lv_obj_get_style_pad_top(btn, LV_PART_MAIN) : 0;
+  lv_coord_t pad_bottom = btn ? lv_obj_get_style_pad_bottom(btn, LV_PART_MAIN) : 0;
+  lv_coord_t width = btn ? lv_obj_get_width(btn) : lv_obj_get_width(loading_widget);
   lv_obj_t *icon = image_card_loading_icon(loading_widget);
   if (icon) {
     lv_obj_set_width(icon, LV_SIZE_CONTENT);
-    if (btn) image_card_align_icon(icon, btn);
+    lv_obj_align(icon, LV_ALIGN_TOP_LEFT, pad_left, pad_top);
+    lv_obj_move_foreground(icon);
   }
   lv_obj_t *label = image_card_loading_label(loading_widget);
   if (label) {
     lv_label_set_long_mode(label, LV_LABEL_LONG_WRAP);
     lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
-    if (btn) image_card_align_label(label, btn);
+    lv_obj_set_style_pad_all(label, 0, LV_PART_MAIN);
+    if (width > pad_left + pad_right) {
+      lv_obj_set_width(label, width - pad_left - pad_right);
+    }
+    lv_obj_align(label, LV_ALIGN_BOTTOM_LEFT, pad_left, -pad_bottom);
+    lv_obj_move_foreground(label);
   }
   lv_obj_update_layout(loading_widget);
 }
