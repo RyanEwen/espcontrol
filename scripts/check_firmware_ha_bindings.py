@@ -645,7 +645,9 @@ def firmware_image_card_base_url_errors(firmware_dir: Path, root: Path) -> list[
     errors: list[str] = []
     if "base_url_provider" not in text:
         errors.append(f"{rel}: keep image card Home Assistant base URL lookup live")
-    if "image_card_join_url(image_card_base_url(ctx), raw)" not in text:
+    if ("image_card_join_url(image_card_base_url(ctx), raw)" not in text and
+        ("std::string base_url = image_card_base_url(ctx)" not in text or
+         "image_card_join_url(base_url, raw)" not in text)):
         errors.append(f"{rel}: resolve image card base URL when entity_picture is handled")
     if 'ctx->base_url = cfg.home_assistant_base_url ? cfg.home_assistant_base_url() : "";' in text:
         if "ctx->base_url_provider = cfg.home_assistant_base_url" not in text:
@@ -735,6 +737,8 @@ def firmware_image_card_startup_errors(
         errors.append(f"{rel}: request image-card attributes once the Home Assistant API is connected")
     if '"/api/image_proxy/" + entity_id' not in text or '"/api/camera_proxy/" + entity_id' not in text:
         errors.append(f"{rel}: fall back to Home Assistant proxy URLs when image-card entity_picture is unavailable")
+    if "Waiting for Home Assistant base URL" not in text:
+        errors.append(f"{rel}: keep image cards loading until the Home Assistant base URL is ready")
     if "subscribe_image_card_entity_state" not in text or "ha_subscribe_state(" not in text:
         errors.append(f"{rel}: refresh image cards when the camera/image entity state changes")
     if "image_card_context_current" not in text or "generation == ha_subscription_generation()" not in text:
@@ -2341,6 +2345,9 @@ def run_self_test() -> int:
         "  if (entity_id.rfind(\"camera.\", 0) == 0) return \"/api/camera_proxy/\" + entity_id;\n"
         "  if (entity_id.rfind(\"image.\", 0) == 0) return \"/api/image_proxy/\" + entity_id;\n"
         "  return \"\";\n"
+        "}\n"
+        "inline void image_card_handle_picture(ImageCardCtx *ctx) {\n"
+        "  ESP_LOGD(\"image_card\", \"Waiting for Home Assistant base URL before loading %s\", ctx->entity_id.c_str());\n"
         "}\n"
         "inline void image_card_request_picture(ImageCardCtx *ctx) {\n"
         "  if (!ha_api_connected()) return;\n"

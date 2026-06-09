@@ -1230,10 +1230,20 @@ inline void image_card_open_modal(ImageCardCtx *ctx) {
 inline void image_card_handle_picture(ImageCardCtx *ctx, esphome::StringRef picture) {
   if (!ctx || !ctx->active || !ctx->image) return;
   std::string raw = string_ref_limited(picture, 4096);
-  std::string url = image_card_join_url(image_card_base_url(ctx), raw);
+  std::string base_url = image_card_base_url(ctx);
+  std::string url = image_card_join_url(base_url, raw);
   if (url.empty()) {
-    url = image_card_entity_proxy_url(ctx);
-    if (!url.empty()) {
+    std::string proxy_path = image_card_entity_proxy_path(ctx->entity_id);
+    if (!proxy_path.empty() && base_url.empty()) {
+      ESP_LOGD("image_card", "Waiting for Home Assistant base URL before loading %s",
+               ctx->entity_id.c_str());
+      image_card_hide(ctx);
+      image_card_set_loading_state(ctx, "Loading", true);
+      image_card_schedule_picture_retry(ctx, IMAGE_CARD_RETRY_INTERVAL_MS);
+      return;
+    }
+    url = image_card_join_url(base_url, proxy_path);
+    if (!url.empty() && raw.empty()) {
       ESP_LOGI("image_card", "Using Home Assistant proxy fallback for %s", ctx->entity_id.c_str());
     }
   }
