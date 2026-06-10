@@ -14,6 +14,10 @@ Camera cards are display cards. They do not stream live video, pan the camera, o
 Camera cards are currently available as a developer feature. If you do not see **Camera Card** in the card type picker, enable developer or experimental features in the setup page first.
 :::
 
+::: warning P4 screens only
+Camera cards are for ESP32-P4 based screens. They are not supported on the ESP32-S3 screen because camera images need more memory and processing power than the S3 model can reliably provide.
+:::
+
 ## Setting Up a Camera Card
 
 1. Select a card and change its type to **Camera Card**.
@@ -50,4 +54,3 @@ For best results, use a few important camera snapshots rather than filling a who
 | The card says **Too many** | Remove or move some Camera cards so the panel has enough image download slots. |
 | The picture is cropped | Change **Expanded Image** to **Show full image**. |
 | The picture does not update often | Check whether the Home Assistant camera entity itself is updating its snapshot image. |
-
