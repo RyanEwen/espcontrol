@@ -15,9 +15,6 @@ constexpr uint32_t IMAGE_CARD_API_RETRY_INTERVAL_MS = 250;
 constexpr uint32_t IMAGE_CARD_MODAL_REFRESH_DELAY_MS = 1000;
 constexpr uint32_t IMAGE_CARD_MODAL_REQUEST_DELAY_MS = 100;
 constexpr uint32_t IMAGE_CARD_MODAL_CLEANUP_DELAY_MS = 100;
-constexpr uint32_t IMAGE_CARD_4848_INITIAL_DOWNLOAD_DELAY_MS = 3000;
-constexpr uint32_t IMAGE_CARD_4848_INITIAL_DOWNLOAD_STAGGER_MS = 3000;
-constexpr uint32_t IMAGE_CARD_4848_STARTUP_RETRY_INTERVAL_MS = 5000;
 constexpr uint8_t IMAGE_CARD_STARTUP_DOWNLOAD_RETRIES = 10;
 constexpr int IMAGE_CARD_MAX_CONTEXTS = 6;
 constexpr int IMAGE_CARD_MODAL_MAX_TARGET_SIDE_PX = 800;
@@ -71,28 +68,6 @@ struct ImageCardModalUi {
 inline ImageCardCtx *image_card_contexts() {
   static ImageCardCtx contexts[IMAGE_CARD_MAX_CONTEXTS];
   return contexts;
-}
-
-inline int image_card_context_index(ImageCardCtx *ctx) {
-  if (!ctx) return 0;
-  ImageCardCtx *contexts = image_card_contexts();
-  for (int i = 0; i < IMAGE_CARD_MAX_CONTEXTS; i++) {
-    if (&contexts[i] == ctx) return i;
-  }
-  return 0;
-}
-
-inline uint32_t image_card_startup_download_retry_interval_ms() {
-  return control_modal_current_is_4848_size()
-    ? IMAGE_CARD_4848_STARTUP_RETRY_INTERVAL_MS
-    : IMAGE_CARD_RETRY_INTERVAL_MS;
-}
-
-inline uint32_t image_card_initial_download_delay_ms(ImageCardCtx *ctx) {
-  if (!control_modal_current_is_4848_size()) return 0;
-  return IMAGE_CARD_4848_INITIAL_DOWNLOAD_DELAY_MS +
-         static_cast<uint32_t>(image_card_context_index(ctx)) *
-           IMAGE_CARD_4848_INITIAL_DOWNLOAD_STAGGER_MS;
 }
 
 inline ImageCardModalUi &image_card_modal_ui() {
@@ -409,7 +384,7 @@ inline void image_card_handle_download_error(ImageCardCtx *ctx) {
   if (!ctx->image_ready && image_card_startup_retry_active(ctx, now) &&
       ctx->startup_download_errors < IMAGE_CARD_STARTUP_DOWNLOAD_RETRIES) {
     ctx->startup_download_errors++;
-    ctx->next_download_retry_ms = now + image_card_startup_download_retry_interval_ms();
+    ctx->next_download_retry_ms = now + IMAGE_CARD_RETRY_INTERVAL_MS;
     image_card_hide(ctx);
     image_card_set_loading_state(ctx, "Loading", true);
     return;
@@ -1367,13 +1342,6 @@ inline void image_card_handle_picture(ImageCardCtx *ctx, esphome::StringRef pict
   }
   ctx->next_picture_retry_ms = 0;
   ctx->source_url = url;
-  if (!ctx->requested_once && control_modal_current_is_4848_size()) {
-    if (ctx->next_download_retry_ms == 0) {
-      image_card_schedule_source_refresh(
-        ctx, image_card_initial_download_delay_ms(ctx), "startup camera");
-    }
-    return;
-  }
   if (image_card_modal_active_for(ctx)) {
     image_card_queue_modal_source_request(ctx);
     image_card_schedule_source_refresh(ctx, IMAGE_CARD_MODAL_REFRESH_DELAY_MS, "tile");
