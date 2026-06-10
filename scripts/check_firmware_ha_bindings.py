@@ -418,9 +418,9 @@ def firmware_weather_request_errors(firmware_dir: Path, root: Path) -> list[str]
     if "WEATHER_FORECAST_RETRY_DELAY_MS" not in text or "weather_forecast_schedule_retry" not in text:
         errors.append(f"{rel}: retry failed weather forecast requests later")
     if (
-        "response if response is defined and response is not none else none" not in text
+        "response if response is defined and response is not none else {}" not in text
         or "'forecast' in response_data" not in text
-        or "response_data[entity] if response_data is not none and entity in response_data else none" not in text
+        or "response_data[entity] if entity in response_data else {}" not in text
     ):
         errors.append(f"{rel}: accept both direct and entity-keyed Home Assistant forecast response shapes")
     if (
@@ -434,9 +434,8 @@ def firmware_weather_request_errors(firmware_dir: Path, root: Path) -> list[str]
     ):
         errors.append(f"{rel}: select today/tomorrow weather forecasts by date/datetime before falling back to list order")
     if (
-        "entity_response['temperature_unit']" not in text
-        or "entity_response['unit_of_measurement']" not in text
-        or "entity_response['unit']" not in text
+        "unit_keys = ['temperature_unit','native_temperature_unit','unit_of_measurement','native_unit_of_measurement','unit']" not in text
+        or "key in entity_response" not in text
         or "state_attr(entity, 'temperature_unit')" not in text
         or "state_attr(entity, 'unit_of_measurement')" not in text
     ):
@@ -457,13 +456,9 @@ def firmware_weather_request_errors(firmware_dir: Path, root: Path) -> list[str]
     ):
         errors.append(f"{rel}: accept max/min weather forecast temperature field aliases")
     if (
-        "item_unit" not in text
-        or "today['temperature_unit']" not in text
-        or "today['unit_of_measurement']" not in text
-        or "today['unit']" not in text
-        or "tomorrow['native_temperature_unit']" not in text
-        or "tomorrow['unit_of_measurement']" not in text
-        or "tomorrow['unit']" not in text
+        "unit_keys" not in text
+        or "today is not none and key in today" not in text
+        or "tomorrow is not none and key in tomorrow" not in text
     ):
         errors.append(f"{rel}: preserve forecast temperature units from individual forecast items")
     if "parse_weather_forecast_temp" in text and "std::isfinite(parsed)" not in text:

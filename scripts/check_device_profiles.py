@@ -97,17 +97,23 @@ def test_generated_yaml(profiles: dict[str, dict]) -> None:
         assert f'firmware_manifest_slug: "{slug}"' in package, f"{slug}: packages.yaml missing manifest slug"
         assert f"cfg.num_slots = {profile['slots']};" in sensors, f"{slug}: sensors.yaml missing slot count"
         limit = image_card_limit(profile)
-        package_name = "image_cards.yaml" if limit == 4 else f"image_cards_{limit}.yaml"
-        assert package_name in package, f"{slug}: packages.yaml missing {package_name}"
-        assert f"cfg.image_card_image_count = {limit};" in sensors, (
-            f"{slug}: sensors.yaml missing image-card downloader count"
-        )
-        assert f"id(image_card_download_{limit})," in sensors, (
-            f"{slug}: sensors.yaml missing final image-card tile downloader"
-        )
-        assert f"id(image_card_modal_download_{limit})," in sensors, (
-            f"{slug}: sensors.yaml missing final image-card modal downloader"
-        )
+        if limit > 0:
+            package_name = "image_cards.yaml" if limit == 4 else f"image_cards_{limit}.yaml"
+            assert package_name in package, f"{slug}: packages.yaml missing {package_name}"
+            assert f"cfg.image_card_image_count = {limit};" in sensors, (
+                f"{slug}: sensors.yaml missing image-card downloader count"
+            )
+            assert f"id(image_card_download_{limit})," in sensors, (
+                f"{slug}: sensors.yaml missing final image-card tile downloader"
+            )
+            assert f"id(image_card_modal_download_{limit})," in sensors, (
+                f"{slug}: sensors.yaml missing final image-card modal downloader"
+            )
+        else:
+            assert "image_cards:" not in package, f"{slug}: zero image-card profile should not include image cards"
+            assert "cfg.image_card_image_count" not in sensors, (
+                f"{slug}: zero image-card profile should not wire image-card downloaders"
+            )
         if profile["firmware"].get("display", {}).get("infoOnly"):
             assert "cfg.info_only = true;" in sensors, f"{slug}: sensors.yaml missing info-only grid flag"
 
