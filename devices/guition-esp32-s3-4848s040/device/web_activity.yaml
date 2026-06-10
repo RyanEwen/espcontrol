@@ -1,9 +1,9 @@
 # =============================================================================
-# WEB ACTIVITY - Pause the S3 screen while the web settings UI is active
+# WEB ACTIVITY - Show S3 web settings status while the web UI is active
 # =============================================================================
 # The S3 has much less spare memory than the P4 displays. When a browser opens
 # the local web settings page, the web UI presses these internal buttons so the
-# device can pause LVGL, turn the panel off, and release downloaded images.
+# device can show a low-brightness status message and release downloaded images.
 # =============================================================================
 
 globals:
@@ -94,7 +94,6 @@ script:
       - artwork_image.release: image_card_modal_download_2
       - artwork_image.release: image_card_modal_download_3
       - artwork_image.release: image_card_modal_download_4
-      - lvgl.pause:
       - output.set_level:
           id: gpio_backlight_pwm
           level: 15%
