@@ -77,6 +77,8 @@ inline ImageCardCtx *image_card_contexts() {
 
 inline void image_card_schedule_source_refresh(ImageCardCtx *ctx, uint32_t delay_ms,
                                                const char *reason);
+inline bool &image_card_refresh_paused();
+inline void image_card_set_refresh_paused(bool paused, const char *reason = nullptr);
 
 inline ImageCardCtx *&image_card_active_download_context() {
   static ImageCardCtx *ctx = nullptr;
@@ -109,6 +111,11 @@ inline void image_card_release_download_slot(ImageCardCtx *ctx, bool start_next 
 inline ImageCardModalUi &image_card_modal_ui() {
   static ImageCardModalUi ui;
   return ui;
+}
+
+inline bool &image_card_refresh_paused() {
+  static bool paused = false;
+  return paused;
 }
 
 inline void image_card_style_modal_back_button(lv_obj_t *btn,
@@ -1031,6 +1038,7 @@ inline void image_card_schedule_picture_retry(ImageCardCtx *ctx, uint32_t delay_
 }
 
 inline void image_card_request_picture(ImageCardCtx *ctx) {
+  if (image_card_refresh_paused()) return;
   if (!ctx || !ctx->active || ctx->entity_id.empty()) return;
   if (!ha_api_connected()) {
     if (image_card_startup_retry_active(ctx)) {
@@ -1128,6 +1136,7 @@ inline void image_card_schedule_next_refresh(ImageCardCtx *ctx, uint32_t now = e
 }
 
 inline void image_card_request_source_url(ImageCardCtx *ctx) {
+  if (image_card_refresh_paused()) return;
   if (!ctx || !ctx->active || !ctx->image || ctx->source_url.empty()) return;
   uint32_t now = esphome::millis();
   if (image_card_modal_active_for(ctx)) {
@@ -1190,6 +1199,7 @@ inline void image_card_request_source_url(ImageCardCtx *ctx) {
 }
 
 inline bool image_card_request_modal_source_url(ImageCardCtx *ctx) {
+  if (image_card_refresh_paused()) return false;
   if (!ctx || !ctx->active || !image_card_has_separate_modal_image(ctx) ||
       ctx->source_url.empty() || !image_card_modal_active_for(ctx)) {
     return false;
@@ -1246,6 +1256,7 @@ inline void image_card_cancel_modal_request_timer() {
 }
 
 inline bool image_card_queue_modal_source_request(ImageCardCtx *ctx) {
+  if (image_card_refresh_paused()) return false;
   if (!ctx || !ctx->active || !image_card_has_separate_modal_image(ctx) ||
       ctx->source_url.empty() || !image_card_modal_active_for(ctx) ||
       !image_card_modal_refresh_supported()) {
@@ -1266,6 +1277,7 @@ inline bool image_card_queue_modal_source_request(ImageCardCtx *ctx) {
 
 inline void image_card_schedule_source_refresh(ImageCardCtx *ctx, uint32_t delay_ms,
                                                const char *reason) {
+  if (image_card_refresh_paused()) return;
   if (!ctx || !ctx->active || ctx->source_url.empty()) return;
   ctx->next_download_retry_ms = esphome::millis() + delay_ms;
   ESP_LOGI("image_card", "Queued %s image refresh for %s in %lu ms",
@@ -1313,6 +1325,54 @@ inline void image_card_hide_modal() {
   control_modal_delete_overlay(ControlModalKind::IMAGE_CARD, ui.overlay);
   ui = ImageCardModalUi();
   image_card_schedule_modal_cleanup(ctx);
+}
+
+inline void image_card_set_refresh_paused(bool paused, const char *reason) {
+  bool &current = image_card_refresh_paused();
+  if (current == paused) return;
+  current = paused;
+  ESP_LOGI("image_card", "%s camera image refreshes%s%s",
+           paused ? "Pausing" : "Resuming",
+           reason ? ": " : "",
+           reason ? reason : "");
+  if (!paused) return;
+
+  ImageCardModalUi &ui = image_card_modal_ui();
+  if (ui.overlay) {
+    image_card_hide_modal();
+  } else {
+    image_card_cancel_modal_request_timer();
+  }
+
+  ImageCardCtx *contexts = image_card_contexts();
+  for (int i = 0; i < IMAGE_CARD_MAX_CONTEXTS; i++) {
+    ImageCardCtx *ctx = &contexts[i];
+    if (!ctx->active) continue;
+    if (ctx->modal_cleanup_timer) {
+      lv_timer_del(ctx->modal_cleanup_timer);
+      ctx->modal_cleanup_timer = nullptr;
+    }
+    ctx->next_refresh_ms = 0;
+    ctx->next_picture_retry_ms = 0;
+    ctx->next_download_retry_ms = 0;
+    ctx->requested_once = false;
+    ctx->image_ready = false;
+    ctx->download_queued = false;
+    image_card_release_download_slot(ctx, false);
+    if (ctx->image) {
+      ctx->image->cancel_update();
+      ctx->image->release();
+    }
+    if (ctx->modal_image && ctx->modal_image != ctx->image) {
+      ctx->modal_image->cancel_update();
+      ctx->modal_image->release();
+      ctx->modal_url.clear();
+    }
+    image_card_clear_widget_source(ctx->widget);
+    image_card_hide_loading(ctx);
+    image_card_hide(ctx);
+  }
+  image_card_active_download_context() = nullptr;
 }
 
 inline void image_card_open_modal(ImageCardCtx *ctx) {
@@ -1389,6 +1449,7 @@ inline void image_card_open_modal(ImageCardCtx *ctx) {
 }
 
 inline void image_card_handle_picture(ImageCardCtx *ctx, esphome::StringRef picture) {
+  if (image_card_refresh_paused()) return;
   if (!ctx || !ctx->active || !ctx->image) return;
   std::string raw = string_ref_limited(picture, 4096);
   std::string base_url = image_card_base_url(ctx);
@@ -1450,6 +1511,7 @@ inline void image_card_handle_picture(ImageCardCtx *ctx, esphome::StringRef pict
 }
 
 inline void refresh_image_cards() {
+  if (image_card_refresh_paused()) return;
   if (!ha_api_connected()) return;
   ImageCardCtx *contexts = image_card_contexts();
   uint32_t now = esphome::millis();
@@ -1466,6 +1528,7 @@ inline void refresh_image_cards() {
 }
 
 inline void image_card_refresh_due() {
+  if (image_card_refresh_paused()) return;
   ImageCardCtx *contexts = image_card_contexts();
   uint32_t now = esphome::millis();
   for (int i = 0; i < IMAGE_CARD_MAX_CONTEXTS; i++) {

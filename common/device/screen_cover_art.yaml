@@ -963,6 +963,11 @@ script:
       - globals.set:
           id: cover_art_screensaver_active
           value: 'true'
+      - if:
+          condition:
+            lambda: 'return std::string("${device_slug}") == "guition-esp32-s3-4848s040";'
+          then:
+            - lambda: 'image_card_set_refresh_paused(true, "S3 cover art active");'
       - globals.set:
           id: screensaver_display_off_active
           value: 'false'
@@ -1021,6 +1026,9 @@ script:
             - lambda: |-
                 id(cover_art_image_available) = false;
                 id(cover_art_loaded_url).clear();
+            - lambda: |-
+                image_card_set_refresh_paused(false, "S3 cover art inactive");
+                if (ha_api_connected()) refresh_image_cards();
       - script.execute: clock_bar_apply
 
   - id: cover_art_delay_timer
