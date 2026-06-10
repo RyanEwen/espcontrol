@@ -570,7 +570,7 @@ function buildSettingsPage(parent) {
 
   function addMediaPlayerSleepPreventionToggle(parent, inputId) {
     var mediaPlayerToggle = toggleRow(
-      "Override for Media Cover Art",
+      "Allow media cover art to override",
       inputId,
       state.mediaPlayerSleepPreventionOn);
     parent.appendChild(mediaPlayerToggle.row);
