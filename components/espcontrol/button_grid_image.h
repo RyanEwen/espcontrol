@@ -573,7 +573,6 @@ inline bool image_card_position_widget(lv_obj_t *btn, lv_obj_t *widget,
   lv_coord_t pad_top = lv_obj_get_style_pad_top(btn, LV_PART_MAIN);
   lv_obj_set_pos(widget, -pad_left, -pad_top);
   lv_obj_set_size(widget, width, height);
-  image_card_apply_tile_image_align(widget);
   image_card_sync_tile_corners(btn, widget);
   if (target_width) *target_width = width;
   if (target_height) *target_height = height;
@@ -586,6 +585,7 @@ inline void image_card_apply_widget_geometry(lv_obj_t *btn, lv_obj_t *widget,
   lv_coord_t width = 0;
   lv_coord_t height = 0;
   if (!image_card_position_widget(btn, widget, &width, &height)) return;
+  image_card_apply_tile_image_align(widget);
   lv_obj_t *loading = image_card_loading_widget(widget);
   image_card_position_widget(btn, loading);
   image_card_refresh_loading_layout(loading);
