@@ -92,18 +92,21 @@ class JPEGFormat(Format):
         required_files = (
             "CMakeLists.txt",
             os.path.join("src", "jdapimin.c"),
+            os.path.join("src", "jmemnobs.c"),
             os.path.join("src", "wrapper", "jdapistd-8.c"),
         )
-        src_cmake = os.path.join(src_path, "CMakeLists.txt")
-        dest_cmake = os.path.join(dest_path, "CMakeLists.txt")
         missing_required_file = any(
             not os.path.exists(os.path.join(dest_path, file_name))
             for file_name in required_files
         )
-        needs_copy = missing_required_file or (
-            os.path.exists(dest_cmake)
-            and os.path.getmtime(src_cmake) > os.path.getmtime(dest_cmake)
-        )
+        source_newer = False
+        if not missing_required_file:
+            source_newer = any(
+                os.path.getmtime(os.path.join(src_path, file_name))
+                > os.path.getmtime(os.path.join(dest_path, file_name))
+                for file_name in required_files
+            )
+        needs_copy = missing_required_file or source_newer
         if needs_copy:
             if os.path.exists(dest_path):
                 shutil.rmtree(dest_path)

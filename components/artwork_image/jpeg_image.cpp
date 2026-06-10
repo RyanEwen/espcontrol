@@ -1,6 +1,8 @@
 #include "jpeg_image.h"
 #ifdef USE_ARTWORK_IMAGE_JPEG_SUPPORT
 
+#include <cstdlib>
+
 #include "esphome/components/display/display_buffer.h"
 #include "esphome/core/application.h"
 #include "esphome/core/helpers.h"
@@ -159,7 +161,14 @@ int HOT JpegDecoder::decode(uint8_t *buffer, size_t size) {
 
   // Allocate row buffers (raw pointers — safe across longjmp)
   size_t row_stride = static_cast<size_t>(out_w) * 3;
-  row_buffer = static_cast<uint8_t *>(heap_caps_malloc(row_stride, MALLOC_CAP_8BIT));
+#ifdef USE_ESP32
+  row_buffer = static_cast<uint8_t *>(heap_caps_malloc(row_stride, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT));
+  if (row_buffer == nullptr) {
+    row_buffer = static_cast<uint8_t *>(heap_caps_malloc(row_stride, MALLOC_CAP_8BIT));
+  }
+#else
+  row_buffer = static_cast<uint8_t *>(malloc(row_stride));
+#endif
   if (row_buffer == nullptr) {
     ESP_LOGE(TAG, "JPEG row buffer allocation failed: %zu bytes", row_stride);
     jpeg_destroy_decompress(&cinfo);
@@ -211,7 +220,11 @@ int HOT JpegDecoder::decode(uint8_t *buffer, size_t size) {
 
   jpeg_finish_decompress(&cinfo);
   jpeg_destroy_decompress(&cinfo);
+#ifdef USE_ESP32
+  heap_caps_free(row_buffer);
+#else
   free(row_buffer);
+#endif
 
   this->decoded_bytes_ = size;
   ESP_LOGD(TAG, "JPEG decode finished: output=%dx%d", out_w, out_h);
