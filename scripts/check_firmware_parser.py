@@ -49,6 +49,7 @@ using lv_coord_t = int;
 using lv_style_selector_t = int;
 using lv_color_t = int;
 using lv_grid_align_t = int;
+static int lv_obj_move_background_calls = 0;
 inline const char *espcontrol_i18n(const char *text) { return text ? text : ""; }
 inline std::string espcontrol_i18n(const std::string &text) { return text; }
 constexpr int LV_PART_MAIN = 0;
@@ -112,6 +113,7 @@ inline void lv_obj_update_layout(lv_obj_t *) {}
 inline void lv_label_set_text(lv_obj_t *, const char *) {}
 inline void lv_obj_align(lv_obj_t *, int, int, int) {}
 inline void lv_obj_move_foreground(lv_obj_t *) {}
+inline void lv_obj_move_background(lv_obj_t *) { lv_obj_move_background_calls++; }
 
 #include "temperature_unit.h"
 #include "button_grid_config_pure.h"
@@ -144,6 +146,37 @@ int main() {
   assert(clock_bar_grid_track_span_size(1024, 5, 5, 10, 5, 0, 2) == 400);
   assert(clock_bar_grid_track_span_size(1024, 5, 5, 10, 5, 3, 2) == 399);
   assert(clock_bar_grid_track_span_size(600, 42, 5, 10, 3, 0, 2) == 366);
+
+  set_clock_bar_temperature_value_count(6);
+  lv_obj_t temperature_1;
+  lv_obj_t temperature_2;
+  lv_obj_t temperature_3;
+  lv_obj_t temperature_4;
+  lv_obj_t temperature_5;
+  lv_obj_t temperature_6;
+  lv_obj_t display_time;
+  lv_obj_t network_status_button;
+  lv_obj_t weather_icon_container;
+  lv_obj_t *temperature_labels[] = {
+    &temperature_1,
+    &temperature_2,
+    &temperature_3,
+    &temperature_4,
+    &temperature_5,
+    &temperature_6,
+  };
+  lv_obj_move_background_calls = 0;
+  apply_clock_bar_layout(
+    "left:temperature,temperature_2,temperature_3,temperature_4,temperature_5,temperature_6|middle:time|right:network,weather",
+    temperature_labels,
+    6,
+    &display_time,
+    &network_status_button,
+    &weather_icon_container,
+    true, true, true, true, true,
+    12, 17, 20, 10, 80);
+  assert(lv_obj_move_background_calls == 9);
+  set_clock_bar_temperature_value_count(0);
 
   assert(cfg_field("light.kitchen;Kitchen;Auto;Lightbulb", 0) == "light.kitchen");
   assert(cfg_field("light.kitchen;Kitchen;Auto;Lightbulb", 3) == "Lightbulb");

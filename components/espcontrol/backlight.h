@@ -798,6 +798,7 @@ inline void align_clock_bar_layout_item(lv_obj_t *obj,
                                         int y,
                                         int right_x,
                                         int item_gap) {
+  if (!obj) return;
   if (item < 0 || item >= CLOCK_BAR_ITEM_COUNT) return;
   int section = layout.section[item];
   if (section < 0 || section >= CLOCK_BAR_SECTION_COUNT) return;
@@ -806,12 +807,14 @@ inline void align_clock_bar_layout_item(lv_obj_t *obj,
     int x = left_x + clock_bar_packed_offset_before(
                          layout, section, layout.order[item], item_gap);
     lv_obj_align(obj, LV_ALIGN_TOP_LEFT, x, y);
+    lv_obj_move_background(obj);
     return;
   }
   if (section == CLOCK_BAR_SECTION_RIGHT) {
     int x = -(right_x + clock_bar_packed_offset_after(
                             layout, section, layout.order[item], item_gap));
     lv_obj_align(obj, LV_ALIGN_TOP_RIGHT, x, y);
+    lv_obj_move_background(obj);
     return;
   }
   if (section == CLOCK_BAR_SECTION_MIDDLE) {
@@ -820,6 +823,7 @@ inline void align_clock_bar_layout_item(lv_obj_t *obj,
     int width = clock_bar_item_width(item, item_gap);
     int x = before + width / 2 - total_width / 2;
     lv_obj_align(obj, LV_ALIGN_TOP_MID, x, y);
+    lv_obj_move_background(obj);
     return;
   }
 
@@ -828,6 +832,7 @@ inline void align_clock_bar_layout_item(lv_obj_t *obj,
                          layout.order[item],
                          layout.count[section],
                          left_x, y, right_x, item_gap);
+  lv_obj_move_background(obj);
 }
 
 inline bool clock_bar_layout_item_visible(int item, size_t temperature_count,
