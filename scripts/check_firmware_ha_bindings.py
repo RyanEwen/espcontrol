@@ -871,6 +871,43 @@ def firmware_clock_screensaver_overlay_errors(backlight_path: Path, root: Path) 
     return errors
 
 
+def firmware_screen_schedule_screensaver_override_errors(backlight_path: Path, root: Path) -> list[str]:
+    errors: list[str] = []
+    if not backlight_path.exists():
+        return errors
+
+    rel = backlight_path.relative_to(root)
+    text = backlight_path.read_text(encoding="utf-8")
+
+    idle_body = yaml_script_body(text, "screensaver_idle_check")
+    if idle_body is None:
+        errors.append(f"{rel}: missing screensaver_idle_check script")
+    else:
+        night_index = idle_body.find("screen_schedule_night_active(")
+        mode_index = idle_body.find("return id(screensaver_mode).state")
+        schedule_index = idle_body.find("id(screen_schedule_check).execute();", night_index)
+        if night_index == -1 or schedule_index == -1 or (
+            mode_index != -1 and schedule_index > mode_index
+        ):
+            errors.append(f"{rel}: let the night screen schedule override timer screensaver actions")
+
+    wake_body = yaml_script_body(text, "screensaver_presence_wake")
+    if wake_body is None:
+        errors.append(f"{rel}: missing screensaver_presence_wake script")
+    else:
+        wake_index = wake_body.find("script.execute: screensaver_wake")
+        pre_wake_body = wake_body[:wake_index] if wake_index != -1 else wake_body
+        required_tokens = (
+            "screen_schedule_waiting_for_time(",
+            "screen_schedule_night_active(",
+            "id(screen_schedule_check).execute();",
+        )
+        if wake_index == -1 or any(token not in pre_wake_body for token in required_tokens):
+            errors.append(f"{rel}: let the night screen schedule override sensor screensaver wake")
+
+    return errors
+
+
 def firmware_climate_step_errors(firmware_dir: Path, root: Path) -> list[str]:
     path = firmware_dir / "button_grid_climate.h"
     if not path.exists():
@@ -1014,6 +1051,7 @@ def run_scan() -> int:
     errors.extend(firmware_artwork_image_auth_errors(ARTWORK_IMAGE_PATH, ROOT))
     errors.extend(firmware_screensaver_wake_guard_errors(BACKLIGHT_PATH, COVER_ART_PATH, ROOT))
     errors.extend(firmware_clock_screensaver_overlay_errors(BACKLIGHT_PATH, ROOT))
+    errors.extend(firmware_screen_schedule_screensaver_override_errors(BACKLIGHT_PATH, ROOT))
     errors.extend(firmware_climate_step_errors(FIRMWARE_DIR, ROOT))
     errors.extend(
         firmware_s3_api_errors(
@@ -1389,6 +1427,23 @@ def expect_clock_screensaver_overlay_errors(name: str, text: str, expected: tupl
         path.parent.mkdir(parents=True)
         path.write_text(text, encoding="utf-8")
         errors = firmware_clock_screensaver_overlay_errors(path, root)
+        for item in expected:
+            assert any(item in error for error in errors), f"{name}: missing {item!r} in {errors!r}"
+        if not expected:
+            assert not errors, f"{name}: expected no errors, got {errors!r}"
+
+
+def expect_screen_schedule_screensaver_override_errors(
+    name: str,
+    text: str,
+    expected: tuple[str, ...],
+) -> None:
+    with TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        path = root / "common" / "addon" / "backlight.yaml"
+        path.parent.mkdir(parents=True)
+        path.write_text(text, encoding="utf-8")
+        errors = firmware_screen_schedule_screensaver_override_errors(path, root)
         for item in expected:
             assert any(item in error for error in errors), f"{name}: missing {item!r} in {errors!r}"
         if not expected:
@@ -2596,6 +2651,92 @@ def run_self_test() -> int:
         "    then:\n"
         "      - lvgl.widget.show: clock_screensaver\n",
         ("raise the clock screensaver above existing top-layer UI",),
+    )
+    valid_schedule_screensaver_override = (
+        "script:\n"
+        "  - id: screensaver_idle_check\n"
+        "    then:\n"
+        "      - if:\n"
+        "          condition:\n"
+        "            lambda: |-\n"
+        "              if (screen_schedule_night_active(\n"
+        "                    id(screen_schedule_trigger).state,\n"
+        "                    id(schedule_enabled).state,\n"
+        "                    id(presence_detected),\n"
+        "                    now.is_valid(),\n"
+        "                    now.is_valid() ? now.hour : 0,\n"
+        "                    (int) id(schedule_on_hour).state,\n"
+        "                    (int) id(schedule_off_hour).state)) {\n"
+        "                id(screen_schedule_check).execute();\n"
+        "                return false;\n"
+        "              }\n"
+        "              return id(screensaver_mode).state == \"timer\";\n"
+        "  - id: screensaver_presence_wake\n"
+        "    then:\n"
+        "      - if:\n"
+        "          condition:\n"
+        "            lambda: |-\n"
+        "              if (screen_schedule_waiting_for_time(\n"
+        "                    id(screen_schedule_trigger).state,\n"
+        "                    id(schedule_enabled).state,\n"
+        "                    now.is_valid()) ||\n"
+        "                  screen_schedule_night_active(\n"
+        "                    id(screen_schedule_trigger).state,\n"
+        "                    id(schedule_enabled).state,\n"
+        "                    id(presence_detected),\n"
+        "                    now.is_valid(),\n"
+        "                    now.is_valid() ? now.hour : 0,\n"
+        "                    (int) id(schedule_on_hour).state,\n"
+        "                    (int) id(schedule_off_hour).state)) {\n"
+        "                id(screen_schedule_check).execute();\n"
+        "                return false;\n"
+        "              }\n"
+        "              return id(screensaver_mode).state == \"sensor\";\n"
+        "          then:\n"
+        "            - script.execute: screensaver_wake\n"
+    )
+    expect_screen_schedule_screensaver_override_errors(
+        "night schedule overrides timer and sensor screensaver",
+        valid_schedule_screensaver_override,
+        (),
+    )
+    expect_screen_schedule_screensaver_override_errors(
+        "timer screensaver bypasses night schedule",
+        valid_schedule_screensaver_override.replace(
+            "                id(screen_schedule_check).execute();\n"
+            "                return false;\n"
+            "              }\n"
+            "              return id(screensaver_mode).state == \"timer\";\n",
+            "                std::string mode = id(schedule_mode).current_option();\n"
+            "                if (screen_schedule_clock_mode(mode)) return false;\n"
+            "              }\n"
+            "              return id(screensaver_mode).state == \"timer\";\n",
+            1,
+        ),
+        ("override timer screensaver actions",),
+    )
+    expect_screen_schedule_screensaver_override_errors(
+        "sensor screensaver wake bypasses night schedule",
+        valid_schedule_screensaver_override.replace(
+            "              if (screen_schedule_waiting_for_time(\n"
+            "                    id(screen_schedule_trigger).state,\n"
+            "                    id(schedule_enabled).state,\n"
+            "                    now.is_valid()) ||\n"
+            "                  screen_schedule_night_active(\n"
+            "                    id(screen_schedule_trigger).state,\n"
+            "                    id(schedule_enabled).state,\n"
+            "                    id(presence_detected),\n"
+            "                    now.is_valid(),\n"
+            "                    now.is_valid() ? now.hour : 0,\n"
+            "                    (int) id(schedule_on_hour).state,\n"
+            "                    (int) id(schedule_off_hour).state)) {\n"
+            "                id(screen_schedule_check).execute();\n"
+            "                return false;\n"
+            "              }\n",
+            "",
+            1,
+        ),
+        ("override sensor screensaver wake",),
     )
     expect_artwork_image_auth_errors(
         "local artwork image request uses Basic auth",

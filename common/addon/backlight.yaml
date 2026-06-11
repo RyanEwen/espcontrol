@@ -143,9 +143,8 @@ script:
                     now.is_valid() ? now.hour : 0,
                     (int) id(schedule_on_hour).state,
                     (int) id(schedule_off_hour).state)) {
-                std::string mode = id(schedule_mode).current_option();
-                if (screen_schedule_always_on_mode(mode) ||
-                    screen_schedule_clock_mode(mode)) return false;
+                id(screen_schedule_check).execute();
+                return false;
               }
               return id(screensaver_mode).state == "timer" ||
                      id(screensaver_mode).state == "sensor";
@@ -226,12 +225,30 @@ script:
             - script.execute: screen_schedule_check
       - if:
           condition:
-            lambda: 'return id(screensaver_mode).state == "sensor";'
+            lambda: |-
+              if (id(screensaver_mode).state != "sensor") return false;
+              if (!id(schedule_enabled).state) return true;
+              auto now = panel_time_or_fallback(id(panel_time).now(), id(homeassistant_time).now());
+              if (screen_schedule_waiting_for_time(
+                    id(screen_schedule_trigger).state,
+                    id(schedule_enabled).state,
+                    now.is_valid()) ||
+                  screen_schedule_night_active(
+                    id(screen_schedule_trigger).state,
+                    id(schedule_enabled).state,
+                    id(presence_detected),
+                    now.is_valid(),
+                    now.is_valid() ? now.hour : 0,
+                    (int) id(schedule_on_hour).state,
+                    (int) id(schedule_off_hour).state)) {
+                id(screen_schedule_check).execute();
+                return false;
+              }
+              return true;
           then:
             - if:
                 condition:
                   lambda: |-
-                    if (!id(schedule_enabled).state) return true;
                     auto now = panel_time_or_fallback(id(panel_time).now(), id(homeassistant_time).now());
                     if (screen_schedule_normal_active(
                           id(screen_schedule_trigger).state,
