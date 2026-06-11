@@ -649,51 +649,16 @@ def script_block(device: dict) -> str:
 
 
 def reset_existing_panel_settings_script(device: dict) -> str:
-    package = device.get("package") or {}
-    subpage_chunks = int(package.get("subpageConfigChunks") or 8)
     lines = [
         "  - id: reset_existing_panel_settings_once",
         "    then:",
         "      - lambda: |-",
         f"          const int reset_version = {PANEL_DEVICE_SETTINGS_RESET_VERSION};",
         "          if (id(panel_device_settings_reset_version) >= reset_version) return;",
-        '          ESP_LOGI("config", "Resetting stored panel settings to current defaults");',
-        '          id(button_order).publish_state("");',
+        '          ESP_LOGI("config", "Preserving stored panel settings across firmware update");',
+        "          id(panel_device_settings_reset_version) = reset_version;",
+        "          global_preferences->sync();",
     ]
-    for num in range(1, device["slots"] + 1):
-        lines.append(f'          id(button_{num}_config).publish_state("");')
-        lines.append(f'          id(subpage_{num}_config).publish_state("");')
-        lines.append(f'          id(subpage_{num}_config_ext).publish_state("");')
-        lines.append(f'          id(subpage_{num}_config_ext_2).publish_state("");')
-        lines.append(f'          id(subpage_{num}_config_ext_3).publish_state("");')
-        if subpage_chunks >= 8:
-            lines.append(f'          id(subpage_{num}_config_ext_4).publish_state("");')
-            lines.append(f'          id(subpage_{num}_config_ext_5).publish_state("");')
-            lines.append(f'          id(subpage_{num}_config_ext_6).publish_state("");')
-            lines.append(f'          id(subpage_{num}_config_ext_7).publish_state("");')
-    lines.extend(
-        [
-            '          id(button_on_color).publish_state("${button_on_color_initial}");',
-            '          id(button_off_color).publish_state("${button_off_color_initial}");',
-            '          id(sensor_card_color).publish_state("${sensor_card_color_initial}");',
-            "          id(clock_bar_enabled).turn_off();",
-            "          id(clock_bar_time_enabled).turn_on();",
-            "          id(network_status_enabled).turn_on();",
-            "          id(temperature_degree_symbol_enabled).turn_on();",
-            "          id(subpage_chevrons_enabled).turn_on();",
-            '          id(clock_bar_layout).publish_state("left:temperature|middle:time|right:network");',
-            '          id(clock_bar_temperature_entities).publish_state("");',
-            "          id(outdoor_temp_enable).turn_off();",
-            "          id(indoor_temp_enable).turn_off();",
-            '          id(outdoor_temp_entity).publish_state("");',
-            '          id(indoor_temp_entity).publish_state("");',
-            "          auto temperature_unit_call = id(temperature_unit_select).make_call();",
-            '          temperature_unit_call.set_option("Auto");',
-            "          temperature_unit_call.perform();",
-            "          id(panel_device_settings_reset_version) = reset_version;",
-            "          global_preferences->sync();",
-        ]
-    )
     return "\n".join(lines)
 
 
