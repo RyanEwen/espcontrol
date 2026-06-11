@@ -760,7 +760,7 @@ script:
       - script.execute: backlight_fade_current_ui_to_black
       - script.wait: backlight_fade_current_ui_to_black
       - lvgl.widget.show: clock_screensaver
-      - lambda: 'lv_obj_move_foreground(id(clock_screensaver));'
+      - script.execute: clock_screensaver_keep_on_top
       - output.set_level:
           id: gpio_backlight_pwm
           level: 0%
@@ -798,10 +798,24 @@ script:
       - lvgl.widget.hide: clock_screensaver
       - script.execute: clock_bar_apply
 
+  # Keep the clock above any screen changes or top-layer overlays that appear
+  # after the screensaver starts.
+  - id: clock_screensaver_keep_on_top
+    mode: restart
+    then:
+      - lambda: |-
+          if (!id(is_clock_showing)) return;
+          refresh_screensaver_fullscreen(id(clock_screensaver), id(dim_screensaver_touch_guard));
+          lv_obj_clear_flag(id(clock_screensaver), LV_OBJ_FLAG_HIDDEN);
+          lv_obj_move_foreground(id(clock_screensaver));
+
 # -----------------------------------------------------------------------------
 # Clock screensaver drift update (repositions label for burn-in prevention)
 # -----------------------------------------------------------------------------
 interval:
+  - interval: 1s
+    then:
+      - script.execute: clock_screensaver_keep_on_top
   - interval: 30s
     then:
       - if:

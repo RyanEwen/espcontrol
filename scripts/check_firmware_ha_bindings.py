@@ -839,6 +839,7 @@ def firmware_clock_screensaver_overlay_errors(backlight_path: Path, root: Path) 
     text = backlight_path.read_text(encoding="utf-8")
     sleep_body = yaml_script_body(text, "screensaver_sleep_timer")
     show_body = yaml_script_body(text, "show_clock_view")
+    keep_on_top_body = yaml_script_body(text, "clock_screensaver_keep_on_top")
 
     if sleep_body is None:
         errors.append(f"{rel}: missing screensaver_sleep_timer script")
@@ -864,9 +865,27 @@ def firmware_clock_screensaver_overlay_errors(backlight_path: Path, root: Path) 
         errors.append(f"{rel}: missing show_clock_view script")
     elif (
         "lvgl.widget.show: clock_screensaver" not in show_body
-        or "lv_obj_move_foreground(id(clock_screensaver))" not in show_body
+        or "script.execute: clock_screensaver_keep_on_top" not in show_body
     ):
         errors.append(f"{rel}: raise the clock screensaver above existing top-layer UI")
+
+    if keep_on_top_body is None:
+        errors.append(f"{rel}: missing clock screensaver keep-on-top script")
+    else:
+        required_keep_on_top_tokens = (
+            "if (!id(is_clock_showing)) return;",
+            "refresh_screensaver_fullscreen(id(clock_screensaver), id(dim_screensaver_touch_guard));",
+            "lv_obj_clear_flag(id(clock_screensaver), LV_OBJ_FLAG_HIDDEN);",
+            "lv_obj_move_foreground(id(clock_screensaver));",
+        )
+        if any(token not in keep_on_top_body for token in required_keep_on_top_tokens):
+            errors.append(f"{rel}: keep re-raising the active clock screensaver above overlays")
+
+    if (
+        "interval: 1s" not in text
+        or "script.execute: clock_screensaver_keep_on_top" not in text.split("interval:", 1)[-1]
+    ):
+        errors.append(f"{rel}: keep the active clock screensaver above overlays after it starts")
 
     return errors
 
@@ -2614,7 +2633,18 @@ def run_self_test() -> int:
         "  - id: show_clock_view\n"
         "    then:\n"
         "      - lvgl.widget.show: clock_screensaver\n"
-        "      - lambda: 'lv_obj_move_foreground(id(clock_screensaver));'\n",
+        "      - script.execute: clock_screensaver_keep_on_top\n"
+        "  - id: clock_screensaver_keep_on_top\n"
+        "    then:\n"
+        "      - lambda: |-\n"
+        "          if (!id(is_clock_showing)) return;\n"
+        "          refresh_screensaver_fullscreen(id(clock_screensaver), id(dim_screensaver_touch_guard));\n"
+        "          lv_obj_clear_flag(id(clock_screensaver), LV_OBJ_FLAG_HIDDEN);\n"
+        "          lv_obj_move_foreground(id(clock_screensaver));\n"
+        "interval:\n"
+        "  - interval: 1s\n"
+        "    then:\n"
+        "      - script.execute: clock_screensaver_keep_on_top\n",
         ("overlay the existing UI without closing it",),
     )
     expect_clock_screensaver_overlay_errors(
@@ -2634,7 +2664,18 @@ def run_self_test() -> int:
         "  - id: show_clock_view\n"
         "    then:\n"
         "      - lvgl.widget.show: clock_screensaver\n"
-        "      - lambda: 'lv_obj_move_foreground(id(clock_screensaver));'\n",
+        "      - script.execute: clock_screensaver_keep_on_top\n"
+        "  - id: clock_screensaver_keep_on_top\n"
+        "    then:\n"
+        "      - lambda: |-\n"
+        "          if (!id(is_clock_showing)) return;\n"
+        "          refresh_screensaver_fullscreen(id(clock_screensaver), id(dim_screensaver_touch_guard));\n"
+        "          lv_obj_clear_flag(id(clock_screensaver), LV_OBJ_FLAG_HIDDEN);\n"
+        "          lv_obj_move_foreground(id(clock_screensaver));\n"
+        "interval:\n"
+        "  - interval: 1s\n"
+        "    then:\n"
+        "      - script.execute: clock_screensaver_keep_on_top\n",
         (),
     )
     expect_clock_screensaver_overlay_errors(
