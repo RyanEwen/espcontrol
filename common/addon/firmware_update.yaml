@@ -94,6 +94,9 @@ script:
       - lvgl.resume:
       - script.execute: clock_bar_hide
       - lvgl.page.show: loading_page
+      # Expected during firmware writes: blanking the backlight reduces power
+      # and avoids drawing while flash is busy. Do not treat this as a modal
+      # screensaver blank.
       - script.execute: backlight_force_display_off
       - script.wait: backlight_force_display_off
 

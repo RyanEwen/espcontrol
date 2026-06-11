@@ -358,51 +358,63 @@ script:
   - id: backlight_sleep_display_off
     mode: restart
     then:
-      - globals.set:
-          id: display_asleep
-          value: 'true'
-      - globals.set:
-          id: screensaver_display_off_active
-          value: 'true'
-      - globals.set:
-          id: screensaver_dimmed_active
-          value: 'false'
-      - globals.set:
-          id: cover_art_screensaver_active
-          value: 'false'
-      - lvgl.resume:
-      - script.execute: clock_bar_hide
-      - script.wait: clock_bar_hide
-      - script.execute: backlight_fade_current_ui_to_black
-      - script.wait: backlight_fade_current_ui_to_black
-      - script.execute: hide_clock_view
-      - script.execute: hide_cover_art_view
-      - lvgl.widget.hide: dim_screensaver_touch_guard
-      - lvgl.page.show: screen_off_page
-      - script.execute: clock_bar_hide
-      - delay: 50ms
-      - script.execute: backlight_force_display_off
-      - lvgl.pause:
-      - script.execute: backlight_force_display_off
+      - if:
+          condition:
+            lambda: 'return !id(home_screen_idle_suspended);'
+          then:
+            - globals.set:
+                id: display_asleep
+                value: 'true'
+            - globals.set:
+                id: screensaver_display_off_active
+                value: 'true'
+            - globals.set:
+                id: screensaver_dimmed_active
+                value: 'false'
+            - globals.set:
+                id: cover_art_screensaver_active
+                value: 'false'
+            - lvgl.resume:
+            - script.execute: clock_bar_hide
+            - script.wait: clock_bar_hide
+            - script.execute: backlight_fade_current_ui_to_black
+            - script.wait: backlight_fade_current_ui_to_black
+            - script.execute: hide_clock_view
+            - script.execute: hide_cover_art_view
+            - lvgl.widget.hide: dim_screensaver_touch_guard
+            - lvgl.page.show: screen_off_page
+            - script.execute: clock_bar_hide
+            - delay: 50ms
+            - script.execute: backlight_force_display_off
+            - lvgl.pause:
+            - script.execute: backlight_force_display_off
+          else:
+            - lambda: 'ESP_LOGD("backlight", "Skipping automatic display-off while image modal is active");'
 
   - id: backlight_schedule_display_off
     mode: restart
     then:
-      - script.execute: backlight_force_display_off
-      - lvgl.resume:
-      - script.execute: clock_bar_hide
-      - script.wait: clock_bar_hide
-      - script.execute: hide_clock_view
-      - globals.set:
-          id: screensaver_dimmed_active
-          value: 'false'
-      - lvgl.widget.hide: dim_screensaver_touch_guard
-      - lvgl.page.show: screen_off_page
-      - script.execute: clock_bar_hide
-      - delay: 50ms
-      - script.execute: backlight_force_display_off
-      - lvgl.pause:
-      - script.execute: backlight_force_display_off
+      - if:
+          condition:
+            lambda: 'return !id(home_screen_idle_suspended) || id(screen_schedule_asleep);'
+          then:
+            - script.execute: backlight_force_display_off
+            - lvgl.resume:
+            - script.execute: clock_bar_hide
+            - script.wait: clock_bar_hide
+            - script.execute: hide_clock_view
+            - globals.set:
+                id: screensaver_dimmed_active
+                value: 'false'
+            - lvgl.widget.hide: dim_screensaver_touch_guard
+            - lvgl.page.show: screen_off_page
+            - script.execute: clock_bar_hide
+            - delay: 50ms
+            - script.execute: backlight_force_display_off
+            - lvgl.pause:
+            - script.execute: backlight_force_display_off
+          else:
+            - lambda: 'ESP_LOGD("backlight", "Skipping non-scheduled display-off while image modal is active");'
 
   # Touchscreen long-press sleep. This is stronger than the automatic schedule;
   # the next tap wakes it.
@@ -637,31 +649,37 @@ script:
   - id: show_dimmed_view
     mode: restart
     then:
-      - script.execute: screensaver_dimmed_refresh_brightness
-      - script.wait: screensaver_dimmed_refresh_brightness
-      - globals.set:
-          id: display_asleep
-          value: 'true'
-      - globals.set:
-          id: screen_schedule_asleep
-          value: 'false'
-      - globals.set:
-          id: screensaver_display_off_active
-          value: 'false'
-      - globals.set:
-          id: screensaver_dimmed_active
-          value: 'true'
-      - lvgl.resume:
-      - script.execute: clock_bar_hide
-      - script.wait: clock_bar_hide
-      - script.execute: hide_clock_view
-      - lambda: 'refresh_screensaver_fullscreen(id(clock_screensaver), id(dim_screensaver_touch_guard));'
-      - lvgl.widget.show: dim_screensaver_touch_guard
-      - lambda: 'lv_obj_move_foreground(id(dim_screensaver_touch_guard));'
-      - light.turn_on:
-          id: display_backlight
-          brightness: !lambda 'return id(screensaver_dimmed_target_level);'
-          transition_length: 2s
+      - if:
+          condition:
+            lambda: 'return !id(home_screen_idle_suspended);'
+          then:
+            - script.execute: screensaver_dimmed_refresh_brightness
+            - script.wait: screensaver_dimmed_refresh_brightness
+            - globals.set:
+                id: display_asleep
+                value: 'true'
+            - globals.set:
+                id: screen_schedule_asleep
+                value: 'false'
+            - globals.set:
+                id: screensaver_display_off_active
+                value: 'false'
+            - globals.set:
+                id: screensaver_dimmed_active
+                value: 'true'
+            - lvgl.resume:
+            - script.execute: clock_bar_hide
+            - script.wait: clock_bar_hide
+            - script.execute: hide_clock_view
+            - lambda: 'refresh_screensaver_fullscreen(id(clock_screensaver), id(dim_screensaver_touch_guard));'
+            - lvgl.widget.show: dim_screensaver_touch_guard
+            - lambda: 'lv_obj_move_foreground(id(dim_screensaver_touch_guard));'
+            - light.turn_on:
+                id: display_backlight
+                brightness: !lambda 'return id(screensaver_dimmed_target_level);'
+                transition_length: 2s
+          else:
+            - lambda: 'ESP_LOGD("backlight", "Skipping dimmed screensaver while image modal is active");'
 
   # Choose the clock screensaver brightness for the current day/night period.
   - id: clock_screensaver_refresh_brightness
@@ -733,73 +751,79 @@ script:
   - id: show_clock_view
     mode: single
     then:
-      - lambda: 'navigation_return_home(id(main_page)->obj);'
-      - globals.set:
-          id: screensaver_dimmed_active
-          value: 'false'
-      - lvgl.widget.hide: dim_screensaver_touch_guard
-      - script.execute: clock_screensaver_refresh_brightness
-      - script.wait: clock_screensaver_refresh_brightness
-      - lambda: |-
-          id(is_clock_showing) = true;
-          apply_clock_screensaver_text_color(id(clock_label), id(schedule_clock_text_color).state);
-          auto time = panel_time_or_fallback(id(panel_time).now(), id(homeassistant_time).now());
-          if (time.is_valid()) {
-            char buf[8];
-            bool use_12h = id(clock_format_select).current_option() == "12h";
-            format_clock_time_without_suffix(buf, sizeof(buf),
-                                             time.hour, time.minute, use_12h);
-            lv_label_set_text(id(clock_label), buf);
-            position_clock_screensaver_label(id(clock_screensaver), id(clock_label), time.minute);
-          }
-      - script.execute: clock_bar_hide
-      - script.wait: clock_bar_hide
-      - script.execute: backlight_fade_current_ui_to_black
-      - script.wait: backlight_fade_current_ui_to_black
-      - lambda: |-
-          lv_obj_t *temperature_labels[] = {
-            id(temperatures),
-            id(temperature_2),
-            id(temperature_3),
-            id(temperature_4),
-            id(temperature_5),
-            id(temperature_6),
-          };
-          hide_clock_bar_top_layer_widgets(temperature_labels, 6,
-                                           id(display_time),
-                                           id(network_status_button));
-          network_status_hide_modal();
-          refresh_screensaver_fullscreen(id(clock_screensaver), id(dim_screensaver_touch_guard));
-          lv_obj_clear_flag(id(clock_screensaver), LV_OBJ_FLAG_HIDDEN);
-          lv_obj_move_foreground(id(clock_screensaver));
-      - output.set_level:
-          id: gpio_backlight_pwm
-          level: 0%
-      - delay: 50ms
-      - output.set_level:
-          id: gpio_backlight_pwm
-          level: !lambda 'return id(screensaver_clock_target_level) * 0.20f;'
-      - delay: 50ms
-      - output.set_level:
-          id: gpio_backlight_pwm
-          level: !lambda 'return id(screensaver_clock_target_level) * 0.40f;'
-      - delay: 50ms
-      - output.set_level:
-          id: gpio_backlight_pwm
-          level: !lambda 'return id(screensaver_clock_target_level) * 0.60f;'
-      - delay: 50ms
-      - output.set_level:
-          id: gpio_backlight_pwm
-          level: !lambda 'return id(screensaver_clock_target_level) * 0.80f;'
-      - delay: 50ms
-      - output.set_level:
-          id: gpio_backlight_pwm
-          level: !lambda 'return id(screensaver_clock_target_level);'
-      - delay: 50ms
-      - light.turn_on:
-          id: display_backlight
-          brightness: !lambda 'return id(screensaver_clock_target_level);'
-          transition_length: 0s
+      - if:
+          condition:
+            lambda: 'return !id(home_screen_idle_suspended);'
+          then:
+            - lambda: 'navigation_return_home(id(main_page)->obj);'
+            - globals.set:
+                id: screensaver_dimmed_active
+                value: 'false'
+            - lvgl.widget.hide: dim_screensaver_touch_guard
+            - script.execute: clock_screensaver_refresh_brightness
+            - script.wait: clock_screensaver_refresh_brightness
+            - lambda: |-
+                id(is_clock_showing) = true;
+                apply_clock_screensaver_text_color(id(clock_label), id(schedule_clock_text_color).state);
+                auto time = panel_time_or_fallback(id(panel_time).now(), id(homeassistant_time).now());
+                if (time.is_valid()) {
+                  char buf[8];
+                  bool use_12h = id(clock_format_select).current_option() == "12h";
+                  format_clock_time_without_suffix(buf, sizeof(buf),
+                                                   time.hour, time.minute, use_12h);
+                  lv_label_set_text(id(clock_label), buf);
+                  position_clock_screensaver_label(id(clock_screensaver), id(clock_label), time.minute);
+                }
+            - script.execute: clock_bar_hide
+            - script.wait: clock_bar_hide
+            - script.execute: backlight_fade_current_ui_to_black
+            - script.wait: backlight_fade_current_ui_to_black
+            - lambda: |-
+                lv_obj_t *temperature_labels[] = {
+                  id(temperatures),
+                  id(temperature_2),
+                  id(temperature_3),
+                  id(temperature_4),
+                  id(temperature_5),
+                  id(temperature_6),
+                };
+                hide_clock_bar_top_layer_widgets(temperature_labels, 6,
+                                                 id(display_time),
+                                                 id(network_status_button));
+                network_status_hide_modal();
+                refresh_screensaver_fullscreen(id(clock_screensaver), id(dim_screensaver_touch_guard));
+                lv_obj_clear_flag(id(clock_screensaver), LV_OBJ_FLAG_HIDDEN);
+                lv_obj_move_foreground(id(clock_screensaver));
+            - output.set_level:
+                id: gpio_backlight_pwm
+                level: 0%
+            - delay: 50ms
+            - output.set_level:
+                id: gpio_backlight_pwm
+                level: !lambda 'return id(screensaver_clock_target_level) * 0.20f;'
+            - delay: 50ms
+            - output.set_level:
+                id: gpio_backlight_pwm
+                level: !lambda 'return id(screensaver_clock_target_level) * 0.40f;'
+            - delay: 50ms
+            - output.set_level:
+                id: gpio_backlight_pwm
+                level: !lambda 'return id(screensaver_clock_target_level) * 0.60f;'
+            - delay: 50ms
+            - output.set_level:
+                id: gpio_backlight_pwm
+                level: !lambda 'return id(screensaver_clock_target_level) * 0.80f;'
+            - delay: 50ms
+            - output.set_level:
+                id: gpio_backlight_pwm
+                level: !lambda 'return id(screensaver_clock_target_level);'
+            - delay: 50ms
+            - light.turn_on:
+                id: display_backlight
+                brightness: !lambda 'return id(screensaver_clock_target_level);'
+                transition_length: 0s
+          else:
+            - lambda: 'ESP_LOGD("backlight", "Skipping clock screensaver while image modal is active");'
 
   # Hide the clock screensaver overlay
   - id: hide_clock_view

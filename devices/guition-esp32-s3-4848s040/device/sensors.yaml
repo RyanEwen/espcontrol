@@ -60,6 +60,18 @@ script:
             id(screensaver_sleep_timer).stop();
             id(screensaver_sleep_sensor).stop();
             id(screensaver_sleep_display_off).stop();
+            id(backlight_sleep_display_off).stop();
+            id(backlight_fade_current_ui_to_black).stop();
+            id(backlight_schedule_display_off).stop();
+            id(show_clock_view).stop();
+            id(show_dimmed_view).stop();
+            id(clock_screensaver_refresh_brightness).stop();
+            id(screensaver_dimmed_refresh_brightness).stop();
+            id(display_asleep) = false;
+            id(screensaver_display_off_active) = false;
+            id(screensaver_dimmed_active) = false;
+            lv_obj_add_flag(id(dim_screensaver_touch_guard), LV_OBJ_FLAG_HIDDEN);
+            id(backlight_apply_brightness).execute();
           };
           cfg.resume_home_idle = []() {
             id(home_screen_idle_suspended) = false;
@@ -158,6 +170,18 @@ esphome:
               id(screensaver_sleep_timer).stop();
               id(screensaver_sleep_sensor).stop();
               id(screensaver_sleep_display_off).stop();
+              id(backlight_sleep_display_off).stop();
+              id(backlight_fade_current_ui_to_black).stop();
+              id(backlight_schedule_display_off).stop();
+              id(show_clock_view).stop();
+              id(show_dimmed_view).stop();
+              id(clock_screensaver_refresh_brightness).stop();
+              id(screensaver_dimmed_refresh_brightness).stop();
+              id(display_asleep) = false;
+              id(screensaver_display_off_active) = false;
+              id(screensaver_dimmed_active) = false;
+              lv_obj_add_flag(id(dim_screensaver_touch_guard), LV_OBJ_FLAG_HIDDEN);
+              id(backlight_apply_brightness).execute();
             };
             cfg.resume_home_idle = []() {
               id(home_screen_idle_suspended) = false;
@@ -274,6 +298,18 @@ esphome:
               id(screensaver_sleep_timer).stop();
               id(screensaver_sleep_sensor).stop();
               id(screensaver_sleep_display_off).stop();
+              id(backlight_sleep_display_off).stop();
+              id(backlight_fade_current_ui_to_black).stop();
+              id(backlight_schedule_display_off).stop();
+              id(show_clock_view).stop();
+              id(show_dimmed_view).stop();
+              id(clock_screensaver_refresh_brightness).stop();
+              id(screensaver_dimmed_refresh_brightness).stop();
+              id(display_asleep) = false;
+              id(screensaver_display_off_active) = false;
+              id(screensaver_dimmed_active) = false;
+              lv_obj_add_flag(id(dim_screensaver_touch_guard), LV_OBJ_FLAG_HIDDEN);
+              id(backlight_apply_brightness).execute();
             };
             cfg.resume_home_idle = []() {
               id(home_screen_idle_suspended) = false;
