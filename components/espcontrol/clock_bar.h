@@ -275,15 +275,17 @@ inline ClockBarVisibility clock_bar_resolve_visibility(
     bool display_off_screensaver_active,
     bool dimmed_screensaver_active) {
   ClockBarVisibility result;
-  result.reserve_space = enabled &&
+  // Full-screen screensavers hide the clock bar, but the grid should keep the
+  // same top padding so waking does not briefly resize the cards.
+  result.reserve_space = enabled && !screen_schedule_asleep;
+  result.visible = result.reserve_space &&
       !clock_bar_blocked_by_overlay(
           display_asleep,
           screen_schedule_asleep,
           clock_screensaver_active,
           cover_art_screensaver_active,
           display_off_screensaver_active,
-          dimmed_screensaver_active);
-  result.visible = result.reserve_space &&
+          dimmed_screensaver_active) &&
       clock_bar_active_on_button_grid_page(main_page_obj);
   return result;
 }

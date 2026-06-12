@@ -60,6 +60,7 @@ static bool lv_test_disp_available = false;
 static int lv_test_hor_res = 480;
 static int lv_test_ver_res = 480;
 static int lv_obj_move_background_calls = 0;
+static lv_obj_t *lv_active_screen = nullptr;
 inline const char *espcontrol_i18n(const char *text) { return text ? text : ""; }
 inline std::string espcontrol_i18n(const std::string &text) { return text; }
 constexpr int LV_PART_MAIN = 0;
@@ -84,7 +85,7 @@ constexpr int LV_OBJ_FLAG_HIDDEN = 2;
 constexpr int LV_GRAD_DIR_HOR = 1;
 inline int lv_color_hex(uint32_t value) { return static_cast<int>(value); }
 inline int lv_pct(int value) { return value; }
-inline lv_obj_t *lv_scr_act() { return nullptr; }
+inline lv_obj_t *lv_scr_act() { return lv_active_screen; }
 inline void lv_obj_set_style_transform_scale_x(lv_obj_t *, int, int) {}
 inline void lv_obj_set_style_transform_scale_y(lv_obj_t *, int, int) {}
 inline void lv_obj_set_style_bg_color(lv_obj_t *, int, lv_style_selector_t) {}
@@ -168,6 +169,28 @@ int main() {
   assert(clock_bar_current_screen_width(1024) == 800);
   assert(clock_bar_current_screen_height(600) == 1280);
   lv_test_disp_available = false;
+
+  lv_obj_t main_page;
+  lv_active_screen = &main_page;
+  auto awake_clock_bar = clock_bar_resolve_visibility(
+    true, &main_page, false, false, false, false, false, false);
+  assert(awake_clock_bar.reserve_space);
+  assert(awake_clock_bar.visible);
+
+  auto clock_screensaver_clock_bar = clock_bar_resolve_visibility(
+    true, &main_page, false, false, true, false, false, false);
+  assert(clock_screensaver_clock_bar.reserve_space);
+  assert(!clock_screensaver_clock_bar.visible);
+
+  auto dismissing_screensaver_clock_bar = clock_bar_resolve_visibility(
+    true, &main_page, true, false, false, false, false, false);
+  assert(dismissing_screensaver_clock_bar.reserve_space);
+  assert(!dismissing_screensaver_clock_bar.visible);
+
+  auto screen_schedule_clock_bar = clock_bar_resolve_visibility(
+    true, &main_page, true, true, true, false, false, false);
+  assert(!screen_schedule_clock_bar.reserve_space);
+  assert(!screen_schedule_clock_bar.visible);
 
   auto fallback_clock_bar = parse_clock_bar_layout("bad|unknown:time");
   assert(fallback_clock_bar.section[CLOCK_BAR_ITEM_TEMPERATURE] == CLOCK_BAR_SECTION_LEFT);
