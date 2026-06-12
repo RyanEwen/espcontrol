@@ -4,6 +4,7 @@
 #pragma once
 
 #include <cmath>
+#include <cstdint>
 #include <cstdlib>
 #include <string>
 #include "esphome/components/network/ip_address.h"
@@ -19,6 +20,15 @@ constexpr const char *NETWORK_ICON_WIFI_OFF_OUTLINE = "\U000F092E";
 constexpr const char *NETWORK_ICON_ETHERNET = "\U000F0200";
 
 using NetworkStatusUpdateCallback = void (*)();
+using NetworkStatusUpdateCheckCallback = void (*)();
+
+enum NetworkStatusUpdateState : uint8_t {
+  NETWORK_STATUS_UPDATE_HIDDEN,
+  NETWORK_STATUS_UPDATE_CHECKING,
+  NETWORK_STATUS_UPDATE_LATEST,
+  NETWORK_STATUS_UPDATE_AVAILABLE,
+  NETWORK_STATUS_UPDATE_INSTALLING,
+};
 
 struct NetworkStatusModalUi {
   lv_obj_t *overlay = nullptr;
@@ -28,6 +38,7 @@ struct NetworkStatusModalUi {
   lv_obj_t *device_name_lbl = nullptr;
   lv_obj_t *ip_lbl = nullptr;
   lv_obj_t *firmware_lbl = nullptr;
+  lv_obj_t *update_status_lbl = nullptr;
   lv_obj_t *update_btn = nullptr;
   NetworkStatusUpdateCallback update_callback = nullptr;
 };
@@ -42,8 +53,64 @@ inline NetworkStatusUpdateCallback &network_status_update_callback_ref() {
   return callback;
 }
 
+inline NetworkStatusUpdateCheckCallback &network_status_update_check_callback_ref() {
+  static NetworkStatusUpdateCheckCallback callback = nullptr;
+  return callback;
+}
+
+inline NetworkStatusUpdateState &network_status_update_state_ref() {
+  static NetworkStatusUpdateState state = NETWORK_STATUS_UPDATE_HIDDEN;
+  return state;
+}
+
 inline void network_status_set_update_callback(NetworkStatusUpdateCallback callback) {
   network_status_update_callback_ref() = callback;
+}
+
+inline void network_status_set_update_check_callback(NetworkStatusUpdateCheckCallback callback) {
+  network_status_update_check_callback_ref() = callback;
+}
+
+inline const char *network_status_update_status_text(NetworkStatusUpdateState state) {
+  switch (state) {
+    case NETWORK_STATUS_UPDATE_CHECKING:
+      return espcontrol_i18n("Checking for updates");
+    case NETWORK_STATUS_UPDATE_LATEST:
+      return espcontrol_i18n("Latest installed");
+    case NETWORK_STATUS_UPDATE_AVAILABLE:
+      return espcontrol_i18n("Update available");
+    case NETWORK_STATUS_UPDATE_INSTALLING:
+      return espcontrol_i18n("Installing update");
+    case NETWORK_STATUS_UPDATE_HIDDEN:
+    default:
+      return "";
+  }
+}
+
+inline void network_status_apply_update_state() {
+  NetworkStatusModalUi &ui = network_status_modal_ui();
+  NetworkStatusUpdateState state = network_status_update_state_ref();
+  bool show_status = state != NETWORK_STATUS_UPDATE_HIDDEN;
+  bool show_button = state == NETWORK_STATUS_UPDATE_AVAILABLE && ui.update_callback != nullptr;
+
+  if (ui.update_status_lbl) {
+    lv_label_set_text(ui.update_status_lbl, network_status_update_status_text(state));
+    if (show_status) lv_obj_clear_flag(ui.update_status_lbl, LV_OBJ_FLAG_HIDDEN);
+    else lv_obj_add_flag(ui.update_status_lbl, LV_OBJ_FLAG_HIDDEN);
+  }
+  if (ui.update_btn) {
+    if (show_button) lv_obj_clear_flag(ui.update_btn, LV_OBJ_FLAG_HIDDEN);
+    else lv_obj_add_flag(ui.update_btn, LV_OBJ_FLAG_HIDDEN);
+  }
+  if (ui.content) {
+    lv_obj_update_layout(ui.content);
+    lv_obj_align(ui.content, LV_ALIGN_CENTER, 0, 0);
+  }
+}
+
+inline void network_status_set_update_state(NetworkStatusUpdateState state) {
+  network_status_update_state_ref() = state;
+  network_status_apply_update_state();
 }
 
 inline const char *network_status_wifi_icon(float pct) {
@@ -123,6 +190,7 @@ inline void network_status_hide_modal() {
   ui.device_name_lbl = nullptr;
   ui.ip_lbl = nullptr;
   ui.firmware_lbl = nullptr;
+  ui.update_status_lbl = nullptr;
   ui.update_btn = nullptr;
   ui.update_callback = nullptr;
   control_modal_clear_active(ControlModalKind::NETWORK_STATUS);
@@ -192,6 +260,17 @@ inline void network_status_open_modal(const std::string &device_name,
     DARK_TEXT_MUTED);
 
   ui.update_callback = network_status_update_callback_ref();
+  bool update_ui_enabled = ui.update_callback != nullptr ||
+                           network_status_update_check_callback_ref() != nullptr ||
+                           network_status_update_state_ref() != NETWORK_STATUS_UPDATE_HIDDEN;
+  if (update_ui_enabled) {
+    ui.update_status_lbl = network_status_add_center_label(
+      ui.content,
+      network_status_update_status_text(network_status_update_state_ref()),
+      text_font,
+      content_w,
+      DARK_TEXT_MUTED);
+  }
   if (ui.update_callback) {
     lv_coord_t update_h = control_modal_scaled_px(52, layout.short_side);
     if (update_h < 38) update_h = 38;
@@ -213,9 +292,15 @@ inline void network_status_open_modal(const std::string &device_name,
       }, LV_EVENT_CLICKED, nullptr);
     }
   }
-  lv_obj_update_layout(ui.content);
-  lv_obj_align(ui.content, LV_ALIGN_CENTER, 0, 0);
+  network_status_apply_update_state();
 
   lv_obj_move_foreground(ui.close_btn);
   lv_obj_move_foreground(ui.overlay);
+
+  NetworkStatusUpdateCheckCallback check_callback = network_status_update_check_callback_ref();
+  NetworkStatusUpdateState state = network_status_update_state_ref();
+  if (check_callback && state != NETWORK_STATUS_UPDATE_INSTALLING &&
+      state != NETWORK_STATUS_UPDATE_AVAILABLE) {
+    check_callback();
+  }
 }
