@@ -118,14 +118,18 @@ function connectEvents() {
       renderPreview();
     },
     "switch-indoor_temp_enable": function (val, d) {
+      state._clockBarTemperatureVisibilityReceived = true;
       state._indoorOn = d.value === true || val === "ON";
       syncTemperatureUi();
       updateTempPreview();
+      updateClockBarItemUi();
     },
     "switch-outdoor_temp_enable": function (val, d) {
+      state._clockBarTemperatureVisibilityReceived = true;
       state._outdoorOn = d.value === true || val === "ON";
       syncTemperatureUi();
       updateTempPreview();
+      updateClockBarItemUi();
     },
     "switch-screen__clock_bar": function (val, d, key) {
       if (applyClockBarStateValue(val, d, key)) syncClockBarUi();
@@ -137,11 +141,11 @@ function connectEvents() {
       applyClockBarTemperatureEntities(normalizeClockBarTemperatureEntities(val), false);
     },
     "switch-screen__clock_bar_time": function (val, d) {
-      state.clockBarTimeOn = true;
+      state.clockBarTimeOn = d.value === true || val === "ON";
       syncClockBarUi();
     },
     "switch-screen__network_status_icon": function (val, d) {
-      state.networkStatusOn = true;
+      state.networkStatusOn = d.value === true || val === "ON";
       syncClockBarUi();
     },
     "switch-screen__temperature_degree_symbol": function (val, d) {
@@ -156,12 +160,20 @@ function connectEvents() {
     "text-indoor_temp_entity": function (val) {
       state.indoorEntity = val;
       syncInput(els.setIndoorEntity, val);
-      if (!state._clockBarTemperatureEntitiesReceived) syncTemperatureUi();
+      if (!state._clockBarTemperatureEntitiesReceived) {
+        syncTemperatureUi();
+        updateTempPreview();
+        updateClockBarItemUi();
+      }
     },
     "text-outdoor_temp_entity": function (val) {
       state.outdoorEntity = val;
       syncInput(els.setOutdoorEntity, val);
-      if (!state._clockBarTemperatureEntitiesReceived) syncTemperatureUi();
+      if (!state._clockBarTemperatureEntitiesReceived) {
+        syncTemperatureUi();
+        updateTempPreview();
+        updateClockBarItemUi();
+      }
     },
     "select-screen__temperature_unit": function (val, d) {
       state.temperatureUnit = normalizeTemperatureUnit(d.value || val);

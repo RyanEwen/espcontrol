@@ -88,7 +88,7 @@ function updateClock() {
 }
 
 function clockBarTemperatureActive() {
-  return clockBarTemperatureEntries().length > 0;
+  return clockBarTemperatureVisible();
 }
 
 var CLOCK_BAR_SECTIONS = ["left", "middle", "right"];
@@ -110,16 +110,11 @@ function isClockBarTemperatureItem(item) {
 }
 
 function clockBarTemperatureItemIds() {
-  var count = clockBarTemperatureEntries().length;
-  var out = [];
-  for (var i = 0; i < count && i < MAX_CLOCK_BAR_TEMPERATURES; i++) {
-    out.push(clockBarTemperatureItemId(i));
-  }
-  return out;
+  return ["temperature"];
 }
 
 function clockBarItems() {
-  return clockBarTemperatureItemIds().concat(["time", "network"]);
+  return ["temperature", "time", "network"];
 }
 
 function clockBarDefaultSection(item) {
@@ -131,7 +126,7 @@ function clockBarDefaultSection(item) {
 
 function clockBarItemActive(item) {
   var tempIndex = clockBarTemperatureItemIndex(item);
-  if (tempIndex >= 0) return tempIndex < clockBarTemperatureEntries().length;
+  if (tempIndex >= 0) return clockBarTemperatureVisible();
   if (item === "time") return !!state.clockBarTimeOn;
   if (item === "network") return !!state.networkStatusOn;
   return false;
@@ -143,8 +138,8 @@ function clockBarItemElement(item) {
 
 function clockBarItemLabel(item) {
   if (isClockBarTemperatureItem(item)) return "Temperature";
-  if (item === "time") return "Time";
-  if (item === "network") return "Network Status";
+  if (item === "time") return "Clock";
+  if (item === "network") return "Connectivity";
   return "Clock Bar";
 }
 
@@ -219,14 +214,8 @@ function normalizeClockBarLayout() {
   var next = { left: [], middle: [], right: [] };
   CLOCK_BAR_SECTIONS.forEach(function (section) {
     (CLOCK_BAR_DEFAULT_LAYOUT[section] || []).forEach(function (item) {
-      if (!clockBarItemActive(item)) return;
       if (next[section].indexOf(item) === -1) next[section].push(item);
     });
-  });
-  clockBarItems().forEach(function (item) {
-    var section = clockBarDefaultSection(item);
-    if (!clockBarItemActive(item) || next[section].indexOf(item) !== -1) return;
-    next[clockBarDefaultSection(item)].push(item);
   });
   state.clockBarLayout = next;
   return next;
@@ -238,6 +227,8 @@ function createClockBarItemElement(item, section) {
   button.setAttribute("data-clockbar-item", item);
   button.setAttribute("data-clockbar-section", section);
   button.setAttribute("aria-label", clockBarItemLabel(item));
+  button.setAttribute("role", "button");
+  button.setAttribute("tabindex", "0");
 
   if (isClockBarTemperatureItem(item)) {
     var temp = document.createElement("span");
@@ -274,7 +265,6 @@ function renderClockBarLayout() {
     container.innerHTML = "";
     var rendered = 0;
     layout[section].forEach(function (item) {
-      if (!clockBarItemActive(item)) return;
       var itemEl = createClockBarItemElement(item, section);
       container.appendChild(itemEl);
       els.clockBarItems[item] = itemEl;
@@ -292,17 +282,17 @@ function syncClockBarItemElement(item) {
   if (!el) return;
   var active = clockBarItemActive(item);
   el.className = el.className
-    .replace(/\s?sp-clockbar-inactive/g, "")
+    .replace(/\s?sp-clockbar-hidden/g, "")
     .replace(/\s?sp-selected/g, "");
-  if (!active) el.className += " sp-clockbar-inactive";
+  if (!active) el.className += " sp-clockbar-hidden";
+  if (state.clockBarSelectedItem === item) el.className += " sp-selected";
   el.setAttribute("title", clockBarItemLabel(item));
+  el.setAttribute("aria-pressed", state.clockBarSelectedItem === item ? "true" : "false");
 }
 
 function updateClockBarItemUi() {
   renderClockBarLayout();
-  clockBarTemperatureItemIds().forEach(syncClockBarItemElement);
-  syncClockBarItemElement("time");
-  syncClockBarItemElement("network");
+  clockBarItems().forEach(syncClockBarItemElement);
 }
 
 function syncInput(el, val) {
@@ -354,13 +344,12 @@ function updateTempPreview() {
   var show = clockBarVisibleInPreview();
   var unit = clockBarTemperatureUnitSymbol();
   var sampleValues = ["17", "24", "21", "19", "22", "18"];
-  clockBarTemperatureEntries().forEach(function (_, index) {
-    var item = clockBarTemperatureItemId(index);
+  clockBarTemperatureItemIds().forEach(function (item, index) {
     var el = els.temps[item];
     if (!el) return;
-    var value = sampleValues[index] || "--";
+    var configured = primaryClockBarTemperatureEntity();
+    var value = configured ? (sampleValues[index] || "--") : "--";
     if (index === 0 && state._outdoorVal != null) value = state._outdoorVal;
-    if (index === 1 && state._indoorVal != null) value = state._indoorVal;
     el.className = "sp-temp" + (show ? " sp-visible" : "");
     el.textContent = value + unit;
   });

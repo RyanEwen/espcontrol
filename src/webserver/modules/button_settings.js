@@ -10,6 +10,8 @@ function updatePreviewHint(c) {
   els.previewHint.style.display = "";
   if (isConfigLocked()) {
     els.previewHint.textContent = "Editing is paused while the device reconnects";
+  } else if (state.clockBarSelectedItem) {
+    els.previewHint.textContent = clockBarItemLabel(state.clockBarSelectedItem) + " selected";
   } else if (c.selected.length > 1) {
     els.previewHint.textContent = c.selected.length + " buttons selected \u2022 right click to copy, cut, or delete";
   } else {
@@ -17,10 +19,53 @@ function updatePreviewHint(c) {
   }
 }
 
+function renderClockBarSelectionBar() {
+  if (!els.selectionBar || !state.clockBarSelectedItem) return false;
+  els.selectionBar.className = "sp-selection-bar sp-visible";
+
+  var label = document.createElement("span");
+  label.className = "sp-selection-label";
+  label.textContent = clockBarItemLabel(state.clockBarSelectedItem) + " selected";
+  els.selectionBar.appendChild(label);
+
+  var actions = document.createElement("div");
+  actions.className = "sp-selection-actions";
+
+  var editBtn = document.createElement("button");
+  editBtn.type = "button";
+  editBtn.className = "sp-selection-btn sp-selection-btn-primary";
+  editBtn.innerHTML = '<span class="mdi mdi-pencil"></span>Edit';
+  editBtn.disabled = !isClockBarTemperatureItem(state.clockBarSelectedItem);
+  editBtn.addEventListener("click", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!editBtn.disabled) openClockBarTemperatureSettings();
+  });
+  actions.appendChild(editBtn);
+
+  var visible = clockBarItemActive(state.clockBarSelectedItem);
+  var hideBtn = document.createElement("button");
+  hideBtn.type = "button";
+  hideBtn.className = "sp-selection-btn";
+  hideBtn.innerHTML = '<span class="mdi mdi-' + (visible ? "eye-off-outline" : "eye-outline") + '"></span>' +
+    (visible ? "Hide" : "Show");
+  hideBtn.addEventListener("click", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    setClockBarItemVisible(state.clockBarSelectedItem, !visible);
+    renderSelectionBar(ctx());
+  });
+  actions.appendChild(hideBtn);
+
+  els.selectionBar.appendChild(actions);
+  return true;
+}
+
 function renderSelectionBar(c) {
   if (!els.selectionBar) return;
   c = c || ctx();
   els.selectionBar.innerHTML = "";
+  if (!isConfigLocked() && renderClockBarSelectionBar()) return;
   if (isConfigLocked() || !c.selected.length) {
     els.selectionBar.className = "sp-selection-bar";
     return;
@@ -72,15 +117,17 @@ function closeSettings() {
   _settingsDeferred = false;
   state.settingsDraft = null;
   ctx().setSelected([]);
+  state.clockBarSelectedItem = "";
   updateClockBarItemUi();
   renderPreview();
 }
 
 function clearCardSelection() {
   var c = ctx();
-  if (!c.selected.length && c.getLastClicked() < 0) return;
+  if (!c.selected.length && c.getLastClicked() < 0 && !state.clockBarSelectedItem) return;
   c.setSelected([]);
   c.setLastClicked(-1);
+  state.clockBarSelectedItem = "";
   hideSettingsOverlay();
   updateClockBarItemUi();
   renderPreview();
@@ -90,6 +137,7 @@ function clearCardSelection() {
 function isSelectionControlTarget(target) {
   return !!(
     (els.previewMain && els.previewMain.contains(target)) ||
+    (els.topbar && els.topbar.contains(target)) ||
     (els.selectionBar && els.selectionBar.contains(target)) ||
     (els.settingsOverlay && els.settingsOverlay.contains(target)) ||
     (ctxMenu && ctxMenu.contains(target)) ||
@@ -105,9 +153,77 @@ function handleDocumentSelectionMouseDown(e) {
 
 function openSelectedCardSettings() {
   if (isConfigLocked()) return;
+  if (state.clockBarSelectedItem) {
+    if (isClockBarTemperatureItem(state.clockBarSelectedItem)) openClockBarTemperatureSettings();
+    return;
+  }
   var c = ctx();
   if (c.selected.length !== 1) return;
   renderButtonSettings(true);
+}
+
+function selectClockBarItem(item) {
+  if (isConfigLocked() || clockBarItems().indexOf(item) === -1) return;
+  var c = ctx();
+  c.setSelected([]);
+  c.setLastClicked(-1);
+  hideSettingsOverlay();
+  state.clockBarSelectedItem = state.clockBarSelectedItem === item ? "" : item;
+  updateClockBarItemUi();
+  renderPreview();
+  renderButtonSettings();
+}
+
+function openClockBarTemperatureSettings() {
+  if (isConfigLocked()) return;
+  var container = els.buttonSettings;
+  if (!container) return;
+  state.clockBarSelectedItem = "temperature";
+  container.innerHTML = "";
+  if (els.settingsOverlay) els.settingsOverlay.classList.add("sp-visible");
+
+  var title = document.createElement("div");
+  title.className = "sp-section-title";
+  title.textContent = "Temperature";
+  container.appendChild(title);
+
+  var panel = document.createElement("div");
+  panel.className = "sp-panel";
+
+  var entityField = document.createElement("div");
+  entityField.className = "sp-field";
+  entityField.appendChild(fieldLabel("Entity", "sp-clockbar-temperature-entity"));
+  var entityInp = entityInput(
+    "sp-clockbar-temperature-entity",
+    primaryClockBarTemperatureEntity(),
+    "sensor.outdoor_temperature",
+    ["sensor"]
+  );
+  entityField.appendChild(entityInp);
+  panel.appendChild(entityField);
+
+  var degreeToggle = toggleRow(
+    "Show Degree Symbol",
+    "sp-clockbar-temperature-degree-symbol",
+    state.temperatureDegreeSymbolOn
+  );
+  panel.appendChild(degreeToggle.row);
+
+  var saveRow = document.createElement("div");
+  saveRow.className = "sp-btn-row sp-btn-row--save";
+  var saveBtn = document.createElement("button");
+  saveBtn.type = "button";
+  saveBtn.className = "sp-action-btn sp-save-btn";
+  saveBtn.textContent = "Save";
+  saveBtn.addEventListener("click", function () {
+    saveClockBarTemperatureSettings(entityInp.value, degreeToggle.input.checked);
+    closeSettings();
+  });
+  saveRow.appendChild(saveBtn);
+  panel.appendChild(saveRow);
+
+  container.appendChild(panel);
+  entityInp.focus();
 }
 
 function openCardSettings(slot) {

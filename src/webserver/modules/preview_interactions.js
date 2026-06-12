@@ -188,6 +188,28 @@ function setupPreviewEvents() {
 
   state.clockBarDragItem = "";
 
+  if (els.topbar) {
+    els.topbar.addEventListener("click", function (e) {
+      if (isConfigLocked()) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      var target = e.target.closest("[data-clockbar-item]");
+      if (!target) return;
+      e.preventDefault();
+      e.stopPropagation();
+      selectClockBarItem(target.getAttribute("data-clockbar-item"));
+    });
+    els.topbar.addEventListener("keydown", function (e) {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      var target = e.target.closest("[data-clockbar-item]");
+      if (!target) return;
+      e.preventDefault();
+      selectClockBarItem(target.getAttribute("data-clockbar-item"));
+    });
+  }
+
   function isBackExitTarget(e, target) {
     var icon = target.querySelector(".sp-back-hit");
     if (!icon) return false;
@@ -371,6 +393,7 @@ function setupPreviewEvents() {
 function handleBtnClick(e, slot, pos) {
   if (isConfigLocked()) return;
   if (didDrag) { didDrag = false; return; }
+  state.clockBarSelectedItem = "";
   var c = ctx();
   if (e.shiftKey || e.ctrlKey || e.metaKey) e.preventDefault();
 

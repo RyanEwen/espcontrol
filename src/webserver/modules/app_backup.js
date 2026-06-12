@@ -43,8 +43,8 @@ function exportConfig() {
       temperature_unit: normalizeTemperatureUnit(state.temperatureUnit),
       clock_bar: state.clockBarOn,
       clock_bar_layout: CLOCK_BAR_FIXED_LAYOUT_STRING,
-      clock_bar_time: true,
-      network_status_icon: true,
+      clock_bar_time: state.clockBarTimeOn,
+      network_status_icon: state.networkStatusOn,
       temperature_degree_symbol: state.temperatureDegreeSymbolOn,
       subpage_chevron: state.subpageChevronsOn,
       timezone: state.timezone,
@@ -190,12 +190,20 @@ function importConfig() {
           screenRotationOptions: allScreenRotationOptions(),
         });
 
-        applyClockBarTemperatureEntities(importedSettings.clockBarTemperatureEntities, true);
+        state._clockBarTemperatureVisibilityReceived = true;
+        state._outdoorOn = importedSettings.outdoorTempEnable;
+        state._indoorOn = importedSettings.indoorTempEnable;
+        applyClockBarTemperatureEntities(importedSettings.clockBarTemperatureEntities, false);
+        postClockBarTemperatureEntities(serializeClockBarTemperatureEntities(importedSettings.clockBarTemperatureEntities));
+        postSwitch(entityName("outdoor_temp_enable"), importedSettings.outdoorTempEnable);
+        postSwitch(entityName("indoor_temp_enable"), importedSettings.indoorTempEnable);
+        postText(entityName("outdoor_temp_entity"), importedSettings.outdoorTempEntity);
+        postText(entityName("indoor_temp_entity"), importedSettings.indoorTempEntity);
         postClockBar(importedSettings.clockBar);
         applyClockBarLayoutValue(CLOCK_BAR_FIXED_LAYOUT_STRING);
         postClockBarLayout(CLOCK_BAR_FIXED_LAYOUT_STRING);
-        postClockBarTime(true);
-        postNetworkStatusIcon(true);
+        postClockBarTime(importedSettings.clockBarTime);
+        postNetworkStatusIcon(importedSettings.networkStatusIcon);
         postTemperatureDegreeSymbol(importedSettings.temperatureDegreeSymbol);
         postSubpageChevron(importedSettings.subpageChevron);
         var importedTimezone = importedSettings.timezone;
@@ -258,8 +266,8 @@ function importConfig() {
         state.outdoorEntity = importedSettings.outdoorTempEntity;
         state.temperatureUnit = importedTemperatureUnit;
         state.clockBarOn = importedSettings.clockBar;
-        state.clockBarTimeOn = true;
-        state.networkStatusOn = true;
+        state.clockBarTimeOn = importedSettings.clockBarTime;
+        state.networkStatusOn = importedSettings.networkStatusIcon;
         state.temperatureDegreeSymbolOn = importedSettings.temperatureDegreeSymbol;
         state.subpageChevronsOn = importedSettings.subpageChevron;
         state.timezone = importedTimezone;

@@ -13,11 +13,11 @@ You will find these controls in **Settings > Display > Clock Bar** on the panel 
 ## Settings
 
 - **Show Clock Bar** - turns the whole top bar on or off.
-- **Temperature** - shows one Home Assistant temperature sensor as a small clock-bar item.
-- **Show Degree Symbol** - controls whether temperature values include the degree/unit suffix.
-- **Connectivity** - always shows WiFi strength or Ethernet status at the right edge of the clock bar.
+- **Temperature** - select the temperature item in the screen preview, choose **Edit**, then choose the Home Assistant sensor and whether to show the degree symbol.
+- **Clock** - select the clock item in the screen preview and choose **Hide** or **Show**.
+- **Connectivity** - select the connectivity item in the screen preview and choose **Hide** or **Show**.
 
-The clock bar layout is not customizable. Extra saved temperature entries, weather settings, and older saved layout strings are ignored by current firmware.
+The clock bar layout is not customizable. Hidden items stay greyed in the web preview so you can select and show them again, but they are hidden on the device screen. Extra saved temperature entries, weather settings, and older saved layout strings are ignored by current firmware.
 
 Tap the network status icon on the panel to see device details, including the device name, IP address, WiFi strength, uptime, and firmware version.
 

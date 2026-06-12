@@ -50,8 +50,11 @@ var CSS =
   ".sp-clockbar-left{justify-content:flex-start}.sp-clockbar-middle{justify-content:center}.sp-clockbar-right{justify-content:flex-end}" +
   ".sp-clockbar-item{height:min(36px,calc(100% - .45cqw));min-height:0;min-width:28px;border:1px solid transparent;border-radius:calc(var(--topbar-fs)*.3);" +
   "background:transparent;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 calc(var(--topbar-fs)*.28);" +
-  "box-sizing:border-box;cursor:default;line-height:1;font:inherit;pointer-events:none}" +
-  ".sp-clockbar-item:hover{background:transparent;border-color:transparent}" +
+  "box-sizing:border-box;cursor:pointer;line-height:1;font:inherit;pointer-events:auto;transition:background .2s,border-color .2s,opacity .2s}" +
+  ".sp-clockbar-item:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.26)}" +
+  ".sp-clockbar-item.sp-selected{border-color:var(--accent);background:rgba(92,115,231,.18)}" +
+  ".sp-clockbar-item.sp-clockbar-hidden{opacity:.42;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18)}" +
+  ".sp-clockbar-item.sp-clockbar-hidden.sp-selected{opacity:.65;border-color:var(--accent)}" +
   ".sp-clockbar-network{padding:0;width:min(36px,calc(var(--topbar-fs)*2.2));min-width:28px}" +
   ".sp-temp{color:#fff;font-size:var(--topbar-fs);white-space:nowrap;opacity:0;transition:opacity .3s}" +
   ".sp-temp.sp-visible{opacity:1}" +
@@ -60,7 +63,6 @@ var CSS =
   "line-height:1;width:calc(var(--topbar-fs)*1.2);height:100%;display:flex;align-items:center;" +
   "justify-content:center;opacity:0;transition:opacity .3s}" +
   ".sp-network-preview.sp-visible{opacity:1}" +
-  ".sp-clockbar-item.sp-clockbar-inactive .sp-temp,.sp-clockbar-item.sp-clockbar-inactive .sp-clock,.sp-clockbar-item.sp-clockbar-inactive .sp-network-preview{display:none}" +
   ".sp-main{position:absolute;top:var(--grid-top);left:var(--grid-left);right:var(--grid-right);bottom:var(--grid-bottom);" +
   "display:grid;grid-template-columns:var(--grid-cols);grid-template-rows:var(--grid-rows);gap:var(--grid-gap);overflow:hidden}" +
 
@@ -197,6 +199,7 @@ var CSS =
   ".sp-selection-btn:hover{background:var(--border);border-color:#4a4d54}" +
   ".sp-selection-btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}" +
   ".sp-selection-btn-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}" +
+  ".sp-selection-btn:disabled,.sp-selection-btn:disabled:hover{opacity:.45;cursor:not-allowed;background:var(--surface2);border-color:var(--border);color:var(--text2)}" +
   ".sp-selection-btn .mdi{font-size:16px;line-height:1}" +
 
   ".sp-config{padding:var(--gap) var(--gap) var(--gap)}" +

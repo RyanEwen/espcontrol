@@ -1941,7 +1941,8 @@ inline bool configure_clock_bar_temperature_entities(
     lv_obj_t **temperature_labels,
     size_t temperature_label_count,
     lv_obj_t *main_page_obj,
-    std::function<bool()> clock_bar_visible_callback = nullptr) {
+    std::function<bool()> clock_bar_visible_callback = nullptr,
+    std::function<bool()> clock_bar_temperature_visible_callback = nullptr) {
   set_clock_bar_temperature_labels(temperature_labels, temperature_label_count);
 
   std::vector<std::string> clock_bar_entities =
@@ -1957,13 +1958,18 @@ inline bool configure_clock_bar_temperature_entities(
   refresh_clock_bar_temperature_label_values(
       main_page_obj,
       clock_bar_visible_callback ? clock_bar_visible_callback() : true,
-      false, false, NAN, NAN);
+      false,
+      clock_bar_temperature_visible_callback
+          ? clock_bar_temperature_visible_callback()
+          : true,
+      NAN, NAN);
 
   for (size_t i = 0; i < clock_bar_entities.size(); i++) {
     ha_subscribe_state(
       clock_bar_entities[i],
       std::function<void(esphome::StringRef)>(
-        [i, generation, main_page_obj, clock_bar_visible_callback](esphome::StringRef state) {
+        [i, generation, main_page_obj, clock_bar_visible_callback,
+         clock_bar_temperature_visible_callback](esphome::StringRef state) {
           if (generation != clock_bar_temperature_subscription_generation()) return;
           float val = 0.0f;
           if (parse_float_ref(state, val)) {
@@ -1972,7 +1978,11 @@ inline bool configure_clock_bar_temperature_entities(
             refresh_clock_bar_temperature_label_values(
                 main_page_obj,
                 clock_bar_visible_callback ? clock_bar_visible_callback() : true,
-                false, false, NAN, NAN);
+                false,
+                clock_bar_temperature_visible_callback
+                    ? clock_bar_temperature_visible_callback()
+                    : true,
+                NAN, NAN);
           }
         })
     );
@@ -1995,14 +2005,15 @@ inline void grid_phase3(
     bool *media_player_playing_ptr,
     std::function<bool()> clock_bar_visible_callback,
     std::function<void()> wake_callback,
-    std::function<void()> sleep_callback) {
+    std::function<void()> sleep_callback,
+    std::function<bool()> clock_bar_temperature_visible_callback = nullptr) {
   ESP_LOGI("sensors", "Phase 3: temp/presence/media subscriptions start (%lu ms)", esphome::millis());
   bool has_clock_bar_entities = configure_clock_bar_temperature_entities(
       temperature_entities, temperature_labels, temperature_label_count,
-      main_page_obj, clock_bar_visible_callback);
+      main_page_obj, clock_bar_visible_callback,
+      clock_bar_temperature_visible_callback);
   if (has_clock_bar_entities) {
     indoor_on = false;
-    outdoor_on = false;
   }
 
   refresh_clock_bar_temperature_label_values(

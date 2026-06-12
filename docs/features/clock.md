@@ -19,9 +19,9 @@ Configured in the **Time Settings** section of the **Settings** tab in [Setup](/
 - **Custom Month Names** — advanced Date card labels. Turn this on to edit the twelve month names used by Date cards. Turning it off resets them to the default English month names.
 - **Sunrise / Sunset** — read-only reference values calculated from your timezone, updated daily. Displayed in whichever format you chose.
 
-The **Clock Bar** section controls whether the top bar is shown. The clock bar uses a fixed layout with one temperature reading, the time, and status icons. The temperature unit itself is set in the **Temperature** section. When the clock bar is enabled, the small network icon at the far right shows WiFi strength or Ethernet status. Tap it to see the device name, IP address, WiFi strength, uptime, and firmware version.
+The **Clock Bar** section controls whether the top bar is shown. The clock bar uses a fixed layout with one temperature reading, the time, and status icons. Select an item in the screen preview to edit or hide it. The temperature unit itself is set in the **Temperature** section. When the connectivity icon is shown, tap it on the panel to see the device name, IP address, WiFi strength, uptime, and firmware version.
 
-The network status icon is on by default. Turn off **Show Network Status Icon** in the Clock Bar settings if you only want the clock and temperature items in the top bar.
+The network status icon is on by default. Hide the **Connectivity** item in the screen preview if you only want the clock and temperature items in the top bar.
 
 ## How It Works
 

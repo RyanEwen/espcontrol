@@ -61,6 +61,7 @@ var state = {
   sensorColor: THEME_PRESETS[defaultTheme()].sensor,
   selectedSlots: [],
   lastClickedSlot: -1,
+  clockBarSelectedItem: "",
   activeTab: "screen",
   _indoorOn: false,
   _outdoorOn: false,
@@ -70,6 +71,7 @@ var state = {
   outdoorEntity: "",
   clockBarTemperatureEntities: [],
   _clockBarTemperatureEntitiesReceived: false,
+  _clockBarTemperatureVisibilityReceived: false,
   temperatureUnit: "Auto",
   clockBarOn: false,
   _clockBarStateValues: {},
@@ -364,11 +366,21 @@ function clockBarTemperatureEntities() {
   return normalizeClockBarTemperatureEntities(clockBarTemperatureEntries());
 }
 
+function primaryClockBarTemperatureEntity() {
+  return clockBarTemperatureEntities()[0] || state.outdoorEntity || "";
+}
+
+function clockBarTemperatureVisible() {
+  return !!(state._outdoorOn && primaryClockBarTemperatureEntity());
+}
+
 function applyClockBarTemperatureEntities(list, postDevice) {
   state.clockBarTemperatureEntities = normalizeClockBarTemperatureEntries(list);
   state._clockBarTemperatureEntitiesReceived = true;
   var configured = clockBarTemperatureEntities();
-  state._outdoorOn = configured.length > 0;
+  if (!state._clockBarTemperatureVisibilityReceived) {
+    state._outdoorOn = configured.length > 0;
+  }
   state._indoorOn = false;
   state.outdoorEntity = configured[0] || "";
   state.indoorEntity = "";
@@ -382,6 +394,55 @@ function applyClockBarTemperatureEntities(list, postDevice) {
   syncTemperatureUi();
   updateTempPreview();
   updateClockBarItemUi();
+}
+
+function saveClockBarTemperatureSettings(entity, degreeSymbolOn) {
+  entity = String(entity || "").trim();
+  state.clockBarTemperatureEntities = entity ? [entity] : [];
+  state._clockBarTemperatureEntitiesReceived = true;
+  state._clockBarTemperatureVisibilityReceived = true;
+  state._outdoorOn = !!entity;
+  state._indoorOn = false;
+  state.outdoorEntity = entity;
+  state.indoorEntity = "";
+  state.temperatureDegreeSymbolOn = !!degreeSymbolOn;
+  postClockBarTemperatureEntities(serializeClockBarTemperatureEntities(state.clockBarTemperatureEntities));
+  postSwitch(entityName("outdoor_temp_enable"), state._outdoorOn);
+  postSwitch(entityName("indoor_temp_enable"), false);
+  postText(entityName("outdoor_temp_entity"), state.outdoorEntity);
+  postText(entityName("indoor_temp_entity"), "");
+  postTemperatureDegreeSymbol(state.temperatureDegreeSymbolOn);
+  syncTemperatureUi();
+  syncClockBarUi();
+}
+
+function setClockBarItemVisible(item, visible) {
+  visible = !!visible;
+  if (isClockBarTemperatureItem(item)) {
+    var entity = primaryClockBarTemperatureEntity();
+    if (visible && !entity) {
+      entity = defaultClockBarTemperatureEntity(0);
+      state.clockBarTemperatureEntities = [entity];
+      state._clockBarTemperatureEntitiesReceived = true;
+      state.outdoorEntity = entity;
+      postClockBarTemperatureEntities(entity);
+      postText(entityName("outdoor_temp_entity"), entity);
+    }
+    state._clockBarTemperatureVisibilityReceived = true;
+    state._outdoorOn = visible && !!entity;
+    state._indoorOn = false;
+    postSwitch(entityName("outdoor_temp_enable"), state._outdoorOn);
+    postSwitch(entityName("indoor_temp_enable"), false);
+    postText(entityName("indoor_temp_entity"), "");
+  } else if (item === "time") {
+    state.clockBarTimeOn = visible;
+    postClockBarTime(state.clockBarTimeOn);
+  } else if (item === "network") {
+    state.networkStatusOn = visible;
+    postNetworkStatusIcon(state.networkStatusOn);
+  }
+  syncClockBarUi();
+  syncTemperatureUi();
 }
 
 function appendScreenRotationOption(select, opt) {
@@ -719,6 +780,10 @@ function syncThemeFromDevice(theme, options) {
 
 function syncClockBarUi() {
   var visible = clockBarVisibleInPreview();
+  if (!visible && state.clockBarSelectedItem) {
+    state.clockBarSelectedItem = "";
+    hideSettingsOverlay();
+  }
   syncPreviewGridTop();
   if (els.topbar) els.topbar.className = "sp-topbar" + (visible ? "" : " sp-hidden");
   if (els.setClockBarToggle) els.setClockBarToggle.checked = !!state.clockBarOn;
@@ -736,6 +801,7 @@ function syncClockBarUi() {
     els.setSubpageChevronToggle.checked = !!state.subpageChevronsOn;
   }
   updateClockBarItemUi();
+  renderSelectionBar(ctx());
   updateNetworkPreview();
   updateTempPreview();
 }

@@ -476,7 +476,7 @@ inline void refresh_clock_bar_temperature_label_values(
     return;
   }
 
-  if (!show_on_screen) {
+  if (!show_on_screen || !outdoor_enabled) {
     for (lv_obj_t *label : labels) clock_bar_set_widget_hidden(label, true);
     return;
   }
@@ -796,6 +796,7 @@ inline size_t clock_bar_visible_temperature_count(bool indoor_enabled,
                                                   bool outdoor_enabled) {
   if (clock_bar_temperature_has_items()) {
     size_t count = clock_bar_temperature_values().size();
+    if (!outdoor_enabled) return 0;
     return count > CLOCK_BAR_VISIBLE_TEMPERATURE_SLOT_COUNT
                ? CLOCK_BAR_VISIBLE_TEMPERATURE_SLOT_COUNT
                : count;

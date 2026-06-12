@@ -392,6 +392,9 @@ esphome:
               },
               []() {
                 id(screensaver_presence_sleep).execute();
+              },
+              []() {
+                return id(outdoor_temp_enable).state;
               });
         - delay: 500ms
         - script.execute: refresh_button_grid

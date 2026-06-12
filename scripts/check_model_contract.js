@@ -201,7 +201,10 @@ assert.deepStrictEqual(
 
 const panelSettings = model.normalizeBackupPanelSettings({
   temperature_unit: "centigrade",
+  outdoor_temp_enable: false,
+  clock_bar_temperature_entities: "sensor.porch_temperature",
   clock_bar_time: false,
+  network_status_icon: false,
   language: "it",
   clock_format: "24h",
   ntp_server_1: "pool.ntp.org",
@@ -224,8 +227,10 @@ const panelSettings = model.normalizeBackupPanelSettings({
   screenRotationOptions: ["0", "90", "180", "270"],
 });
 assert.strictEqual(panelSettings.temperatureUnit, "\u00B0C", "panel temperature unit normalizes");
-assert.strictEqual(panelSettings.clockBarTime, true, "panel clock bar time resets on");
-assert.strictEqual(panelSettings.networkStatusIcon, true, "panel clock bar network status resets on");
+assert.strictEqual(panelSettings.outdoorTempEnable, false, "panel clock bar temperature visibility imports");
+assert.deepStrictEqual(plain(panelSettings.clockBarTemperatureEntities), ["sensor.porch_temperature"], "panel clock bar temperature entity imports");
+assert.strictEqual(panelSettings.clockBarTime, false, "panel clock bar time imports");
+assert.strictEqual(panelSettings.networkStatusIcon, false, "panel clock bar network status imports");
 assert.strictEqual(panelSettings.language, "it", "panel language imports");
 assert.strictEqual(panelSettings.clockFormat, "24h", "panel clock format validates against options");
 assert.strictEqual(panelSettings.ntpServer1, "pool.ntp.org", "panel NTP server imports");

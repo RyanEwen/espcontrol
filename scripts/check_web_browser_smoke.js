@@ -825,9 +825,44 @@ async function assertClockBarEditorSmoke(page, posts, label) {
     "middle",
     `${label}: clock bar time remains in the fixed middle section`
   );
-  assert.strictEqual(await page.locator(".sp-selection-bar.sp-visible").count(), 0, `${label}: clicking clock bar does not select an item`);
-  assert.strictEqual(await page.locator(".sp-settings-overlay.sp-visible").count(), 0, `${label}: clicking clock bar does not open settings`);
-  assert.strictEqual(posts.length, before, `${label}: clock bar click/hover does not post customization changes`);
+  assert.strictEqual(await page.locator(".sp-selection-bar.sp-visible").count(), 1, `${label}: clicking clock bar selects an item`);
+  assert((await page.locator(".sp-selection-bar").textContent()).includes("Clock selected"), `${label}: clock selection is labelled`);
+  assert.strictEqual(await page.getByRole("button", { name: "Edit", exact: true }).isDisabled(), true, `${label}: clock edit button is disabled`);
+  await page.getByRole("button", { name: "Hide", exact: true }).click();
+  await waitForPost(posts, { domain: "switch", name: "screen__clock_bar_time", action: "turn_off" }, `${label}: hiding clock posts clock switch`, before);
+  assert((await page.locator('[data-clockbar-item="time"]').getAttribute("class")).includes("sp-clockbar-hidden"), `${label}: hidden clock is greyed in preview`);
+  await page.getByRole("button", { name: "Show", exact: true }).click();
+  await waitForPost(posts, { domain: "switch", name: "screen__clock_bar_time", action: "turn_on" }, `${label}: showing clock posts clock switch`, before);
+
+  await page.locator('[data-clockbar-item="network"]').click({ force: true });
+  assert((await page.locator(".sp-selection-bar").textContent()).includes("Connectivity selected"), `${label}: connectivity selection is labelled`);
+  assert.strictEqual(await page.getByRole("button", { name: "Edit", exact: true }).isDisabled(), true, `${label}: connectivity edit button is disabled`);
+  await page.getByRole("button", { name: "Hide", exact: true }).click();
+  await waitForPost(posts, { domain: "switch", name: "screen__network_status_icon", action: "turn_off" }, `${label}: hiding connectivity posts network switch`, before);
+  assert((await page.locator('[data-clockbar-item="network"]').getAttribute("class")).includes("sp-clockbar-hidden"), `${label}: hidden connectivity is greyed in preview`);
+  await page.getByRole("button", { name: "Show", exact: true }).click();
+  await waitForPost(posts, { domain: "switch", name: "screen__network_status_icon", action: "turn_on" }, `${label}: showing connectivity posts network switch`, before);
+
+  await page.locator('[data-clockbar-item="temperature"]').click({ force: true });
+  assert((await page.locator(".sp-selection-bar").textContent()).includes("Temperature selected"), `${label}: temperature selection is labelled`);
+  assert.strictEqual(await page.getByRole("button", { name: "Edit", exact: true }).isDisabled(), false, `${label}: temperature edit button is enabled`);
+  await page.getByRole("button", { name: "Edit", exact: true }).click();
+  await page.waitForSelector(".sp-settings-overlay.sp-visible");
+  await page.locator("#sp-clockbar-temperature-entity").fill("sensor.porch_temperature");
+  await page.locator("#sp-clockbar-temperature-degree-symbol").evaluate((el) => { el.checked = false; });
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await waitForAnyPost(posts, [
+    { domain: "text", name: "Clock Bar: Temperature Entities", action: "set", value: "sensor.porch_temperature" },
+    { domain: "text", name: "clock_bar__temperature_entities", action: "set", value: "sensor.porch_temperature" },
+  ], `${label}: saving temperature posts entity`, before);
+  await waitForPost(posts, { domain: "switch", name: "screen__temperature_degree_symbol", action: "turn_off" }, `${label}: saving temperature posts degree symbol`, before);
+  await page.locator('[data-clockbar-item="temperature"]').click({ force: true });
+  await page.getByRole("button", { name: "Hide", exact: true }).click();
+  await waitForPost(posts, { domain: "switch", name: "outdoor_temp_enable", action: "turn_off" }, `${label}: hiding temperature posts visibility switch`, before);
+  assert((await page.locator('[data-clockbar-item="temperature"]').getAttribute("class")).includes("sp-clockbar-hidden"), `${label}: hidden temperature is greyed in preview`);
+  await page.getByRole("button", { name: "Show", exact: true }).click();
+  await waitForPost(posts, { domain: "switch", name: "outdoor_temp_enable", action: "turn_on" }, `${label}: showing temperature posts visibility switch`, before);
+  assert.strictEqual(await page.locator(".sp-settings-overlay.sp-visible").count(), 0, `${label}: clock bar temperature dialog closes after save`);
 
   const screenBox = await page.locator(".sp-screen").boundingBox();
   const timeBox = await page.locator('[data-clockbar-item="time"][data-clockbar-section="middle"]').boundingBox();
