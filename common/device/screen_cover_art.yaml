@@ -766,7 +766,9 @@ script:
                   refreshed += std::to_string(esphome::millis());
                   return refreshed;
                 };
-                id(cover_art_download_url) = id(cover_art_refresh_needed)
+                const bool needs_artwork_refresh =
+                    id(cover_art_refresh_needed) || !id(cover_art_image_available);
+                id(cover_art_download_url) = needs_artwork_refresh
                     ? refresh_ha_media_proxy_url(id(cover_art_url))
                     : id(cover_art_url);
                 ESP_LOGI("cover_art", "Downloading artwork URL (%u chars, download %u chars, active=%s, image_available=%s, refresh_needed=%s)",
@@ -1724,6 +1726,13 @@ script:
                        id(cover_art_external_input_active)) &&
                      !id(cover_art_media_player_entity).state.empty();
           then:
+            - lambda: |-
+                if (!id(cover_art_image_available)) {
+                  id(cover_art_refresh_needed) = true;
+                  id(cover_art_retry_url).clear();
+                  id(cover_art_retry_count) = 0;
+                  ESP_LOGI("cover_art", "Playback resumed without artwork; refreshing Home Assistant artwork URL");
+                }
             - script.execute: cover_art_delay_timer
 
   - id: cover_art_playback_stopped

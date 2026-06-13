@@ -626,6 +626,11 @@ def firmware_cover_art_refresh_errors(path: Path, root: Path) -> list[str]:
             errors.append(f"{rel}: add a refresh marker that preserves existing artwork query strings")
         if "request_update_url(id(cover_art_download_url))" not in download_body:
             errors.append(f"{rel}: download through the refresh-aware artwork URL")
+        if (
+            "needs_artwork_refresh" not in download_body
+            or "id(cover_art_refresh_needed) || !id(cover_art_image_available)" not in download_body
+        ):
+            errors.append(f"{rel}: refresh Home Assistant media proxy artwork when no image is currently available")
 
     for script_id in ("cover_art_deferred_download", "cover_art_prepare_download"):
         body = yaml_script_body(text, script_id)
@@ -661,6 +666,15 @@ def firmware_cover_art_refresh_errors(path: Path, root: Path) -> list[str]:
         errors.append(f"{rel}: subscribe to and refresh the media_album_name attribute")
     if "id(cover_art_refresh_needed) = true" not in text:
         errors.append(f"{rel}: set stale artwork state when track/source metadata changes")
+    playback_started_body = yaml_script_body(text, "cover_art_playback_started")
+    if not playback_started_body:
+        errors.append(f"{rel}: missing cover_art_playback_started script")
+    elif (
+        "!id(cover_art_image_available)" not in playback_started_body
+        or "id(cover_art_retry_count) = 0" not in playback_started_body
+        or "id(cover_art_retry_url).clear()" not in playback_started_body
+    ):
+        errors.append(f"{rel}: reset artwork retry state when playback resumes without a visible image")
     return errors
 
 
