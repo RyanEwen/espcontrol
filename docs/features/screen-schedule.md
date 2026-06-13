@@ -12,7 +12,7 @@ You will find it in the **Settings** tab on the [Setup](/features/setup) page, u
 
 ## Settings
 
-- **Night Schedule** - turns automatic night schedule behavior on or off.
+- **Mode** - choose **Disabled**, **Time**, or **Sensor**. Time uses the daytime and night-time hours. Sensor uses the configured presence entity to decide when the panel is in normal or night mode.
 - **Daytime** - the first hour when the screen should be awake. The default is **6:00 AM**.
 - **Night Time** - the first hour when the night schedule starts. The default is **11:00 PM**.
 - **At Night Time** - what the panel should do overnight. **Screen Off** is the default, **Screen Dimmed** keeps the panel usable at a set brightness, and **Clock** shows the clock instead. Screen Off can protect the LCD in the background while the backlight stays off.
@@ -22,7 +22,9 @@ You will find it in the **Settings** tab on the [Setup](/features/setup) page, u
 - **Clock Brightness** - shown only for **Clock**. It controls the backlight level used by the overnight clock. The default is **10%**.
 - **Clock Text Color** - shown only for **Clock**. It controls the colour of the overnight schedule clock text.
 
-When the schedule is disabled, the on and off time controls are hidden and the panel uses the normal [screensaver](/features/screensaver) and [backlight](/features/backlight) rules.
+When the schedule is disabled, the panel uses the normal [screensaver](/features/screensaver) and [backlight](/features/backlight) rules.
+
+Time-based Night Schedule has priority over screensaver presence wake while night time is active. If someone walks past during scheduled night time, the normal screensaver sensor does not wake the panel; tap wake still works. To make presence control night and daytime behavior, use **Sensor** mode for Night Schedule instead.
 
 ## How the Times Work
 

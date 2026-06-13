@@ -170,7 +170,7 @@ function buildSettingsPage(parent) {
   var scheduleBody = document.createElement("div");
   scheduleBody.appendChild(infoPanel(
     "sp-night-schedule-info",
-    "Night Schedule overrides screensaver and Media Cover Art settings while it is active."
+    "Time-based Night Schedule overrides screensaver presence wake and Media Cover Art while it is active. Use Sensor mode when you want presence to control the night schedule."
   ));
   scheduleBody.appendChild(fieldLabel("Mode"));
   var scheduleSegment = document.createElement("div");

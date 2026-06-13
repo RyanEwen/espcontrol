@@ -53,6 +53,8 @@ Touching the screen always wakes it up, no matter which mode you're using.
 
 ## Screen Schedule
 
-The [screen schedule](/features/screen-schedule) is separate from the screensaver. Use it when you want the panel to be fully dark during fixed hours, such as overnight.
+The [screen schedule](/features/screen-schedule) is separate from the screensaver. Use it when you want the panel to be fully dark, dimmed, or showing a clock overnight.
 
-When the screen schedule is in **Screen Off** or **Clock** mode, the presence sensor does not wake the panel outside the scheduled daytime hours. Tap wake still works, and uses the temporary wake settings from the screen schedule.
+When Night Schedule is using fixed **Time** hours, it has priority over screensaver sensor wake during night time. The screensaver presence sensor still keeps the panel awake and wakes it during normal daytime operation, but it does not override scheduled night time. Tap wake still works, and uses the temporary wake settings from the screen schedule.
+
+If you want presence to control when the panel is in night mode, set Night Schedule to **Sensor** mode instead of **Time** mode.

@@ -413,7 +413,7 @@ async function assertSettingsPage(page, label, options = {}) {
   assert(await nightScheduleInfo.isVisible(), `${label}: night schedule override info panel should render`);
   assert.strictEqual(
     await nightScheduleInfo.innerText(),
-    "Night Schedule overrides screensaver and Media Cover Art settings while it is active.",
+    "Time-based Night Schedule overrides screensaver presence wake and Media Cover Art while it is active. Use Sensor mode when you want presence to control the night schedule.",
     `${label}: night schedule override info panel text should match`
   );
   if (!options.isEpaper) {
