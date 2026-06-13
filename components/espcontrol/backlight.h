@@ -91,15 +91,11 @@ inline SunCalcResult recalc_sunrise_sunset(
     snprintf(r.sunset_str, sizeof(r.sunset_str), "%02d:%02d", sh, sm);
   }
 
-  int lat_c = (int)((lat >= 0 ? lat : -lat) * 100.0f + 0.5f);
-  int lon_c = (int)((lon >= 0 ? lon : -lon) * 100.0f + 0.5f);
   int tz_c = (int)((tz_offset >= 0 ? tz_offset : -tz_offset) * 10.0f + 0.5f);
   ESP_LOGI("backlight",
            "Sunrise %02d:%02d, Sunset %02d:%02d "
-           "(lat=%s%d.%02d lon=%s%d.%02d tz=%s%d.%d)",
+           "(tz=%s%d.%d)",
            rh, rm, sh, sm,
-           lat < 0 ? "-" : "", lat_c / 100, lat_c % 100,
-           lon < 0 ? "-" : "", lon_c / 100, lon_c % 100,
            tz_offset < 0 ? "-" : "", tz_c / 10, tz_c % 10);
 
   return r;
