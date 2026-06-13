@@ -118,6 +118,26 @@ def test_generated_yaml(profiles: dict[str, dict]) -> None:
             assert "cfg.info_only = true;" in sensors, f"{slug}: sensors.yaml missing info-only grid flag"
 
 
+def test_upgrades_do_not_reset_saved_panel_config() -> None:
+    display = (ROOT / "common" / "config" / "display.yaml").read_text(encoding="utf-8")
+    generator = (ROOT / "scripts" / "generate_device_slots.py").read_text(encoding="utf-8")
+    assert "panel_device_settings_reset_version" not in display, (
+        "firmware upgrades must not add a stored reset marker for panel config"
+    )
+    assert "reset_existing_panel_settings" not in generator, (
+        "generated device YAML must not include a boot-time panel config reset script"
+    )
+
+    for sensor_path in sorted((ROOT / "devices").glob("*/device/sensors.yaml")):
+        text = sensor_path.read_text(encoding="utf-8")
+        rel = sensor_path.relative_to(ROOT)
+        assert "reset_existing_panel_settings" not in text, f"{rel}: must not reset saved panel config on boot"
+        assert "id(button_order).publish_state(\"\")" not in text, f"{rel}: must not clear saved button order"
+        assert not re.search(r"id\((?:button|subpage)_\d+_config(?:_ext(?:_\d+)?)?\)\.publish_state\(\"\"\)", text), (
+            f"{rel}: must not clear saved button or subpage config"
+        )
+
+
 def test_square_s3_reapplies_clock_bar_layout() -> None:
     slug = "guition-esp32-s3-4848s040"
     sensors = (ROOT / "devices" / slug / "device" / "sensors.yaml").read_text(encoding="utf-8")
@@ -415,6 +435,7 @@ def main() -> int:
     test_public_device_capabilities(profile_slugs)
     test_generated_web(profiles)
     test_generated_yaml(profiles)
+    test_upgrades_do_not_reset_saved_panel_config()
     test_square_s3_reapplies_clock_bar_layout()
     test_setup_icon_glyphs()
     test_weather_card_visual_matches_preview()

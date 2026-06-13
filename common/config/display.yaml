@@ -10,10 +10,6 @@ globals:
     type: bool
     restore_value: no
     initial_value: 'false'
-  - id: panel_device_settings_reset_version
-    type: int
-    restore_value: true
-    initial_value: '0'
 
 esphome:
   on_boot:

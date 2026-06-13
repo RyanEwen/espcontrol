@@ -109,10 +109,6 @@ esphome:
                 #endif
             then:
               - lambda: |-
-                  ESP_LOGW("jc8012p4a1", "Previous boot crashed; preserving saved panel layout before retry");
-                  id(panel_device_settings_reset_version) = 0;
-              - script.execute: reset_existing_panel_settings_once
-              - lambda: |-
                   #ifdef USE_ESP32_CRASH_HANDLER
                   esphome::esp32::crash_handler_clear();
                   #endif

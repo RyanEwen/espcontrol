@@ -146,15 +146,6 @@ script:
             id(main_page)->obj);
       - script.execute: clock_bar_apply
 
-  - id: reset_existing_panel_settings_once
-    then:
-      - lambda: |-
-          const int reset_version = 20260611;
-          if (id(panel_device_settings_reset_version) >= reset_version) return;
-          ESP_LOGI("config", "Preserving stored panel settings across firmware update");
-          id(panel_device_settings_reset_version) = reset_version;
-          global_preferences->sync();
-
 esphome:
   on_boot:
     - priority: -100

@@ -11,7 +11,6 @@ from pathlib import Path
 from product_schema import slot_devices
 
 ROOT = Path(__file__).resolve().parents[1]
-PANEL_DEVICE_SETTINGS_RESET_VERSION = 20260611
 
 
 PACKAGE_HEADER = """# =============================================================================
@@ -664,24 +663,8 @@ def script_block(device: dict) -> str:
             "            id(main_page)->obj);",
             *after_refresh,
             "",
-            reset_existing_panel_settings_script(device),
-            "",
         ]
     )
-
-
-def reset_existing_panel_settings_script(device: dict) -> str:
-    lines = [
-        "  - id: reset_existing_panel_settings_once",
-        "    then:",
-        "      - lambda: |-",
-        f"          const int reset_version = {PANEL_DEVICE_SETTINGS_RESET_VERSION};",
-        "          if (id(panel_device_settings_reset_version) >= reset_version) return;",
-        '          ESP_LOGI("config", "Preserving stored panel settings across firmware update");',
-        "          id(panel_device_settings_reset_version) = reset_version;",
-        "          global_preferences->sync();",
-    ]
-    return "\n".join(lines)
 
 
 def replace_phase(text: str, phase: int, block: str, call: str, slug: str) -> str:
