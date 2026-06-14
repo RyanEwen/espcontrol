@@ -773,10 +773,10 @@ inline void cover_control_open_modal(CoverControlCtx *ctx) {
   lv_obj_set_style_pad_all(ui.tab_row, 0, LV_PART_MAIN);
   lv_obj_clear_flag(ui.tab_row, LV_OBJ_FLAG_SCROLLABLE);
   ui.controls_tab = cover_control_create_tab_button(
-    ui.tab_row, find_icon("Gesture Tap"), ctx->icon_font,
+    ui.tab_row, find_icon("Swap Vertical"), ctx->icon_font,
     CoverControlTab::CONTROLS, ctx->width_compensation_percent);
   ui.position_tab = cover_control_create_tab_button(
-    ui.tab_row, find_icon("Blinds"), ctx->icon_font,
+    ui.tab_row, find_icon("View Headline"), ctx->icon_font,
     CoverControlTab::POSITION, ctx->width_compensation_percent);
   ui.tilt_tab = cover_control_create_tab_button(
     ui.tab_row, find_icon("Swap Vertical"), ctx->icon_font,

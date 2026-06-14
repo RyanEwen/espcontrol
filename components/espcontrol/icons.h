@@ -263,6 +263,7 @@ static const IconEntry ICON_ENTRIES[] = {
     {"Transmission Tower",         "\U000F0D3E"},
     {"Trash Can",                  "\U000F0A79"},
     {"Trash Can Outline",          "\U000F0A7A"},
+    {"View Headline",              "\U000F0571"},
     {"Volume High",                "\U000F057E"},
     {"Wall Outlet",                "\U000F0427"},
     {"Wall Sconce",                "\U000F091C"},
