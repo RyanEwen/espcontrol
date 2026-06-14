@@ -496,6 +496,19 @@ inline lv_obj_t *cover_control_create_wide_icon_button(lv_obj_t *parent, const c
   return btn;
 }
 
+inline lv_coord_t cover_control_home_grid_row_gap(const ControlModalLayout &layout) {
+  ControlModalGridMetrics &metrics = control_modal_grid_metrics();
+  if (metrics.page) {
+    lv_obj_update_layout(metrics.page);
+    lv_coord_t gap = lv_obj_get_style_pad_row(metrics.page, LV_PART_MAIN);
+    if (gap > 0) return gap;
+    gap = lv_obj_get_style_pad_column(metrics.page, LV_PART_MAIN);
+    if (gap > 0) return gap;
+  }
+  lv_coord_t gap = control_modal_scaled_px(10, layout.short_side);
+  return gap > 0 ? gap : 10;
+}
+
 inline void cover_control_layout_slider(lv_obj_t *slider, lv_coord_t width,
                                         lv_coord_t height, lv_coord_t center_y) {
   if (!slider) return;
@@ -580,22 +593,20 @@ inline void cover_control_layout_modal(CoverControlCtx *ctx) {
     lv_coord_t box_h = content_h;
     lv_obj_set_size(ui.controls_box, box_w, box_h);
     lv_obj_align(ui.controls_box, LV_ALIGN_CENTER, 0, content_center_y);
-    lv_coord_t btn_w = box_w;
-    lv_coord_t gap = box_h / 14;
-    if (gap < 14) gap = 14;
-    if (gap > 28) gap = 28;
+    lv_coord_t btn_w = layout.sw / 3;
+    if (btn_w <= 0) btn_w = box_w;
+    if (btn_w > box_w) btn_w = box_w;
+    lv_coord_t gap = cover_control_home_grid_row_gap(layout);
     lv_coord_t btn_h = (box_h - gap * 2) / 3;
     if (btn_h < 56) btn_h = 56;
     lv_coord_t total_h = btn_h * 3 + gap * 2;
     lv_coord_t start_y = (box_h - total_h) / 2;
     if (start_y < 0) start_y = 0;
+    lv_coord_t btn_radius = control_modal_card_radius(ctx->btn);
     lv_obj_t *buttons[3] = {ui.up_btn, ui.stop_btn, ui.down_btn};
     for (int i = 0; i < 3; i++) {
       if (!buttons[i]) continue;
       lv_obj_set_size(buttons[i], btn_w, btn_h);
-      lv_coord_t btn_radius = btn_h / 4;
-      if (btn_radius < 18) btn_radius = 18;
-      if (btn_radius > 28) btn_radius = 28;
       lv_obj_set_style_radius(buttons[i], btn_radius, LV_PART_MAIN);
       lv_obj_align(buttons[i], LV_ALIGN_TOP_MID, 0, start_y + i * (btn_h + gap));
       lv_obj_t *label = lv_obj_get_child(buttons[i], 0);
