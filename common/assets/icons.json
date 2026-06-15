@@ -24,6 +24,12 @@
       "comment": "Modal close button"
     },
     {
+      "name": "Folder",
+      "codepoint": "F024B",
+      "mdi": "folder",
+      "comment": "Default subpage indicator"
+    },
+    {
       "name": "Download",
       "codepoint": "F01DA",
       "mdi": "download",

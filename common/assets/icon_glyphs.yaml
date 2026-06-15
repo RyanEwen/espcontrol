@@ -3,6 +3,7 @@
 - "\U000F0141"  # mdi-chevron-left (Back button)
 - "\U000F0142"  # mdi-chevron-right (Subpage indicator)
 - "\U000F0156"  # mdi-close (Modal close button)
+- "\U000F024B"  # mdi-folder (Default subpage indicator)
 - "\U000F01DA"  # mdi-download (Firmware install update entity)
 - "\U000F04F9"  # mdi-tag (Firmware version entity)
 - "\U000F06B0"  # mdi-update (Firmware update entities)
