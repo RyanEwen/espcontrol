@@ -1071,6 +1071,7 @@ inline void grid_phase2(
       continue;
     }
     if (p.type == "vacuum") {
+      lv_obj_set_user_data(s.btn, nullptr);
       if (!p.entity.empty() && vacuum_card_mode_needs_state(p.sensor)) {
         VacuumCardCtx *ctx = create_vacuum_card_context(s, p);
         subscribe_vacuum_card_state(ctx);
