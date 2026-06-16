@@ -1751,11 +1751,14 @@ inline bool bind_image_card(BtnSlot &s, const ParsedCfg &p, const GridConfig &cf
     }, LV_EVENT_CLICKED, ctx);
   }
 
+  const std::string image_card_entity_id = p.entity;
+  const uint32_t image_card_generation = ha_subscription_generation();
   ha_subscribe_attribute(
-    p.entity,
+    image_card_entity_id,
     std::string("entity_picture"),
     std::function<void(esphome::StringRef)>(
-      [ctx](esphome::StringRef picture) {
+      [ctx, image_card_entity_id, image_card_generation](esphome::StringRef picture) {
+        if (!image_card_context_current(ctx, image_card_entity_id, image_card_generation)) return;
         image_card_handle_picture(ctx, picture);
       })
   );
