@@ -13,7 +13,10 @@ substitutions:
   name: "your-device-name"
   friendly_name: "Your Device Name"
   # Set this to "ethernet" for the built-in wired Ethernet port.
+  # Ethernet builds disable EspControl firmware updates because the release
+  # manifest only provides the standard WiFi firmware for this device.
   network_transport: "wifi"
+  disable_updates: ${ "true" if network_transport == "ethernet" else "false" }
   starter_network_package_suffix: ${ "_ethernet" if network_transport == "ethernet" else "" }
 
 # ---------------------------------------------------------------------------
