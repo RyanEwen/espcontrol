@@ -16,7 +16,8 @@ Use this page when you know what you want the panel to do but are not sure which
 |---|---|---|
 | Toggle a light, switch, fan, helper, or button-style entity | [Switch](/card-types/switches) | `light`, `switch`, `input_boolean`, `fan`, or `button` |
 | Control a light as on/off, brightness, or colour temperature | [Lights](/card-types/lights) | `light` |
-| Run a scene, script, automation, helper action, vacuum command, or button press | [Action](/card-types/actions) | Depends on the selected action |
+| Run a scene, script, automation, helper action, or button press | [Action](/card-types/actions) | Depends on the selected action |
+| Show or control a robot vacuum | [Vacuum](/card-types/vacuum) | `vacuum` |
 | Pick from a Home Assistant select list | [Option Select](/card-types/option-select) | `select` or `input_select` |
 | Fire a custom Home Assistant automation event | [Trigger](/card-types/buttons) | No entity required |
 | Call an HTTP URL directly from the panel | [Webhook](/card-types/webhooks) | URL |
@@ -58,7 +59,8 @@ Some names in the setup page group several related modes:
 |---|---|
 | **Lights** | Switch, Brightness, Colour Temperature |
 | **Fans** | Switch, Speed, Oscillation, Direction, Preset |
-| **Action** | Scene, Script, Automation, Button, Vacuum, Helper, Option Select |
+| **Action** | Scene, Script, Automation, Button, Helper, Option Select |
+| **Vacuum** | Status, Start / Stop, Dock, Pause / Resume, Spot Clean, Locate, Clean Area |
 | **Alarm** | Combined Control, Arm Away, Arm Home, Disarm |
 | **Date & Time** | Clock, Date, Time & Date, World Clock |
 | **Media** | Play/Pause, Previous, Next, Volume, Track Position, Now Playing |

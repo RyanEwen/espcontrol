@@ -114,9 +114,6 @@ globals:
   - id: cover_art_accent_b
     type: int
     initial_value: '0'
-  - id: cover_art_manual_wake_ms
-    type: uint32_t
-    initial_value: '0'
 
 esphome:
   on_boot:
@@ -138,7 +135,7 @@ api:
         }
         int port = static_cast<int>(id(cover_art_home_assistant_artwork_port).state);
         id(cover_art_home_assistant_base_url) =
-          id(cover_art_home_assistant_artwork_protocol).state + "://" + host + ":" + std::to_string(port);
+          id(cover_art_home_assistant_artwork_protocol).current_option() + "://" + host + ":" + std::to_string(port);
         id(cover_art_api_wait_logged) = false;
         ESP_LOGI("cover_art", "Using Home Assistant artwork base URL: %s",
                  id(cover_art_home_assistant_base_url).c_str());
@@ -153,13 +150,13 @@ image:
     byte_order: LITTLE_ENDIAN
 
 artwork_image:
-  - url: "https://placehold.co/${cover_art_size}x${cover_art_size}/111111/333333.jpg"
+  - url: "https://placehold.co/${cover_art_decode_size}x${cover_art_decode_size}/111111/333333.jpg"
     id: cover_art_downloaded_image
     format: AUTO
     type: RGB565
     byte_order: LITTLE_ENDIAN
     placeholder: cover_art_placeholder
-    resize: ${cover_art_size}x${cover_art_size}
+    resize: ${cover_art_decode_size}x${cover_art_decode_size}
     buffer_size: 65536
     allow_insecure_local_urls: true
     on_download_finished:
@@ -419,6 +416,27 @@ script:
             lv_obj_set_style_max_height(id(cover_art_title_label), title_max_height, LV_PART_MAIN);
           };
 
+          auto set_art_image_geometry = [](int art_x, int art_y, int display_size) {
+            const int source_size = ${cover_art_decode_size};
+          #if ESPHOME_VERSION_CODE >= VERSION_CODE(2026, 4, 0)
+            lv_obj_set_pos(id(cover_art_image_widget), art_x, art_y);
+            lv_obj_set_size(id(cover_art_image_widget), display_size, display_size);
+            lv_image_set_inner_align(id(cover_art_image_widget), LV_IMAGE_ALIGN_COVER);
+          #else
+            uint16_t zoom = 256;
+            if (source_size > 0 && display_size > 0) {
+              int scaled = (display_size * 256 + source_size / 2) / source_size;
+              if (scaled < 1) scaled = 1;
+              if (scaled > 4096) scaled = 4096;
+              zoom = static_cast<uint16_t>(scaled);
+            }
+            lv_img_set_pivot(id(cover_art_image_widget), 0, 0);
+            lv_img_set_zoom(id(cover_art_image_widget), zoom);
+            lv_obj_set_pos(id(cover_art_image_widget), art_x, art_y);
+            lv_obj_set_size(id(cover_art_image_widget), source_size, source_size);
+          #endif
+          };
+
           const std::string slug = "${device_slug}";
           const std::string rotation = id(screen_rotation_select).current_option();
 
@@ -426,8 +444,10 @@ script:
             const bool landscape = rotation == "0" || rotation == "180";
             if (landscape) {
               apply_split_layout(1024, 600, 0, 0, 600, 585, 0, 439, 600, 615, 34, 377, 430, 260);
+              set_art_image_geometry(0, 0, 600);
             } else {
               apply_split_layout(600, 1024, 0, 0, 600, 0, 600, 600, 424, 30, 634, 540, 360, 162);
+              set_art_image_geometry(0, 0, 600);
             }
             return;
           }
@@ -436,8 +456,10 @@ script:
             const bool landscape = rotation == "90" || rotation == "270";
             if (landscape) {
               apply_split_layout(800, 480, 0, 0, 480, 480, 0, 320, 480, 504, 34, 272, 330, 220);
+              set_art_image_geometry(0, 0, 480);
             } else {
               apply_split_layout(480, 800, 0, 0, 480, 0, 480, 480, 320, 24, 514, 324, 262, 130);
+              set_art_image_geometry(0, 0, 480);
             }
             return;
           }
@@ -446,8 +468,10 @@ script:
             const bool landscape = rotation == "0" || rotation == "180";
             if (landscape) {
               apply_split_layout(1280, 800, 0, 0, 800, 800, 0, 480, 800, 840, 40, 400, 720, 506);
+              set_art_image_geometry(0, 0, 800);
             } else {
               apply_split_layout(800, 1280, 0, 0, 800, 0, 800, 800, 480, 40, 834, 720, 422, 216);
+              set_art_image_geometry(0, 0, 800);
             }
             return;
           }
@@ -465,8 +489,7 @@ script:
 
           lv_obj_set_pos(id(cover_art_backdrop), fallback_x, fallback_y);
           lv_obj_set_size(id(cover_art_backdrop), fallback_size, fallback_size);
-          lv_obj_set_pos(id(cover_art_image_widget), fallback_x, fallback_y);
-          lv_obj_set_size(id(cover_art_image_widget), fallback_size, fallback_size);
+          set_art_image_geometry(fallback_x, fallback_y, fallback_size);
           lv_obj_set_pos(id(cover_art_accent_overlay), fallback_x, fallback_y);
           lv_obj_set_size(id(cover_art_accent_overlay), fallback_size, fallback_size);
           lv_obj_set_pos(id(cover_art_track_panel), fallback_x, fallback_y);
@@ -759,6 +782,19 @@ script:
                            id(cover_art_loaded_url).empty();
                 then:
                   - script.execute: cover_art_show_black_screen
+            - if:
+                condition:
+                  lambda: |-
+                    return id(cover_art_screensaver_active) &&
+                           id(cover_art_image_available) &&
+                           id(cover_art_refresh_needed) &&
+                           !${cover_art_live_image_updates};
+                then:
+                  - script.execute: cover_art_show_black_screen
+                  - artwork_image.release: cover_art_downloaded_image
+                  - lambda: |-
+                      ESP_LOGI("cover_art", "Released current artwork before replacement download");
+                      id(cover_art_loaded_url).clear();
             - lambda: |-
                 if (id(cover_art_url) != id(cover_art_retry_url)) {
                   id(cover_art_retry_url) = id(cover_art_url);
@@ -856,13 +892,13 @@ script:
           if (chosen.empty()) return;
 
           std::string fallback;
-          std::string capped = esphome::artwork_image::cap_artwork_url(chosen, ${cover_art_size});
+          std::string capped = esphome::artwork_image::cap_artwork_url(chosen, ${cover_art_decode_size});
           if (capped != chosen) {
             fallback = chosen;
             chosen = capped;
           }
           if (fallback.empty() && !alternate.empty()) {
-            fallback = esphome::artwork_image::cap_artwork_url(alternate, ${cover_art_size});
+            fallback = esphome::artwork_image::cap_artwork_url(alternate, ${cover_art_decode_size});
             if (fallback == chosen) fallback.clear();
           }
 
@@ -1172,16 +1208,8 @@ script:
       - delay: !lambda |-
           float seconds = id(cover_art_delay).state;
           if (std::isnan(seconds) || seconds < 0.0f) seconds = 10.0f;
-          uint32_t delay_ms = (uint32_t)(seconds * 1000.0f);
-          const uint32_t manual_wake_holdoff_ms = 60000;
-          if (id(cover_art_manual_wake_ms) != 0) {
-            uint32_t elapsed = (uint32_t)(millis() - id(cover_art_manual_wake_ms));
-            if (elapsed < manual_wake_holdoff_ms) {
-              uint32_t remaining = manual_wake_holdoff_ms - elapsed;
-              if (remaining > delay_ms) delay_ms = remaining;
-            }
-          }
-          return delay_ms;
+          ESP_LOGI("cover_art", "Waiting %.0fs before showing cover art", seconds);
+          return (uint32_t)(seconds * 1000.0f);
       - if:
           condition:
             lambda: |-
@@ -1298,7 +1326,7 @@ script:
             }
             if (!chosen.empty()) {
               std::string fallback;
-              std::string capped = esphome::artwork_image::cap_artwork_url(chosen, ${cover_art_size});
+              std::string capped = esphome::artwork_image::cap_artwork_url(chosen, ${cover_art_decode_size});
               if (capped != chosen) {
                 ESP_LOGI("cover_art", "Using capped JPEG artwork URL (%u chars)",
                          (unsigned) capped.size());
@@ -1306,7 +1334,7 @@ script:
                 chosen = capped;
               }
               if (fallback.empty() && !alternate.empty()) {
-                fallback = esphome::artwork_image::cap_artwork_url(alternate, ${cover_art_size});
+                fallback = esphome::artwork_image::cap_artwork_url(alternate, ${cover_art_decode_size});
                 if (fallback == chosen) fallback.clear();
               }
               id(cover_art_fallback_url) = fallback;
@@ -1866,9 +1894,6 @@ script:
       - globals.set:
           id: cover_art_media_playing
           value: 'false'
-      - globals.set:
-          id: cover_art_manual_wake_ms
-          value: '0'
       - lambda: |-
           id(cover_art_media_position) = 0.0f;
           id(cover_art_position_anchor) = 0.0f;

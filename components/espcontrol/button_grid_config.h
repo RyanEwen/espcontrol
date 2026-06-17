@@ -248,11 +248,14 @@ inline int hex_digit(char c) {
   return -1;
 }
 
-inline std::string decode_compact_field(const std::string &value) {
+inline std::string decode_compact_field(const std::string &value, size_t start, size_t len) {
+  if (start > value.size()) return "";
+  size_t end = start + len;
+  if (end < start || end > value.size()) end = value.size();
   std::string out;
-  out.reserve(value.size());
-  for (size_t i = 0; i < value.size(); i++) {
-    if (value[i] == '%' && i + 2 < value.size()) {
+  out.reserve(end - start);
+  for (size_t i = start; i < end; i++) {
+    if (value[i] == '%' && i + 2 < end) {
       int hi = hex_digit(value[i + 1]);
       int lo = hex_digit(value[i + 2]);
       if (hi >= 0 && lo >= 0) {
@@ -264,6 +267,10 @@ inline std::string decode_compact_field(const std::string &value) {
     out.push_back(value[i]);
   }
   return out;
+}
+
+inline std::string decode_compact_field(const std::string &value) {
+  return decode_compact_field(value, 0, value.size());
 }
 
 inline char compact_hex_char(uint8_t value) {
@@ -620,7 +627,7 @@ inline std::string normalize_garage_label_display(const std::string &value) {
 
 inline std::string garage_card_options_normalized(const std::string &options,
                                                   const std::string &sensor) {
-  if (sensor == "open" || sensor == "close") return "";
+  (void)sensor;
   return normalize_garage_label_display(cfg_option_value(options, "label_display")) == "status"
     ? "label_display=status"
     : "";
@@ -897,6 +904,32 @@ inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
     p.icon_on.clear();
     if (p.icon.empty() || p.icon == "Auto" || p.icon == "Chevron Down") p.icon = "Flash";
   }
+  if (p.type == "action" && p.sensor == "vacuum.start") {
+    p.type = "vacuum";
+    p.sensor = "start_stop";
+    p.unit.clear();
+    p.precision.clear();
+    p.options.clear();
+    p.icon_on = "Auto";
+    if (p.icon.empty() || p.icon == "Auto") p.icon = "Robot Vacuum";
+  }
+  if (p.type == "action" && p.sensor == "vacuum.return_to_base") {
+    p.type = "vacuum";
+    p.sensor = "dock";
+    p.unit.clear();
+    p.precision.clear();
+    p.options.clear();
+    p.icon_on = "Auto";
+    if (p.icon.empty() || p.icon == "Auto") p.icon = "Robot Vacuum Variant";
+  }
+  if (p.type == "vacuum") {
+    p.sensor = card_runtime_vacuum_mode(p.sensor);
+    if (p.sensor != "clean_area") p.unit.clear();
+    p.precision.clear();
+    p.options.clear();
+    p.icon_on = "Auto";
+    if (p.icon.empty() || p.icon == "Auto") p.icon = card_runtime_vacuum_default_icon_name(p.sensor);
+  }
   if (p.type.empty()) {
     p.options = switch_card_options_normalized(p.options);
   }
@@ -916,7 +949,7 @@ inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
     if (p.icon_on.empty() || p.icon_on == "Auto") p.icon_on = "Motion Sensor";
     p.options = presence_card_options_normalized(p.options);
   }
-  if (!p.type.empty() && p.type != "action" && p.type != "alarm" && p.type != "alarm_action" && p.type != "climate" && p.type != "garage" && p.type != "webhook" && p.type != "screen_lock" && p.type != "todo" && p.type != "sensor" && p.type != "door_window" && p.type != "presence" && p.type != "media" && p.type != "subpage" && p.type != "image" && !fan_card_type(p.type) && !card_large_numbers_supported(p)) {
+  if (!p.type.empty() && p.type != "action" && p.type != "alarm" && p.type != "alarm_action" && p.type != "climate" && p.type != "garage" && p.type != "webhook" && p.type != "screen_lock" && p.type != "todo" && p.type != "sensor" && p.type != "door_window" && p.type != "presence" && p.type != "media" && p.type != "subpage" && p.type != "image" && p.type != "vacuum" && !fan_card_type(p.type) && !card_large_numbers_supported(p)) {
     p.options.clear();
   }
   if (p.type == "sensor") {
@@ -1270,9 +1303,6 @@ inline void reset_ha_control_availability_refs() {
   ha_control_availability_refs().clear();
 }
 
-#ifndef ESPCONTROL_HA_RETRY_HELPERS_DEFINED
-inline void ha_reset_unavailable_state_retries() {}
-#endif
 #ifndef ESPCONTROL_HA_DEFERRED_HELPERS_DEFINED
 inline void ha_reset_deferred_state_requests() {}
 #endif
@@ -1286,7 +1316,6 @@ inline void bump_ha_subscription_generation() {
   uint32_t &generation = ha_subscription_generation();
   generation++;
   if (generation == 0) generation = 1;
-  ha_reset_unavailable_state_retries();
   ha_reset_deferred_state_requests();
 }
 
@@ -2191,8 +2220,7 @@ inline const char *garage_card_label(const ParsedCfg &p) {
 }
 
 inline bool garage_card_show_status(const ParsedCfg &p) {
-  return !garage_command_mode(p.sensor) &&
-    normalize_garage_label_display(cfg_option_value(p.options, "label_display")) == "status";
+  return normalize_garage_label_display(cfg_option_value(p.options, "label_display")) == "status";
 }
 
 inline bool alarm_card_show_status_icon(const ParsedCfg &p) {

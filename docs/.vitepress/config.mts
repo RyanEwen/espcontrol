@@ -375,10 +375,8 @@ export default defineConfig({
         items: [
           { text: 'Overview', link: '/' },
           { text: 'Install', link: '/getting-started/install' },
-          { text: 'Manual ESPHome Setup', link: '/getting-started/manual-esphome-setup' },
           { text: 'Enable Actions', link: '/getting-started/home-assistant-actions' },
-          { text: '3D Printable Stands', link: '/reference/3d-printable-stands' },
-          { text: 'Collect USB Logs', link: '/getting-started/collect-usb-logs' },
+          { text: 'Manual Setup', link: '/getting-started/manual-esphome-setup' },
           { text: 'Troubleshooting', link: '/getting-started/troubleshooting' },
         ],
       },
@@ -390,6 +388,7 @@ export default defineConfig({
           { text: '4.3-inch JC4880P443', link: '/screens/jc4880p443' },
           { text: '4-inch ESP32-P4 86 Panel', link: '/screens/p4-86' },
           { text: '4-inch 4848S040', link: '/screens/4848s040' },
+          { text: 'Printable Stands', link: '/reference/3d-printable-stands' },
         ],
       },
       {
@@ -455,6 +454,7 @@ export default defineConfig({
         text: 'Reference',
         items: [
           { text: 'Contributing', link: '/reference/contributing' },
+          { text: 'Collect USB Logs', link: '/reference/collect-usb-logs' },
           { text: 'Icon Reference', link: '/reference/icons' },
           { text: 'Language Support', link: '/reference/language-support' },
           { text: 'Request Device Support', link: '/reference/request-device-support' },

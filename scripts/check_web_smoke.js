@@ -109,10 +109,23 @@ assert.deepStrictEqual(Array.from(hooks.coverArtHideExternalInputPostUrls(false)
   "/switch/screen_saver__hide_for_external_sources/turn_off",
   "/switch/Screen%20Saver%3A%20Hide%20for%20external%20sources/turn_off",
 ], "cover art external-input posts include all firmware object id aliases");
+assert.deepStrictEqual(Array.from(hooks.coverArtDelayPostUrls(30)), [
+  "/number/screen_saver__cover_art_delay/set?value=30",
+  "/number/screen_saver_cover_art_delay/set?value=30",
+  "/number/cover_art_delay/set?value=30",
+  "/number/Screen%20Saver%3A%20Cover%20Art%20Delay/set?value=30",
+], "cover art delay posts include all firmware object id aliases");
 assert(
   Array.from(hooks.entityLookupNames("screen_saver_track_overlay_duration")).includes("screen_saver__show_track_overlay"),
   "cover art track-overlay post aliases include the legacy show-track-overlay object id"
 );
+assert.deepStrictEqual(Array.from(hooks.coverArtTrackOverlayDurationPostUrls(15)), [
+  "/number/screen_saver__track_overlay_duration/set?value=15",
+  "/number/screen_saver_track_overlay_duration/set?value=15",
+  "/number/track_overlay_duration/set?value=15",
+  "/number/screen_saver__show_track_overlay/set?value=15",
+  "/number/Screen%20Saver%3A%20Show%20Track%20Overlay/set?value=15",
+], "cover art track-overlay posts include all firmware object id aliases");
 assert.strictEqual(hooks.clockBarVisibleInPreviewFor(true, "off"), true, "clock bar preview is visible when enabled");
 assert.strictEqual(hooks.clockBarVisibleInPreviewFor(true, "dim"), true, "clock bar preview stays visible for dimmed screen saver");
 assert.strictEqual(hooks.clockBarVisibleInPreviewFor(true, "clock"), true, "clock bar preview stays visible when clock screen saver is configured");
@@ -749,6 +762,18 @@ const coverSliderPreview = hooks.buttonTypePreviewFor("cover", {
 });
 assert(coverSliderPreview.iconHtml.includes("sp-slider-preview"), "cover slider preview uses the slider track");
 assert(coverSliderPreview.labelHtml.includes("mdi-blinds-horizontal"), "cover slider preview uses the cover badge");
+
+const coverModalPreview = hooks.buttonTypePreviewFor("cover", {
+  entity: "cover.office_blind",
+  label: "Office Blind",
+  icon: "Blinds",
+  icon_on: "Blinds Open",
+  sensor: "modal",
+  type: "cover",
+});
+assert(!coverModalPreview.iconHtml.includes("sp-slider-preview"), "cover modal preview uses icon-only layout");
+assert(coverModalPreview.iconHtml.includes("mdi-blinds"), "cover modal preview uses the cover icon");
+assert(coverModalPreview.labelHtml.includes("mdi-blinds-horizontal"), "cover modal preview uses the cover badge");
 
 const coverCommandPreview = hooks.buttonTypePreviewFor("cover", {
   entity: "cover.office_blind",

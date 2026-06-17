@@ -67,9 +67,13 @@ inline bool card_runtime_cover_tilt_mode(const std::string &mode) {
   return mode == "tilt" && card_runtime_cover_mode_valid(mode);
 }
 
+inline bool card_runtime_cover_modal_mode(const std::string &mode) {
+  return mode == "modal" && card_runtime_cover_mode_valid(mode);
+}
+
 inline bool card_runtime_cover_command_mode(const std::string &mode) {
   return card_runtime_cover_mode_valid(mode) &&
-         mode != "" && mode != "toggle" && mode != "tilt";
+         mode != "" && mode != "toggle" && mode != "tilt" && mode != "modal";
 }
 
 inline const char *card_runtime_cover_command_service(const std::string &mode) {
@@ -177,4 +181,29 @@ inline std::string card_runtime_climate_number_display(const std::string &value)
 
 inline bool card_runtime_weather_forecast_precision(const std::string &precision) {
   return card_contract_weather_forecast_precision(precision);
+}
+
+inline std::string card_runtime_vacuum_mode(const std::string &mode) {
+  if (mode == "status" || mode == "start_stop" || mode == "dock" ||
+      mode == "pause_resume" || mode == "clean_spot" || mode == "locate" ||
+      mode == "clean_area") {
+    return mode;
+  }
+  if (mode == "vacuum.start") return "start_stop";
+  if (mode == "vacuum.return_to_base") return "dock";
+  return "start_stop";
+}
+
+inline bool card_runtime_vacuum_state_mode(const std::string &mode) {
+  std::string normalized = card_runtime_vacuum_mode(mode);
+  return normalized == "status" || normalized == "start_stop" || normalized == "pause_resume";
+}
+
+inline const char *card_runtime_vacuum_default_icon_name(const std::string &mode) {
+  std::string normalized = card_runtime_vacuum_mode(mode);
+  if (normalized == "dock") return "Robot Vacuum Variant";
+  if (normalized == "clean_spot") return "Vacuum";
+  if (normalized == "locate") return "Robot Vacuum Alert";
+  if (normalized == "clean_area") return "Vacuum Outline";
+  return "Robot Vacuum";
 }

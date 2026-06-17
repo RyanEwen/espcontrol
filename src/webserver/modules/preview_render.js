@@ -54,6 +54,7 @@ var CARD_TYPE_PICKER_DETAILS = {
   slider: { icon: "tune-vertical", description: "Adjust a numeric or brightness value." },
   subpage: { icon: "view-grid-plus", description: "Open a nested page of cards." },
   webhook: { icon: "webhook", description: "Send a direct HTTP request." },
+  vacuum: { icon: "robot-vacuum", description: "Show or control a vacuum cleaner." },
   weather: { icon: "weather-partly-cloudy", description: "Show weather or forecast data." },
 };
 
