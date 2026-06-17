@@ -1088,7 +1088,7 @@ def firmware_climate_step_errors(firmware_dir: Path, root: Path) -> list[str]:
             "CLIMATE_DEFAULT_STEP_TENTHS" not in body
             or "CLIMATE_WHOLE_NUMBER_STEP_TENTHS" not in body
             or "ctx->precision <= 0" not in body
-            or "ctx->step_tenths > minimum" not in body
+            or "ctx->step_tenths >= minimum" not in body
         ):
             errors.append(f"{rel}: keep climate temperature changes at a display-appropriate minimum")
     if "int step = climate_effective_step_tenths(ctx);" not in text:
@@ -3187,7 +3187,7 @@ def run_self_test() -> int:
         "inline int climate_effective_step_tenths(ClimateControlCtx *ctx) {\n"
         "  if (!ctx) return CLIMATE_DEFAULT_STEP_TENTHS;\n"
         "  int minimum = ctx->precision <= 0 ? CLIMATE_WHOLE_NUMBER_STEP_TENTHS : CLIMATE_DEFAULT_STEP_TENTHS;\n"
-        "  if (ctx->step_tenths > minimum && ctx->step_tenths <= 100)\n"
+        "  if (ctx->step_tenths >= minimum && ctx->step_tenths <= 100)\n"
         "    return ctx->step_tenths;\n"
         "  return minimum;\n"
         "}\n"

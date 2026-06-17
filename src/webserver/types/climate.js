@@ -137,7 +137,7 @@ registerButtonType("climate", {
     syncIconFields();
     panel.appendChild(iconFields);
 
-    var precisionField = helpers.selectField("Unit Precision", helpers.idPrefix + "climate-precision", [
+    var precisionField = helpers.selectField("Temperature Display", helpers.idPrefix + "climate-precision", [
       ["", "10"],
       ["1", "10.2"],
     ], climateConfig.precision);
