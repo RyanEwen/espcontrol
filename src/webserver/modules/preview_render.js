@@ -54,8 +54,19 @@ var CARD_TYPE_PICKER_DETAILS = {
   slider: { icon: "tune-vertical", description: "Adjust a numeric or brightness value." },
   subpage: { icon: "view-grid-plus", description: "Open a nested page of cards." },
   webhook: { icon: "webhook", description: "Send a direct HTTP request." },
+  vacuum: { icon: "robot-vacuum", description: "Show or control a vacuum cleaner." },
   weather: { icon: "weather-partly-cloudy", description: "Show weather or forecast data." },
 };
+
+var CARD_TYPE_PICKER_DEFAULTS = {
+  light_brightness: "light_control",
+};
+
+function defaultButtonTypeForPicker(key) {
+  return Object.prototype.hasOwnProperty.call(CARD_TYPE_PICKER_DEFAULTS, key)
+    ? CARD_TYPE_PICKER_DEFAULTS[key]
+    : key;
+}
 
 function buttonTypePickerDetails(key, label) {
   var details = CARD_TYPE_PICKER_DETAILS[key || ""] || {};

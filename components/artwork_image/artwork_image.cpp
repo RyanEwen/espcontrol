@@ -1071,6 +1071,7 @@ void ArtworkImage::end_connection_() {
   this->decoder_.reset();
   this->discard_decode_buffer_();
   this->download_buffer_.reset();
+  this->download_buffer_.shrink_to(this->download_buffer_initial_size_);
 }
 
 bool ArtworkImage::validate_url_(const std::string &url) {

@@ -391,6 +391,10 @@ inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
     setup_action_card(s, p);
     return;
   }
+  if (p.type == "vacuum") {
+    setup_vacuum_card(s, p);
+    return;
+  }
   if (p.type == "option_select") {
     setup_option_select_card(
       s, p, palette.has_sensor_color, palette.sensor_val,
@@ -423,6 +427,10 @@ inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
     setup_climate_control_button(
       s.btn, s.icon_lbl, s.sensor_container, s.sensor_lbl, s.unit_lbl,
       s.text_lbl, p, display_icon_font(display));
+    return;
+  }
+  if (p.type == "light_control") {
+    setup_light_control_card(s, p);
     return;
   }
   if (brightness_slider_type(p.type) || p.type == "cover") {
@@ -709,6 +717,7 @@ inline void grid_phase1(
   display_set_width_axis(display);
   int NS = bounded_grid_slots(cfg.num_slots);
   int COLS = cfg.cols > 0 ? cfg.cols : 1;
+  if (COLS > MAX_GRID_SLOTS) COLS = MAX_GRID_SLOTS;
   for (int i = 0; i < NS; i++)
     lv_obj_add_flag(slots[i].btn, LV_OBJ_FLAG_HIDDEN);
   configure_grid_layout(main_page_obj, NS, COLS);
@@ -1062,6 +1071,17 @@ inline void grid_phase2(
       }
       continue;
     }
+    if (p.type == "vacuum") {
+      lv_obj_set_user_data(s.btn, nullptr);
+      if (!p.entity.empty() && vacuum_card_mode_needs_state(p.sensor)) {
+        VacuumCardCtx *ctx = create_vacuum_card_context(s, p);
+        subscribe_vacuum_card_state(ctx);
+        lv_obj_set_user_data(s.btn, ctx);
+      } else if (!p.entity.empty()) {
+        subscribe_control_availability(s.btn, s.btn, p.entity);
+      }
+      continue;
+    }
     if (p.type == "option_select") {
       if (!p.entity.empty()) {
         OptionSelectCtx *ctx = create_option_select_context(
@@ -1166,6 +1186,21 @@ inline void grid_phase2(
       }
       continue;
     }
+    if (p.type == "light_control") {
+      if (!p.entity.empty()) {
+        LightControlCtx *ctx = create_light_control_context(
+          s, p,
+          has_on ? on_val : DEFAULT_SLIDER_COLOR,
+          display_volume_number_font(display),
+          display_volume_label_font(display)
+            ? display_volume_label_font(display)
+            : lv_obj_get_style_text_font(s.text_lbl, LV_PART_MAIN),
+          display_icon_font(display),
+          display_volume_width_percent(display));
+        subscribe_light_control_state(ctx);
+      }
+      continue;
+    }
 
     if (p.entity.empty()) continue;
 
@@ -1252,11 +1287,10 @@ inline void grid_phase2(
   if (cfg.info_only) return;
 
   // --- Subpage creation ---
-  // Heap-allocated grid descriptors (never freed -- display lifetime)
-  lv_coord_t *sp_col_dsc = new lv_coord_t[COLS + 1];
+  static lv_coord_t sp_col_dsc[MAX_GRID_SLOTS + 1];
   for (int i = 0; i < COLS; i++) sp_col_dsc[i] = LV_GRID_FR(1);
   sp_col_dsc[COLS] = LV_GRID_TEMPLATE_LAST;
-  lv_coord_t *sp_row_dsc = new lv_coord_t[ROWS + 1];
+  static lv_coord_t sp_row_dsc[MAX_GRID_SLOTS + 1];
   for (int i = 0; i < ROWS; i++) sp_row_dsc[i] = LV_GRID_FR(1);
   sp_row_dsc[ROWS] = LV_GRID_TEMPLATE_LAST;
 
@@ -1647,8 +1681,32 @@ inline void grid_phase2(
           ParsedCfg *ctx = new ParsedCfg(sb_cfg);
           lv_obj_add_event_cb(sb_btn, [](lv_event_t *e) {
             ParsedCfg *c = (ParsedCfg *)lv_event_get_user_data(e);
-            if (c) send_action_card_action(*c);
+            lv_obj_t *target = static_cast<lv_obj_t *>(lv_event_get_target(e));
+            if (!c) return;
+            if (action_script_confirmation_enabled(*c) && target) {
+              switch_confirmation_open_modal(*c, target, false);
+            } else {
+              send_action_card_action(*c);
+            }
           }, LV_EVENT_CLICKED, ctx);
+        }
+        continue;
+      }
+      if (sb_cfg.type == "vacuum") {
+        if (!sb_cfg.entity.empty()) {
+          VacuumCardCtx *ctx = create_vacuum_card_context(sub_slot, sb_cfg);
+          if (vacuum_card_mode_needs_state(sb_cfg.sensor)) {
+            subscribe_vacuum_card_state(ctx);
+          } else {
+            subscribe_control_availability(sub_slot.btn, sub_slot.btn, sb_cfg.entity);
+          }
+          add_parent_indicator(sb_cfg.entity);
+          if (!vacuum_card_read_only(sb_cfg)) {
+            lv_obj_add_event_cb(sb_btn, [](lv_event_t *e) {
+              VacuumCardCtx *ctx = (VacuumCardCtx *)lv_event_get_user_data(e);
+              send_vacuum_card_action(ctx);
+            }, LV_EVENT_CLICKED, ctx);
+          }
         }
         continue;
       }
@@ -1795,6 +1853,27 @@ inline void grid_phase2(
           lv_obj_add_event_cb(sb_btn, [](lv_event_t *e) {
             ClimateControlCtx *ctx = (ClimateControlCtx *)lv_event_get_user_data(e);
             if (ctx) climate_control_open_modal(ctx);
+          }, LV_EVENT_CLICKED, ctx);
+        }
+        continue;
+      }
+      if (sb_cfg.type == "light_control") {
+        if (!sb_cfg.entity.empty()) {
+          LightControlCtx *ctx = create_light_control_context(
+            sub_slot, sb_cfg,
+            has_on ? on_val : DEFAULT_SLIDER_COLOR,
+            display_volume_number_font(display),
+            display_volume_label_font(display)
+              ? display_volume_label_font(display)
+              : lv_obj_get_style_text_font(sub_slot.text_lbl, LV_PART_MAIN),
+            display_icon_font(display),
+            display_volume_width_percent(display));
+          subscribe_light_control_state(ctx);
+          lv_obj_add_event_cb(sb_btn, [](lv_event_t *e) {
+            lv_obj_t *target = static_cast<lv_obj_t *>(lv_event_get_target(e));
+            if (target && lv_obj_has_state(target, LV_STATE_DISABLED)) return;
+            LightControlCtx *ctx = (LightControlCtx *)lv_event_get_user_data(e);
+            if (ctx) light_control_open_modal(ctx);
           }, LV_EVENT_CLICKED, ctx);
         }
         continue;

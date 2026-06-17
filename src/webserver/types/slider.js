@@ -20,7 +20,7 @@ function normalizeCoverMode(mode, allowCommands) {
 }
 
 function coverModalModeEnabled() {
-  return typeof isExperimentalEnabled === "function" && isExperimentalEnabled("developer");
+  return true;
 }
 
 function coverModeOptionsForSettings(currentMode) {

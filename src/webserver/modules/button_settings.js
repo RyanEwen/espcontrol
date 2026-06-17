@@ -653,6 +653,7 @@ function renderButtonSettings(forceOpen) {
 
   function selectCardType(newType) {
     if (newType === "__choose-card-type__") return;
+    newType = defaultButtonTypeForPicker(newType);
     b.type = newType;
     if (state.settingsDraft && state.settingsDraft.key === draftKey) {
       state.settingsDraft.typeSelected = true;

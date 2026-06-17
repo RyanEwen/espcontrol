@@ -125,6 +125,10 @@ if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
     actionCardStateUnit: actionCardStateUnit,
     actionCardStatePrecision: actionCardStatePrecision,
     actionCardStateDisplayMode: actionCardStateDisplayMode,
+    actionScriptConfirmationEnabled: actionScriptConfirmationEnabled,
+    actionScriptConfirmationMessage: actionScriptConfirmationMessage,
+    actionScriptConfirmationYesText: actionScriptConfirmationYesText,
+    actionScriptConfirmationNoText: actionScriptConfirmationNoText,
     alarmPinRequired: alarmPinRequired,
     alarmIconDisplayMode: alarmIconDisplayMode,
     alarmLabelDisplayMode: alarmLabelDisplayMode,
@@ -177,6 +181,7 @@ if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
     buttonTypePickerOptionsFor: function (isSub, selectedTypeKey) {
       return buttonTypePickerOptionList(!!isSub, selectedTypeKey == null ? null : selectedTypeKey);
     },
+    defaultButtonTypeForPicker: defaultButtonTypeForPicker,
     buttonTypesMissingCardMetadata: function () {
       var missing = [];
       for (var key in BUTTON_TYPES) {
@@ -322,6 +327,8 @@ if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
     entityInitialDetail: entityInitialDetail,
     entityLookupNames: entityLookupNames,
     coverArtHideExternalInputPostUrls: coverArtHideExternalInputPostUrls,
+    coverArtDelayPostUrls: coverArtDelayPostUrls,
+    coverArtTrackOverlayDurationPostUrls: coverArtTrackOverlayDurationPostUrls,
     firmwareUpdateControlsVisibleFor: function (transport, supported) {
       var oldTransport = state.networkTransport;
       var oldSupported = state.firmwareUpdateControlsSupported;

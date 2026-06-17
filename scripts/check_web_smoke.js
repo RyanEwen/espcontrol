@@ -109,10 +109,23 @@ assert.deepStrictEqual(Array.from(hooks.coverArtHideExternalInputPostUrls(false)
   "/switch/screen_saver__hide_for_external_sources/turn_off",
   "/switch/Screen%20Saver%3A%20Hide%20for%20external%20sources/turn_off",
 ], "cover art external-input posts include all firmware object id aliases");
+assert.deepStrictEqual(Array.from(hooks.coverArtDelayPostUrls(30)), [
+  "/number/screen_saver__cover_art_delay/set?value=30",
+  "/number/screen_saver_cover_art_delay/set?value=30",
+  "/number/cover_art_delay/set?value=30",
+  "/number/Screen%20Saver%3A%20Cover%20Art%20Delay/set?value=30",
+], "cover art delay posts include all firmware object id aliases");
 assert(
   Array.from(hooks.entityLookupNames("screen_saver_track_overlay_duration")).includes("screen_saver__show_track_overlay"),
   "cover art track-overlay post aliases include the legacy show-track-overlay object id"
 );
+assert.deepStrictEqual(Array.from(hooks.coverArtTrackOverlayDurationPostUrls(15)), [
+  "/number/screen_saver__track_overlay_duration/set?value=15",
+  "/number/screen_saver_track_overlay_duration/set?value=15",
+  "/number/track_overlay_duration/set?value=15",
+  "/number/screen_saver__show_track_overlay/set?value=15",
+  "/number/Screen%20Saver%3A%20Show%20Track%20Overlay/set?value=15",
+], "cover art track-overlay posts include all firmware object id aliases");
 assert.strictEqual(hooks.clockBarVisibleInPreviewFor(true, "off"), true, "clock bar preview is visible when enabled");
 assert.strictEqual(hooks.clockBarVisibleInPreviewFor(true, "dim"), true, "clock bar preview stays visible for dimmed screen saver");
 assert.strictEqual(hooks.clockBarVisibleInPreviewFor(true, "clock"), true, "clock bar preview stays visible when clock screen saver is configured");
@@ -243,6 +256,47 @@ const confirmationOnRoundTrip = hooks.parseButtonConfig(hooks.serializeButtonCon
 }));
 assert.strictEqual(hooks.switchConfirmationMode(confirmationOnRoundTrip), "on");
 assert.strictEqual(hooks.switchConfirmationMessage(confirmationOnRoundTrip), "Turn on this device?");
+const scriptConfirmationButton = {
+  entity: "script.goodnight",
+  label: "Goodnight",
+  icon: "Script Text Play",
+  icon_on: "Auto",
+  sensor: "script.turn_on",
+  unit: "",
+  type: "action",
+  precision: "",
+  options: "confirm_on,confirm_message=Run bedtime?,confirm_yes=Run,confirm_no=Cancel",
+};
+const scriptConfirmationRoundTrip = hooks.parseButtonConfig(hooks.serializeButtonConfig(scriptConfirmationButton));
+assert.deepStrictEqual(plain(scriptConfirmationRoundTrip), scriptConfirmationButton);
+assert.strictEqual(hooks.actionScriptConfirmationEnabled(scriptConfirmationRoundTrip), true);
+assert.strictEqual(hooks.actionScriptConfirmationMessage(scriptConfirmationRoundTrip), "Run bedtime?");
+assert.strictEqual(hooks.actionScriptConfirmationYesText(scriptConfirmationRoundTrip), "Run");
+assert.strictEqual(hooks.actionScriptConfirmationNoText(scriptConfirmationRoundTrip), "Cancel");
+const scriptConfirmationDefaultRoundTrip = hooks.parseButtonConfig(hooks.serializeButtonConfig({
+  entity: "script.goodnight",
+  label: "Goodnight",
+  icon: "Script Text Play",
+  icon_on: "Auto",
+  sensor: "script.turn_on",
+  unit: "",
+  type: "action",
+  precision: "",
+  options: "confirm_on",
+}));
+assert.strictEqual(hooks.actionScriptConfirmationMessage(scriptConfirmationDefaultRoundTrip), "Run this script?");
+const sceneWithStaleConfirmation = hooks.parseButtonConfig(hooks.serializeButtonConfig({
+  entity: "scene.goodnight",
+  label: "Goodnight",
+  icon: "Movie Open",
+  icon_on: "Auto",
+  sensor: "scene.turn_on",
+  unit: "",
+  type: "action",
+  precision: "",
+  options: "confirm_on,confirm_message=Run bedtime?",
+}));
+assert.strictEqual(sceneWithStaleConfirmation.options, "", "non-script action cards drop script confirmation options");
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("alarm", false, false), true);
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("alarm", true, false), true);
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("alarm", true, true), true);
@@ -274,11 +328,17 @@ assert(
   hooks.buttonTypePreviewFor("alarm", { label: "Alarm", icon: "Alarm", type: "alarm", options: "icon_display=static" }).iconHtml.includes("mdi-bell-ring"),
   "alarm preview uses the selected Alarm icon"
 );
-assert.deepStrictEqual(Array.from(hooks.alarmCardTypeOptionValues(false)), ["control_panel", "away", "home", "disarm"]);
-assert.deepStrictEqual(Array.from(hooks.alarmCardTypeOptionValues(true)), ["control_panel", "away", "home", "disarm"]);
+assert.deepStrictEqual(Array.from(hooks.alarmCardTypeOptionValues(false)), ["control_panel", "away", "home", "night", "vacation", "disarm"]);
+assert.deepStrictEqual(Array.from(hooks.alarmCardTypeOptionValues(true)), ["control_panel", "away", "home", "night", "vacation", "disarm"]);
 assert.deepStrictEqual(Array.from(hooks.alarmVisibleActions(hooks.parseButtonConfig(
   "alarm_control_panel.house;House;Security;Auto;;;alarm;;actions=away%7Cdisarm"
 ))), ["away", "disarm"]);
+assert.deepStrictEqual(Array.from(hooks.alarmVisibleActions(hooks.parseButtonConfig(
+  "alarm_control_panel.house;House;Security;Auto;;;alarm;;actions=night%7Cvacation"
+))), ["night", "vacation"]);
+assert.deepStrictEqual(Array.from(hooks.alarmVisibleActions(hooks.parseButtonConfig(
+  "alarm_control_panel.house;House;Security;Auto;;;alarm;;actions=away%7Chome%7Cnight%7Cvacation%7Cdisarm"
+))), ["away", "home", "night"]);
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("fan_speed", false, false), false);
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("fan_speed", true, false), true);
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("fan_speed", true, true), true);
@@ -936,6 +996,22 @@ const subpagePresencePreview = hooks.buttonTypePreviewFor("subpage", {
 assert(subpagePresencePreview.iconHtml.includes("mdi-account"), "presence subpage preset preview uses the account icon");
 assert(subpagePresencePreview.labelHtml.includes("Presence"), "presence subpage preset preview uses the Presence label");
 assert(subpagePresencePreview.labelHtml.includes("mdi-chevron-right"), "presence subpage preset preview shows the chevron badge");
+
+[
+  ["alarm", "alarm_control_panel.home", "mdi-shield-home", "Alarm"],
+  ["vacuum", "vacuum.downstairs", "mdi-robot-vacuum", "Vacuum"],
+  ["weather", "weather.home", "mdi-weather-partly-cloudy", "Weather"],
+].forEach(([kind, entity, iconClass, label]) => {
+  const preview = hooks.buttonTypePreviewFor("subpage", {
+    entity,
+    sensor: "indicator",
+    type: "subpage",
+    options: `subpage_kind=${kind}`,
+  });
+  assert(preview.iconHtml.includes(iconClass), `${label} subpage preset preview uses the expected icon`);
+  assert(preview.labelHtml.includes(label), `${label} subpage preset preview uses the expected label`);
+  assert(preview.labelHtml.includes("mdi-chevron-right"), `${label} subpage preset preview shows the chevron badge`);
+});
 
 const subpageCustomPresetPreview = hooks.buttonTypePreviewFor("subpage", {
   entity: "climate.living_room",
