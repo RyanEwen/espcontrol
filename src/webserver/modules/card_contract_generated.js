@@ -100,6 +100,32 @@ var CARD_CONTRACT_CARDS = {
         "name": "large_numbers",
         "label": "Large State Numbers",
         "kind": "flag"
+      },
+      {
+        "name": "confirmation_required",
+        "label": "Confirmation Required",
+        "kind": "flag",
+        "storage": [
+          "confirm_on"
+        ]
+      },
+      {
+        "name": "confirm_message",
+        "label": "Message",
+        "kind": "text",
+        "defaultValue": "Run this script?"
+      },
+      {
+        "name": "confirm_yes",
+        "label": "Confirm Button",
+        "kind": "text",
+        "defaultValue": "Yes"
+      },
+      {
+        "name": "confirm_no",
+        "label": "Cancel Button",
+        "kind": "text",
+        "defaultValue": "No"
       }
     ],
     "default": {
@@ -164,6 +190,8 @@ var CARD_CONTRACT_CARDS = {
           "control_panel",
           "away",
           "home",
+          "night",
+          "vacation",
           "disarm"
         ],
         "defaultValue": "control_panel"
@@ -187,6 +215,8 @@ var CARD_CONTRACT_CARDS = {
         "values": [
           "away",
           "home",
+          "night",
+          "vacation",
           "disarm"
         ],
         "defaultValue": "away|home|disarm"
@@ -234,6 +264,20 @@ var CARD_CONTRACT_CARDS = {
             "service": "alarm_control_panel.alarm_arm_home",
             "icon": "Shield Home",
             "legacyIcon": "Home"
+          },
+          {
+            "value": "night",
+            "label": "Arm Night",
+            "service": "alarm_control_panel.alarm_arm_night",
+            "icon": "Weather Night",
+            "legacyIcon": "Weather Night"
+          },
+          {
+            "value": "vacation",
+            "label": "Arm Vacation",
+            "service": "alarm_control_panel.alarm_arm_vacation",
+            "icon": "Airplane",
+            "legacyIcon": "Airplane"
           },
           {
             "value": "disarm",
@@ -430,7 +474,7 @@ var CARD_CONTRACT_CARDS = {
           "stop",
           "set_position"
         ],
-        "defaultValue": ""
+        "defaultValue": "modal"
       },
       {
         "name": "cover_position",
@@ -457,7 +501,7 @@ var CARD_CONTRACT_CARDS = {
       "label": "",
       "icon": "Blinds",
       "icon_on": "Blinds Open",
-      "sensor": "",
+      "sensor": "modal",
       "unit": "",
       "type": "cover",
       "precision": "",
@@ -507,7 +551,6 @@ var CARD_CONTRACT_CARDS = {
     "label": "Fans",
     "allowInSubpage": true,
     "pickerKey": "fan_speed",
-    "experimental": "developer",
     "domains": [
       "fan"
     ],
@@ -527,7 +570,6 @@ var CARD_CONTRACT_CARDS = {
     "label": "Fans",
     "allowInSubpage": true,
     "pickerKey": "fan_speed",
-    "experimental": "developer",
     "domains": [
       "fan"
     ],
@@ -547,7 +589,6 @@ var CARD_CONTRACT_CARDS = {
     "label": "Fans",
     "allowInSubpage": true,
     "pickerKey": "fan_speed",
-    "experimental": "developer",
     "domains": [
       "fan"
     ],
@@ -566,7 +607,6 @@ var CARD_CONTRACT_CARDS = {
   "fan_speed": {
     "label": "Fans",
     "allowInSubpage": true,
-    "experimental": "developer",
     "domains": [
       "fan"
     ],
@@ -586,7 +626,6 @@ var CARD_CONTRACT_CARDS = {
     "label": "Fans",
     "allowInSubpage": true,
     "pickerKey": "fan_speed",
-    "experimental": "developer",
     "domains": [
       "fan"
     ],
@@ -1102,10 +1141,19 @@ var CARD_CONTRACT_CARDS = {
         "kind": "choice",
         "values": [
           "",
+          "switch",
           "lights",
           "climate",
           "presence",
-          "media"
+          "media",
+          "alarm",
+          "cover",
+          "garage",
+          "lock",
+          "vacuum",
+          "weather",
+          "sensor",
+          "image"
         ],
         "defaultValue": ""
       },
@@ -1411,11 +1459,6 @@ function cardContractAllowInSubpage(type) {
 function cardContractPickerKey(type) {
   var card = cardContractCard(type);
   return card && card.pickerKey ? card.pickerKey : "";
-}
-
-function cardContractExperimental(type) {
-  var card = cardContractCard(type);
-  return card && card.experimental ? card.experimental : "";
 }
 
 function cardContractHidden(type) {

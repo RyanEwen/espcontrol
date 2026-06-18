@@ -177,7 +177,6 @@ function seededEvents() {
     { id: "select-screen__clock_format", state: "24h", value: "24h", option: ["12h", "24h"] },
     { id: "select-screen__rotation", state: "0", value: "0", option: ["0", "90", "180", "270"] },
     { id: "number-screensaver_timeout", state: "300", value: 300, min: 10, max: 3600 },
-    { id: "switch-developer__experimental_features", state: "ON", value: true },
     { id: "text-subpage_6_config", state: "1,B|media_player.living:Living:Speaker:Auto:play_pause::media" },
   ];
   BUTTON_FIXTURES.forEach((state, index) => {
@@ -886,18 +885,18 @@ async function assertBackupImportSmoke(page, posts, testCase) {
   );
 }
 
-async function entitySuggestionValues(page, inputSelector, query = "light", expectedValue = "") {
+async function entitySuggestionValues(page, inputSelector, query = "light", expectedValues = []) {
   await page.locator(inputSelector).fill(query);
-  await page.waitForFunction(({ selector, query, expectedValue }) => {
+  await page.waitForFunction(({ selector, query, expectedValues }) => {
     const input = document.querySelector(selector);
     const normalizedQuery = String(query || "").toLowerCase();
     if (!input || String(input.value || "").toLowerCase() !== normalizedQuery) return false;
     const options = Array.from(input.parentElement.querySelectorAll(".sp-entity-dropdown.sp-open .sp-entity-option"));
     if (!options.length) return false;
     const values = options.map((option) => String(option.textContent || ""));
-    if (!values.every((value) => value.toLowerCase().includes(normalizedQuery))) return false;
-    return !expectedValue || values.includes(expectedValue);
-  }, { selector: inputSelector, query, expectedValue });
+    return options.every((option) => String(option.textContent || "").toLowerCase().includes(normalizedQuery)) &&
+      expectedValues.every((value) => values.indexOf(value) !== -1);
+  }, { selector: inputSelector, query, expectedValues });
   return page.locator(inputSelector).evaluate((input) => {
     return Array.from(input.parentElement.querySelectorAll(".sp-entity-dropdown.sp-open .sp-entity-option"))
       .map((option) => option.textContent || "");
@@ -911,7 +910,7 @@ async function assertEditAndApplySmoke(page, posts, errors) {
 
   await page.locator('.sp-main [data-slot="1"]').click();
   await page.getByRole("button", { name: "Edit", exact: true }).click();
-  const switchSuggestions = await entitySuggestionValues(page, "#sp-inp-entity", "light", "light.kitchen");
+  const switchSuggestions = await entitySuggestionValues(page, "#sp-inp-entity", "light", ["light.kitchen"]);
   assert(switchSuggestions.includes("light.kitchen"), "switch card suggestions include a recently used light");
   assert(!switchSuggestions.includes("sensor.energy"), "switch card suggestions exclude recently used sensors");
   assert(!switchSuggestions.includes("media_player.living"), "switch card suggestions exclude recently used media players");

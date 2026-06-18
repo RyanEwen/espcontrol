@@ -502,7 +502,12 @@ inline std::string sensor_card_options_normalized(const std::string &options,
 
 inline std::string normalize_subpage_kind(const std::string &value) {
   return value == "lights" || value == "media" ||
-    value == "climate" || value == "presence" ? value : "";
+    value == "climate" || value == "presence" ||
+    value == "switch" || value == "alarm" ||
+    value == "cover" || value == "garage" ||
+    value == "lock" || value == "vacuum" ||
+    value == "weather" || value == "sensor" ||
+    value == "image" ? value : "";
 }
 
 inline std::string subpage_card_options_normalized(const std::string &options,
@@ -768,6 +773,51 @@ inline std::string switch_card_options_normalized(const std::string &options) {
   return out;
 }
 
+inline void append_config_token(std::string &out, const std::string &token) {
+  if (token.empty()) return;
+  if (!out.empty()) out += ",";
+  out += token;
+}
+
+inline std::string action_card_options_normalized(const std::string &options,
+                                                  const std::string &action) {
+  std::string out;
+  std::string state_entity = cfg_option_value(options, "state_entity");
+  if (!state_entity.empty()) {
+    append_config_token(out, "state_entity=" + encode_compact_field(state_entity));
+    std::string state_precision = cfg_option_value(options, "state_precision");
+    if (state_precision == "icon" || state_precision == "text") {
+      append_config_token(out, "state_precision=" + state_precision);
+    } else {
+      std::string state_unit = cfg_option_value(options, "state_unit");
+      if (!state_unit.empty()) {
+        append_config_token(out, "state_unit=" + encode_compact_field(state_unit));
+      }
+      if (state_precision == "1" || state_precision == "2") {
+        append_config_token(out, "state_precision=" + state_precision);
+      }
+      append_large_numbers_option(out, options);
+    }
+  }
+
+  if (action == "script.turn_on" && cfg_option_token_present(options, "confirm_on")) {
+    append_config_token(out, "confirm_on");
+    std::string message = cfg_option_value(options, "confirm_message");
+    std::string yes = cfg_option_value(options, "confirm_yes");
+    std::string no = cfg_option_value(options, "confirm_no");
+    if (!message.empty() && message != "Run this script?") {
+      append_config_token(out, "confirm_message=" + encode_compact_field(message));
+    }
+    if (!yes.empty() && yes != "Yes") {
+      append_config_token(out, "confirm_yes=" + encode_compact_field(yes));
+    }
+    if (!no.empty() && no != "No") {
+      append_config_token(out, "confirm_no=" + encode_compact_field(no));
+    }
+  }
+  return out;
+}
+
 inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
   // Slider cards used to store "h" here for horizontal layout. Sliders are
   // now always vertical, so treat any saved slider sensor value as legacy.
@@ -929,6 +979,10 @@ inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
     p.icon_on = "Auto";
     if (p.icon.empty() || p.icon == "Auto") p.icon = "Robot Vacuum Variant";
   }
+  if (p.type == "action") {
+    p.precision.clear();
+    p.options = action_card_options_normalized(p.options, p.sensor);
+  }
   if (p.type == "vacuum") {
     p.sensor = card_runtime_vacuum_mode(p.sensor);
     if (p.sensor != "clean_area") p.unit.clear();
@@ -1077,6 +1131,11 @@ inline bool switch_confirmation_enabled(const ParsedCfg &p) {
           cfg_option_enabled(p.options, "confirm_on"));
 }
 
+inline bool action_script_confirmation_enabled(const ParsedCfg &p) {
+  return p.type == "action" && p.sensor == "script.turn_on" &&
+         cfg_option_enabled(p.options, "confirm_on");
+}
+
 inline bool switch_confirmation_required(const ParsedCfg &p, bool currently_on) {
   if (p.type.empty()) {
     return currently_on
@@ -1087,6 +1146,9 @@ inline bool switch_confirmation_required(const ParsedCfg &p, bool currently_on) 
 }
 
 inline std::string switch_confirmation_default_message(const ParsedCfg &p) {
+  if (action_script_confirmation_enabled(p)) {
+    return espcontrol_i18n(std::string("Run this script?"));
+  }
   bool confirm_off = cfg_option_enabled(p.options, "confirm_off");
   bool confirm_on = cfg_option_enabled(p.options, "confirm_on");
   if (confirm_off && confirm_on) return espcontrol_i18n(std::string("Toggle this device?"));

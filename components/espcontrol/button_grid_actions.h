@@ -605,6 +605,8 @@ inline void handle_button_click(const std::string &cfg, int slot_num,
     if (action_card_option_select(p)) {
       OptionSelectCtx *ctx = (OptionSelectCtx *)lv_obj_get_user_data(btn_obj);
       if (ctx) option_select_open_modal(ctx);
+    } else if (action_script_confirmation_enabled(p) && btn_obj) {
+      switch_confirmation_open_modal(p, btn_obj, false);
     } else {
       send_action_card_action(p);
     }

@@ -142,6 +142,16 @@ inline bool card_runtime_alarm_action_mode_valid(const std::string &mode) {
   return card_contract_alarm_action_mode_valid(mode);
 }
 
+inline size_t card_runtime_alarm_action_mode_count() {
+  return sizeof(CARD_CONTRACT_ALARM_ACTION_MODES) / sizeof(CARD_CONTRACT_ALARM_ACTION_MODES[0]);
+}
+
+inline const char *card_runtime_alarm_action_mode_at(size_t index) {
+  return index < card_runtime_alarm_action_mode_count()
+    ? CARD_CONTRACT_ALARM_ACTION_MODES[index]
+    : "";
+}
+
 inline const char *card_runtime_alarm_action_service(const std::string &mode) {
   return card_contract_alarm_action_service(mode);
 }

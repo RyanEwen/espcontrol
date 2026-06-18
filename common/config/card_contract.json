@@ -81,6 +81,30 @@
           "name": "large_numbers",
           "label": "Large State Numbers",
           "kind": "flag"
+        },
+        {
+          "name": "confirmation_required",
+          "label": "Confirmation Required",
+          "kind": "flag",
+          "storage": ["confirm_on"]
+        },
+        {
+          "name": "confirm_message",
+          "label": "Message",
+          "kind": "text",
+          "defaultValue": "Run this script?"
+        },
+        {
+          "name": "confirm_yes",
+          "label": "Confirm Button",
+          "kind": "text",
+          "defaultValue": "Yes"
+        },
+        {
+          "name": "confirm_no",
+          "label": "Cancel Button",
+          "kind": "text",
+          "defaultValue": "No"
         }
       ],
       "default": {
@@ -129,7 +153,7 @@
           "name": "alarm_card_type",
           "label": "Type",
           "kind": "choice",
-          "values": ["control_panel", "away", "home", "disarm"],
+          "values": ["control_panel", "away", "home", "night", "vacation", "disarm"],
           "defaultValue": "control_panel"
         },
         {
@@ -148,7 +172,7 @@
           "name": "actions",
           "label": "Visible Actions",
           "kind": "choice",
-          "values": ["away", "home", "disarm"],
+          "values": ["away", "home", "night", "vacation", "disarm"],
           "defaultValue": "away|home|disarm"
         },
         {
@@ -184,6 +208,20 @@
               "service": "alarm_control_panel.alarm_arm_home",
               "icon": "Shield Home",
               "legacyIcon": "Home"
+            },
+            {
+              "value": "night",
+              "label": "Arm Night",
+              "service": "alarm_control_panel.alarm_arm_night",
+              "icon": "Weather Night",
+              "legacyIcon": "Weather Night"
+            },
+            {
+              "value": "vacation",
+              "label": "Arm Vacation",
+              "service": "alarm_control_panel.alarm_arm_vacation",
+              "icon": "Airplane",
+              "legacyIcon": "Airplane"
             },
             {
               "value": "disarm",
@@ -339,7 +377,7 @@
           "label": "Type",
           "kind": "choice",
           "values": ["modal", "", "tilt", "toggle", "open", "close", "stop", "set_position"],
-          "defaultValue": ""
+          "defaultValue": "modal"
         },
         {
           "name": "cover_position",
@@ -366,7 +404,7 @@
         "label": "",
         "icon": "Blinds",
         "icon_on": "Blinds Open",
-        "sensor": "",
+        "sensor": "modal",
         "unit": "",
         "type": "cover",
         "precision": "",
@@ -409,7 +447,6 @@
       "label": "Fans",
       "allowInSubpage": true,
       "pickerKey": "fan_speed",
-      "experimental": "developer",
       "domains": ["fan"],
       "default": {
         "entity": "",
@@ -427,7 +464,6 @@
       "label": "Fans",
       "allowInSubpage": true,
       "pickerKey": "fan_speed",
-      "experimental": "developer",
       "domains": ["fan"],
       "default": {
         "entity": "",
@@ -445,7 +481,6 @@
       "label": "Fans",
       "allowInSubpage": true,
       "pickerKey": "fan_speed",
-      "experimental": "developer",
       "domains": ["fan"],
       "default": {
         "entity": "",
@@ -462,7 +497,6 @@
     "fan_speed": {
       "label": "Fans",
       "allowInSubpage": true,
-      "experimental": "developer",
       "domains": ["fan"],
       "default": {
         "entity": "",
@@ -480,7 +514,6 @@
       "label": "Fans",
       "allowInSubpage": true,
       "pickerKey": "fan_speed",
-      "experimental": "developer",
       "domains": ["fan"],
       "default": {
         "entity": "",
@@ -922,7 +955,7 @@
           "name": "subpage_kind",
           "label": "Subpage Type",
           "kind": "choice",
-          "values": ["", "lights", "climate", "presence", "media"],
+          "values": ["", "switch", "lights", "climate", "presence", "media", "alarm", "cover", "garage", "lock", "vacuum", "weather", "sensor", "image"],
           "defaultValue": ""
         },
         {

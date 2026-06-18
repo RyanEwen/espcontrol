@@ -18,7 +18,8 @@ Use Action cards for shortcuts such as running a scene, starting a script, trigg
 4. Enter the **Entity** for the thing you want the action to use.
 5. If you choose **Set Number Helper**, enter the value.
 6. Choose an **Icon**.
-7. Optionally turn on **Show State** if the Action card should show a separate Home Assistant state.
+7. If you choose **Run Script**, optionally turn on **Confirmation Required** if accidental taps would be a problem.
+8. Optionally turn on **Show State** if the Action card should show a separate Home Assistant state.
 
 ## Run an Existing Home Assistant Script
 
@@ -33,6 +34,8 @@ For example, to run a script called `script.mettre_de_la_musique`:
 5. Choose an icon.
 
 When you tap the card, EspControl sends `script.turn_on` to Home Assistant with that script as the target entity. The label is only what appears on the panel, so it can be different from the script name.
+
+For safety-sensitive scripts, turn on **Confirmation Required**. The card will open the same confirmation popup used by Switch cards before it sends `script.turn_on`. You can customise the popup message and the confirm/cancel button text.
 
 Action cards do not currently pass script variables or extra data. If a script needs inputs, handle those inside the Home Assistant script, or create a small wrapper script in Home Assistant and point the Action card at that wrapper.
 
@@ -76,7 +79,7 @@ When the state entity is active, Icon mode highlights the card. If the state ent
 When you tap an Action card:
 
 - The card briefly flashes the highlight colour.
-- The selected Home Assistant action is sent with the configured entity.
+- The selected Home Assistant action is sent with the configured entity. Run Script cards with **Confirmation Required** ask first.
 - If **Show State** is off, the card does not stay highlighted.
 - If **Show State** is on, the card display follows the state entity you chose.
 

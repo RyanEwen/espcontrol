@@ -385,6 +385,7 @@ var CSS =
 
   ".sp-cond-field{padding:0 0 4px;display:none}" +
   ".sp-cond-field.sp-visible{display:block}" +
+  ".sp-action-confirm-section.sp-visible{margin-bottom:28px}" +
   ".sp-cond-field.sp-climate-settings-gap.sp-visible{margin-bottom:24px}" +
   ".sp-disclosure{border:1px solid var(--border);border-radius:8px;background:rgba(255,255,255,.02);overflow:hidden;margin-top:4px}" +
   ".sp-disclosure-button{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;" +

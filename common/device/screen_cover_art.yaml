@@ -1495,7 +1495,7 @@ script:
                 if (id(cover_art_screensaver_active)) id(cover_art_refresh_progress).execute();
                 id(cover_art_delay_timer).stop();
                 id(cover_art_show_track_overlay).stop();
-                id(hide_cover_art_view).execute();
+                id(cover_art_return_home_after_playback).execute();
                 return;
               }
 
@@ -1964,4 +1964,34 @@ script:
           id(cover_art_last_progress_percent) = -1;
           lv_bar_set_value(id(cover_art_progress_bar), 0, LV_ANIM_OFF);
           lv_label_set_text(id(cover_art_time_label), "0:00  /  0:00");
+      - script.execute: cover_art_return_home_after_playback
+
+  - id: cover_art_return_home_after_playback
+    mode: restart
+    then:
+      - if:
+          condition:
+            lambda: |-
+              return id(cover_art_screensaver_active) &&
+                     !id(screen_schedule_asleep) &&
+                     !id(screensaver_display_off_active) &&
+                     !id(screensaver_dimmed_active) &&
+                     !id(is_clock_showing);
+          then:
+            - globals.set:
+                id: display_asleep
+                value: 'false'
       - script.execute: hide_cover_art_view
+      - script.wait: hide_cover_art_view
+      - if:
+          condition:
+            lambda: |-
+              return !id(display_asleep) &&
+                     !id(screen_schedule_asleep) &&
+                     !id(screensaver_display_off_active) &&
+                     !id(screensaver_dimmed_active) &&
+                     !id(is_clock_showing);
+          then:
+            - script.execute: backlight_apply_brightness
+            - script.execute: screensaver_idle_check
+            - script.execute: home_screen_idle_check

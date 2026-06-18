@@ -18,7 +18,7 @@ inline const char *const CARD_CONTRACT_MEDIA_DISPLAY_MODES[] = {"", "state"};
 inline const char *const CARD_CONTRACT_MEDIA_NOW_PLAYING_CONTROLS[] = {"", "progress", "play_pause"};
 inline const char *const CARD_CONTRACT_MEDIA_LEGACY_MODES[] = {"controls"};
 inline const char *const CARD_CONTRACT_MEDIA_STATE_DISPLAY_MODES[] = {"play_pause", "position"};
-inline const char *const CARD_CONTRACT_ALARM_ACTION_MODES[] = {"away", "home", "disarm"};
+inline const char *const CARD_CONTRACT_ALARM_ACTION_MODES[] = {"away", "home", "night", "vacation", "disarm"};
 inline const char *const CARD_CONTRACT_ALARM_ICON_DISPLAY_MODES[] = {"static", "status"};
 inline const char *const CARD_CONTRACT_ALARM_LABEL_DISPLAY_MODES[] = {"name", "status"};
 inline const char *const CARD_CONTRACT_CLIMATE_LABEL_DISPLAY_MODES[] = {"label", "status", "actual", "target"};
@@ -153,6 +153,8 @@ inline const char *card_contract_media_playback_service(const std::string &mode)
 inline const char *card_contract_alarm_action_service(const std::string &mode) {
   if (mode == "away") return "alarm_control_panel.alarm_arm_away";
   if (mode == "home") return "alarm_control_panel.alarm_arm_home";
+  if (mode == "night") return "alarm_control_panel.alarm_arm_night";
+  if (mode == "vacation") return "alarm_control_panel.alarm_arm_vacation";
   if (mode == "disarm") return "alarm_control_panel.alarm_disarm";
   return nullptr;
 }
@@ -160,6 +162,8 @@ inline const char *card_contract_alarm_action_service(const std::string &mode) {
 inline const char *card_contract_alarm_action_icon_name(const std::string &mode) {
   if (mode == "away") return "Shield Lock";
   if (mode == "home") return "Shield Home";
+  if (mode == "night") return "Weather Night";
+  if (mode == "vacation") return "Airplane";
   if (mode == "disarm") return "Shield Off";
   return "Alarm";
 }
@@ -167,6 +171,8 @@ inline const char *card_contract_alarm_action_icon_name(const std::string &mode)
 inline bool card_contract_alarm_action_legacy_icon_name(const std::string &mode, const std::string &icon) {
   if (mode == "away") return icon == "Security";
   if (mode == "home") return icon == "Home";
+  if (mode == "night") return icon == "Weather Night";
+  if (mode == "vacation") return icon == "Airplane";
   if (mode == "disarm") return icon == "Lock Open";
   return false;
 }
