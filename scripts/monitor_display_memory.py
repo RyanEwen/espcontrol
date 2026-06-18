@@ -35,6 +35,8 @@ METRICS = {
     "psram_largest": "/sensor/memory__psram_largest_block",
 }
 
+REQUIRED_METRICS = {"heap_free", "psram_free"}
+
 
 @dataclass(frozen=True)
 class Target:
@@ -128,7 +130,12 @@ def collect_sample(targets: list[Target], timeout: float) -> list[Reading]:
     for target in targets:
         values: dict[str, float] = {}
         for metric in METRICS:
-            values[metric] = fetch_metric(target.host, metric, timeout)
+            try:
+                values[metric] = fetch_metric(target.host, metric, timeout)
+            except MonitorError:
+                if metric in REQUIRED_METRICS:
+                    raise
+                values[metric] = math.nan
         readings.append(Reading(timestamp=timestamp, target=target.name, values=values))
     return readings
 
@@ -143,10 +150,16 @@ def summarize(readings: list[Reading]) -> list[Trend]:
         target_readings.sort(key=lambda item: item.timestamp)
         if not target_readings:
             continue
-        elapsed_hours = (target_readings[-1].timestamp - target_readings[0].timestamp) / 3600.0
         for metric in METRICS:
-            first = target_readings[0].values[metric]
-            last = target_readings[-1].values[metric]
+            metric_readings = [
+                item for item in target_readings
+                if math.isfinite(item.values.get(metric, math.nan))
+            ]
+            if not metric_readings:
+                continue
+            elapsed_hours = (metric_readings[-1].timestamp - metric_readings[0].timestamp) / 3600.0
+            first = metric_readings[0].values[metric]
+            last = metric_readings[-1].values[metric]
             delta = last - first
             per_hour = delta / elapsed_hours if elapsed_hours > 0 else 0.0
             trends.append(Trend(
@@ -156,7 +169,7 @@ def summarize(readings: list[Reading]) -> list[Trend]:
                 last=last,
                 delta=delta,
                 per_hour=per_hour,
-                samples=len(target_readings),
+                samples=len(metric_readings),
             ))
     return trends
 
@@ -170,7 +183,7 @@ def write_csv(path: Path, readings: list[Reading]) -> None:
             writer.writerow([
                 datetime.fromtimestamp(reading.timestamp, timezone.utc).isoformat(),
                 reading.target,
-                *(reading.values[metric] for metric in METRICS),
+                *(reading.values[metric] if math.isfinite(reading.values[metric]) else "" for metric in METRICS),
             ])
 
 
@@ -190,6 +203,9 @@ def print_sample(readings: list[Reading], baseline: dict[tuple[str, str], float]
         for metric in METRICS:
             value = reading.values[metric]
             key = (reading.target, metric)
+            if not math.isfinite(value):
+                cells.append(f"{metric}=n/a")
+                continue
             if key not in baseline:
                 baseline[key] = value
             delta = value - baseline[key]
@@ -211,7 +227,8 @@ def print_summary(trends: list[Trend], heap_tolerance: float, psram_tolerance: f
         print(
             f"  {trend.target:8s} {trend.metric:13s} "
             f"{format_bytes(trend.first)} -> {format_bytes(trend.last)} "
-            f"delta={trend.delta:+,.0f} per_hour={trend.per_hour:+,.0f} {status}"
+            f"delta={trend.delta:+,.0f} per_hour={trend.per_hour:+,.0f} "
+            f"samples={trend.samples} {status}"
         )
     return leaking
 
@@ -250,6 +267,18 @@ def run_self_test() -> int:
             "psram_free": 9_999_000,
             "psram_largest": 8_000_000,
         }),
+        Reading(now, "missing", {
+            "heap_free": 100_000,
+            "heap_largest": math.nan,
+            "psram_free": 10_000_000,
+            "psram_largest": math.nan,
+        }),
+        Reading(now + 1800, "missing", {
+            "heap_free": 100_000,
+            "heap_largest": math.nan,
+            "psram_free": 10_000_000,
+            "psram_largest": math.nan,
+        }),
     ]
     trends = {(item.target, item.metric): item for item in summarize(readings)}
     heap = trends[("test", "heap_free")]
@@ -257,6 +286,10 @@ def run_self_test() -> int:
     assert heap.delta == -2000
     assert heap.per_hour == -4000
     assert psram.delta == -1000
+    assert ("missing", "heap_free") in trends
+    assert ("missing", "psram_free") in trends
+    assert ("missing", "heap_largest") not in trends
+    assert ("missing", "psram_largest") not in trends
     assert parse_metric_payload('{"value": "12345 B"}') == 12345
     assert parse_metric_payload("state: 67890") == 67890
     print("Memory monitor self-test passed.")
