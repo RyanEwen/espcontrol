@@ -500,6 +500,10 @@ async function assertSettingsPage(page, label, options = {}) {
     "8123",
     `${label}: Home Assistant port field should default to 8123`
   );
+  assert(
+    await homeAssistantSettingsCard.locator("#sp-set-ha-artwork-port.sp-input--no-stepper").count() === 1,
+    `${label}: Home Assistant port field should hide browser stepper controls`
+  );
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
   assert(!overflow, `${label}: settings page has horizontal overflow`);
   await page.getByRole("tab", { name: "Screen" }).click();

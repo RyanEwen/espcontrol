@@ -1057,7 +1057,7 @@ function buildSettingsPage(parent) {
   haPortField.className = "sp-field";
   haPortField.appendChild(fieldLabel("Home Assistant Port", "sp-set-ha-artwork-port"));
   var haPortInput = document.createElement("input");
-  haPortInput.className = "sp-input";
+  haPortInput.className = "sp-input sp-input--no-stepper";
   haPortInput.id = "sp-set-ha-artwork-port";
   haPortInput.type = "number";
   haPortInput.min = "1";
