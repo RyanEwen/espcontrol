@@ -350,6 +350,7 @@ const ICON_GROUPS = {
   'Broom': 'General',
   'Cat': 'General',
   'Check': 'General',
+  'Circle Outline': 'General',
   'Clock': 'General',
   'Delete': 'General',
   'Delete Empty': 'General',

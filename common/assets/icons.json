@@ -401,6 +401,11 @@
       "mdi": "clock-outline"
     },
     {
+      "name": "Circle Outline",
+      "codepoint": "F0766",
+      "mdi": "circle-outline"
+    },
+    {
       "name": "Coffee Maker",
       "codepoint": "F109F",
       "mdi": "coffee-maker"

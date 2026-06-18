@@ -644,7 +644,7 @@ inline lv_obj_t *light_control_create_power_button(lv_obj_t *parent, const lv_fo
   lv_obj_clear_flag(btn, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_t *label = lv_label_create(btn);
   if (label) {
-    lv_label_set_text(label, find_icon("Power"));
+    lv_label_set_text(label, find_icon(turn_on ? "Power" : "Circle Outline"));
     lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
     if (font) lv_obj_set_style_text_font(label, font, LV_PART_MAIN);
     lv_obj_set_style_transform_zoom(label, 230, LV_PART_MAIN);
@@ -674,18 +674,25 @@ inline void light_control_layout_power(lv_obj_t *group, lv_obj_t *on_btn,
   if (radius > 46) radius = 46;
   lv_obj_set_style_radius(group, radius, LV_PART_MAIN);
   lv_obj_set_style_clip_corner(group, true, LV_PART_MAIN);
-  lv_coord_t button_h = height / 2;
+  lv_coord_t inset = width / 16;
+  if (inset < 8) inset = 8;
+  if (inset > 16) inset = 16;
+  lv_coord_t gap = inset;
+  lv_coord_t button_w = width - inset * 2;
+  lv_coord_t button_h = (height - inset * 2 - gap) / 2;
+  if (button_w < width / 2) button_w = width / 2;
+  if (button_h < 48) button_h = 48;
   if (on_btn) {
-    lv_obj_set_size(on_btn, width, button_h);
+    lv_obj_set_size(on_btn, button_w, button_h);
     lv_obj_set_style_radius(on_btn, radius, LV_PART_MAIN);
-    lv_obj_align(on_btn, LV_ALIGN_TOP_MID, 0, 0);
+    lv_obj_align(on_btn, LV_ALIGN_TOP_MID, 0, inset);
     lv_obj_t *label = lv_obj_get_child(on_btn, 0);
     if (label) lv_obj_center(label);
   }
   if (off_btn) {
-    lv_obj_set_size(off_btn, width, button_h);
+    lv_obj_set_size(off_btn, button_w, button_h);
     lv_obj_set_style_radius(off_btn, radius, LV_PART_MAIN);
-    lv_obj_align(off_btn, LV_ALIGN_BOTTOM_MID, 0, 0);
+    lv_obj_align(off_btn, LV_ALIGN_BOTTOM_MID, 0, -inset);
     lv_obj_t *label = lv_obj_get_child(off_btn, 0);
     if (label) lv_obj_center(label);
   }
