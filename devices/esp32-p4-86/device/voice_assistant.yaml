@@ -237,6 +237,16 @@ globals:
     restore_value: false
     initial_value: "false"
 
+  - id: voice_stop_media_after_voice
+    type: bool
+    restore_value: false
+    initial_value: "false"
+
+  - id: voice_interaction_active
+    type: bool
+    restore_value: false
+    initial_value: "false"
+
 micro_wake_word:
   id: onboard_wake_word
   microphone:
@@ -307,13 +317,16 @@ micro_wake_word:
                                       id(pending_voice_wake_restart) = wake_word;
                                       id(pending_voice_wake_restart_ms) = millis();
                                       id(voice_resume_media_after_voice) = true;
+                                      id(voice_stop_media_after_voice) = false;
                                   - script.execute: pause_media_for_voice
                                 else:
                                   - logger.log:
                                       level: INFO
                                       tag: voice
                                       format: "Pausing media playback from Stop wake word"
-                                  - lambda: id(voice_resume_media_after_voice) = false;
+                                  - lambda: |-
+                                      id(voice_resume_media_after_voice) = false;
+                                      id(voice_stop_media_after_voice) = false;
                                   - media_player.pause:
                                       id: voice_media_player
                           else:
@@ -447,6 +460,7 @@ script:
                 id(pending_voice_wake_restart).clear();
                 id(voice_cancel_in_progress) = false;
                 id(voice_resume_media_after_voice) = false;
+                id(voice_stop_media_after_voice) = false;
             - script.execute: apply_restored_voice_wake_word
 
   - id: resume_media_after_voice
@@ -482,6 +496,46 @@ script:
             - script.execute: cover_art_resubscribe
             - script.execute: show_cover_art_view
 
+  - id: stop_interrupted_media_after_voice
+    mode: restart
+    then:
+      - if:
+          condition:
+            lambda: return id(voice_stop_media_after_voice);
+          then:
+            - logger.log:
+                level: INFO
+                tag: voice
+                format: "Stopping interrupted media from voice command"
+            - lambda: |-
+                id(voice_stop_media_after_voice) = false;
+                id(voice_resume_media_after_voice) = false;
+            - media_player.stop:
+                id: voice_media_player
+            - globals.set:
+                id: cover_art_media_playing
+                value: 'false'
+            - script.stop: cover_art_delay_timer
+            - script.execute: hide_cover_art_view
+            - script.execute: clock_bar_apply
+
+  - id: restore_voice_home_ui
+    mode: restart
+    then:
+      - script.stop: cover_art_delay_timer
+      - script.stop: show_cover_art_view
+      - script.stop: cover_art_show_track_overlay
+      - script.execute: screensaver_wake
+      - script.wait: screensaver_wake
+      - script.execute: hide_cover_art_view
+      - script.wait: hide_cover_art_view
+      - lambda: |-
+          navigation_return_home(id(main_page)->obj);
+          id(display_asleep) = false;
+          id(cover_art_screensaver_active) = false;
+      - delay: 50ms
+      - script.execute: clock_bar_apply
+
   - id: release_voice_after_response
     mode: restart
     then:
@@ -515,7 +569,9 @@ script:
             - delay: 500ms
       - switch.turn_off: speaker_amplifier_enable
       - script.execute: apply_restored_voice_wake_word
-      - lambda: id(voice_resume_media_after_voice) = false;
+      - lambda: |-
+          id(voice_resume_media_after_voice) = false;
+          id(voice_stop_media_after_voice) = false;
 
   - id: apply_restored_voice_wake_word
     mode: restart
@@ -524,7 +580,15 @@ script:
           condition:
             switch.is_on: master_mute_switch
           then:
-            - micro_wake_word.stop:
+            - micro_wake_word.disable_model: wake_word_stop
+            - script.execute: enable_selected_voice_wake_word
+            - if:
+                condition:
+                  not:
+                    micro_wake_word.is_running:
+                then:
+                  - delay: 250ms
+                  - micro_wake_word.start:
             - text_sensor.template.publish:
                 id: voice_assistant_stage
                 state: Muted
@@ -607,6 +671,12 @@ script:
                 then:
                   - micro_wake_word.disable_model: wake_word_stop
 
+  - id: refresh_voice_clock_bar_mute_icon
+    mode: restart
+    then:
+      - delay: 150ms
+      - script.execute: clock_bar_apply
+
 select:
   - platform: template
     id: voice_wake_word_select
@@ -667,9 +737,11 @@ voice_assistant:
   auto_gain: 31dBFS
   volume_multiplier: 1.0
   on_start:
+    - lambda: id(voice_interaction_active) = true;
     - script.stop: release_voice_after_response
     - micro_wake_word.disable_model: wake_word_stop
-    - script.execute: screensaver_wake
+    - script.execute: restore_voice_home_ui
+    - script.wait: restore_voice_home_ui
     - text_sensor.template.publish:
         id: voice_assistant_stage
         state: Starting
@@ -687,6 +759,7 @@ voice_assistant:
         format: "Wake word detected"
   on_listening:
     - micro_wake_word.disable_model: wake_word_stop
+    - script.execute: restore_voice_home_ui
     - lambda: |-
         id(voice_speaker).set_pause_state(false);
         id(voice_cancel_in_progress) = false;
@@ -728,6 +801,35 @@ voice_assistant:
         tag: voice
         format: "STT result: %s"
         args: [x.c_str()]
+    - lambda: |-
+        std::string text = x;
+        for (char &c : text) {
+          c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+        }
+        auto has = [&](const char *needle) { return text.find(needle) != std::string::npos; };
+        const bool stop_media_command =
+            has("stop playing") ||
+            has("stop playback") ||
+            has("stop the music") ||
+            has("stop music") ||
+            has("stop the song") ||
+            has("stop song") ||
+            has("stop audio") ||
+            has("stop the audio");
+        if (id(voice_resume_media_after_voice) && stop_media_command) {
+          ESP_LOGI("voice", "Interpreting STT as local stop-media command during barge-in");
+          id(voice_stop_media_after_voice) = true;
+          id(voice_resume_media_after_voice) = false;
+        }
+    - if:
+        condition:
+          lambda: return id(voice_stop_media_after_voice);
+        then:
+          - logger.log:
+              level: INFO
+              tag: voice
+              format: "Stopping local voice turn for barge-in stop-media command"
+          - voice_assistant.stop:
   on_intent_start:
     - text_sensor.template.publish:
         id: voice_assistant_stage
@@ -745,6 +847,7 @@ voice_assistant:
         tag: voice
         format: "Intent handling ended"
   on_tts_start:
+    - script.execute: restore_voice_home_ui
     - text_sensor.template.publish:
         id: voice_assistant_stage
         state: TTS starting
@@ -758,6 +861,7 @@ voice_assistant:
         args: [x.c_str()]
     - script.execute: activate_stop_word_once
   on_tts_end:
+    - script.execute: restore_voice_home_ui
     - text_sensor.template.publish:
         id: voice_assistant_stage
         state: TTS complete
@@ -789,10 +893,12 @@ voice_assistant:
     - logger.log:
         level: INFO
         tag: voice
-        format: "Voice timer finished"
+        format: "Voice timer finished; starting timer alert chime"
     - switch.turn_on: timer_ringing
   on_error:
+    - lambda: id(voice_interaction_active) = false;
     - script.stop: release_voice_after_response
+    - script.execute: restore_voice_home_ui
     - text_sensor.template.publish:
         id: voice_assistant_stage
         state: !lambda 'return std::string("Error: ") + code;'
@@ -802,7 +908,9 @@ voice_assistant:
         format: "Voice assistant error: %s - %s"
         args: [code.c_str(), message.c_str()]
   on_idle:
+    - lambda: id(voice_interaction_active) = false;
     - script.stop: release_voice_after_response
+    - script.execute: restore_voice_home_ui
     - text_sensor.template.publish:
         id: voice_assistant_stage
         state: Idle
@@ -852,6 +960,18 @@ voice_assistant:
           - script.stop: release_voice_after_response
           - switch.turn_off: speaker_amplifier_enable
           - script.execute: apply_restored_voice_wake_word
+          - script.execute: stop_interrupted_media_after_voice
+          - script.wait: stop_interrupted_media_after_voice
+          - if:
+              condition:
+                lambda: return !id(voice_resume_media_after_voice);
+              then:
+                - globals.set:
+                    id: cover_art_media_playing
+                    value: 'false'
+          - lambda: id(voice_interaction_active) = false;
+          - script.execute: restore_voice_home_ui
+          - script.wait: restore_voice_home_ui
           - script.execute: resume_media_after_voice
 
 switch:
@@ -863,19 +983,32 @@ switch:
     restore_mode: RESTORE_DEFAULT_OFF
     optimistic: true
     turn_on_action:
-      - microphone.mute:
       - script.stop: release_voice_after_response
-      - script.execute: cancel_voice_response
-      - micro_wake_word.stop:
+      - script.stop: play_voice_timer_alert
+      - if:
+          condition:
+            switch.is_on: timer_ringing
+          then:
+            - switch.turn_off: timer_ringing
+      - voice_assistant.stop:
+      - micro_wake_word.disable_model: wake_word_stop
+      - script.execute: enable_selected_voice_wake_word
+      - lambda: |-
+          id(voice_cancel_in_progress) = false;
+          id(voice_resume_media_after_voice) = false;
+          id(voice_stop_media_after_voice) = false;
+          id(pending_voice_wake_restart).clear();
       - text_sensor.template.publish:
           id: voice_assistant_stage
           state: Muted
+      - script.execute: refresh_voice_clock_bar_mute_icon
     turn_off_action:
-      - microphone.unmute:
+      - lambda: id(voice_speaker).set_pause_state(false);
       - text_sensor.template.publish:
           id: voice_assistant_stage
           state: Idle
       - script.execute: apply_restored_voice_wake_word
+      - script.execute: refresh_voice_clock_bar_mute_icon
 
   - platform: template
     id: wake_sound

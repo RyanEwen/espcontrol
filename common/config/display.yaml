@@ -54,6 +54,9 @@ script:
           hide_clock_bar_top_layer_widgets(temperature_labels, 6,
                                            id(display_time),
                                            id(network_status_button));
+          #ifdef USE_VOICE_ASSISTANT
+          lv_obj_add_flag(id(voice_clock_bar_mute_button), LV_OBJ_FLAG_HIDDEN);
+          #endif
           network_status_hide_modal();
 
   - id: clock_bar_apply
@@ -103,6 +106,9 @@ script:
             hide_clock_bar_top_layer_widgets(temperature_labels, 6,
                                              id(display_time),
                                              id(network_status_button));
+            #ifdef USE_VOICE_ASSISTANT
+            lv_obj_add_flag(id(voice_clock_bar_mute_button), LV_OBJ_FLAG_HIDDEN);
+            #endif
             network_status_hide_modal();
             return;
           }
@@ -136,6 +142,20 @@ script:
             lv_obj_add_flag(id(network_status_button), LV_OBJ_FLAG_HIDDEN);
             network_status_hide_modal();
           }
+          #ifdef USE_VOICE_ASSISTANT
+          lv_obj_align(id(voice_clock_bar_mute_button), LV_ALIGN_TOP_RIGHT,
+                       -(clock_bar_right_x + clock_bar_item_width / 2), clock_bar_icon_y);
+          lv_obj_clear_flag(id(voice_clock_bar_mute_button), LV_OBJ_FLAG_HIDDEN);
+          if (id(master_mute_switch).state) {
+            lv_label_set_text(id(voice_clock_bar_mute_icon_label), "\U000F036D");
+            lv_obj_set_style_text_color(id(voice_clock_bar_mute_icon_label),
+                                        lv_color_hex(0xFF3333), LV_PART_MAIN);
+          } else {
+            lv_label_set_text(id(voice_clock_bar_mute_icon_label), "\U000F04C3");
+            lv_obj_set_style_text_color(id(voice_clock_bar_mute_icon_label),
+                                        lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+          }
+          #endif
           if (!visible) return;
 
           refresh_clock_bar_temperature_label_values(id(main_page)->obj,
