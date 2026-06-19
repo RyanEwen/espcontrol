@@ -586,6 +586,11 @@ script:
           condition:
             lambda: 'return id(cover_art_screensaver_active);'
           then:
+            - lambda: |-
+                float timeout = id(screensaver_timeout).state;
+                if (std::isnan(timeout) || timeout <= 0.0f) timeout = 300.0f;
+                id(cover_art_dismissed_until_ms) = millis() + (uint32_t)(timeout * 1000.0f);
+                ESP_LOGD("cover_art", "Cover art dismissed by touch for %.0fs", timeout);
             - globals.set:
                 id: screensaver_wake_touch_guard_skip_once
                 value: 'true'

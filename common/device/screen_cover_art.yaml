@@ -42,6 +42,9 @@ globals:
   - id: cover_art_last_good_url
     type: std::string
     initial_value: '""'
+  - id: cover_art_dismissed_until_ms
+    type: uint32_t
+    initial_value: '0'
   - id: cover_art_refresh_needed
     type: bool
     initial_value: 'false'
@@ -1322,6 +1325,21 @@ script:
       - if:
           condition:
             lambda: |-
+              uint32_t now = millis();
+              uint32_t until = id(cover_art_dismissed_until_ms);
+              if (until == 0 || (int32_t)(until - now) <= 0) {
+                id(cover_art_dismissed_until_ms) = 0;
+                return false;
+              }
+              ESP_LOGD("cover_art", "Cover art manually dismissed; waiting before showing again");
+              return true;
+          then:
+            - delay: 5s
+            - script.execute: cover_art_delay_timer
+            - script.stop: cover_art_delay_timer
+      - if:
+          condition:
+            lambda: |-
               bool voice_active = false;
               #ifdef USE_VOICE_ASSISTANT
               voice_active = id(voice_interaction_active);
@@ -1953,6 +1971,9 @@ script:
       - globals.set:
           id: cover_art_media_playing
           value: 'false'
+      - globals.set:
+          id: cover_art_dismissed_until_ms
+          value: '0'
       - lambda: |-
           id(cover_art_media_position) = 0.0f;
           id(cover_art_position_anchor) = 0.0f;
