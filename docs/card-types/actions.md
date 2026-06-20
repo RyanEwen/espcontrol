@@ -6,9 +6,9 @@ description:
 
 # Action
 
-An Action card is a simple one-tap shortcut. It sends a selected Home Assistant action when you tap it, but it does not show an on/off state.
+An Action card is a simple one-tap shortcut. It sends a selected Home Assistant action, opens an Option Select picker, or runs a registered local device action when you tap it.
 
-Use Action cards for shortcuts such as running a scene, starting a script, triggering an automation, pressing a Home Assistant button entity, or changing a helper.
+Use Action cards for shortcuts such as running a scene, starting a script, triggering an automation, pressing a Home Assistant button entity, changing a helper, or calling a custom action registered on the panel itself.
 
 ## Setting Up an Action Card
 
@@ -19,7 +19,7 @@ Use Action cards for shortcuts such as running a scene, starting a script, trigg
 5. If you choose **Set Number Helper**, enter the value.
 6. Choose an **Icon**.
 7. If you choose **Run Script**, optionally turn on **Confirmation Required** if accidental taps would be a problem.
-8. Optionally turn on **Show State** if the Action card should show a separate Home Assistant state.
+8. Optionally turn on **Show State** if a Home Assistant-backed Action card should show a separate Home Assistant state.
 
 ## Run an Existing Home Assistant Script
 
@@ -51,6 +51,7 @@ Action cards do not currently pass script variables or extra data. If a script n
 | **Toggle Helper** | `input_boolean.guest_mode` | None |
 | **Set Number Helper** | `input_number.target_level` | Value |
 | **Option Select** | `select.wled_preset` or `input_select.house_mode` | Opens option list |
+| **Local Action** | Registered local action key | Runs on the panel |
 
 ## Option Select
 
@@ -59,6 +60,27 @@ Choose **Option Select** inside the Action card when you want the panel to show 
 When you tap the card, EspControl opens the option list reported by Home Assistant. Choosing an option sends `select.select_option` for `select` entities or `input_select.select_option` for `input_select` helpers.
 
 This is useful for WLED presets, room modes, house modes, and similar helpers where you want to pick from the current list rather than hard-code one option into the card.
+
+## Local Action
+
+Choose **Local Action** inside the Action card when the action should run directly on the ESP32 instead of going through Home Assistant.
+
+Local actions are registered in your device's `on_boot` lambda using `register_local_action()`. The key must be unique per device and is used to match the card to the callback.
+
+```yaml
+esphome:
+  on_boot:
+    - priority: 700
+      then:
+        - lambda: |-
+            register_local_action(
+              "tv_off",
+              "TV Off",
+              [=]() { id(ir_blaster).transmit_nec(0x04FB, 0x08F7); }
+            );
+```
+
+When the setup page can reach the device, it shows a dropdown of registered local actions. If the device cannot be reached, enter the **Action Key** manually.
 
 ## Show State
 
@@ -80,6 +102,7 @@ When you tap an Action card:
 
 - The card briefly flashes the highlight colour.
 - The selected Home Assistant action is sent with the configured entity. Run Script cards with **Confirmation Required** ask first.
+- Local Action cards run the registered callback on the panel itself.
 - If **Show State** is off, the card does not stay highlighted.
 - If **Show State** is on, the card display follows the state entity you chose.
 
@@ -89,7 +112,7 @@ If you want a shortcut that does several things, create a scene or script in Hom
 
 Use a script for locks that require a PIN or code. EspControl does not store lock codes on the panel.
 
-Use an [Action](/card-types/actions) card when the panel should directly run something that already exists in Home Assistant. Use a [Webhook](/card-types/webhooks) card when the panel should call a URL directly without Home Assistant. Use a [Trigger](/card-types/buttons) card when you want the panel to fire a custom event that a Home Assistant automation responds to.
+Use an [Action](/card-types/actions) card when the panel should directly run something that already exists in Home Assistant, or when it should run a registered local panel action. Use a [Webhook](/card-types/webhooks) card when the panel should call a URL directly without Home Assistant. Use a [Trigger](/card-types/buttons) card when you want the panel to fire a custom event that a Home Assistant automation responds to.
 
 Use the dedicated card types for richer controls:
 
@@ -101,5 +124,5 @@ Use the dedicated card types for richer controls:
 - Use [Vacuum](/card-types/vacuum) for robot vacuum status and cleaning controls.
 
 ::: info Requires Home Assistant actions
-Action cards send Home Assistant actions from the panel. If tapping a card does nothing, check [Enable Actions](/getting-started/home-assistant-actions).
+Home Assistant-backed Action cards send Home Assistant actions from the panel. If tapping one of those cards does nothing, check [Enable Actions](/getting-started/home-assistant-actions). Local Action mode runs on the panel and does not need Home Assistant.
 :::

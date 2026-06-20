@@ -16,8 +16,7 @@ Use this page when you know what you want the panel to do but are not sure which
 |---|---|---|
 | Toggle a light, switch, fan, helper, or button-style entity | [Switch](/card-types/switches) | `light`, `switch`, `input_boolean`, `fan`, or `button` |
 | Control a light as on/off, brightness, colour temperature, or colour presets | [Lights](/card-types/lights) | `light` |
-| Run a scene, script, automation, helper action, or button press | [Action](/card-types/actions) | Depends on the selected action |
-| Run an action registered directly on the panel | [Local Action](/card-types/local-actions) | Local action key |
+| Run a scene, script, automation, helper action, button press, or local panel action | [Action](/card-types/actions) | Depends on the selected action |
 | Show or control a robot vacuum | [Vacuum](/card-types/vacuum) | `vacuum` |
 | Pick from a Home Assistant select list | [Option Select](/card-types/option-select) | `select` or `input_select` |
 | Fire a custom Home Assistant automation event | [Trigger](/card-types/buttons) | No entity required |
@@ -48,9 +47,9 @@ Most cards use Home Assistant entities. The entity ID is the exact name Home Ass
 Some cards do not need a Home Assistant entity:
 
 - **Trigger** sends a custom event that Home Assistant automations can listen for.
-- **Local Action** runs a callback registered directly on the panel firmware.
 - **Local Sensor** shows a value supplied by the panel firmware.
 - **Webhook** sends a direct HTTP request.
+- **Action > Local Action** runs a registered callback on the panel itself.
 - **Date & Time**, **World Clock**, **Screen Lock**, and **Subpage** can work from the panel itself.
 - **Internal Switches** controls built-in relay hardware on supported panels.
 
@@ -62,7 +61,7 @@ Some names in the setup page group several related modes:
 |---|---|
 | **Lights** | All Controls, Switch, Brightness, Colour Temperature |
 | **Fans** | Switch, Speed, Oscillation, Direction, Preset |
-| **Action** | Scene, Script, Automation, Button, Helper, Option Select |
+| **Action** | Scene, Script, Automation, Button, Helper, Option Select, Local Action |
 | **Vacuum** | Status, Start / Stop, Dock, Pause / Resume, Spot Clean, Locate, Clean Area |
 | **Alarm** | Combined Control, Arm Away, Arm Home, Arm Night, Arm Vacation, Disarm |
 | **Date & Time** | Clock, Date, Time & Date, World Clock |

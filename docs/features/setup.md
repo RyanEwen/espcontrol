@@ -32,8 +32,7 @@ The setup page uses these card names and grouped modes on the device. For a quic
 |---|---|---|
 | **[Switch](/card-types/switches)** | Controls a Home Assistant entity and shows its on/off state. This is the default card type. | Yes |
 | **[Lights](/card-types/lights)** | Controls a light as a full control popup, switch, brightness slider, or colour temperature slider. | Yes, as a light entity |
-| **[Action](/card-types/actions)** | Runs a one-tap Home Assistant scene, script, button, helper action, or Option Select picker. | Yes |
-| **[Local Action](/card-types/local-actions)** | Runs an action registered directly on the panel firmware. | Local action key |
+| **[Action](/card-types/actions)** | Runs a one-tap Home Assistant scene, script, button, helper action, Option Select picker, or local panel action. | Depends on the selected action |
 | **[Option Select](/card-types/option-select)** | Opens a live `select` or `input_select` option list through the Action card. | Yes, as a select entity |
 | **[Webhook](/card-types/webhooks)** | Calls an HTTP URL directly from the panel for other automation platforms and webhook services. | URL |
 | **[Trigger](/card-types/buttons)** | Fires an event to Home Assistant for use in automations. | No |
@@ -57,7 +56,7 @@ The setup page uses these card names and grouped modes on the device. For a quic
 
 For cards that use Home Assistant, enter the entity name from Home Assistant in the **Entity** field, such as `light.living_room`, `switch.garden_lights`, `scene.movie_mode`, or `weather.forecast_home`. Some card types use a more specific label, such as **Sensor Entity**, **Weather Entity**, or **Climate Entity**. You can find entity names under **Settings > Devices & Services** in Home Assistant.
 
-Some card names group several related controls together. **Lights** contains All Controls, Switch, Brightness, and Colour Temperature options. **Fans** contains Switch, Speed, Oscillation, Direction, and Preset options. **Action** contains scene, script, helper, and Option Select actions. **Sensor** contains Home Assistant and Local Sensor sources. **Vacuum** contains Status, Start / Stop, Dock, Pause / Resume, Spot Clean, Locate, and Clean Area options. **Cover** contains Modal, Position, Tilt, Toggle, Open, Close, Stop, and Set Position options. **Alarm** contains Combined Control, Arm Away, Arm Home, Arm Night, Arm Vacation, and Disarm options. **Date & Time** contains Clock, Date, Time & Date, and World Clock options.
+Some card names group several related controls together. **Lights** contains All Controls, Switch, Brightness, and Colour Temperature options. **Fans** contains Switch, Speed, Oscillation, Direction, and Preset options. **Action** contains scene, script, helper, Option Select, and Local Action modes. **Sensor** contains Home Assistant and Local Sensor sources. **Vacuum** contains Status, Start / Stop, Dock, Pause / Resume, Spot Clean, Locate, and Clean Area options. **Cover** contains Modal, Position, Tilt, Toggle, Open, Close, Stop, and Set Position options. **Alarm** contains Combined Control, Arm Away, Arm Home, Arm Night, Arm Vacation, and Disarm options. **Date & Time** contains Clock, Date, Time & Date, and World Clock options.
 
 For the generated list of current card domains, subpage support, grouping, and options, see the [Card Capability Reference](/generated/cards/capabilities).
 

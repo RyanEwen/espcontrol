@@ -36,7 +36,7 @@ function buttonTypeInfoOnlyVisible(key) {
 
 var CARD_TYPE_PICKER_DETAILS = {
   "": { icon: "toggle-switch", description: "Toggle lights, switches, helpers, or fans." },
-  action: { icon: "flash", description: "Run a Home Assistant action or service." },
+  action: { icon: "flash", description: "Run a Home Assistant or local action." },
   alarm: { icon: "shield-home", description: "Control or trigger alarm panel actions." },
   calendar: { icon: "calendar-clock", description: "Show date, time, or world clock values." },
   climate: { icon: "thermostat", description: "Show climate status and temperature controls." },
