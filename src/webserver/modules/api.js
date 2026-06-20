@@ -733,6 +733,22 @@ function postNetworkStatusIcon(on) {
   );
 }
 
+var VOICE_SERVICES_UNAVAILABLE =
+  "Voice services setting is not available on this firmware. Update the device firmware, then reload this page.";
+
+function voiceServicesPostUrls(on) {
+  return entityPostUrls(
+    "switch",
+    entityName("voice_services"),
+    entityObjectIds("voice_services"),
+    on ? "turn_on" : "turn_off"
+  );
+}
+
+function postVoiceServices(on) {
+  post(voiceServicesPostUrls(on), null, VOICE_SERVICES_UNAVAILABLE);
+}
+
 var TEMPERATURE_DEGREE_SYMBOL_UNAVAILABLE =
   "Temperature degree symbol setting is not available on this firmware. Update the device firmware, then reload this page.";
 
@@ -943,6 +959,9 @@ function settingsStateEntities() {
 
   if (CFG.features && CFG.features.screenRotation) {
     items = items.concat(entityStateItems(ENTITY_CATALOG.groups.settings_optional));
+  }
+  if (CFG.features && CFG.features.voiceServices) {
+    items = items.concat(entityStateItems(ENTITY_CATALOG.groups.settings_voice));
   }
 
   return items;

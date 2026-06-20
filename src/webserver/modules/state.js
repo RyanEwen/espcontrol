@@ -94,6 +94,7 @@ var state = {
   _clockBarStateValues: {},
   clockBarTimeOn: true,
   networkStatusOn: true,
+  voiceServicesOn: false,
   networkTransport: "wifi",
   wifiStrengthPercent: 100,
   temperatureDegreeSymbolOn: true,
@@ -826,6 +827,9 @@ function syncClockBarUi() {
   if (els.setClockBarTimeToggle) els.setClockBarTimeToggle.checked = !!state.clockBarTimeOn;
   if (els.setNetworkStatusToggle) {
     els.setNetworkStatusToggle.checked = !!state.networkStatusOn;
+  }
+  if (els.setVoiceServicesToggle) {
+    els.setVoiceServicesToggle.checked = !!state.voiceServicesOn;
   }
   if (els.setClockBarBadge) {
     els.setClockBarBadge.className = "sp-card-badge" + (state.clockBarOn ? "" : " sp-hidden");

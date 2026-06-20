@@ -115,6 +115,14 @@ var ENTITY_CATALOG = {
         "network_status_enabled"
       ]
     },
+    "voice_services": {
+      "domain": "switch",
+      "name": "Voice Services",
+      "objectIds": [
+        "voice_services",
+        "voice_services_enabled"
+      ]
+    },
     "screen_temperature_degree_symbol": {
       "domain": "switch",
       "name": "Screen: Temperature Degree Symbol",
@@ -581,6 +589,9 @@ var ENTITY_CATALOG = {
       "firmware_install_update",
       "firmware_auto_update",
       "firmware_update_frequency"
+    ],
+    "settings_voice": [
+      "voice_services"
     ],
     "settings_optional": [
       "screen_rotation"

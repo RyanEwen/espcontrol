@@ -114,6 +114,7 @@ export interface PanelSettings {
   clock_bar_layout?: string;
   clock_bar_time?: boolean;
   network_status_icon: boolean;
+  voice_services?: boolean;
   timezone: string;
   language: string;
   clock_format: string;

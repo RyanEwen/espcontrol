@@ -333,6 +333,7 @@ if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
     coverArtDelayPostUrls: coverArtDelayPostUrls,
     coverArtTrackOverlayDurationPostUrls: coverArtTrackOverlayDurationPostUrls,
     homeAssistantArtworkPortPostUrls: homeAssistantArtworkPortPostUrls,
+    voiceServicesPostUrls: voiceServicesPostUrls,
     firmwareUpdateControlsVisibleFor: function (transport, supported) {
       var oldTransport = state.networkTransport;
       var oldSupported = state.firmwareUpdateControlsSupported;

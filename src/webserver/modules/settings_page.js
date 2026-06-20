@@ -517,6 +517,17 @@ function buildSettingsPage(parent) {
     postClockBar(state.clockBarOn);
   });
 
+  if (CFG.features && CFG.features.voiceServices) {
+    var voiceServices = toggleRow("Voice Services", "sp-set-voice-services", state.voiceServicesOn);
+    clockBarBody.appendChild(voiceServices.row);
+    els.setVoiceServicesToggle = voiceServices.input;
+    voiceServices.input.addEventListener("change", function () {
+      state.voiceServicesOn = this.checked;
+      syncClockBarUi();
+      postVoiceServices(state.voiceServicesOn);
+    });
+  }
+
   var clockBarBadge = document.createElement("span");
   clockBarBadge.setAttribute("aria-label", "Clock bar on");
   clockBarBadge.innerHTML = '<span class="sp-card-badge-dot"></span><span>ON</span>';

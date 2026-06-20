@@ -512,6 +512,8 @@ def web_features(profile: dict[str, Any]) -> dict[str, Any]:
             features["screenRotationDisplayOffset"] = rotation["displayOffset"]
     if profile.get("internalRelays"):
         features["internalRelays"] = copy.deepcopy(profile["internalRelays"])
+    if "voice_assistant" in (package.get("extraPackages") or {}):
+        features["voiceServices"] = True
     if package.get("subpageConfigChunks"):
         features["subpageConfigChunks"] = package["subpageConfigChunks"]
     return features

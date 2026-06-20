@@ -240,6 +240,7 @@ export interface BackupPanelSettingsState {
   clockBarLayout: string;
   clockBarTime: boolean;
   networkStatusIcon: boolean;
+  voiceServices: boolean;
   temperatureDegreeSymbol: boolean;
   subpageChevron: boolean;
   timezone: string;
@@ -329,6 +330,7 @@ export function normalizeBackupPanelSettings(
     clockBarLayout: CLOCK_BAR_FIXED_LAYOUT,
     clockBarTime: objectValue(settings, "clock_bar_time") != null ? !!settings.clock_bar_time : true,
     networkStatusIcon: objectValue(settings, "network_status_icon") != null ? !!settings.network_status_icon : true,
+    voiceServices: objectValue(settings, "voice_services") != null ? !!settings.voice_services : false,
     temperatureDegreeSymbol: objectValue(settings, "temperature_degree_symbol") != null
       ? !!settings.temperature_degree_symbol
       : true,

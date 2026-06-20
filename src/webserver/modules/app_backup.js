@@ -45,6 +45,7 @@ function exportConfig() {
       clock_bar_layout: CLOCK_BAR_FIXED_LAYOUT_STRING,
       clock_bar_time: state.clockBarTimeOn,
       network_status_icon: state.networkStatusOn,
+      voice_services: state.voiceServicesOn,
       temperature_degree_symbol: state.temperatureDegreeSymbolOn,
       subpage_chevron: state.subpageChevronsOn,
       timezone: state.timezone,
@@ -205,6 +206,7 @@ function importConfig() {
         postClockBarLayout(CLOCK_BAR_FIXED_LAYOUT_STRING);
         postClockBarTime(importedSettings.clockBarTime);
         postNetworkStatusIcon(importedSettings.networkStatusIcon);
+        if (CFG.features && CFG.features.voiceServices) postVoiceServices(importedSettings.voiceServices);
         postTemperatureDegreeSymbol(importedSettings.temperatureDegreeSymbol);
         postSubpageChevron(importedSettings.subpageChevron);
         var importedTimezone = importedSettings.timezone;
@@ -266,6 +268,7 @@ function importConfig() {
         state.clockBarOn = importedSettings.clockBar;
         state.clockBarTimeOn = importedSettings.clockBarTime;
         state.networkStatusOn = importedSettings.networkStatusIcon;
+        state.voiceServicesOn = importedSettings.voiceServices;
         state.temperatureDegreeSymbolOn = importedSettings.temperatureDegreeSymbol;
         state.subpageChevronsOn = importedSettings.subpageChevron;
         state.timezone = importedTimezone;

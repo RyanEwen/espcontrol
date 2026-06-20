@@ -71,6 +71,10 @@ assert.deepStrictEqual(Array.from(hooks.SSE_ALIAS_GROUPS.clockBarTime), [
   "switch-screen_clock_bar_time",
   "switch-clock_bar_time_enabled",
 ], "clock bar time SSE aliases are registered together");
+assert.deepStrictEqual(Array.from(hooks.SSE_ALIAS_GROUPS.voiceServices), [
+  "switch-voice_services",
+  "switch-voice_services_enabled",
+], "voice services SSE aliases are registered together");
 assert.deepStrictEqual(Array.from(hooks.SSE_ALIAS_GROUPS.scheduleWakeTimeout), [
   "number-screen__schedule_wake_timeout",
   "number-screen_schedule_wake_timeout",
@@ -133,6 +137,11 @@ assert.deepStrictEqual(Array.from(hooks.homeAssistantArtworkPortPostUrls(80)), [
   "/number/home_assistant_artwork_port/set?value=80",
   "/number/Home%20Assistant%20Artwork%20Port/set?value=80",
 ], "Home Assistant artwork port posts include object id and entity name fallbacks");
+assert.deepStrictEqual(Array.from(hooks.voiceServicesPostUrls(true)), [
+  "/switch/voice_services/turn_on",
+  "/switch/voice_services_enabled/turn_on",
+  "/switch/Voice%20Services/turn_on",
+], "voice services posts include object id aliases and entity name fallback");
 assert.strictEqual(hooks.clockBarVisibleInPreviewFor(true, "off"), true, "clock bar preview is visible when enabled");
 assert.strictEqual(hooks.clockBarVisibleInPreviewFor(true, "dim"), true, "clock bar preview stays visible for dimmed screen saver");
 assert.strictEqual(hooks.clockBarVisibleInPreviewFor(true, "clock"), true, "clock bar preview stays visible when clock screen saver is configured");
