@@ -258,6 +258,11 @@ inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
     return;
   }
 
+  if (sensor_card_local_sensor(p)) {
+    if (p.entity.empty()) return;
+    setup_local_sensor_card(s, p, palette.has_sensor_color, palette.sensor_val);
+    return;
+  }
   if (is_text_sensor_card(p)) {
     setup_text_sensor_card(s, p, palette.has_sensor_color, palette.sensor_val);
     return;
@@ -384,7 +389,7 @@ inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
     setup_local_action_card(s, p);
     return;
   }
-  if (p.type == "local_sensor") {
+  if (p.type == "local_sensor" || sensor_card_local_sensor(p)) {
     if (p.entity.empty()) return;
     setup_local_sensor_card(s, p, palette.has_sensor_color, palette.sensor_val);
     return;
@@ -1059,7 +1064,7 @@ inline void grid_phase2(
       }
       continue;
     }
-    if (p.type == "local_sensor") {
+    if (p.type == "local_sensor" || sensor_card_local_sensor(p)) {
       continue;
     }
     if (p.type == "action") {
@@ -1939,7 +1944,7 @@ inline void grid_phase2(
         }
         continue;
       }
-      if (sb_cfg.type == "local_sensor") {
+      if (sb_cfg.type == "local_sensor" || sensor_card_local_sensor(sb_cfg)) {
         continue;
       }
       if (sb_cfg.type == "light_temperature") {
