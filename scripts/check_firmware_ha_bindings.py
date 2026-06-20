@@ -665,6 +665,13 @@ def firmware_cover_art_refresh_errors(path: Path, root: Path) -> list[str]:
         ):
             errors.append(f"{rel}: do not exit early from {script_id} when stale artwork needs refresh")
 
+    cached_body = yaml_script_body(text, "cover_art_use_cached_artwork")
+    if cached_body and cached_body.count("id(cover_art_refresh_needed) = true;") < 2:
+        errors.append(f"{rel}: mark changed cached artwork URLs as stale before downloading")
+    resubscribe_body = yaml_script_body(text, "cover_art_resubscribe")
+    if resubscribe_body and "if (!url.empty() && url != id(cover_art_url))" not in resubscribe_body:
+        errors.append(f"{rel}: mark changed Home Assistant artwork attributes as stale")
+
     apply_body = yaml_script_body(text, "cover_art_apply_downloaded_image")
     if not apply_body:
         errors.append(f"{rel}: missing cover_art_apply_downloaded_image script")
@@ -2636,9 +2643,14 @@ def run_self_test() -> int:
         "  - id: cover_art_use_cached_artwork\n"
         "    then:\n"
         "      - lambda: |-\n"
+        "          if (chosen != id(cover_art_url)) {\n"
+        "            id(cover_art_refresh_needed) = true;\n"
+        "          }\n"
         "          if (chosen == id(cover_art_url)) {\n"
         "            if (!id(cover_art_image_available) || id(cover_art_refresh_needed)) {}\n"
         "          }\n"
+        "          id(cover_art_url) = chosen;\n"
+        "          id(cover_art_refresh_needed) = true;\n"
         "  - id: cover_art_request_artwork\n"
         "    then:\n"
         "      - lambda: |-\n"
@@ -2668,6 +2680,9 @@ def run_self_test() -> int:
         "          mark_artwork_refresh_needed();\n"
         "          mark_artwork_refresh_needed();\n"
         "          mark_artwork_refresh_needed();\n"
+        "          if (!url.empty() && url != id(cover_art_url)) {\n"
+        "            id(cover_art_refresh_needed) = true;\n"
+        "          }\n"
         "          ha_subscribe_attribute(cover_entity, std::string(\"media_album_name\"), handle_media_album);\n"
         "          ha_get_attribute(cover_entity, std::string(\"media_album_name\"), handle_media_album);\n",
         (),

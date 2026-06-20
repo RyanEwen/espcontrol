@@ -1010,6 +1010,7 @@ script:
           ESP_LOGI("cover_art", "Using cached artwork URL (%u chars)", (unsigned) chosen.size());
           id(cover_art_url) = chosen;
           id(cover_art_last_good_url) = chosen;
+          id(cover_art_refresh_needed) = true;
           id(cover_art_retry_url).clear();
           id(cover_art_retry_count) = 0;
           if (id(cover_art_loaded_url).empty()) {
@@ -1814,6 +1815,11 @@ script:
               cached = url;
               if (!local) {
                 id(cover_art_cached_local_url).clear();
+              }
+              if (!url.empty() && url != id(cover_art_url)) {
+                id(cover_art_refresh_needed) = true;
+                id(cover_art_retry_url).clear();
+                id(cover_art_retry_count) = 0;
               }
               ESP_LOGI("cover_art", "Cached artwork %s (%u chars, url %u chars, active=%s)",
                        local ? "entity_picture_local" : "entity_picture",
