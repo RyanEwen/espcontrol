@@ -336,6 +336,10 @@ inline bool action_card_option_select(const ParsedCfg &p) {
   return p.type == "action" && action_card_option_select_action(p.sensor);
 }
 
+inline bool action_card_local_action(const ParsedCfg &p) {
+  return p.type == "action" && p.sensor == "local";
+}
+
 inline bool cfg_option_token_present(const std::string &options, const char *name) {
   if (!name || !*name || options.empty()) return false;
   size_t start = 0;
@@ -616,7 +620,7 @@ inline std::string climate_card_options_normalized(const std::string &options) {
 }
 
 inline bool action_card_large_numbers_supported(const ParsedCfg &p) {
-  if (p.type != "action") return false;
+  if (p.type != "action" || action_card_local_action(p)) return false;
   std::string precision = cfg_option_value(p.options, "state_precision");
   return precision == "0" || precision == "1" || precision == "2" ||
          !cfg_option_value(p.options, "state_unit").empty();
@@ -822,6 +826,15 @@ inline std::string action_card_options_normalized(const std::string &options,
 }
 
 inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
+  if (p.type == "local") {
+    p.type = "action";
+    p.sensor = "local";
+    p.unit.clear();
+    p.precision.clear();
+    p.options.clear();
+    p.icon_on = "Auto";
+    if (p.icon.empty() || p.icon == "Auto" || p.icon == "Flash") p.icon = "Gesture Tap";
+  }
   // Slider cards used to store "h" here for horizontal layout. Sliders are
   // now always vertical, so treat any saved slider sensor value as legacy.
   if (brightness_slider_type(p.type) && !p.sensor.empty()) p.sensor.clear();
@@ -964,6 +977,13 @@ inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
     p.icon_on.clear();
     if (p.icon.empty() || p.icon == "Auto" || p.icon == "Chevron Down") p.icon = "Flash";
   }
+  if (action_card_local_action(p)) {
+    p.unit.clear();
+    p.precision.clear();
+    p.options.clear();
+    p.icon_on = "Auto";
+    if (p.icon.empty() || p.icon == "Auto" || p.icon == "Flash") p.icon = "Gesture Tap";
+  }
   if (p.type == "action" && p.sensor == "vacuum.start") {
     p.type = "vacuum";
     p.sensor = "start_stop";
@@ -1060,14 +1080,17 @@ inline int media_volume_max_percent(const ParsedCfg &p) {
 }
 
 inline std::string action_card_state_entity(const ParsedCfg &p) {
+  if (action_card_local_action(p)) return "";
   return p.type == "action" ? cfg_option_value(p.options, "state_entity") : "";
 }
 
 inline std::string action_card_state_unit(const ParsedCfg &p) {
+  if (action_card_local_action(p)) return "";
   return p.type == "action" ? cfg_option_value(p.options, "state_unit") : "";
 }
 
 inline std::string action_card_state_precision(const ParsedCfg &p) {
+  if (action_card_local_action(p)) return "";
   return p.type == "action" ? cfg_option_value(p.options, "state_precision") : "";
 }
 

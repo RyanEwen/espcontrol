@@ -568,7 +568,13 @@ inline void setup_toggle_visual(BtnSlot &s, const ParsedCfg &p) {
   }
 }
 
+inline void setup_local_action_card(BtnSlot &s, const ParsedCfg &p);
+
 inline void setup_action_card(BtnSlot &s, const ParsedCfg &p) {
+  if (action_card_local_action(p)) {
+    setup_local_action_card(s, p);
+    return;
+  }
   std::string action_label = p.label.empty()
     ? (p.entity.empty() ? espcontrol_i18n(std::string("Action")) : p.entity)
     : p.label;

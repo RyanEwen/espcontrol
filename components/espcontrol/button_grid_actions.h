@@ -47,6 +47,10 @@ inline bool action_card_action_allowed(const std::string &action) {
 }
 
 inline void send_action_card_action(const ParsedCfg &p) {
+  if (action_card_local_action(p)) {
+    if (!p.entity.empty()) send_local_action(p.entity);
+    return;
+  }
   if (p.entity.empty() || p.sensor.empty() || !action_card_action_allowed(p.sensor)) return;
   if (action_card_option_select(p)) return;
   const char *value_key = action_card_value_key(p.sensor);
@@ -601,7 +605,7 @@ inline void handle_button_click(const std::string &cfg, int slot_num,
     }
   } else if (p.type == "internal") {
     if (!p.entity.empty()) send_internal_relay_action(p);
-  } else if (p.type == "local") {
+  } else if (p.type == "local" || action_card_local_action(p)) {
     if (!p.entity.empty()) send_local_action(p.entity);
   } else if (p.type == "action") {
     if (action_card_option_select(p)) {

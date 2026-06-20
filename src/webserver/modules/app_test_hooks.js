@@ -124,6 +124,7 @@ if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
     actionCardStateUnit: actionCardStateUnit,
     actionCardStatePrecision: actionCardStatePrecision,
     actionCardStateDisplayMode: actionCardStateDisplayMode,
+    actionCardIsLocal: actionCardIsLocal,
     actionScriptConfirmationEnabled: actionScriptConfirmationEnabled,
     actionScriptConfirmationMessage: actionScriptConfirmationMessage,
     actionScriptConfirmationYesText: actionScriptConfirmationYesText,

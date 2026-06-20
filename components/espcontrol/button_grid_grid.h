@@ -380,7 +380,7 @@ inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
     setup_internal_relay_card(s, p);
     return;
   }
-  if (p.type == "local") {
+  if (p.type == "local" || action_card_local_action(p)) {
     setup_local_action_card(s, p);
     return;
   }
@@ -1673,6 +1673,14 @@ inline void grid_phase2(
       }
       if (sb_cfg.type == "action") {
         if (!sb_cfg.entity.empty() && !sb_cfg.sensor.empty()) {
+          if (action_card_local_action(sb_cfg)) {
+            std::string *key = new std::string(sb_cfg.entity);
+            lv_obj_add_event_cb(sb_btn, [](lv_event_t *e) {
+              std::string *k = (std::string *)lv_event_get_user_data(e);
+              if (k) send_local_action(*k);
+            }, LV_EVENT_CLICKED, key);
+            continue;
+          }
           if (action_card_option_select(sb_cfg)) {
             OptionSelectCtx *ctx = create_option_select_context(
               sub_slot, sb_cfg,

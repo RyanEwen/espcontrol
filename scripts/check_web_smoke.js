@@ -710,6 +710,16 @@ const actionOptionPreview = hooks.buttonTypePreviewFor("action", {
 assert(actionOptionPreview.iconHtml.includes("Option"), "action option-select preview uses option text");
 assert(actionOptionPreview.labelHtml.includes("mdi-chevron-down"), "action option-select preview uses the dropdown badge");
 
+const localActionPreview = hooks.buttonTypePreviewFor("action", {
+  entity: "zoom_mute",
+  label: "Zoom Mute",
+  icon: "Gesture Tap",
+  sensor: "local",
+  type: "action",
+});
+assert(localActionPreview.iconHtml.includes("mdi-gesture-tap"), "local action subtype preview uses the local action icon");
+assert(localActionPreview.labelHtml.includes("mdi-chip"), "local action subtype preview uses the local action badge");
+
 const alarmActionPreview = hooks.buttonTypePreviewFor("alarm_action", {
   entity: "alarm_control_panel.house",
   label: "Arm Away",

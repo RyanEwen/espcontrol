@@ -2148,6 +2148,32 @@ assertButtonRoundTrip(hooks, "button action card", {
   precision: "",
 }, false);
 
+assertButtonRoundTrip(hooks, "local action subtype card", {
+  entity: "zoom_mute",
+  label: "Zoom Mute",
+  icon: "Gesture Tap",
+  icon_on: "Auto",
+  sensor: "local",
+  unit: "",
+  type: "action",
+  precision: "",
+}, false);
+
+const parsedLocalActionSubtype = hooks.parseButtonConfig("zoom_mute;Zoom Mute;Gesture Tap;Auto;local;;action");
+assert.strictEqual(parsedLocalActionSubtype.type, "action", "local action subtype remains an action card");
+assert.strictEqual(hooks.actionCardIsLocal(parsedLocalActionSubtype), true, "local action subtype is detected");
+
+assertButtonMigration(hooks, "legacy local action card becomes action subtype", "zoom_mute;Zoom Mute;Auto;Auto;;;local;;state_entity=sensor.stale", {
+  entity: "zoom_mute",
+  label: "Zoom Mute",
+  icon: "Gesture Tap",
+  icon_on: "Auto",
+  sensor: "local",
+  unit: "",
+  type: "action",
+  precision: "",
+});
+
 assertButtonMigration(hooks, "legacy vacuum start action card", "vacuum.k11_vacuum_784c;Vacuum Bath;Robot Vacuum;Auto;vacuum.start;;action", {
   entity: "vacuum.k11_vacuum_784c",
   label: "Vacuum Bath",
