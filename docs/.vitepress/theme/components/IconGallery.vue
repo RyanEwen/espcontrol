@@ -310,6 +310,8 @@ const ICON_GROUPS = {
   'LAN': 'Network & Tech',
   'Printer': 'Network & Tech',
   'Printer 3D': 'Network & Tech',
+  'Robot Mower': 'Network & Tech',
+  'Robot Mower Outline': 'Network & Tech',
   'Robot Vacuum': 'Network & Tech',
   'Robot Vacuum Alert': 'Network & Tech',
   'Robot Vacuum Off': 'Network & Tech',

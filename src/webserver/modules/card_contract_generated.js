@@ -175,6 +175,38 @@ var CARD_CONTRACT_CARDS = {
       "options": ""
     }
   },
+  "lawn_mower": {
+    "label": "Lawn Mower",
+    "allowInSubpage": true,
+    "domains": [
+      "lawn_mower"
+    ],
+    "options": [
+      {
+        "name": "lawn_mower_mode",
+        "label": "Type",
+        "kind": "choice",
+        "values": [
+          "status",
+          "start_mowing",
+          "dock",
+          "pause_resume"
+        ],
+        "defaultValue": "start_mowing"
+      }
+    ],
+    "default": {
+      "entity": "",
+      "label": "",
+      "icon": "Robot Mower",
+      "icon_on": "Auto",
+      "sensor": "start_mowing",
+      "unit": "",
+      "type": "lawn_mower",
+      "precision": "",
+      "options": ""
+    }
+  },
   "alarm": {
     "label": "Alarm",
     "allowInSubpage": true,
@@ -1172,6 +1204,7 @@ var CARD_CONTRACT_CARDS = {
           "garage",
           "lock",
           "vacuum",
+          "lawn_mower",
           "weather",
           "sensor",
           "image"
@@ -1391,6 +1424,7 @@ var CARD_CONTRACT_SUBPAGE_TYPE_CODES = {
   "slider": "L",
   "cover": "C",
   "vacuum": "VC",
+  "lawn_mower": "LM",
   "light_temperature": "N",
   "garage": "R",
   "lock": "K",
@@ -1427,6 +1461,7 @@ var CARD_CONTRACT_SUBPAGE_TYPES_BY_CODE = {
   "L": "slider",
   "C": "cover",
   "VC": "vacuum",
+  "LM": "lawn_mower",
   "N": "light_temperature",
   "R": "garage",
   "K": "lock",

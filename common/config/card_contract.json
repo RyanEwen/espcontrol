@@ -144,6 +144,31 @@
         "options": ""
       }
     },
+    "lawn_mower": {
+      "label": "Lawn Mower",
+      "allowInSubpage": true,
+      "domains": ["lawn_mower"],
+      "options": [
+        {
+          "name": "lawn_mower_mode",
+          "label": "Type",
+          "kind": "choice",
+          "values": ["status", "start_mowing", "dock", "pause_resume"],
+          "defaultValue": "start_mowing"
+        }
+      ],
+      "default": {
+        "entity": "",
+        "label": "",
+        "icon": "Robot Mower",
+        "icon_on": "Auto",
+        "sensor": "start_mowing",
+        "unit": "",
+        "type": "lawn_mower",
+        "precision": "",
+        "options": ""
+      }
+    },
     "alarm": {
       "label": "Alarm",
       "allowInSubpage": true,
@@ -973,7 +998,7 @@
           "name": "subpage_kind",
           "label": "Subpage Type",
           "kind": "choice",
-          "values": ["", "switch", "lights", "climate", "presence", "media", "alarm", "cover", "garage", "lock", "vacuum", "weather", "sensor", "image"],
+          "values": ["", "switch", "lights", "climate", "presence", "media", "alarm", "cover", "garage", "lock", "vacuum", "lawn_mower", "weather", "sensor", "image"],
           "defaultValue": ""
         },
         {
@@ -1208,6 +1233,7 @@
     "slider": "L",
     "cover": "C",
     "vacuum": "VC",
+    "lawn_mower": "LM",
     "light_temperature": "N",
     "garage": "R",
     "lock": "K",

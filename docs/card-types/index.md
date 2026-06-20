@@ -18,6 +18,7 @@ Use this page when you know what you want the panel to do but are not sure which
 | Control a light as on/off, brightness, colour temperature, or colour presets | [Lights](/card-types/lights) | `light` |
 | Run a scene, script, automation, helper action, button press, or local panel action | [Action](/card-types/actions) | Depends on the selected action |
 | Show or control a robot vacuum | [Vacuum](/card-types/vacuum) | `vacuum` |
+| Show or control a robotic lawn mower | [Lawn Mower](/card-types/lawn-mower) | `lawn_mower` |
 | Pick from a Home Assistant select list | [Option Select](/card-types/option-select) | `select` or `input_select` |
 | Fire a custom Home Assistant automation event | [Trigger](/card-types/buttons) | No entity required |
 | Call an HTTP URL directly from the panel | [Webhook](/card-types/webhooks) | URL |
@@ -63,6 +64,7 @@ Some names in the setup page group several related modes:
 | **Fans** | Switch, Speed, Oscillation, Direction, Preset |
 | **Action** | Scene, Script, Automation, Button, Helper, Option Select, Local Action |
 | **Vacuum** | Status, Start / Stop, Dock, Pause / Resume, Spot Clean, Locate, Clean Area |
+| **Lawn Mower** | Status, Start Mowing, Dock, Pause / Resume |
 | **Alarm** | Combined Control, Arm Away, Arm Home, Arm Night, Arm Vacation, Disarm |
 | **Date & Time** | Clock, Date, Time & Date, World Clock |
 | **Media** | Play/Pause, Previous, Next, Volume, Track Position, Now Playing |

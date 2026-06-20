@@ -139,6 +139,9 @@ function normalizeButtonConfig(b) {
   if (b && b.type === "vacuum") {
     normalizeVacuumConfig(b);
   }
+  if (b && b.type === "lawn_mower") {
+    normalizeLawnMowerConfig(b);
+  }
   if (b && b.type === "screen_lock") {
     b.entity = "";
     b.label = "";
@@ -218,7 +221,7 @@ function normalizeButtonConfig(b) {
     if (!b.icon || b.icon === "Auto") b.icon = "Motion Sensor Off";
     if (!b.icon_on || b.icon_on === "Auto") b.icon_on = "Motion Sensor";
     b.options = normalizePresenceOptions(b.options);
-  } else if (b && b.type !== "action" && b.type !== "alarm" && b.type !== "alarm_action" && b.type !== "climate" && b.type !== "garage" && b.type !== "webhook" && b.type !== "screen_lock" && b.type !== "media" && b.type !== "presence" && b.type !== "subpage" && b.type !== "image" && b.type !== "vacuum" && !cardLargeNumbersSupported(b)) {
+  } else if (b && b.type !== "action" && b.type !== "alarm" && b.type !== "alarm_action" && b.type !== "climate" && b.type !== "garage" && b.type !== "webhook" && b.type !== "screen_lock" && b.type !== "media" && b.type !== "presence" && b.type !== "subpage" && b.type !== "image" && b.type !== "vacuum" && b.type !== "lawn_mower" && !cardLargeNumbersSupported(b)) {
     b.options = "";
   }
   return b;
@@ -621,6 +624,7 @@ var SUBPAGE_KIND_PRESET_DEFINITIONS = [
   { value: "garage", label: "Garage Door", preset: { label: "Garage", icon: "Garage", entityDomains: ["cover"], placeholder: "e.g. cover.garage_door" } },
   { value: "lock", label: "Lock", preset: { label: "Lock", icon: "Lock", entityDomains: ["lock"], placeholder: "e.g. lock.front_door" } },
   { value: "vacuum", label: "Vacuum", preset: { label: "Vacuum", icon: "Robot Vacuum", entityDomains: ["vacuum"], placeholder: "e.g. vacuum.downstairs" } },
+  { value: "lawn_mower", label: "Lawn Mower", preset: { label: "Lawn Mower", icon: "Robot Mower", entityDomains: ["lawn_mower"], placeholder: "e.g. lawn_mower.backyard" } },
   { value: "weather", label: "Weather", preset: { label: "Weather", icon: "Weather Partly Cloudy", entityDomains: ["weather"], placeholder: "e.g. weather.home" } },
   { value: "sensor", label: "Sensor", preset: { label: "Sensor", icon: "Gauge", entityDomains: ["sensor", "binary_sensor", "text_sensor"], placeholder: "e.g. sensor.open_windows" } },
   { value: "image", label: "Camera/Image", preset: { label: "Camera", icon: "Camera", entityDomains: ["camera", "image"], placeholder: "e.g. camera.front_door" } },
@@ -1445,6 +1449,13 @@ function buttonConfigFields(b) {
     iconOn = "Auto";
     if (!icon || icon === "Auto") icon = vacuumModeDefaultIcon(sensor);
   }
+  if (type === "lawn_mower") {
+    sensor = normalizeLawnMowerMode(sensor);
+    unit = "";
+    precision = "";
+    iconOn = "Auto";
+    if (!icon || icon === "Auto") icon = lawnMowerModeDefaultIcon(sensor);
+  }
   if (type === "climate") precision = normalizeClimatePrecisionConfig(precision);
   if (type === "image") {
     iconOn = "Auto";
@@ -1477,7 +1488,7 @@ function buttonConfigFields(b) {
     options = webhookButton.options || "";
   } else if (type === "screen_lock") {
     options = "";
-  } else if (type === "vacuum") {
+  } else if (type === "vacuum" || type === "lawn_mower") {
     options = "";
   } else if (type === "sensor") {
     options = sensor === SENSOR_CARD_LOCAL_SENSOR ? "" : normalizeSensorOptions(options, precision);

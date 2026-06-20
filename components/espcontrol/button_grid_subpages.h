@@ -406,13 +406,15 @@ inline void subscribe_subpage_parent_indicator(
     lv_obj_t *parent_btn, lv_obj_t *parent_icon,
     int parent_idx, bool *child_was_on,
     bool has_alt_icon, const char *off_glyph, const char *on_glyph,
-    int *sp_on_count) {
+    int *sp_on_count,
+    bool (*is_active_state)(esphome::StringRef) = is_entity_on_ref) {
   ha_subscribe_state(
     entity_id,
     std::function<void(esphome::StringRef)>(
       [parent_btn, parent_icon, parent_idx, child_was_on,
-       has_alt_icon, off_glyph, on_glyph, sp_on_count](esphome::StringRef state) {
-        bool is_on = is_entity_on_ref(state);
+       has_alt_icon, off_glyph, on_glyph, sp_on_count,
+       is_active_state](esphome::StringRef state) {
+        bool is_on = is_active_state(state);
         if (is_on && !*child_was_on) {
           sp_on_count[parent_idx]++;
           *child_was_on = true;

@@ -48,6 +48,7 @@ var CARD_TYPE_PICKER_DETAILS = {
   image: { icon: "image", description: "Display an image card where supported." },
   internal: { icon: "power-plug", description: "Control built-in device relays." },
   light_brightness: { icon: "lightbulb", description: "Configure light switch, brightness, or temperature controls." },
+  lawn_mower: { icon: "robot-mower", description: "Show or control a robotic lawn mower." },
   local_sensor: { icon: "gauge", description: "Show a sensor value from this device." },
   lock: { icon: "lock", description: "Show and control a lock." },
   media: { icon: "speaker", description: "Control media playback or volume." },

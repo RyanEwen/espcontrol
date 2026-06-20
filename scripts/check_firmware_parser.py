@@ -22,6 +22,7 @@ DEVICES_DIR = ROOT / "devices"
 
 CPP_SOURCE = r'''
 #include <cassert>
+#include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
@@ -326,6 +327,25 @@ int main() {
   assert(image_card_refresh_interval_ms(image_default) == 0);
   assert(!image_card_timer_only_refresh(image_default));
   assert(!image_card_modal_fit_enabled(image_default));
+  auto lawn_mower = parse_cfg("lawn_mower.backyard;Backyard Mower;Auto;Bell;pause_resume;ignored;lawn_mower;2;large_numbers");
+  assert(lawn_mower.type == "lawn_mower");
+  assert(lawn_mower.entity == "lawn_mower.backyard");
+  assert(lawn_mower.sensor == "pause_resume");
+  assert(lawn_mower.unit == "");
+  assert(lawn_mower.precision == "");
+  assert(lawn_mower.options == "");
+  assert(lawn_mower.icon == "Robot Mower");
+  assert(lawn_mower.icon_on == "Auto");
+  auto lawn_mower_dock = parse_cfg("lawn_mower.backyard;Dock;Auto;Auto;dock;;lawn_mower");
+  assert(lawn_mower_dock.sensor == "dock");
+  assert(lawn_mower_dock.icon == "Robot Mower Outline");
+  auto lawn_mower_invalid = parse_cfg("lawn_mower.backyard;Start;Auto;Auto;bad_mode;;lawn_mower");
+  assert(lawn_mower_invalid.sensor == "start_mowing");
+  assert(lawn_mower_invalid.icon == "Robot Mower");
+  assert(card_runtime_lawn_mower_state_mode("status"));
+  assert(card_runtime_lawn_mower_state_mode("start_mowing"));
+  assert(card_runtime_lawn_mower_state_mode("dock"));
+  assert(card_runtime_lawn_mower_state_mode("pause_resume"));
   auto image_label = parse_cfg("camera.front_door;Front Door;Auto;Auto;;;image;;image_label");
   assert(image_label.type == "image");
   assert(image_label.label == "Front Door");
@@ -457,6 +477,8 @@ int main() {
   assert(subpage_alarm.options == "subpage_kind=alarm");
   auto subpage_vacuum = parse_cfg("vacuum.downstairs;Vacuum;Robot Vacuum;Auto;indicator;;subpage;;subpage_kind=vacuum");
   assert(subpage_vacuum.options == "subpage_kind=vacuum");
+  auto subpage_lawn_mower = parse_cfg("lawn_mower.backyard;Lawn Mower;Robot Mower;Auto;indicator;;subpage;;subpage_kind=lawn_mower");
+  assert(subpage_lawn_mower.options == "subpage_kind=lawn_mower");
   auto subpage_weather = parse_cfg("weather.home;Weather;Weather Partly Cloudy;Auto;indicator;;subpage;;subpage_kind=weather");
   assert(subpage_weather.options == "subpage_kind=weather");
   auto subpage_bad_kind = parse_cfg("media_player.bad;Bad;Speaker;Auto;indicator;;subpage;;subpage_kind=audio");

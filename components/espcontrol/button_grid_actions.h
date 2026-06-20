@@ -627,6 +627,16 @@ inline void handle_button_click(const std::string &cfg, int slot_num,
       fallback.area_id = p.unit;
       send_vacuum_card_action(&fallback);
     }
+  } else if (p.type == "lawn_mower") {
+    LawnMowerCardCtx *ctx = (LawnMowerCardCtx *)lv_obj_get_user_data(btn_obj);
+    if (ctx) {
+      send_lawn_mower_card_action(ctx);
+    } else if (!lawn_mower_card_read_only(p)) {
+      LawnMowerCardCtx fallback;
+      fallback.entity_id = p.entity;
+      fallback.mode = lawn_mower_card_mode(p.sensor);
+      send_lawn_mower_card_action(&fallback);
+    }
   } else if (p.type == "webhook") {
     send_webhook_action(p);
   } else if (p.type == "todo") {

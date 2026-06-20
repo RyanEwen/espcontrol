@@ -409,6 +409,10 @@ inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
     setup_vacuum_card(s, p);
     return;
   }
+  if (p.type == "lawn_mower") {
+    setup_lawn_mower_card(s, p);
+    return;
+  }
   if (p.type == "option_select") {
     setup_option_select_card(
       s, p, palette.has_sensor_color, palette.sensor_val,
@@ -947,10 +951,16 @@ inline void grid_phase2(
       if (p.label.empty())
         subscribe_friendly_name(s.text_lbl, p.entity);
 
-      if (normalize_subpage_kind(cfg_option_value(p.options, "subpage_kind")) == "climate") {
+      std::string parent_subpage_kind = normalize_subpage_kind(cfg_option_value(p.options, "subpage_kind"));
+      if (parent_subpage_kind == "climate") {
         subscribe_climate_subpage_parent_indicator(
           p.entity, s.btn, s.icon_lbl, has_icon_on[idx - 1],
           icon_off_cp[idx - 1], icon_on_cp[idx - 1]);
+      } else if (parent_subpage_kind == "lawn_mower") {
+        subscribe_toggle_state(s.btn, s.icon_lbl, s.sensor_container,
+          &has_sensor[idx - 1], &sensor_text_mode[idx - 1],
+          &has_icon_on[idx - 1], &icon_off_cp[idx - 1], &icon_on_cp[idx - 1],
+          nullptr, p.entity, false, lawn_mower_state_active_ref);
       } else {
         subscribe_toggle_state(s.btn, s.icon_lbl, s.sensor_container,
           &has_sensor[idx - 1], &sensor_text_mode[idx - 1],
@@ -1092,6 +1102,17 @@ inline void grid_phase2(
       if (!p.entity.empty() && vacuum_card_mode_needs_state(p.sensor)) {
         VacuumCardCtx *ctx = create_vacuum_card_context(s, p);
         subscribe_vacuum_card_state(ctx);
+        lv_obj_set_user_data(s.btn, ctx);
+      } else if (!p.entity.empty()) {
+        subscribe_control_availability(s.btn, s.btn, p.entity);
+      }
+      continue;
+    }
+    if (p.type == "lawn_mower") {
+      lv_obj_set_user_data(s.btn, nullptr);
+      if (!p.entity.empty() && lawn_mower_card_mode_needs_state(p.sensor)) {
+        LawnMowerCardCtx *ctx = create_lawn_mower_card_context(s, p);
+        subscribe_lawn_mower_card_state(ctx);
         lv_obj_set_user_data(s.btn, ctx);
       } else if (!p.entity.empty()) {
         subscribe_control_availability(s.btn, s.btn, p.entity);
@@ -1414,7 +1435,8 @@ inline void grid_phase2(
     }, LV_EVENT_CLICKED, main_page_obj);
     screen_lock_register_controlled_button(back_btn);
 
-    auto add_parent_indicator = [&](const std::string &entity_id) {
+    auto add_parent_indicator = [&](const std::string &entity_id,
+                                    bool (*is_active_state)(esphome::StringRef) = is_entity_on_ref) {
       if (!sp_indicator || entity_id.empty()) return;
       lv_obj_t *parent_btn = slots[si].btn;
       lv_obj_t *parent_icon = slots[si].icon_lbl;
@@ -1428,7 +1450,7 @@ inline void grid_phase2(
       subscribe_subpage_parent_indicator(
         entity_id, parent_btn, parent_icon, parent_idx,
         &sp_child_was_on[cwi], sp_has_icon_on,
-        sp_icon_off_glyph, sp_icon_on_glyph, sp_on_count);
+        sp_icon_off_glyph, sp_icon_on_glyph, sp_on_count, is_active_state);
     };
 
     auto add_subpage_toggle_click = [&](lv_obj_t *btn, const std::string &entity_id, bool set_checked) {
@@ -1733,6 +1755,24 @@ inline void grid_phase2(
             lv_obj_add_event_cb(sb_btn, [](lv_event_t *e) {
               VacuumCardCtx *ctx = (VacuumCardCtx *)lv_event_get_user_data(e);
               send_vacuum_card_action(ctx);
+            }, LV_EVENT_CLICKED, ctx);
+          }
+        }
+        continue;
+      }
+      if (sb_cfg.type == "lawn_mower") {
+        if (!sb_cfg.entity.empty()) {
+          LawnMowerCardCtx *ctx = create_lawn_mower_card_context(sub_slot, sb_cfg);
+          if (lawn_mower_card_mode_needs_state(sb_cfg.sensor)) {
+            subscribe_lawn_mower_card_state(ctx);
+          } else {
+            subscribe_control_availability(sub_slot.btn, sub_slot.btn, sb_cfg.entity);
+          }
+          add_parent_indicator(sb_cfg.entity, lawn_mower_state_active_ref);
+          if (!lawn_mower_card_read_only(sb_cfg)) {
+            lv_obj_add_event_cb(sb_btn, [](lv_event_t *e) {
+              LawnMowerCardCtx *ctx = (LawnMowerCardCtx *)lv_event_get_user_data(e);
+              send_lawn_mower_card_action(ctx);
             }, LV_EVENT_CLICKED, ctx);
           }
         }

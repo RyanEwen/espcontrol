@@ -518,6 +518,7 @@ inline std::string normalize_subpage_kind(const std::string &value) {
     value == "switch" || value == "alarm" ||
     value == "cover" || value == "garage" ||
     value == "lock" || value == "vacuum" ||
+    value == "lawn_mower" ||
     value == "weather" || value == "sensor" ||
     value == "image" ? value : "";
 }
@@ -1028,6 +1029,14 @@ inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
     p.icon_on = "Auto";
     if (p.icon.empty() || p.icon == "Auto") p.icon = card_runtime_vacuum_default_icon_name(p.sensor);
   }
+  if (p.type == "lawn_mower") {
+    p.sensor = card_runtime_lawn_mower_mode(p.sensor);
+    p.unit.clear();
+    p.precision.clear();
+    p.options.clear();
+    p.icon_on = "Auto";
+    if (p.icon.empty() || p.icon == "Auto") p.icon = card_runtime_lawn_mower_default_icon_name(p.sensor);
+  }
   if (p.type.empty()) {
     p.options = switch_card_options_normalized(p.options);
   }
@@ -1047,7 +1056,7 @@ inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
     if (p.icon_on.empty() || p.icon_on == "Auto") p.icon_on = "Motion Sensor";
     p.options = presence_card_options_normalized(p.options);
   }
-  if (!p.type.empty() && p.type != "action" && p.type != "alarm" && p.type != "alarm_action" && p.type != "climate" && p.type != "garage" && p.type != "webhook" && p.type != "screen_lock" && p.type != "todo" && p.type != "sensor" && p.type != "door_window" && p.type != "presence" && p.type != "media" && p.type != "subpage" && p.type != "image" && p.type != "vacuum" && !fan_card_type(p.type) && !card_large_numbers_supported(p)) {
+  if (!p.type.empty() && p.type != "action" && p.type != "alarm" && p.type != "alarm_action" && p.type != "climate" && p.type != "garage" && p.type != "webhook" && p.type != "screen_lock" && p.type != "todo" && p.type != "sensor" && p.type != "door_window" && p.type != "presence" && p.type != "media" && p.type != "subpage" && p.type != "image" && p.type != "vacuum" && p.type != "lawn_mower" && !fan_card_type(p.type) && !card_large_numbers_supported(p)) {
     p.options.clear();
   }
   if (sensor_card_local_sensor(p)) {

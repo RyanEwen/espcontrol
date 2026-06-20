@@ -77,6 +77,7 @@ function subpageTypeFromCode(code) {
     N: "light_temperature",
     R: "garage",
     K: "lock",
+    LM: "lawn_mower",
     M: "media",
     H: "climate",
     WH: "webhook",
@@ -237,6 +238,7 @@ assert.deepStrictEqual(Array.from(subpageKindOption.values), [
   "garage",
   "lock",
   "vacuum",
+  "lawn_mower",
   "weather",
   "sensor",
   "image",
@@ -245,6 +247,11 @@ assert.strictEqual(
   hooks.subpageKind({ options: "subpage_kind=vacuum" }),
   "vacuum",
   "vacuum subpage type is accepted by the web config normalizer"
+);
+assert.strictEqual(
+  hooks.subpageKind({ options: "subpage_kind=lawn_mower" }),
+  "lawn_mower",
+  "lawn mower subpage type is accepted by the web config normalizer"
 );
 assert.deepStrictEqual(Array.from(hooks.cardContractDomains("climate")), ["climate"], "generated contract exposes card domains");
 assert.deepStrictEqual(buttonShape(hooks.cardContractDefaultConfig("climate")), buttonShape({
@@ -2247,6 +2254,35 @@ assertButtonMigration(hooks, "legacy vacuum return to base action card", "vacuum
     type: "vacuum",
     precision: "",
   }, false);
+});
+
+[
+  "status",
+  "start_mowing",
+  "dock",
+  "pause_resume",
+].forEach((mode) => {
+  assertButtonRoundTrip(hooks, `lawn mower ${mode} card`, {
+    entity: "lawn_mower.backyard",
+    label: "Backyard Mower",
+    icon: "Robot Mower",
+    icon_on: "Auto",
+    sensor: mode,
+    unit: "",
+    type: "lawn_mower",
+    precision: "",
+  }, false);
+});
+
+assertButtonMigration(hooks, "invalid lawn mower mode normalizes to start mowing", "lawn_mower.backyard;Backyard Mower;Auto;Auto;bad_mode;;lawn_mower", {
+  entity: "lawn_mower.backyard",
+  label: "Backyard Mower",
+  icon: "Robot Mower",
+  icon_on: "Auto",
+  sensor: "start_mowing",
+  unit: "",
+  type: "lawn_mower",
+  precision: "",
 });
 
 assertButtonRoundTrip(hooks, "input button action card", {

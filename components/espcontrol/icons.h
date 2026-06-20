@@ -142,6 +142,8 @@ static const IconEntry ICON_ENTRIES[] = {
     {"Lamp Outline",               "\U000F17D0"},
     {"LAN",                        "\U000F0317"},
     {"Lawnmower",                  "\U000F11F7"},
+    {"Robot Mower",                "\U000F11F7"},
+    {"Robot Mower Outline",        "\U000F11F3"},
     {"Leaf",                       "\U000F032A"},
     {"LED Strip",                  "\U000F07D6"},
     {"LED Strip Variant",          "\U000F1051"},

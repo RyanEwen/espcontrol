@@ -1063,6 +1063,7 @@ assert(subpagePresencePreview.labelHtml.includes("mdi-chevron-right"), "presence
 [
   ["alarm", "alarm_control_panel.home", "mdi-shield-home", "Alarm"],
   ["vacuum", "vacuum.downstairs", "mdi-robot-vacuum", "Vacuum"],
+  ["lawn_mower", "lawn_mower.backyard", "mdi-robot-mower", "Lawn Mower"],
   ["weather", "weather.home", "mdi-weather-partly-cloudy", "Weather"],
 ].forEach(([kind, entity, iconClass, label]) => {
   const preview = hooks.buttonTypePreviewFor("subpage", {
@@ -1075,6 +1076,38 @@ assert(subpagePresencePreview.labelHtml.includes("mdi-chevron-right"), "presence
   assert(preview.labelHtml.includes(label), `${label} subpage preset preview uses the expected label`);
   assert(preview.labelHtml.includes("mdi-chevron-right"), `${label} subpage preset preview shows the chevron badge`);
 });
+
+assert(hooks.buttonTypePickerKeysFor(false).includes("lawn_mower"), "lawn mower cards are available in the main picker");
+assert(hooks.buttonTypePickerKeysFor(true).includes("lawn_mower"), "lawn mower cards are available in subpages");
+assert.deepStrictEqual(plain(hooks.buttonTypeDefaultConfig("lawn_mower")), {
+  entity: "",
+  label: "",
+  icon: "Robot Mower",
+  icon_on: "Auto",
+  sensor: "start_mowing",
+  unit: "",
+  type: "lawn_mower",
+  precision: "",
+  options: "",
+}, "lawn mower default config matches the shared contract");
+assert.deepStrictEqual(
+  Array.from(hooks.cardContractOptions("lawn_mower").find((option) => option.name === "lawn_mower_mode").values),
+  ["status", "start_mowing", "dock", "pause_resume"],
+  "lawn mower mode values match the scoped service set"
+);
+const lawnMowerPreview = hooks.buttonTypePreviewFor("lawn_mower", {
+  entity: "lawn_mower.backyard",
+  label: "",
+  icon: "Auto",
+  icon_on: "Auto",
+  sensor: "bad_mode",
+  unit: "ignored",
+  type: "lawn_mower",
+  precision: "2",
+  options: "ignored",
+});
+assert(lawnMowerPreview.iconHtml.includes("mdi-robot-mower"), "lawn mower preview uses the robot mower icon");
+assert(lawnMowerPreview.labelHtml.includes("mdi-robot-mower"), "lawn mower preview badge uses the robot mower icon");
 
 const subpageCustomPresetPreview = hooks.buttonTypePreviewFor("subpage", {
   entity: "climate.living_room",

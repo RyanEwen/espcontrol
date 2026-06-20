@@ -741,6 +741,16 @@
       "mdi": "robot-mower"
     },
     {
+      "name": "Robot Mower",
+      "codepoint": "F11F7",
+      "mdi": "robot-mower"
+    },
+    {
+      "name": "Robot Mower Outline",
+      "codepoint": "F11F3",
+      "mdi": "robot-mower-outline"
+    },
+    {
       "name": "Leaf",
       "codepoint": "F032A",
       "mdi": "leaf"

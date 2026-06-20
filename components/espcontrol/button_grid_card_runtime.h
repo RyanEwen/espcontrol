@@ -217,3 +217,23 @@ inline const char *card_runtime_vacuum_default_icon_name(const std::string &mode
   if (normalized == "clean_area") return "Vacuum Outline";
   return "Robot Vacuum";
 }
+
+inline std::string card_runtime_lawn_mower_mode(const std::string &mode) {
+  if (mode == "status" || mode == "start_mowing" || mode == "dock" ||
+      mode == "pause_resume") {
+    return mode;
+  }
+  return "start_mowing";
+}
+
+inline bool card_runtime_lawn_mower_state_mode(const std::string &mode) {
+  std::string normalized = card_runtime_lawn_mower_mode(mode);
+  return normalized == "status" || normalized == "start_mowing" ||
+         normalized == "dock" || normalized == "pause_resume";
+}
+
+inline const char *card_runtime_lawn_mower_default_icon_name(const std::string &mode) {
+  std::string normalized = card_runtime_lawn_mower_mode(mode);
+  if (normalized == "dock") return "Robot Mower Outline";
+  return "Robot Mower";
+}
