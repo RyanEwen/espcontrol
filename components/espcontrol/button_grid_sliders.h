@@ -773,10 +773,11 @@ inline void light_control_layout_modal(LightControlCtx *ctx) {
   light_control_apply_modal_power(ctx);
   light_control_layout_slider(ui.slider, slider_w, slider_h, content_center_y);
   lv_obj_update_layout(ui.panel);
+  int display_pct = light_control_display_pct(ctx);
   light_control_update_slider_fill(
-    ui.slider, ui.slider_fill, ui.slider_handle, ctx->current_pct,
+    ui.slider, ui.slider_fill, ui.slider_handle, display_pct,
     lv_color_hex(ctx->accent_color));
-  light_control_update_slider_handle(ui.slider, ui.slider_handle, ctx->current_pct);
+  light_control_update_slider_handle(ui.slider, ui.slider_handle, display_pct);
   light_control_layout_slider(ui.temp_slider, slider_w, slider_h, content_center_y);
   lv_obj_update_layout(ui.panel);
   light_control_update_slider_fill(
