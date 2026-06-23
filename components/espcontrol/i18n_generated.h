@@ -36,6 +36,8 @@ inline const char *espcontrol_i18n_cs(const char *text) {
   if (std::strcmp(text, "Climate") == 0) return "Klima";
   if (std::strcmp(text, "Clock") == 0) return "Hodiny";
   if (std::strcmp(text, "Close") == 0) return "Zavřít";
+  if (std::strcmp(text, "Closed") == 0) return "Zavřeno";
+  if (std::strcmp(text, "Closing") == 0) return "Zavírá se";
   if (std::strcmp(text, "Cloudy") == 0) return "Zataženo";
   if (std::strcmp(text, "Cloudy Alert") == 0) return "Varování oblačnosti";
   if (std::strcmp(text, "Configure") == 0) return "Nastavit";
@@ -102,6 +104,7 @@ inline const char *espcontrol_i18n_cs(const char *text) {
   if (std::strcmp(text, "Off") == 0) return "Vypnuto";
   if (std::strcmp(text, "On") == 0) return "Zapnuto";
   if (std::strcmp(text, "Open") == 0) return "Otevřít";
+  if (std::strcmp(text, "Opening") == 0) return "Otevírá se";
   if (std::strcmp(text, "Option") == 0) return "Možnost";
   if (std::strcmp(text, "Oscillating") == 0) return "Osciluje";
   if (std::strcmp(text, "Oscillation") == 0) return "Oscilace";
@@ -219,6 +222,8 @@ inline const char *espcontrol_i18n_da(const char *text) {
   if (std::strcmp(text, "Climate") == 0) return "Klima";
   if (std::strcmp(text, "Clock") == 0) return "Ur";
   if (std::strcmp(text, "Close") == 0) return "Luk";
+  if (std::strcmp(text, "Closed") == 0) return "Lukket";
+  if (std::strcmp(text, "Closing") == 0) return "Lukker";
   if (std::strcmp(text, "Cloudy") == 0) return "Overskyet";
   if (std::strcmp(text, "Cloudy Alert") == 0) return "Skyvarsel";
   if (std::strcmp(text, "Configure") == 0) return "Konfigurer";
@@ -285,6 +290,7 @@ inline const char *espcontrol_i18n_da(const char *text) {
   if (std::strcmp(text, "Off") == 0) return "Slukket";
   if (std::strcmp(text, "On") == 0) return "Tændt";
   if (std::strcmp(text, "Open") == 0) return "Åbn";
+  if (std::strcmp(text, "Opening") == 0) return "Åbner";
   if (std::strcmp(text, "Option") == 0) return "Mulighed";
   if (std::strcmp(text, "Oscillating") == 0) return "Oscillerer";
   if (std::strcmp(text, "Partly Cloudy") == 0) return "Delvist overskyet";
@@ -399,6 +405,8 @@ inline const char *espcontrol_i18n_de(const char *text) {
   if (std::strcmp(text, "Climate") == 0) return "Klima";
   if (std::strcmp(text, "Clock") == 0) return "Uhr";
   if (std::strcmp(text, "Close") == 0) return "Schließen";
+  if (std::strcmp(text, "Closed") == 0) return "Geschlossen";
+  if (std::strcmp(text, "Closing") == 0) return "Schließt";
   if (std::strcmp(text, "Cloudy") == 0) return "Bewölkt";
   if (std::strcmp(text, "Cloudy Alert") == 0) return "Wolkenwarnung";
   if (std::strcmp(text, "Configure") == 0) return "Konfigurieren";
@@ -462,6 +470,7 @@ inline const char *espcontrol_i18n_de(const char *text) {
   if (std::strcmp(text, "Off") == 0) return "Aus";
   if (std::strcmp(text, "On") == 0) return "Ein";
   if (std::strcmp(text, "Open") == 0) return "Öffnen";
+  if (std::strcmp(text, "Opening") == 0) return "Öffnet";
   if (std::strcmp(text, "Oscillating") == 0) return "Schwenkt";
   if (std::strcmp(text, "Oscillation") == 0) return "Schwenken";
   if (std::strcmp(text, "Partly Cloudy") == 0) return "Teilweise bewölkt";
@@ -576,6 +585,8 @@ inline const char *espcontrol_i18n_es(const char *text) {
   if (std::strcmp(text, "Climate") == 0) return "Climatización";
   if (std::strcmp(text, "Clock") == 0) return "Reloj";
   if (std::strcmp(text, "Close") == 0) return "Cerrar";
+  if (std::strcmp(text, "Closed") == 0) return "Cerrado";
+  if (std::strcmp(text, "Closing") == 0) return "Cerrando";
   if (std::strcmp(text, "Cloudy") == 0) return "Nublado";
   if (std::strcmp(text, "Cloudy Alert") == 0) return "Alerta de nubosidad";
   if (std::strcmp(text, "Configure") == 0) return "Configurar";
@@ -641,6 +652,7 @@ inline const char *espcontrol_i18n_es(const char *text) {
   if (std::strcmp(text, "Off") == 0) return "Apagado";
   if (std::strcmp(text, "On") == 0) return "Encendido";
   if (std::strcmp(text, "Open") == 0) return "Abrir";
+  if (std::strcmp(text, "Opening") == 0) return "Abriendo";
   if (std::strcmp(text, "Option") == 0) return "Opción";
   if (std::strcmp(text, "Oscillating") == 0) return "Oscilando";
   if (std::strcmp(text, "Oscillation") == 0) return "Oscilación";
@@ -759,6 +771,8 @@ inline const char *espcontrol_i18n_fi(const char *text) {
   if (std::strcmp(text, "Climate") == 0) return "Ilmastointi";
   if (std::strcmp(text, "Clock") == 0) return "Kello";
   if (std::strcmp(text, "Close") == 0) return "Sulje";
+  if (std::strcmp(text, "Closed") == 0) return "Suljettu";
+  if (std::strcmp(text, "Closing") == 0) return "Sulkeutuu";
   if (std::strcmp(text, "Cloudy") == 0) return "Pilvistä";
   if (std::strcmp(text, "Cloudy Alert") == 0) return "Pilvihälytys";
   if (std::strcmp(text, "Configure") == 0) return "Määritä";
@@ -828,6 +842,7 @@ inline const char *espcontrol_i18n_fi(const char *text) {
   if (std::strcmp(text, "Off") == 0) return "Pois";
   if (std::strcmp(text, "On") == 0) return "Päällä";
   if (std::strcmp(text, "Open") == 0) return "Avaa";
+  if (std::strcmp(text, "Opening") == 0) return "Avautuu";
   if (std::strcmp(text, "Option") == 0) return "Vaihtoehto";
   if (std::strcmp(text, "Oscillating") == 0) return "Kääntyvä";
   if (std::strcmp(text, "Oscillation") == 0) return "Kääntö";
@@ -948,6 +963,8 @@ inline const char *espcontrol_i18n_fr(const char *text) {
   if (std::strcmp(text, "Climate") == 0) return "Climat";
   if (std::strcmp(text, "Clock") == 0) return "Horloge";
   if (std::strcmp(text, "Close") == 0) return "Fermer";
+  if (std::strcmp(text, "Closed") == 0) return "Fermé";
+  if (std::strcmp(text, "Closing") == 0) return "Fermeture";
   if (std::strcmp(text, "Cloudy") == 0) return "Nuageux";
   if (std::strcmp(text, "Cloudy Alert") == 0) return "Alerte nuageuse";
   if (std::strcmp(text, "Configure") == 0) return "Configurer";
@@ -1011,6 +1028,7 @@ inline const char *espcontrol_i18n_fr(const char *text) {
   if (std::strcmp(text, "Off") == 0) return "Éteint";
   if (std::strcmp(text, "On") == 0) return "Allumé";
   if (std::strcmp(text, "Open") == 0) return "Ouvrir";
+  if (std::strcmp(text, "Opening") == 0) return "Ouverture";
   if (std::strcmp(text, "Oscillating") == 0) return "Oscillant";
   if (std::strcmp(text, "Partly Cloudy") == 0) return "Partiellement nuageux";
   if (std::strcmp(text, "Partly Cloudy Night") == 0) return "Nuit partiellement nuageuse";
@@ -1126,6 +1144,8 @@ inline const char *espcontrol_i18n_hu(const char *text) {
   if (std::strcmp(text, "Climate") == 0) return "Klíma";
   if (std::strcmp(text, "Clock") == 0) return "Óra";
   if (std::strcmp(text, "Close") == 0) return "Bezárás";
+  if (std::strcmp(text, "Closed") == 0) return "Zárva";
+  if (std::strcmp(text, "Closing") == 0) return "Záródik";
   if (std::strcmp(text, "Cloudy") == 0) return "Felhős";
   if (std::strcmp(text, "Cloudy Alert") == 0) return "Felhőriasztás";
   if (std::strcmp(text, "Configure") == 0) return "Beállítás";
@@ -1194,6 +1214,7 @@ inline const char *espcontrol_i18n_hu(const char *text) {
   if (std::strcmp(text, "Off") == 0) return "Ki";
   if (std::strcmp(text, "On") == 0) return "Be";
   if (std::strcmp(text, "Open") == 0) return "Megnyitás";
+  if (std::strcmp(text, "Opening") == 0) return "Nyílik";
   if (std::strcmp(text, "Option") == 0) return "Opció";
   if (std::strcmp(text, "Oscillating") == 0) return "Oszcillál";
   if (std::strcmp(text, "Oscillation") == 0) return "Oszcilláció";
@@ -1316,6 +1337,8 @@ inline const char *espcontrol_i18n_it(const char *text) {
   if (std::strcmp(text, "Climate") == 0) return "Clima";
   if (std::strcmp(text, "Clock") == 0) return "Orologio";
   if (std::strcmp(text, "Close") == 0) return "Chiudi";
+  if (std::strcmp(text, "Closed") == 0) return "Chiuso";
+  if (std::strcmp(text, "Closing") == 0) return "Chiusura";
   if (std::strcmp(text, "Cloudy") == 0) return "Nuvoloso";
   if (std::strcmp(text, "Cloudy Alert") == 0) return "Allerta nuvole";
   if (std::strcmp(text, "Configure") == 0) return "Configura";
@@ -1383,6 +1406,7 @@ inline const char *espcontrol_i18n_it(const char *text) {
   if (std::strcmp(text, "Off") == 0) return "Spento";
   if (std::strcmp(text, "On") == 0) return "Acceso";
   if (std::strcmp(text, "Open") == 0) return "Apri";
+  if (std::strcmp(text, "Opening") == 0) return "Apertura";
   if (std::strcmp(text, "Option") == 0) return "Opzione";
   if (std::strcmp(text, "Oscillating") == 0) return "Oscillante";
   if (std::strcmp(text, "Oscillation") == 0) return "Oscillazione";
@@ -1500,6 +1524,8 @@ inline const char *espcontrol_i18n_nb(const char *text) {
   if (std::strcmp(text, "Climate") == 0) return "Klima";
   if (std::strcmp(text, "Clock") == 0) return "Klokke";
   if (std::strcmp(text, "Close") == 0) return "Lukk";
+  if (std::strcmp(text, "Closed") == 0) return "Lukket";
+  if (std::strcmp(text, "Closing") == 0) return "Lukker";
   if (std::strcmp(text, "Cloudy") == 0) return "Overskyet";
   if (std::strcmp(text, "Cloudy Alert") == 0) return "Skyvarsel";
   if (std::strcmp(text, "Configure") == 0) return "Konfigurer";
@@ -1565,6 +1591,7 @@ inline const char *espcontrol_i18n_nb(const char *text) {
   if (std::strcmp(text, "Off") == 0) return "Av";
   if (std::strcmp(text, "On") == 0) return "På";
   if (std::strcmp(text, "Open") == 0) return "Åpne";
+  if (std::strcmp(text, "Opening") == 0) return "Åpner";
   if (std::strcmp(text, "Option") == 0) return "Alternativ";
   if (std::strcmp(text, "Oscillating") == 0) return "Oscillerer";
   if (std::strcmp(text, "Oscillation") == 0) return "Oscillasjon";
@@ -1682,6 +1709,8 @@ inline const char *espcontrol_i18n_nl(const char *text) {
   if (std::strcmp(text, "Climate") == 0) return "Klimaat";
   if (std::strcmp(text, "Clock") == 0) return "Klok";
   if (std::strcmp(text, "Close") == 0) return "Sluiten";
+  if (std::strcmp(text, "Closed") == 0) return "Gesloten";
+  if (std::strcmp(text, "Closing") == 0) return "Sluit";
   if (std::strcmp(text, "Cloudy") == 0) return "Bewolkt";
   if (std::strcmp(text, "Cloudy Alert") == 0) return "Bewolkingswaarschuwing";
   if (std::strcmp(text, "Configure") == 0) return "Configureren";
@@ -1748,6 +1777,7 @@ inline const char *espcontrol_i18n_nl(const char *text) {
   if (std::strcmp(text, "Off") == 0) return "Uit";
   if (std::strcmp(text, "On") == 0) return "Aan";
   if (std::strcmp(text, "Open") == 0) return "Openen";
+  if (std::strcmp(text, "Opening") == 0) return "Opent";
   if (std::strcmp(text, "Option") == 0) return "Optie";
   if (std::strcmp(text, "Oscillating") == 0) return "Oscillerend";
   if (std::strcmp(text, "Oscillation") == 0) return "Oscillatie";
@@ -1862,6 +1892,8 @@ inline const char *espcontrol_i18n_pl(const char *text) {
   if (std::strcmp(text, "Climate") == 0) return "Klimat";
   if (std::strcmp(text, "Clock") == 0) return "Zegar";
   if (std::strcmp(text, "Close") == 0) return "Zamknij";
+  if (std::strcmp(text, "Closed") == 0) return "Zamknięte";
+  if (std::strcmp(text, "Closing") == 0) return "Zamykanie";
   if (std::strcmp(text, "Cloudy") == 0) return "Pochmurno";
   if (std::strcmp(text, "Cloudy Alert") == 0) return "Ostrzeżenie o zachmurzeniu";
   if (std::strcmp(text, "Configure") == 0) return "Konfiguruj";
@@ -1927,6 +1959,7 @@ inline const char *espcontrol_i18n_pl(const char *text) {
   if (std::strcmp(text, "Off") == 0) return "Wyłączone";
   if (std::strcmp(text, "On") == 0) return "Włączone";
   if (std::strcmp(text, "Open") == 0) return "Otwórz";
+  if (std::strcmp(text, "Opening") == 0) return "Otwieranie";
   if (std::strcmp(text, "Option") == 0) return "Opcja";
   if (std::strcmp(text, "Oscillating") == 0) return "Oscyluje";
   if (std::strcmp(text, "Oscillation") == 0) return "Oscylacja";
@@ -2043,6 +2076,8 @@ inline const char *espcontrol_i18n_pt_br(const char *text) {
   if (std::strcmp(text, "Climate") == 0) return "Climatização";
   if (std::strcmp(text, "Clock") == 0) return "Relógio";
   if (std::strcmp(text, "Close") == 0) return "Fechar";
+  if (std::strcmp(text, "Closed") == 0) return "Fechado";
+  if (std::strcmp(text, "Closing") == 0) return "Fechando";
   if (std::strcmp(text, "Cloudy") == 0) return "Nublado";
   if (std::strcmp(text, "Cloudy Alert") == 0) return "Alerta de nuvens";
   if (std::strcmp(text, "Configure") == 0) return "Configurar";
@@ -2109,6 +2144,7 @@ inline const char *espcontrol_i18n_pt_br(const char *text) {
   if (std::strcmp(text, "Off") == 0) return "Desligado";
   if (std::strcmp(text, "On") == 0) return "Ligado";
   if (std::strcmp(text, "Open") == 0) return "Abrir";
+  if (std::strcmp(text, "Opening") == 0) return "Abrindo";
   if (std::strcmp(text, "Option") == 0) return "Opção";
   if (std::strcmp(text, "Oscillating") == 0) return "Oscilando";
   if (std::strcmp(text, "Oscillation") == 0) return "Oscilação";
@@ -2225,6 +2261,8 @@ inline const char *espcontrol_i18n_pt(const char *text) {
   if (std::strcmp(text, "Climate") == 0) return "Climatização";
   if (std::strcmp(text, "Clock") == 0) return "Relógio";
   if (std::strcmp(text, "Close") == 0) return "Fechar";
+  if (std::strcmp(text, "Closed") == 0) return "Fechado";
+  if (std::strcmp(text, "Closing") == 0) return "A fechar";
   if (std::strcmp(text, "Cloudy") == 0) return "Nublado";
   if (std::strcmp(text, "Cloudy Alert") == 0) return "Alerta de nuvens";
   if (std::strcmp(text, "Configure") == 0) return "Configurar";
@@ -2291,6 +2329,7 @@ inline const char *espcontrol_i18n_pt(const char *text) {
   if (std::strcmp(text, "Off") == 0) return "Desligado";
   if (std::strcmp(text, "On") == 0) return "Ligado";
   if (std::strcmp(text, "Open") == 0) return "Abrir";
+  if (std::strcmp(text, "Opening") == 0) return "A abrir";
   if (std::strcmp(text, "Option") == 0) return "Opção";
   if (std::strcmp(text, "Oscillating") == 0) return "A oscilar";
   if (std::strcmp(text, "Oscillation") == 0) return "Oscilação";
@@ -2408,6 +2447,8 @@ inline const char *espcontrol_i18n_ro(const char *text) {
   if (std::strcmp(text, "Climate") == 0) return "Climatizare";
   if (std::strcmp(text, "Clock") == 0) return "Ceas";
   if (std::strcmp(text, "Close") == 0) return "Închide";
+  if (std::strcmp(text, "Closed") == 0) return "Închis";
+  if (std::strcmp(text, "Closing") == 0) return "Se închide";
   if (std::strcmp(text, "Cloudy") == 0) return "Înnorat";
   if (std::strcmp(text, "Cloudy Alert") == 0) return "Alertă nori";
   if (std::strcmp(text, "Configure") == 0) return "Configurează";
@@ -2476,6 +2517,7 @@ inline const char *espcontrol_i18n_ro(const char *text) {
   if (std::strcmp(text, "Off") == 0) return "Oprit";
   if (std::strcmp(text, "On") == 0) return "Pornit";
   if (std::strcmp(text, "Open") == 0) return "Deschide";
+  if (std::strcmp(text, "Opening") == 0) return "Se deschide";
   if (std::strcmp(text, "Option") == 0) return "Opțiune";
   if (std::strcmp(text, "Oscillating") == 0) return "Oscilează";
   if (std::strcmp(text, "Oscillation") == 0) return "Oscilație";
@@ -2597,6 +2639,8 @@ inline const char *espcontrol_i18n_sk(const char *text) {
   if (std::strcmp(text, "Climate") == 0) return "Klíma";
   if (std::strcmp(text, "Clock") == 0) return "Hodiny";
   if (std::strcmp(text, "Close") == 0) return "Zavrieť";
+  if (std::strcmp(text, "Closed") == 0) return "Zatvorené";
+  if (std::strcmp(text, "Closing") == 0) return "Zatvára sa";
   if (std::strcmp(text, "Cloudy") == 0) return "Zamračené";
   if (std::strcmp(text, "Cloudy Alert") == 0) return "Varovanie oblačnosti";
   if (std::strcmp(text, "Configure") == 0) return "Nastaviť";
@@ -2663,6 +2707,7 @@ inline const char *espcontrol_i18n_sk(const char *text) {
   if (std::strcmp(text, "Off") == 0) return "Vypnuté";
   if (std::strcmp(text, "On") == 0) return "Zapnuté";
   if (std::strcmp(text, "Open") == 0) return "Otvoriť";
+  if (std::strcmp(text, "Opening") == 0) return "Otvára sa";
   if (std::strcmp(text, "Option") == 0) return "Možnosť";
   if (std::strcmp(text, "Oscillating") == 0) return "Osciluje";
   if (std::strcmp(text, "Oscillation") == 0) return "Oscilácia";
@@ -2781,6 +2826,8 @@ inline const char *espcontrol_i18n_sl(const char *text) {
   if (std::strcmp(text, "Climate") == 0) return "Klima";
   if (std::strcmp(text, "Clock") == 0) return "Ura";
   if (std::strcmp(text, "Close") == 0) return "Zapri";
+  if (std::strcmp(text, "Closed") == 0) return "Zaprto";
+  if (std::strcmp(text, "Closing") == 0) return "Zapiranje";
   if (std::strcmp(text, "Cloudy") == 0) return "Oblačno";
   if (std::strcmp(text, "Cloudy Alert") == 0) return "Opozorilo za oblake";
   if (std::strcmp(text, "Configure") == 0) return "Nastavi";
@@ -2847,6 +2894,7 @@ inline const char *espcontrol_i18n_sl(const char *text) {
   if (std::strcmp(text, "Off") == 0) return "Izklop";
   if (std::strcmp(text, "On") == 0) return "Vklop";
   if (std::strcmp(text, "Open") == 0) return "Odpri";
+  if (std::strcmp(text, "Opening") == 0) return "Odpiranje";
   if (std::strcmp(text, "Option") == 0) return "Možnost";
   if (std::strcmp(text, "Oscillating") == 0) return "Nihanje";
   if (std::strcmp(text, "Oscillation") == 0) return "Nihanje";
@@ -2968,6 +3016,8 @@ inline const char *espcontrol_i18n_sv(const char *text) {
   if (std::strcmp(text, "Climate") == 0) return "Klimat";
   if (std::strcmp(text, "Clock") == 0) return "Klocka";
   if (std::strcmp(text, "Close") == 0) return "Stäng";
+  if (std::strcmp(text, "Closed") == 0) return "Stängd";
+  if (std::strcmp(text, "Closing") == 0) return "Stänger";
   if (std::strcmp(text, "Cloudy") == 0) return "Molnigt";
   if (std::strcmp(text, "Cloudy Alert") == 0) return "Molnvarning";
   if (std::strcmp(text, "Configure") == 0) return "Konfigurera";
@@ -3033,6 +3083,7 @@ inline const char *espcontrol_i18n_sv(const char *text) {
   if (std::strcmp(text, "Off") == 0) return "Av";
   if (std::strcmp(text, "On") == 0) return "På";
   if (std::strcmp(text, "Open") == 0) return "Öppna";
+  if (std::strcmp(text, "Opening") == 0) return "Öppnar";
   if (std::strcmp(text, "Option") == 0) return "Alternativ";
   if (std::strcmp(text, "Oscillating") == 0) return "Oscillerar";
   if (std::strcmp(text, "Partly Cloudy") == 0) return "Delvis molnigt";
@@ -3147,6 +3198,8 @@ inline const char *espcontrol_i18n_tr(const char *text) {
   if (std::strcmp(text, "Climate") == 0) return "İklim";
   if (std::strcmp(text, "Clock") == 0) return "Saat";
   if (std::strcmp(text, "Close") == 0) return "Kapat";
+  if (std::strcmp(text, "Closed") == 0) return "Kapalı";
+  if (std::strcmp(text, "Closing") == 0) return "Kapanıyor";
   if (std::strcmp(text, "Cloudy") == 0) return "Bulutlu";
   if (std::strcmp(text, "Cloudy Alert") == 0) return "Bulut uyarısı";
   if (std::strcmp(text, "Configure") == 0) return "Yapılandır";
@@ -3216,6 +3269,7 @@ inline const char *espcontrol_i18n_tr(const char *text) {
   if (std::strcmp(text, "Off") == 0) return "Kapalı";
   if (std::strcmp(text, "On") == 0) return "Açık";
   if (std::strcmp(text, "Open") == 0) return "Aç";
+  if (std::strcmp(text, "Opening") == 0) return "Açılıyor";
   if (std::strcmp(text, "Option") == 0) return "Seçenek";
   if (std::strcmp(text, "Oscillating") == 0) return "Salınımda";
   if (std::strcmp(text, "Oscillation") == 0) return "Salınım";
@@ -3339,6 +3393,8 @@ inline const char *espcontrol_i18n_uk(const char *text) {
   if (std::strcmp(text, "Climate") == 0) return "Клімат";
   if (std::strcmp(text, "Clock") == 0) return "Годинник";
   if (std::strcmp(text, "Close") == 0) return "Закрити";
+  if (std::strcmp(text, "Closed") == 0) return "Закрито";
+  if (std::strcmp(text, "Closing") == 0) return "Закривається";
   if (std::strcmp(text, "Cloudy") == 0) return "Хмарно";
   if (std::strcmp(text, "Cloudy Alert") == 0) return "Попередження про хмарність";
   if (std::strcmp(text, "Configure") == 0) return "Налаштувати";
@@ -3409,6 +3465,7 @@ inline const char *espcontrol_i18n_uk(const char *text) {
   if (std::strcmp(text, "Off") == 0) return "Вимкнено";
   if (std::strcmp(text, "On") == 0) return "Увімкнено";
   if (std::strcmp(text, "Open") == 0) return "Відкрити";
+  if (std::strcmp(text, "Opening") == 0) return "Відкривається";
   if (std::strcmp(text, "Option") == 0) return "Параметр";
   if (std::strcmp(text, "Oscillating") == 0) return "Коливається";
   if (std::strcmp(text, "Oscillation") == 0) return "Коливання";
