@@ -19,6 +19,8 @@ constexpr int CLIMATE_MODAL_JC4880P443_ARC_SIZE_PERCENT = 96;
 constexpr lv_coord_t CLIMATE_MODAL_ARC_UP_REF_PX = 30;
 constexpr lv_coord_t CLIMATE_MODAL_SQUARE_ARC_UP_REF_PX = 24;
 constexpr lv_coord_t CLIMATE_MODAL_STEP_BUTTONS_UP_REF_PX = 42;
+constexpr lv_coord_t CLIMATE_MODAL_JC1060P470_STEP_BUTTONS_UP_REF_PX = 18;
+constexpr lv_coord_t CLIMATE_MODAL_JC1060P470_VALUE_DOWN_REF_PX = 24;
 constexpr lv_coord_t CLIMATE_MODAL_LARGE_LANDSCAPE_STEP_BUTTONS_UP_REF_PX = 18;
 constexpr lv_coord_t CLIMATE_MODAL_LARGE_LANDSCAPE_VALUE_DOWN_REF_PX = 12;
 constexpr lv_coord_t CLIMATE_MODAL_LARGE_LANDSCAPE_OPTION_CHIP_BOTTOM_PX = 4;
@@ -514,11 +516,17 @@ inline bool climate_control_uses_large_landscape_modal_tuning(const ControlModal
   return control_modal_uses_large_landscape_tuning(layout);
 }
 
+inline bool climate_control_uses_jc1060p470_modal_tuning(const ControlModalLayout &layout) {
+  return control_modal_uses_jc1060p470_tuning(layout);
+}
+
 inline bool climate_control_uses_compact_portrait_modal_tuning(const ControlModalLayout &layout) {
   return control_modal_uses_compact_portrait_tuning(layout) && layout.sh > layout.sw;
 }
 
 inline lv_coord_t climate_control_step_buttons_up_ref(const ControlModalLayout &layout) {
+  if (climate_control_uses_jc1060p470_modal_tuning(layout))
+    return CLIMATE_MODAL_JC1060P470_STEP_BUTTONS_UP_REF_PX;
   if (climate_control_uses_large_landscape_modal_tuning(layout))
     return CLIMATE_MODAL_LARGE_LANDSCAPE_STEP_BUTTONS_UP_REF_PX;
   if (control_modal_uses_compact_portrait_tuning(layout))
@@ -535,6 +543,8 @@ inline lv_coord_t climate_control_step_buttons_down_ref(const ControlModalLayout
 }
 
 inline lv_coord_t climate_control_labels_down_ref(const ControlModalLayout &layout) {
+  if (climate_control_uses_jc1060p470_modal_tuning(layout))
+    return CLIMATE_MODAL_JC1060P470_VALUE_DOWN_REF_PX;
   if (climate_control_uses_large_landscape_modal_tuning(layout))
     return CLIMATE_MODAL_LARGE_LANDSCAPE_VALUE_DOWN_REF_PX;
   if (control_modal_uses_compact_portrait_tuning(layout))
