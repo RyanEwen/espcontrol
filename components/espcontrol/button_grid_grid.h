@@ -524,7 +524,8 @@ inline bool bind_passive_card_sources(BtnSlot &s, const ParsedCfg &p) {
   return false;
 }
 
-inline bool bind_garage_status_card(BtnSlot &s, const ParsedCfg &p) {
+inline bool bind_garage_status_card(BtnSlot &s, const ParsedCfg &p,
+                                    TransientStatusLabel **status_label_out = nullptr) {
   if (p.type != "garage" || p.entity.empty()) {
     return false;
   }
@@ -532,6 +533,7 @@ inline bool bind_garage_status_card(BtnSlot &s, const ParsedCfg &p) {
   std::string fallback_label = p.label.empty() ? espcontrol_i18n(std::string("Garage Door")) : p.label;
   TransientStatusLabel *status_label = create_transient_status_label(
     s.text_lbl, show_status ? "--" : fallback_label);
+  if (status_label_out != nullptr) *status_label_out = status_label;
   subscribe_garage_state(s.btn, s.icon_lbl, status_label,
     garage_closed_icon(p.icon), garage_open_icon(p.icon_on), p.entity, show_status);
   if (!show_status && p.label.empty())
@@ -539,7 +541,8 @@ inline bool bind_garage_status_card(BtnSlot &s, const ParsedCfg &p) {
   return true;
 }
 
-inline LockCardCtx *bind_lock_status_card(BtnSlot &s, const ParsedCfg &p) {
+inline LockCardCtx *bind_lock_status_card(BtnSlot &s, const ParsedCfg &p,
+                                          TransientStatusLabel **status_label_out = nullptr) {
   if (p.type != "lock" || p.entity.empty() || lock_command_mode(p.sensor)) {
     return nullptr;
   }
@@ -549,6 +552,7 @@ inline LockCardCtx *bind_lock_status_card(BtnSlot &s, const ParsedCfg &p) {
   std::string fallback_label = p.label.empty() ? espcontrol_i18n(std::string("Lock")) : p.label;
   TransientStatusLabel *status_label = create_transient_status_label(
     s.text_lbl, fallback_label);
+  if (status_label_out != nullptr) *status_label_out = status_label;
   subscribe_lock_state(s.btn, s.icon_lbl, status_label,
     lock_locked_icon(p.icon), lock_unlocked_icon(p.icon_on), ctx);
   if (p.label.empty())
@@ -835,18 +839,169 @@ inline T *grid_delete_with_owner(lv_obj_t *owner, T *ptr) {
   return ptr;
 }
 
+inline void grid_delete_alarm_card_runtime_ptr(void *ptr);
+
 inline AlarmActionCtx *grid_delete_alarm_action_with_owner(lv_obj_t *owner,
                                                            AlarmActionCtx *ctx) {
   if (owner != nullptr && ctx != nullptr) {
     lv_obj_add_event_cb(owner, [](lv_event_t *e) {
       AlarmActionCtx *action = static_cast<AlarmActionCtx *>(lv_event_get_user_data(e));
       if (action != nullptr) {
-        delete action->card;
+        grid_delete_alarm_card_runtime_ptr(action->card);
         delete action;
       }
     }, LV_EVENT_DELETE, ctx);
   }
   return ctx;
+}
+
+struct GridRuntimeAllocation {
+  lv_obj_t *owner = nullptr;
+  void *ptr = nullptr;
+  void (*deleter)(void *) = nullptr;
+};
+
+inline std::vector<GridRuntimeAllocation> &grid_runtime_allocations() {
+  static std::vector<GridRuntimeAllocation> allocations;
+  return allocations;
+}
+
+template<typename T>
+inline void grid_delete_runtime_ptr(void *ptr) {
+  delete static_cast<T *>(ptr);
+}
+
+inline void grid_delete_transient_status_label(TransientStatusLabel *ctx) {
+  if (ctx != nullptr) {
+    if (ctx->revert_timer != nullptr) {
+      lv_timer_del(ctx->revert_timer);
+      ctx->revert_timer = nullptr;
+    }
+    delete ctx;
+  }
+}
+
+inline void grid_delete_transient_status_label_runtime_ptr(void *ptr) {
+  grid_delete_transient_status_label(static_cast<TransientStatusLabel *>(ptr));
+}
+
+inline void grid_delete_alarm_card_runtime_ptr(void *ptr) {
+  AlarmCardCtx *ctx = static_cast<AlarmCardCtx *>(ptr);
+  if (ctx != nullptr) {
+    if (ctx->arm_delay_timer != nullptr) {
+      lv_timer_del(ctx->arm_delay_timer);
+      ctx->arm_delay_timer = nullptr;
+    }
+    if (ctx->pending_action_timer != nullptr) {
+      lv_timer_del(ctx->pending_action_timer);
+      ctx->pending_action_timer = nullptr;
+    }
+    grid_delete_transient_status_label(ctx->status_label);
+    ctx->status_label = nullptr;
+    delete ctx;
+  }
+}
+
+inline void grid_delete_alarm_action_runtime_ptr(void *ptr) {
+  AlarmActionCtx *action = static_cast<AlarmActionCtx *>(ptr);
+  if (action != nullptr) {
+    grid_delete_alarm_card_runtime_ptr(action->card);
+    delete action;
+  }
+}
+
+inline void grid_delete_fan_card_runtime_ptr(void *ptr) {
+  FanCardCtx *ctx = static_cast<FanCardCtx *>(ptr);
+  if (ctx != nullptr) {
+    grid_delete_transient_status_label(ctx->status_label);
+    ctx->status_label = nullptr;
+    delete ctx;
+  }
+}
+
+inline void grid_release_runtime_allocations(lv_obj_t *owner) {
+  if (owner == nullptr) return;
+  std::vector<GridRuntimeAllocation> &allocations = grid_runtime_allocations();
+  size_t write_index = 0;
+  for (size_t read_index = 0; read_index < allocations.size(); read_index++) {
+    GridRuntimeAllocation &allocation = allocations[read_index];
+    if (allocation.owner == owner) {
+      if (allocation.deleter != nullptr && allocation.ptr != nullptr) {
+        allocation.deleter(allocation.ptr);
+      }
+      continue;
+    }
+    if (write_index != read_index) allocations[write_index] = allocation;
+    write_index++;
+  }
+  allocations.resize(write_index);
+  if (allocations.empty()) std::vector<GridRuntimeAllocation>().swap(allocations);
+}
+
+template<typename T>
+inline T *grid_track_runtime_allocation(lv_obj_t *owner, T *ptr) {
+  if (owner != nullptr && ptr != nullptr) {
+    grid_runtime_allocations().push_back({
+      owner,
+      ptr,
+      grid_delete_runtime_ptr<T>,
+    });
+  }
+  return ptr;
+}
+
+inline AlarmActionCtx *grid_track_alarm_action_runtime(lv_obj_t *owner,
+                                                       AlarmActionCtx *ctx) {
+  if (owner != nullptr && ctx != nullptr) {
+    grid_runtime_allocations().push_back({
+      owner,
+      ctx,
+      grid_delete_alarm_action_runtime_ptr,
+    });
+  }
+  return ctx;
+}
+
+inline AlarmCardCtx *grid_track_alarm_card_runtime(lv_obj_t *owner,
+                                                   AlarmCardCtx *ctx) {
+  if (owner != nullptr && ctx != nullptr) {
+    grid_runtime_allocations().push_back({
+      owner,
+      ctx,
+      grid_delete_alarm_card_runtime_ptr,
+    });
+  }
+  return ctx;
+}
+
+inline FanCardCtx *grid_track_fan_card_runtime(lv_obj_t *owner, FanCardCtx *ctx) {
+  if (owner != nullptr && ctx != nullptr) {
+    grid_runtime_allocations().push_back({
+      owner,
+      ctx,
+      grid_delete_fan_card_runtime_ptr,
+    });
+  }
+  return ctx;
+}
+
+inline TransientStatusLabel *grid_track_transient_status_label_runtime(
+    lv_obj_t *owner, TransientStatusLabel *ctx) {
+  if (owner != nullptr && ctx != nullptr) {
+    grid_runtime_allocations().push_back({
+      owner,
+      ctx,
+      grid_delete_transient_status_label_runtime_ptr,
+    });
+  }
+  return ctx;
+}
+
+inline void grid_release_main_runtime_allocations(BtnSlot *slots, int slot_count) {
+  if (slots == nullptr) return;
+  for (int i = 0; i < slot_count; i++) {
+    grid_release_runtime_allocations(slots[i].btn);
+  }
 }
 
 inline void grid_clear_subpage_parent_targets(BtnSlot *slots, int slot_count) {
@@ -906,6 +1061,7 @@ inline void grid_phase2(
   weather_forecast_cancel_pending_requests();
   reset_ha_control_availability_refs();
   clear_internal_relay_watchers();
+  grid_release_main_runtime_allocations(slots, NS);
   grid_clear_subpage_parent_targets(slots, NS);
   navigation_clear_subpages();
   clear_subpage_vacuum_card_text_refs();
@@ -961,8 +1117,11 @@ inline void grid_phase2(
           subscribe_control_availability(s.btn, s.btn, p.entity);
         }
       }
-      if (!garage_command_mode(p.sensor) || garage_card_show_status(p))
-        bind_garage_status_card(s, p);
+      if (!garage_command_mode(p.sensor) || garage_card_show_status(p)) {
+        TransientStatusLabel *status_label = nullptr;
+        bind_garage_status_card(s, p, &status_label);
+        grid_track_transient_status_label_runtime(s.btn, status_label);
+      }
       continue;
     }
     if (subpage_parent_sensor_state_enabled(p)) {
@@ -1015,7 +1174,9 @@ inline void grid_phase2(
         if (lock_command_mode(p.sensor)) {
           subscribe_control_availability(s.btn, s.btn, p.entity);
         } else {
-          bind_lock_status_card(s, p);
+          TransientStatusLabel *status_label = nullptr;
+          grid_track_runtime_allocation(s.btn, bind_lock_status_card(s, p, &status_label));
+          grid_track_transient_status_label_runtime(s.btn, status_label);
         }
       }
       continue;
@@ -1035,6 +1196,7 @@ inline void grid_phase2(
           lv_obj_get_style_text_color(s.text_lbl, LV_PART_MAIN),
           display_main_width_percent(display),
           false);
+        grid_track_alarm_card_runtime(s.btn, ctx);
         lv_obj_set_user_data(s.btn, ctx);
         subscribe_alarm_state(ctx);
         if (p.label.empty() && !ctx->show_status_label)
@@ -1065,7 +1227,7 @@ inline void grid_phase2(
         alarm_action_card->grid_cols = COLS;
         alarm_set_card_state_colors(alarm_action_card, alarm_action_card->on_color);
 
-        AlarmActionCtx *action_ctx = new AlarmActionCtx();
+        AlarmActionCtx *action_ctx = grid_track_alarm_action_runtime(s.btn, new AlarmActionCtx());
         action_ctx->card = alarm_action_card;
         action_ctx->mode = alarm_action_valid(p.sensor) ? p.sensor : "away";
         action_ctx->requires_pin =
@@ -1085,6 +1247,7 @@ inline void grid_phase2(
           lv_obj_get_style_text_font(s.text_lbl, LV_PART_MAIN),
           display_icon_font(display),
           display_main_width_percent(display));
+        grid_track_fan_card_runtime(s.btn, ctx);
         subscribe_fan_card_state(ctx);
       }
       continue;
@@ -1101,6 +1264,7 @@ inline void grid_phase2(
       if (!p.entity.empty()) {
         TransientStatusLabel *status_label = create_transient_status_label(
           s.text_lbl, p.label.empty() ? espcontrol_i18n(std::string("Cover")) : p.label);
+        grid_track_transient_status_label_runtime(s.btn, status_label);
         subscribe_cover_toggle_state(s.btn, s.icon_lbl, status_label,
           slider_icon_off(p.type, p.entity, p.icon), slider_icon_on(p.type, p.entity, p.icon, p.icon_on), p.entity);
         if (p.label.empty())
@@ -1126,6 +1290,7 @@ inline void grid_phase2(
             has_off ? off_val : DEFAULT_OFF_COLOR,
             has_sensor_color ? sensor_val : DEFAULT_TERTIARY_COLOR,
             display_main_width_percent(display));
+          grid_track_runtime_allocation(s.btn, ctx);
           subscribe_option_select_state(ctx);
           subscribe_option_select_friendly_name(ctx);
         }
@@ -1134,6 +1299,7 @@ inline void grid_phase2(
       std::string state_entity = action_card_state_entity(p);
       if (!state_entity.empty()) {
         ActionCardStateCtx *ctx = create_action_card_state_context(s, p);
+        grid_track_runtime_allocation(s.btn, ctx);
         subscribe_action_card_display_state(ctx, state_entity);
       }
       continue;
@@ -1142,6 +1308,7 @@ inline void grid_phase2(
       lv_obj_set_user_data(s.btn, nullptr);
       if (!p.entity.empty() && vacuum_card_mode_needs_state(p.sensor)) {
         VacuumCardCtx *ctx = create_vacuum_card_context(s, p);
+        grid_track_runtime_allocation(s.btn, ctx);
         subscribe_vacuum_card_state(ctx);
         lv_obj_set_user_data(s.btn, ctx);
       } else if (!p.entity.empty()) {
@@ -1153,6 +1320,7 @@ inline void grid_phase2(
       lv_obj_set_user_data(s.btn, nullptr);
       if (!p.entity.empty() && lawn_mower_card_mode_needs_state(p.sensor)) {
         LawnMowerCardCtx *ctx = create_lawn_mower_card_context(s, p);
+        grid_track_runtime_allocation(s.btn, ctx);
         subscribe_lawn_mower_card_state(ctx);
         lv_obj_set_user_data(s.btn, ctx);
       } else if (!p.entity.empty()) {
@@ -1168,6 +1336,7 @@ inline void grid_phase2(
           has_off ? off_val : DEFAULT_OFF_COLOR,
           has_sensor_color ? sensor_val : DEFAULT_TERTIARY_COLOR,
           display_main_width_percent(display));
+        grid_track_runtime_allocation(s.btn, ctx);
         subscribe_option_select_state(ctx);
         subscribe_option_select_friendly_name(ctx);
       }
@@ -1189,6 +1358,7 @@ inline void grid_phase2(
           display_icon_font(display),
           display_main_width_percent(display),
           is_1x1_card);
+        grid_track_runtime_allocation(s.btn, ctx);
         subscribe_todo_state(ctx);
         subscribe_todo_friendly_name(ctx);
       }
@@ -1222,6 +1392,7 @@ inline void grid_phase2(
             display_volume_width_percent(display),
             s.sensor_lbl, s.unit_lbl,
             cfg.suspend_display_takeover, cfg.resume_display_takeover);
+          grid_track_runtime_allocation(s.btn, ctx);
           subscribe_media_volume_state(ctx);
           if (p.label.empty()) subscribe_friendly_name(s.text_lbl, p.entity);
         } else if (mode == "now_playing") {
@@ -1263,6 +1434,7 @@ inline void grid_phase2(
           display_icon_font(display),
           display_volume_width_percent(display),
           s.sensor_container, s.sensor_lbl, s.unit_lbl);
+        grid_track_runtime_allocation(s.btn, ctx);
         subscribe_climate_control_state(ctx);
       }
       continue;
@@ -1278,6 +1450,7 @@ inline void grid_phase2(
             : lv_obj_get_style_text_font(s.text_lbl, LV_PART_MAIN),
           display_icon_font(display),
           display_volume_width_percent(display));
+        grid_track_runtime_allocation(s.btn, ctx);
         subscribe_light_control_state(ctx);
       }
       continue;
@@ -1292,6 +1465,7 @@ inline void grid_phase2(
         has_off ? off_val : DEFAULT_OFF_COLOR,
         display_icon_font(display),
         display_main_width_percent(display));
+      grid_track_runtime_allocation(s.btn, ctx);
       subscribe_cover_control_state(ctx);
       continue;
     }
@@ -1339,7 +1513,7 @@ inline void grid_phase2(
 
     ToggleTextSensorCtx *text_sensor_ctx = nullptr;
     if (sensor_text_mode[idx - 1]) {
-      text_sensor_ctx = new ToggleTextSensorCtx();
+      text_sensor_ctx = grid_track_runtime_allocation(s.btn, new ToggleTextSensorCtx());
       text_sensor_ctx->text_lbl = s.text_lbl;
       text_sensor_ctx->steady_text = label_text_or_empty(s.text_lbl);
     }
