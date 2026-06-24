@@ -231,7 +231,7 @@ var CSS =
   ".sp-settings-close:hover{background:var(--border);border-color:#4a4d54;color:var(--text)}" +
   ".sp-settings-close:focus-visible{outline:none;border-color:var(--accent);" +
   "box-shadow:0 0 0 3px var(--accent-soft)}" +
-  ".sp-settings-close .mdi{line-height:1}" +
+  ".sp-settings-close-icon{width:20px;height:20px;display:block;fill:currentColor;pointer-events:none}" +
 
   ".sp-section-title{font-size:.8rem;font-weight:600;color:var(--text2);" +
   "margin:var(--gap) 0 8px;letter-spacing:-.01em}" +

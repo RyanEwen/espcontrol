@@ -755,13 +755,14 @@ async function assertEmptyCellSettings(page, posts, label) {
   );
   const closeControl = await page.evaluate(() => {
     var button = document.querySelector(".sp-settings-close");
-    var icon = button && button.querySelector(".mdi-close");
+    var icon = button && button.querySelector(".sp-settings-close-icon path");
     if (!button) return { visible: false };
     var rect = button.getBoundingClientRect();
     var styles = getComputedStyle(button);
     return {
       visible: rect.width > 1 && rect.height > 1,
       hasCloseIcon: !!icon,
+      usesInlineIcon: !!icon && icon.tagName.toLowerCase() === "path",
       width: rect.width,
       height: rect.height,
       radius: parseFloat(styles.borderRadius),
@@ -770,6 +771,7 @@ async function assertEmptyCellSettings(page, posts, label) {
   });
   assert(closeControl.visible, `${label}: settings modal close control is visible`);
   assert(closeControl.hasCloseIcon, `${label}: settings modal close control uses a close icon`);
+  assert(closeControl.usesInlineIcon, `${label}: settings modal close control icon does not depend on external icon fonts`);
   assert(Math.abs(closeControl.width - closeControl.height) <= 1, `${label}: settings modal close control is circular`);
   assert(closeControl.radius >= closeControl.width / 2 - 1, `${label}: settings modal close control has a circle container`);
   assert(closeControl.borderWidth >= 1, `${label}: settings modal close control has a visible container border`);
