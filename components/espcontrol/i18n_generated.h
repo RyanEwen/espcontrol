@@ -86,6 +86,7 @@ inline const char *espcontrol_i18n_cs(const char *text) {
   if (std::strcmp(text, "Loading") == 0) return "Načítání";
   if (std::strcmp(text, "Locate") == 0) return "Najít";
   if (std::strcmp(text, "Lock") == 0) return "Zamknout";
+  if (std::strcmp(text, "Lawn Mower") == 0) return "Sekačka";
   if (std::strcmp(text, "Low") == 0) return "Nízké";
   if (std::strcmp(text, "Low target") == 0) return "Nízký cíl";
   if (std::strcmp(text, "Media") == 0) return "Média";
@@ -93,6 +94,7 @@ inline const char *espcontrol_i18n_cs(const char *text) {
   if (std::strcmp(text, "Monthly") == 0) return "Měsíčně";
   if (std::strcmp(text, "more") == 0) return "další";
   if (std::strcmp(text, "More items") == 0) return "Další položky";
+  if (std::strcmp(text, "Mowing") == 0) return "Seká";
   if (std::strcmp(text, "January") == 0) return "leden";
   if (std::strcmp(text, "February") == 0) return "únor";
   if (std::strcmp(text, "March") == 0) return "březen";
@@ -160,6 +162,7 @@ inline const char *espcontrol_i18n_cs(const char *text) {
   if (std::strcmp(text, "Target") == 0) return "Cíl";
   if (std::strcmp(text, "Today") == 0) return "Dnes";
   if (std::strcmp(text, "Todo") == 0) return "Úkol";
+  if (std::strcmp(text, "Too many") == 0) return "Příliš mnoho";
   if (std::strcmp(text, "Toggle this device?") == 0) return "Přepnout toto zařízení?";
   if (std::strcmp(text, "Tomorrow") == 0) return "Zítra";
   if (std::strcmp(text, "Tornado") == 0) return "Tornádo";
@@ -290,6 +293,7 @@ inline const char *espcontrol_i18n_da(const char *text) {
   if (std::strcmp(text, "Loading") == 0) return "Indlæser";
   if (std::strcmp(text, "Locate") == 0) return "Find";
   if (std::strcmp(text, "Lock") == 0) return "Lås";
+  if (std::strcmp(text, "Lawn Mower") == 0) return "Plæneklipper";
   if (std::strcmp(text, "Low") == 0) return "Lav";
   if (std::strcmp(text, "Low target") == 0) return "Lavt mål";
   if (std::strcmp(text, "Media") == 0) return "Medie";
@@ -297,6 +301,7 @@ inline const char *espcontrol_i18n_da(const char *text) {
   if (std::strcmp(text, "Monthly") == 0) return "Månedligt";
   if (std::strcmp(text, "more") == 0) return "mere";
   if (std::strcmp(text, "More items") == 0) return "Flere elementer";
+  if (std::strcmp(text, "Mowing") == 0) return "Slår græs";
   if (std::strcmp(text, "January") == 0) return "januar";
   if (std::strcmp(text, "February") == 0) return "februar";
   if (std::strcmp(text, "March") == 0) return "marts";
@@ -360,6 +365,7 @@ inline const char *espcontrol_i18n_da(const char *text) {
   if (std::strcmp(text, "Target") == 0) return "Mål";
   if (std::strcmp(text, "Today") == 0) return "I dag";
   if (std::strcmp(text, "Todo") == 0) return "Opgave";
+  if (std::strcmp(text, "Too many") == 0) return "For mange";
   if (std::strcmp(text, "Toggle this device?") == 0) return "Skift denne enhed?";
   if (std::strcmp(text, "Tomorrow") == 0) return "I morgen";
   if (std::strcmp(text, "Track") == 0) return "Spor";
@@ -491,6 +497,7 @@ inline const char *espcontrol_i18n_de(const char *text) {
   if (std::strcmp(text, "Loading") == 0) return "Laden";
   if (std::strcmp(text, "Locate") == 0) return "Orten";
   if (std::strcmp(text, "Lock") == 0) return "Sperren";
+  if (std::strcmp(text, "Lawn Mower") == 0) return "Rasenmäher";
   if (std::strcmp(text, "Low") == 0) return "Niedrig";
   if (std::strcmp(text, "Low target") == 0) return "Niedriger Zielwert";
   if (std::strcmp(text, "Media") == 0) return "Medien";
@@ -498,6 +505,7 @@ inline const char *espcontrol_i18n_de(const char *text) {
   if (std::strcmp(text, "Monthly") == 0) return "Monatlich";
   if (std::strcmp(text, "more") == 0) return "weitere";
   if (std::strcmp(text, "More items") == 0) return "Weitere Elemente";
+  if (std::strcmp(text, "Mowing") == 0) return "Mäht";
   if (std::strcmp(text, "January") == 0) return "Januar";
   if (std::strcmp(text, "February") == 0) return "Februar";
   if (std::strcmp(text, "March") == 0) return "März";
@@ -556,6 +564,7 @@ inline const char *espcontrol_i18n_de(const char *text) {
   if (std::strcmp(text, "Target") == 0) return "Ziel";
   if (std::strcmp(text, "Today") == 0) return "Heute";
   if (std::strcmp(text, "Todo") == 0) return "Aufgabe";
+  if (std::strcmp(text, "Too many") == 0) return "Zu viele";
   if (std::strcmp(text, "Toggle this device?") == 0) return "Dieses Gerät umschalten?";
   if (std::strcmp(text, "Tomorrow") == 0) return "Morgen";
   if (std::strcmp(text, "Track") == 0) return "Titel";
@@ -686,6 +695,7 @@ inline const char *espcontrol_i18n_es(const char *text) {
   if (std::strcmp(text, "Loading") == 0) return "Cargando";
   if (std::strcmp(text, "Locate") == 0) return "Localizar";
   if (std::strcmp(text, "Lock") == 0) return "Bloquear";
+  if (std::strcmp(text, "Lawn Mower") == 0) return "Cortacésped";
   if (std::strcmp(text, "Low") == 0) return "Bajo";
   if (std::strcmp(text, "Low target") == 0) return "Objetivo bajo";
   if (std::strcmp(text, "Media") == 0) return "Multimedia";
@@ -693,6 +703,7 @@ inline const char *espcontrol_i18n_es(const char *text) {
   if (std::strcmp(text, "Monthly") == 0) return "Mensual";
   if (std::strcmp(text, "more") == 0) return "más";
   if (std::strcmp(text, "More items") == 0) return "Más elementos";
+  if (std::strcmp(text, "Mowing") == 0) return "Cortando";
   if (std::strcmp(text, "January") == 0) return "enero";
   if (std::strcmp(text, "February") == 0) return "febrero";
   if (std::strcmp(text, "March") == 0) return "marzo";
@@ -759,6 +770,7 @@ inline const char *espcontrol_i18n_es(const char *text) {
   if (std::strcmp(text, "Target") == 0) return "Objetivo";
   if (std::strcmp(text, "Today") == 0) return "Hoy";
   if (std::strcmp(text, "Todo") == 0) return "Tarea";
+  if (std::strcmp(text, "Too many") == 0) return "Demasiados";
   if (std::strcmp(text, "Toggle this device?") == 0) return "¿Alternar este dispositivo?";
   if (std::strcmp(text, "Tomorrow") == 0) return "Mañana";
   if (std::strcmp(text, "Track") == 0) return "Pista";
@@ -893,6 +905,7 @@ inline const char *espcontrol_i18n_fi(const char *text) {
   if (std::strcmp(text, "Loading") == 0) return "Ladataan";
   if (std::strcmp(text, "Locate") == 0) return "Paikanna";
   if (std::strcmp(text, "Lock") == 0) return "Lukko";
+  if (std::strcmp(text, "Lawn Mower") == 0) return "Ruohonleikkuri";
   if (std::strcmp(text, "Low") == 0) return "Matala";
   if (std::strcmp(text, "Low target") == 0) return "Alaraja";
   if (std::strcmp(text, "Medium") == 0) return "Keskitaso";
@@ -900,6 +913,7 @@ inline const char *espcontrol_i18n_fi(const char *text) {
   if (std::strcmp(text, "Monthly") == 0) return "Kuukausittain";
   if (std::strcmp(text, "more") == 0) return "lisää";
   if (std::strcmp(text, "More items") == 0) return "Lisää kohteita";
+  if (std::strcmp(text, "Mowing") == 0) return "Leikkaa";
   if (std::strcmp(text, "January") == 0) return "Tammikuu";
   if (std::strcmp(text, "February") == 0) return "Helmikuu";
   if (std::strcmp(text, "March") == 0) return "Maaliskuu";
@@ -971,6 +985,7 @@ inline const char *espcontrol_i18n_fi(const char *text) {
   if (std::strcmp(text, "Temporaryhold") == 0) return "Väliaikainen pito";
   if (std::strcmp(text, "Today") == 0) return "Tänään";
   if (std::strcmp(text, "Todo") == 0) return "Tehtävä";
+  if (std::strcmp(text, "Too many") == 0) return "Liian monta";
   if (std::strcmp(text, "Toggle this device?") == 0) return "Vaihda tämän laitteen tila?";
   if (std::strcmp(text, "Tomorrow") == 0) return "Huomenna";
   if (std::strcmp(text, "Track") == 0) return "Kappale";
@@ -1100,12 +1115,14 @@ inline const char *espcontrol_i18n_fr(const char *text) {
   if (std::strcmp(text, "Loading") == 0) return "Chargement";
   if (std::strcmp(text, "Locate") == 0) return "Localiser";
   if (std::strcmp(text, "Lock") == 0) return "Verrouiller";
+  if (std::strcmp(text, "Lawn Mower") == 0) return "Tondeuse";
   if (std::strcmp(text, "Low") == 0) return "Bas";
   if (std::strcmp(text, "Low target") == 0) return "Cible basse";
   if (std::strcmp(text, "Media") == 0) return "Média";
   if (std::strcmp(text, "Monthly") == 0) return "Mensuel";
   if (std::strcmp(text, "more") == 0) return "de plus";
   if (std::strcmp(text, "More items") == 0) return "Plus d’éléments";
+  if (std::strcmp(text, "Mowing") == 0) return "Tonte";
   if (std::strcmp(text, "January") == 0) return "janvier";
   if (std::strcmp(text, "February") == 0) return "février";
   if (std::strcmp(text, "March") == 0) return "mars";
@@ -1169,6 +1186,7 @@ inline const char *espcontrol_i18n_fr(const char *text) {
   if (std::strcmp(text, "Target") == 0) return "Cible";
   if (std::strcmp(text, "Today") == 0) return "Aujourd'hui";
   if (std::strcmp(text, "Todo") == 0) return "Tâche";
+  if (std::strcmp(text, "Too many") == 0) return "Trop nombreux";
   if (std::strcmp(text, "Toggle this device?") == 0) return "Basculer cet appareil ?";
   if (std::strcmp(text, "Tomorrow") == 0) return "Demain";
   if (std::strcmp(text, "Tornado") == 0) return "Tornade";
@@ -1303,6 +1321,7 @@ inline const char *espcontrol_i18n_hu(const char *text) {
   if (std::strcmp(text, "Loading") == 0) return "Betöltés";
   if (std::strcmp(text, "Locate") == 0) return "Keresés";
   if (std::strcmp(text, "Lock") == 0) return "Zár";
+  if (std::strcmp(text, "Lawn Mower") == 0) return "Fűnyíró";
   if (std::strcmp(text, "Low") == 0) return "Alacsony";
   if (std::strcmp(text, "Low target") == 0) return "Alacsony célérték";
   if (std::strcmp(text, "Media") == 0) return "Média";
@@ -1311,6 +1330,7 @@ inline const char *espcontrol_i18n_hu(const char *text) {
   if (std::strcmp(text, "Monthly") == 0) return "Havonta";
   if (std::strcmp(text, "more") == 0) return "további";
   if (std::strcmp(text, "More items") == 0) return "További elemek";
+  if (std::strcmp(text, "Mowing") == 0) return "Nyírás";
   if (std::strcmp(text, "January") == 0) return "Január";
   if (std::strcmp(text, "February") == 0) return "Február";
   if (std::strcmp(text, "March") == 0) return "Március";
@@ -1380,6 +1400,7 @@ inline const char *espcontrol_i18n_hu(const char *text) {
   if (std::strcmp(text, "Temporaryhold") == 0) return "Ideiglenes tartás";
   if (std::strcmp(text, "Today") == 0) return "Ma";
   if (std::strcmp(text, "Todo") == 0) return "Teendő";
+  if (std::strcmp(text, "Too many") == 0) return "Túl sok";
   if (std::strcmp(text, "Toggle this device?") == 0) return "Átváltja ezt az eszközt?";
   if (std::strcmp(text, "Tomorrow") == 0) return "Holnap";
   if (std::strcmp(text, "Tornado") == 0) return "Tornádó";
@@ -1513,6 +1534,7 @@ inline const char *espcontrol_i18n_it(const char *text) {
   if (std::strcmp(text, "Loading") == 0) return "Caricamento";
   if (std::strcmp(text, "Locate") == 0) return "Localizza";
   if (std::strcmp(text, "Lock") == 0) return "Blocca";
+  if (std::strcmp(text, "Lawn Mower") == 0) return "Tagliaerba";
   if (std::strcmp(text, "Low") == 0) return "Basso";
   if (std::strcmp(text, "Low target") == 0) return "Target basso";
   if (std::strcmp(text, "Medium") == 0) return "Medio";
@@ -1520,6 +1542,7 @@ inline const char *espcontrol_i18n_it(const char *text) {
   if (std::strcmp(text, "Monthly") == 0) return "Mensile";
   if (std::strcmp(text, "more") == 0) return "altri";
   if (std::strcmp(text, "More items") == 0) return "Altri elementi";
+  if (std::strcmp(text, "Mowing") == 0) return "Taglio in corso";
   if (std::strcmp(text, "January") == 0) return "Gennaio";
   if (std::strcmp(text, "February") == 0) return "Febbraio";
   if (std::strcmp(text, "March") == 0) return "Marzo";
@@ -1588,6 +1611,7 @@ inline const char *espcontrol_i18n_it(const char *text) {
   if (std::strcmp(text, "Temporaryhold") == 0) return "Temporaneo";
   if (std::strcmp(text, "Today") == 0) return "Oggi";
   if (std::strcmp(text, "Todo") == 0) return "Da fare";
+  if (std::strcmp(text, "Too many") == 0) return "Troppi";
   if (std::strcmp(text, "Toggle this device?") == 0) return "Commutare questo dispositivo?";
   if (std::strcmp(text, "Tomorrow") == 0) return "Domani";
   if (std::strcmp(text, "Track") == 0) return "Traccia";
@@ -1718,12 +1742,14 @@ inline const char *espcontrol_i18n_nb(const char *text) {
   if (std::strcmp(text, "Loading") == 0) return "Laster";
   if (std::strcmp(text, "Locate") == 0) return "Finn";
   if (std::strcmp(text, "Lock") == 0) return "Lås";
+  if (std::strcmp(text, "Lawn Mower") == 0) return "Gressklipper";
   if (std::strcmp(text, "Low") == 0) return "Lav";
   if (std::strcmp(text, "Low target") == 0) return "Lavt mål";
   if (std::strcmp(text, "Mode") == 0) return "Modus";
   if (std::strcmp(text, "Monthly") == 0) return "Månedlig";
   if (std::strcmp(text, "more") == 0) return "flere";
   if (std::strcmp(text, "More items") == 0) return "Flere elementer";
+  if (std::strcmp(text, "Mowing") == 0) return "Klipper";
   if (std::strcmp(text, "January") == 0) return "januar";
   if (std::strcmp(text, "February") == 0) return "februar";
   if (std::strcmp(text, "March") == 0) return "mars";
@@ -1789,6 +1815,7 @@ inline const char *espcontrol_i18n_nb(const char *text) {
   if (std::strcmp(text, "Target") == 0) return "Mål";
   if (std::strcmp(text, "Today") == 0) return "I dag";
   if (std::strcmp(text, "Todo") == 0) return "Oppgave";
+  if (std::strcmp(text, "Too many") == 0) return "For mange";
   if (std::strcmp(text, "Toggle this device?") == 0) return "Veksle denne enheten?";
   if (std::strcmp(text, "Tomorrow") == 0) return "I morgen";
   if (std::strcmp(text, "Track") == 0) return "Spor";
@@ -1921,12 +1948,14 @@ inline const char *espcontrol_i18n_nl(const char *text) {
   if (std::strcmp(text, "Loading") == 0) return "Laden";
   if (std::strcmp(text, "Locate") == 0) return "Lokaliseren";
   if (std::strcmp(text, "Lock") == 0) return "Vergrendelen";
+  if (std::strcmp(text, "Lawn Mower") == 0) return "Grasmaaier";
   if (std::strcmp(text, "Low") == 0) return "Laag";
   if (std::strcmp(text, "Low target") == 0) return "Laag doel";
   if (std::strcmp(text, "Mode") == 0) return "Modus";
   if (std::strcmp(text, "Monthly") == 0) return "Maandelijks";
   if (std::strcmp(text, "more") == 0) return "meer";
   if (std::strcmp(text, "More items") == 0) return "Meer items";
+  if (std::strcmp(text, "Mowing") == 0) return "Maaien";
   if (std::strcmp(text, "January") == 0) return "januari";
   if (std::strcmp(text, "February") == 0) return "februari";
   if (std::strcmp(text, "March") == 0) return "maart";
@@ -1993,6 +2022,7 @@ inline const char *espcontrol_i18n_nl(const char *text) {
   if (std::strcmp(text, "Target") == 0) return "Doel";
   if (std::strcmp(text, "Today") == 0) return "Vandaag";
   if (std::strcmp(text, "Todo") == 0) return "Taken";
+  if (std::strcmp(text, "Too many") == 0) return "Te veel";
   if (std::strcmp(text, "Toggle this device?") == 0) return "Dit apparaat schakelen?";
   if (std::strcmp(text, "Tomorrow") == 0) return "Morgen";
   if (std::strcmp(text, "Track") == 0) return "Nummer";
@@ -2121,12 +2151,14 @@ inline const char *espcontrol_i18n_pl(const char *text) {
   if (std::strcmp(text, "Loading") == 0) return "Ładowanie";
   if (std::strcmp(text, "Locate") == 0) return "Zlokalizuj";
   if (std::strcmp(text, "Lock") == 0) return "Zablokuj";
+  if (std::strcmp(text, "Lawn Mower") == 0) return "Kosiarka";
   if (std::strcmp(text, "Low") == 0) return "Niski";
   if (std::strcmp(text, "Low target") == 0) return "Niski cel";
   if (std::strcmp(text, "Mode") == 0) return "Tryb";
   if (std::strcmp(text, "Monthly") == 0) return "Co miesiąc";
   if (std::strcmp(text, "more") == 0) return "więcej";
   if (std::strcmp(text, "More items") == 0) return "Więcej elementów";
+  if (std::strcmp(text, "Mowing") == 0) return "Koszenie";
   if (std::strcmp(text, "January") == 0) return "styczeń";
   if (std::strcmp(text, "February") == 0) return "luty";
   if (std::strcmp(text, "March") == 0) return "marzec";
@@ -2192,6 +2224,7 @@ inline const char *espcontrol_i18n_pl(const char *text) {
   if (std::strcmp(text, "Target") == 0) return "Cel";
   if (std::strcmp(text, "Today") == 0) return "Dziś";
   if (std::strcmp(text, "Todo") == 0) return "Zadanie";
+  if (std::strcmp(text, "Too many") == 0) return "Za dużo";
   if (std::strcmp(text, "Toggle this device?") == 0) return "Przełączyć to urządzenie?";
   if (std::strcmp(text, "Tomorrow") == 0) return "Jutro";
   if (std::strcmp(text, "Track") == 0) return "Utwór";
@@ -2322,6 +2355,7 @@ inline const char *espcontrol_i18n_pt_br(const char *text) {
   if (std::strcmp(text, "Loading") == 0) return "Carregando";
   if (std::strcmp(text, "Locate") == 0) return "Localizar";
   if (std::strcmp(text, "Lock") == 0) return "Bloquear";
+  if (std::strcmp(text, "Lawn Mower") == 0) return "Cortador de grama";
   if (std::strcmp(text, "Low") == 0) return "Baixo";
   if (std::strcmp(text, "Low target") == 0) return "Alvo baixo";
   if (std::strcmp(text, "Media") == 0) return "Mídia";
@@ -2329,6 +2363,7 @@ inline const char *espcontrol_i18n_pt_br(const char *text) {
   if (std::strcmp(text, "Monthly") == 0) return "Mensal";
   if (std::strcmp(text, "more") == 0) return "mais";
   if (std::strcmp(text, "More items") == 0) return "Mais itens";
+  if (std::strcmp(text, "Mowing") == 0) return "Cortando";
   if (std::strcmp(text, "January") == 0) return "janeiro";
   if (std::strcmp(text, "February") == 0) return "fevereiro";
   if (std::strcmp(text, "March") == 0) return "março";
@@ -2396,6 +2431,7 @@ inline const char *espcontrol_i18n_pt_br(const char *text) {
   if (std::strcmp(text, "Target") == 0) return "Alvo";
   if (std::strcmp(text, "Today") == 0) return "Hoje";
   if (std::strcmp(text, "Todo") == 0) return "Tarefa";
+  if (std::strcmp(text, "Too many") == 0) return "Muitos";
   if (std::strcmp(text, "Toggle this device?") == 0) return "Alternar este dispositivo?";
   if (std::strcmp(text, "Tomorrow") == 0) return "Amanhã";
   if (std::strcmp(text, "Track") == 0) return "Faixa";
@@ -2526,6 +2562,7 @@ inline const char *espcontrol_i18n_pt(const char *text) {
   if (std::strcmp(text, "Loading") == 0) return "A carregar";
   if (std::strcmp(text, "Locate") == 0) return "Localizar";
   if (std::strcmp(text, "Lock") == 0) return "Bloquear";
+  if (std::strcmp(text, "Lawn Mower") == 0) return "Corta-relva";
   if (std::strcmp(text, "Low") == 0) return "Baixo";
   if (std::strcmp(text, "Low target") == 0) return "Alvo baixo";
   if (std::strcmp(text, "Media") == 0) return "Multimédia";
@@ -2533,6 +2570,7 @@ inline const char *espcontrol_i18n_pt(const char *text) {
   if (std::strcmp(text, "Monthly") == 0) return "Mensal";
   if (std::strcmp(text, "more") == 0) return "mais";
   if (std::strcmp(text, "More items") == 0) return "Mais itens";
+  if (std::strcmp(text, "Mowing") == 0) return "A cortar";
   if (std::strcmp(text, "January") == 0) return "janeiro";
   if (std::strcmp(text, "February") == 0) return "fevereiro";
   if (std::strcmp(text, "March") == 0) return "março";
@@ -2600,6 +2638,7 @@ inline const char *espcontrol_i18n_pt(const char *text) {
   if (std::strcmp(text, "Target") == 0) return "Alvo";
   if (std::strcmp(text, "Today") == 0) return "Hoje";
   if (std::strcmp(text, "Todo") == 0) return "Tarefa";
+  if (std::strcmp(text, "Too many") == 0) return "Demasiados";
   if (std::strcmp(text, "Toggle this device?") == 0) return "Alternar este dispositivo?";
   if (std::strcmp(text, "Tomorrow") == 0) return "Amanhã";
   if (std::strcmp(text, "Track") == 0) return "Faixa";
@@ -2733,6 +2772,7 @@ inline const char *espcontrol_i18n_ro(const char *text) {
   if (std::strcmp(text, "Loading") == 0) return "Se încarcă";
   if (std::strcmp(text, "Locate") == 0) return "Localizare";
   if (std::strcmp(text, "Lock") == 0) return "Încuietoare";
+  if (std::strcmp(text, "Lawn Mower") == 0) return "Mașină de tuns iarba";
   if (std::strcmp(text, "Low") == 0) return "Scăzut";
   if (std::strcmp(text, "Low target") == 0) return "Țintă scăzută";
   if (std::strcmp(text, "Medium") == 0) return "Mediu";
@@ -2740,6 +2780,7 @@ inline const char *espcontrol_i18n_ro(const char *text) {
   if (std::strcmp(text, "Monthly") == 0) return "Lunar";
   if (std::strcmp(text, "more") == 0) return "încă";
   if (std::strcmp(text, "More items") == 0) return "Mai multe elemente";
+  if (std::strcmp(text, "Mowing") == 0) return "Tunde iarba";
   if (std::strcmp(text, "January") == 0) return "Ianuarie";
   if (std::strcmp(text, "February") == 0) return "Februarie";
   if (std::strcmp(text, "March") == 0) return "Martie";
@@ -2810,6 +2851,7 @@ inline const char *espcontrol_i18n_ro(const char *text) {
   if (std::strcmp(text, "Temporaryhold") == 0) return "Menținere temporară";
   if (std::strcmp(text, "Today") == 0) return "Astăzi";
   if (std::strcmp(text, "Todo") == 0) return "De făcut";
+  if (std::strcmp(text, "Too many") == 0) return "Prea multe";
   if (std::strcmp(text, "Toggle this device?") == 0) return "Comuți acest dispozitiv?";
   if (std::strcmp(text, "Tomorrow") == 0) return "Mâine";
   if (std::strcmp(text, "Tornado") == 0) return "Tornadă";
@@ -2942,6 +2984,7 @@ inline const char *espcontrol_i18n_sk(const char *text) {
   if (std::strcmp(text, "Loading") == 0) return "Načítanie";
   if (std::strcmp(text, "Locate") == 0) return "Nájsť";
   if (std::strcmp(text, "Lock") == 0) return "Zamknúť";
+  if (std::strcmp(text, "Lawn Mower") == 0) return "Kosačka";
   if (std::strcmp(text, "Low") == 0) return "Nízke";
   if (std::strcmp(text, "Low target") == 0) return "Nízky cieľ";
   if (std::strcmp(text, "Media") == 0) return "Médiá";
@@ -2949,6 +2992,7 @@ inline const char *espcontrol_i18n_sk(const char *text) {
   if (std::strcmp(text, "Monthly") == 0) return "Mesačne";
   if (std::strcmp(text, "more") == 0) return "ďalšie";
   if (std::strcmp(text, "More items") == 0) return "Ďalšie položky";
+  if (std::strcmp(text, "Mowing") == 0) return "Kosí";
   if (std::strcmp(text, "January") == 0) return "január";
   if (std::strcmp(text, "February") == 0) return "február";
   if (std::strcmp(text, "March") == 0) return "marec";
@@ -3016,6 +3060,7 @@ inline const char *espcontrol_i18n_sk(const char *text) {
   if (std::strcmp(text, "Target") == 0) return "Cieľ";
   if (std::strcmp(text, "Today") == 0) return "Dnes";
   if (std::strcmp(text, "Todo") == 0) return "Úloha";
+  if (std::strcmp(text, "Too many") == 0) return "Príliš veľa";
   if (std::strcmp(text, "Toggle this device?") == 0) return "Prepnúť toto zariadenie?";
   if (std::strcmp(text, "Tomorrow") == 0) return "Zajtra";
   if (std::strcmp(text, "Tornado") == 0) return "Tornádo";
@@ -3150,6 +3195,7 @@ inline const char *espcontrol_i18n_sl(const char *text) {
   if (std::strcmp(text, "Loading") == 0) return "Nalaganje";
   if (std::strcmp(text, "Locate") == 0) return "Poišči";
   if (std::strcmp(text, "Lock") == 0) return "Ključavnica";
+  if (std::strcmp(text, "Lawn Mower") == 0) return "Kosilnica";
   if (std::strcmp(text, "Low") == 0) return "Nizko";
   if (std::strcmp(text, "Low target") == 0) return "Nizka ciljna vrednost";
   if (std::strcmp(text, "Media") == 0) return "Predstavnost";
@@ -3158,6 +3204,7 @@ inline const char *espcontrol_i18n_sl(const char *text) {
   if (std::strcmp(text, "Monthly") == 0) return "Mesečno";
   if (std::strcmp(text, "more") == 0) return "več";
   if (std::strcmp(text, "More items") == 0) return "Več elementov";
+  if (std::strcmp(text, "Mowing") == 0) return "Košnja";
   if (std::strcmp(text, "January") == 0) return "Januar";
   if (std::strcmp(text, "February") == 0) return "Februar";
   if (std::strcmp(text, "March") == 0) return "Marec";
@@ -3225,6 +3272,7 @@ inline const char *espcontrol_i18n_sl(const char *text) {
   if (std::strcmp(text, "Temporaryhold") == 0) return "Začasno zadržanje";
   if (std::strcmp(text, "Today") == 0) return "Danes";
   if (std::strcmp(text, "Todo") == 0) return "Opravilo";
+  if (std::strcmp(text, "Too many") == 0) return "Preveč";
   if (std::strcmp(text, "Toggle this device?") == 0) return "Preklopim to napravo?";
   if (std::strcmp(text, "Tomorrow") == 0) return "Jutri";
   if (std::strcmp(text, "Track") == 0) return "Skladba";
@@ -3357,12 +3405,14 @@ inline const char *espcontrol_i18n_sv(const char *text) {
   if (std::strcmp(text, "Loading") == 0) return "Laddar";
   if (std::strcmp(text, "Locate") == 0) return "Hitta";
   if (std::strcmp(text, "Lock") == 0) return "Lås";
+  if (std::strcmp(text, "Lawn Mower") == 0) return "Gräsklippare";
   if (std::strcmp(text, "Low") == 0) return "Låg";
   if (std::strcmp(text, "Low target") == 0) return "Lågt mål";
   if (std::strcmp(text, "Mode") == 0) return "Läge";
   if (std::strcmp(text, "Monthly") == 0) return "Månadsvis";
   if (std::strcmp(text, "more") == 0) return "fler";
   if (std::strcmp(text, "More items") == 0) return "Fler objekt";
+  if (std::strcmp(text, "Mowing") == 0) return "Klipper";
   if (std::strcmp(text, "January") == 0) return "januari";
   if (std::strcmp(text, "February") == 0) return "februari";
   if (std::strcmp(text, "March") == 0) return "mars";
@@ -3427,6 +3477,7 @@ inline const char *espcontrol_i18n_sv(const char *text) {
   if (std::strcmp(text, "Target") == 0) return "Mål";
   if (std::strcmp(text, "Today") == 0) return "Idag";
   if (std::strcmp(text, "Todo") == 0) return "Uppgift";
+  if (std::strcmp(text, "Too many") == 0) return "För många";
   if (std::strcmp(text, "Toggle this device?") == 0) return "Växla denna enhet?";
   if (std::strcmp(text, "Tomorrow") == 0) return "I morgon";
   if (std::strcmp(text, "Track") == 0) return "Spår";
@@ -3559,6 +3610,7 @@ inline const char *espcontrol_i18n_tr(const char *text) {
   if (std::strcmp(text, "Loading") == 0) return "Yükleniyor";
   if (std::strcmp(text, "Locate") == 0) return "Bul";
   if (std::strcmp(text, "Lock") == 0) return "Kilit";
+  if (std::strcmp(text, "Lawn Mower") == 0) return "Çim biçme makinesi";
   if (std::strcmp(text, "Low") == 0) return "Düşük";
   if (std::strcmp(text, "Low target") == 0) return "Düşük hedef";
   if (std::strcmp(text, "Media") == 0) return "Medya";
@@ -3567,6 +3619,7 @@ inline const char *espcontrol_i18n_tr(const char *text) {
   if (std::strcmp(text, "Monthly") == 0) return "Aylık";
   if (std::strcmp(text, "more") == 0) return "daha";
   if (std::strcmp(text, "More items") == 0) return "Daha fazla öğe";
+  if (std::strcmp(text, "Mowing") == 0) return "Biçiyor";
   if (std::strcmp(text, "January") == 0) return "Ocak";
   if (std::strcmp(text, "February") == 0) return "Şubat";
   if (std::strcmp(text, "March") == 0) return "Mart";
@@ -3638,6 +3691,7 @@ inline const char *espcontrol_i18n_tr(const char *text) {
   if (std::strcmp(text, "Temporaryhold") == 0) return "Geçici tutma";
   if (std::strcmp(text, "Today") == 0) return "Bugün";
   if (std::strcmp(text, "Todo") == 0) return "Yapılacak";
+  if (std::strcmp(text, "Too many") == 0) return "Çok fazla";
   if (std::strcmp(text, "Toggle this device?") == 0) return "Bu cihazın durumunu değiştir?";
   if (std::strcmp(text, "Tomorrow") == 0) return "Yarın";
   if (std::strcmp(text, "Tornado") == 0) return "Hortum";
@@ -3774,6 +3828,7 @@ inline const char *espcontrol_i18n_uk(const char *text) {
   if (std::strcmp(text, "Loading") == 0) return "Завантаження";
   if (std::strcmp(text, "Locate") == 0) return "Знайти";
   if (std::strcmp(text, "Lock") == 0) return "Замок";
+  if (std::strcmp(text, "Lawn Mower") == 0) return "Газонокосарка";
   if (std::strcmp(text, "Low") == 0) return "Низько";
   if (std::strcmp(text, "Low target") == 0) return "Низька ціль";
   if (std::strcmp(text, "Media") == 0) return "Медіа";
@@ -3782,6 +3837,7 @@ inline const char *espcontrol_i18n_uk(const char *text) {
   if (std::strcmp(text, "Monthly") == 0) return "Щомісяця";
   if (std::strcmp(text, "more") == 0) return "ще";
   if (std::strcmp(text, "More items") == 0) return "Більше елементів";
+  if (std::strcmp(text, "Mowing") == 0) return "Косить";
   if (std::strcmp(text, "January") == 0) return "Січень";
   if (std::strcmp(text, "February") == 0) return "Лютий";
   if (std::strcmp(text, "March") == 0) return "Березень";
@@ -3853,6 +3909,7 @@ inline const char *espcontrol_i18n_uk(const char *text) {
   if (std::strcmp(text, "Temporaryhold") == 0) return "Тимчасове утримання";
   if (std::strcmp(text, "Today") == 0) return "Сьогодні";
   if (std::strcmp(text, "Todo") == 0) return "Справи";
+  if (std::strcmp(text, "Too many") == 0) return "Забагато";
   if (std::strcmp(text, "Toggle this device?") == 0) return "Перемкнути цей пристрій?";
   if (std::strcmp(text, "Tomorrow") == 0) return "Завтра";
   if (std::strcmp(text, "Tornado") == 0) return "Торнадо";
@@ -3992,6 +4049,7 @@ inline const char *espcontrol_i18n_key_en(const char *key) {
   if (std::strcmp(key, "loading") == 0) return "Loading";
   if (std::strcmp(key, "locate") == 0) return "Locate";
   if (std::strcmp(key, "lock") == 0) return "Lock";
+  if (std::strcmp(key, "lawn_mower") == 0) return "Lawn Mower";
   if (std::strcmp(key, "low") == 0) return "Low";
   if (std::strcmp(key, "low_target") == 0) return "Low target";
   if (std::strcmp(key, "media") == 0) return "Media";
@@ -4000,6 +4058,7 @@ inline const char *espcontrol_i18n_key_en(const char *key) {
   if (std::strcmp(key, "monthly") == 0) return "Monthly";
   if (std::strcmp(key, "more") == 0) return "more";
   if (std::strcmp(key, "more_items") == 0) return "More items";
+  if (std::strcmp(key, "mowing") == 0) return "Mowing";
   if (std::strcmp(key, "january") == 0) return "January";
   if (std::strcmp(key, "february") == 0) return "February";
   if (std::strcmp(key, "march") == 0) return "March";
@@ -4073,6 +4132,7 @@ inline const char *espcontrol_i18n_key_en(const char *key) {
   if (std::strcmp(key, "temporaryhold") == 0) return "Temporaryhold";
   if (std::strcmp(key, "today") == 0) return "Today";
   if (std::strcmp(key, "todo") == 0) return "Todo";
+  if (std::strcmp(key, "too_many") == 0) return "Too many";
   if (std::strcmp(key, "toggle_this_device") == 0) return "Toggle this device?";
   if (std::strcmp(key, "tomorrow") == 0) return "Tomorrow";
   if (std::strcmp(key, "tornado") == 0) return "Tornado";
@@ -4207,6 +4267,7 @@ inline const char *espcontrol_i18n_key_cs(const char *key) {
   if (std::strcmp(key, "loading") == 0) return "Načítání";
   if (std::strcmp(key, "locate") == 0) return "Najít";
   if (std::strcmp(key, "lock") == 0) return "Zamknout";
+  if (std::strcmp(key, "lawn_mower") == 0) return "Sekačka";
   if (std::strcmp(key, "low") == 0) return "Nízké";
   if (std::strcmp(key, "low_target") == 0) return "Nízký cíl";
   if (std::strcmp(key, "media") == 0) return "Média";
@@ -4214,6 +4275,7 @@ inline const char *espcontrol_i18n_key_cs(const char *key) {
   if (std::strcmp(key, "monthly") == 0) return "Měsíčně";
   if (std::strcmp(key, "more") == 0) return "další";
   if (std::strcmp(key, "more_items") == 0) return "Další položky";
+  if (std::strcmp(key, "mowing") == 0) return "Seká";
   if (std::strcmp(key, "january") == 0) return "leden";
   if (std::strcmp(key, "february") == 0) return "únor";
   if (std::strcmp(key, "march") == 0) return "březen";
@@ -4282,6 +4344,7 @@ inline const char *espcontrol_i18n_key_cs(const char *key) {
   if (std::strcmp(key, "target") == 0) return "Cíl";
   if (std::strcmp(key, "today") == 0) return "Dnes";
   if (std::strcmp(key, "todo") == 0) return "Úkol";
+  if (std::strcmp(key, "too_many") == 0) return "Příliš mnoho";
   if (std::strcmp(key, "toggle_this_device") == 0) return "Přepnout toto zařízení?";
   if (std::strcmp(key, "tomorrow") == 0) return "Zítra";
   if (std::strcmp(key, "tornado") == 0) return "Tornádo";
@@ -4412,6 +4475,7 @@ inline const char *espcontrol_i18n_key_da(const char *key) {
   if (std::strcmp(key, "loading") == 0) return "Indlæser";
   if (std::strcmp(key, "locate") == 0) return "Find";
   if (std::strcmp(key, "lock") == 0) return "Lås";
+  if (std::strcmp(key, "lawn_mower") == 0) return "Plæneklipper";
   if (std::strcmp(key, "low") == 0) return "Lav";
   if (std::strcmp(key, "low_target") == 0) return "Lavt mål";
   if (std::strcmp(key, "media") == 0) return "Medie";
@@ -4419,6 +4483,7 @@ inline const char *espcontrol_i18n_key_da(const char *key) {
   if (std::strcmp(key, "monthly") == 0) return "Månedligt";
   if (std::strcmp(key, "more") == 0) return "mere";
   if (std::strcmp(key, "more_items") == 0) return "Flere elementer";
+  if (std::strcmp(key, "mowing") == 0) return "Slår græs";
   if (std::strcmp(key, "january") == 0) return "januar";
   if (std::strcmp(key, "february") == 0) return "februar";
   if (std::strcmp(key, "march") == 0) return "marts";
@@ -4483,6 +4548,7 @@ inline const char *espcontrol_i18n_key_da(const char *key) {
   if (std::strcmp(key, "target") == 0) return "Mål";
   if (std::strcmp(key, "today") == 0) return "I dag";
   if (std::strcmp(key, "todo") == 0) return "Opgave";
+  if (std::strcmp(key, "too_many") == 0) return "For mange";
   if (std::strcmp(key, "toggle_this_device") == 0) return "Skift denne enhed?";
   if (std::strcmp(key, "tomorrow") == 0) return "I morgen";
   if (std::strcmp(key, "track") == 0) return "Spor";
@@ -4614,6 +4680,7 @@ inline const char *espcontrol_i18n_key_de(const char *key) {
   if (std::strcmp(key, "loading") == 0) return "Laden";
   if (std::strcmp(key, "locate") == 0) return "Orten";
   if (std::strcmp(key, "lock") == 0) return "Sperren";
+  if (std::strcmp(key, "lawn_mower") == 0) return "Rasenmäher";
   if (std::strcmp(key, "low") == 0) return "Niedrig";
   if (std::strcmp(key, "low_target") == 0) return "Niedriger Zielwert";
   if (std::strcmp(key, "media") == 0) return "Medien";
@@ -4621,6 +4688,7 @@ inline const char *espcontrol_i18n_key_de(const char *key) {
   if (std::strcmp(key, "monthly") == 0) return "Monatlich";
   if (std::strcmp(key, "more") == 0) return "weitere";
   if (std::strcmp(key, "more_items") == 0) return "Weitere Elemente";
+  if (std::strcmp(key, "mowing") == 0) return "Mäht";
   if (std::strcmp(key, "january") == 0) return "Januar";
   if (std::strcmp(key, "february") == 0) return "Februar";
   if (std::strcmp(key, "march") == 0) return "März";
@@ -4680,6 +4748,7 @@ inline const char *espcontrol_i18n_key_de(const char *key) {
   if (std::strcmp(key, "target") == 0) return "Ziel";
   if (std::strcmp(key, "today") == 0) return "Heute";
   if (std::strcmp(key, "todo") == 0) return "Aufgabe";
+  if (std::strcmp(key, "too_many") == 0) return "Zu viele";
   if (std::strcmp(key, "toggle_this_device") == 0) return "Dieses Gerät umschalten?";
   if (std::strcmp(key, "tomorrow") == 0) return "Morgen";
   if (std::strcmp(key, "track") == 0) return "Titel";
@@ -4810,6 +4879,7 @@ inline const char *espcontrol_i18n_key_es(const char *key) {
   if (std::strcmp(key, "loading") == 0) return "Cargando";
   if (std::strcmp(key, "locate") == 0) return "Localizar";
   if (std::strcmp(key, "lock") == 0) return "Bloquear";
+  if (std::strcmp(key, "lawn_mower") == 0) return "Cortacésped";
   if (std::strcmp(key, "low") == 0) return "Bajo";
   if (std::strcmp(key, "low_target") == 0) return "Objetivo bajo";
   if (std::strcmp(key, "media") == 0) return "Multimedia";
@@ -4817,6 +4887,7 @@ inline const char *espcontrol_i18n_key_es(const char *key) {
   if (std::strcmp(key, "monthly") == 0) return "Mensual";
   if (std::strcmp(key, "more") == 0) return "más";
   if (std::strcmp(key, "more_items") == 0) return "Más elementos";
+  if (std::strcmp(key, "mowing") == 0) return "Cortando";
   if (std::strcmp(key, "january") == 0) return "enero";
   if (std::strcmp(key, "february") == 0) return "febrero";
   if (std::strcmp(key, "march") == 0) return "marzo";
@@ -4884,6 +4955,7 @@ inline const char *espcontrol_i18n_key_es(const char *key) {
   if (std::strcmp(key, "target") == 0) return "Objetivo";
   if (std::strcmp(key, "today") == 0) return "Hoy";
   if (std::strcmp(key, "todo") == 0) return "Tarea";
+  if (std::strcmp(key, "too_many") == 0) return "Demasiados";
   if (std::strcmp(key, "toggle_this_device") == 0) return "¿Alternar este dispositivo?";
   if (std::strcmp(key, "tomorrow") == 0) return "Mañana";
   if (std::strcmp(key, "track") == 0) return "Pista";
@@ -5018,6 +5090,7 @@ inline const char *espcontrol_i18n_key_fi(const char *key) {
   if (std::strcmp(key, "loading") == 0) return "Ladataan";
   if (std::strcmp(key, "locate") == 0) return "Paikanna";
   if (std::strcmp(key, "lock") == 0) return "Lukko";
+  if (std::strcmp(key, "lawn_mower") == 0) return "Ruohonleikkuri";
   if (std::strcmp(key, "low") == 0) return "Matala";
   if (std::strcmp(key, "low_target") == 0) return "Alaraja";
   if (std::strcmp(key, "medium") == 0) return "Keskitaso";
@@ -5025,6 +5098,7 @@ inline const char *espcontrol_i18n_key_fi(const char *key) {
   if (std::strcmp(key, "monthly") == 0) return "Kuukausittain";
   if (std::strcmp(key, "more") == 0) return "lisää";
   if (std::strcmp(key, "more_items") == 0) return "Lisää kohteita";
+  if (std::strcmp(key, "mowing") == 0) return "Leikkaa";
   if (std::strcmp(key, "january") == 0) return "Tammikuu";
   if (std::strcmp(key, "february") == 0) return "Helmikuu";
   if (std::strcmp(key, "march") == 0) return "Maaliskuu";
@@ -5097,6 +5171,7 @@ inline const char *espcontrol_i18n_key_fi(const char *key) {
   if (std::strcmp(key, "temporaryhold") == 0) return "Väliaikainen pito";
   if (std::strcmp(key, "today") == 0) return "Tänään";
   if (std::strcmp(key, "todo") == 0) return "Tehtävä";
+  if (std::strcmp(key, "too_many") == 0) return "Liian monta";
   if (std::strcmp(key, "toggle_this_device") == 0) return "Vaihda tämän laitteen tila?";
   if (std::strcmp(key, "tomorrow") == 0) return "Huomenna";
   if (std::strcmp(key, "track") == 0) return "Kappale";
@@ -5226,12 +5301,14 @@ inline const char *espcontrol_i18n_key_fr(const char *key) {
   if (std::strcmp(key, "loading") == 0) return "Chargement";
   if (std::strcmp(key, "locate") == 0) return "Localiser";
   if (std::strcmp(key, "lock") == 0) return "Verrouiller";
+  if (std::strcmp(key, "lawn_mower") == 0) return "Tondeuse";
   if (std::strcmp(key, "low") == 0) return "Bas";
   if (std::strcmp(key, "low_target") == 0) return "Cible basse";
   if (std::strcmp(key, "media") == 0) return "Média";
   if (std::strcmp(key, "monthly") == 0) return "Mensuel";
   if (std::strcmp(key, "more") == 0) return "de plus";
   if (std::strcmp(key, "more_items") == 0) return "Plus d’éléments";
+  if (std::strcmp(key, "mowing") == 0) return "Tonte";
   if (std::strcmp(key, "january") == 0) return "janvier";
   if (std::strcmp(key, "february") == 0) return "février";
   if (std::strcmp(key, "march") == 0) return "mars";
@@ -5296,6 +5373,7 @@ inline const char *espcontrol_i18n_key_fr(const char *key) {
   if (std::strcmp(key, "target") == 0) return "Cible";
   if (std::strcmp(key, "today") == 0) return "Aujourd'hui";
   if (std::strcmp(key, "todo") == 0) return "Tâche";
+  if (std::strcmp(key, "too_many") == 0) return "Trop nombreux";
   if (std::strcmp(key, "toggle_this_device") == 0) return "Basculer cet appareil ?";
   if (std::strcmp(key, "tomorrow") == 0) return "Demain";
   if (std::strcmp(key, "tornado") == 0) return "Tornade";
@@ -5430,6 +5508,7 @@ inline const char *espcontrol_i18n_key_hu(const char *key) {
   if (std::strcmp(key, "loading") == 0) return "Betöltés";
   if (std::strcmp(key, "locate") == 0) return "Keresés";
   if (std::strcmp(key, "lock") == 0) return "Zár";
+  if (std::strcmp(key, "lawn_mower") == 0) return "Fűnyíró";
   if (std::strcmp(key, "low") == 0) return "Alacsony";
   if (std::strcmp(key, "low_target") == 0) return "Alacsony célérték";
   if (std::strcmp(key, "media") == 0) return "Média";
@@ -5438,6 +5517,7 @@ inline const char *espcontrol_i18n_key_hu(const char *key) {
   if (std::strcmp(key, "monthly") == 0) return "Havonta";
   if (std::strcmp(key, "more") == 0) return "további";
   if (std::strcmp(key, "more_items") == 0) return "További elemek";
+  if (std::strcmp(key, "mowing") == 0) return "Nyírás";
   if (std::strcmp(key, "january") == 0) return "Január";
   if (std::strcmp(key, "february") == 0) return "Február";
   if (std::strcmp(key, "march") == 0) return "Március";
@@ -5508,6 +5588,7 @@ inline const char *espcontrol_i18n_key_hu(const char *key) {
   if (std::strcmp(key, "temporaryhold") == 0) return "Ideiglenes tartás";
   if (std::strcmp(key, "today") == 0) return "Ma";
   if (std::strcmp(key, "todo") == 0) return "Teendő";
+  if (std::strcmp(key, "too_many") == 0) return "Túl sok";
   if (std::strcmp(key, "toggle_this_device") == 0) return "Átváltja ezt az eszközt?";
   if (std::strcmp(key, "tomorrow") == 0) return "Holnap";
   if (std::strcmp(key, "tornado") == 0) return "Tornádó";
@@ -5641,6 +5722,7 @@ inline const char *espcontrol_i18n_key_it(const char *key) {
   if (std::strcmp(key, "loading") == 0) return "Caricamento";
   if (std::strcmp(key, "locate") == 0) return "Localizza";
   if (std::strcmp(key, "lock") == 0) return "Blocca";
+  if (std::strcmp(key, "lawn_mower") == 0) return "Tagliaerba";
   if (std::strcmp(key, "low") == 0) return "Basso";
   if (std::strcmp(key, "low_target") == 0) return "Target basso";
   if (std::strcmp(key, "medium") == 0) return "Medio";
@@ -5648,6 +5730,7 @@ inline const char *espcontrol_i18n_key_it(const char *key) {
   if (std::strcmp(key, "monthly") == 0) return "Mensile";
   if (std::strcmp(key, "more") == 0) return "altri";
   if (std::strcmp(key, "more_items") == 0) return "Altri elementi";
+  if (std::strcmp(key, "mowing") == 0) return "Taglio in corso";
   if (std::strcmp(key, "january") == 0) return "Gennaio";
   if (std::strcmp(key, "february") == 0) return "Febbraio";
   if (std::strcmp(key, "march") == 0) return "Marzo";
@@ -5717,6 +5800,7 @@ inline const char *espcontrol_i18n_key_it(const char *key) {
   if (std::strcmp(key, "temporaryhold") == 0) return "Temporaneo";
   if (std::strcmp(key, "today") == 0) return "Oggi";
   if (std::strcmp(key, "todo") == 0) return "Da fare";
+  if (std::strcmp(key, "too_many") == 0) return "Troppi";
   if (std::strcmp(key, "toggle_this_device") == 0) return "Commutare questo dispositivo?";
   if (std::strcmp(key, "tomorrow") == 0) return "Domani";
   if (std::strcmp(key, "track") == 0) return "Traccia";
@@ -5847,12 +5931,14 @@ inline const char *espcontrol_i18n_key_nb(const char *key) {
   if (std::strcmp(key, "loading") == 0) return "Laster";
   if (std::strcmp(key, "locate") == 0) return "Finn";
   if (std::strcmp(key, "lock") == 0) return "Lås";
+  if (std::strcmp(key, "lawn_mower") == 0) return "Gressklipper";
   if (std::strcmp(key, "low") == 0) return "Lav";
   if (std::strcmp(key, "low_target") == 0) return "Lavt mål";
   if (std::strcmp(key, "mode") == 0) return "Modus";
   if (std::strcmp(key, "monthly") == 0) return "Månedlig";
   if (std::strcmp(key, "more") == 0) return "flere";
   if (std::strcmp(key, "more_items") == 0) return "Flere elementer";
+  if (std::strcmp(key, "mowing") == 0) return "Klipper";
   if (std::strcmp(key, "january") == 0) return "januar";
   if (std::strcmp(key, "february") == 0) return "februar";
   if (std::strcmp(key, "march") == 0) return "mars";
@@ -5919,6 +6005,7 @@ inline const char *espcontrol_i18n_key_nb(const char *key) {
   if (std::strcmp(key, "target") == 0) return "Mål";
   if (std::strcmp(key, "today") == 0) return "I dag";
   if (std::strcmp(key, "todo") == 0) return "Oppgave";
+  if (std::strcmp(key, "too_many") == 0) return "For mange";
   if (std::strcmp(key, "toggle_this_device") == 0) return "Veksle denne enheten?";
   if (std::strcmp(key, "tomorrow") == 0) return "I morgen";
   if (std::strcmp(key, "track") == 0) return "Spor";
@@ -6051,12 +6138,14 @@ inline const char *espcontrol_i18n_key_nl(const char *key) {
   if (std::strcmp(key, "loading") == 0) return "Laden";
   if (std::strcmp(key, "locate") == 0) return "Lokaliseren";
   if (std::strcmp(key, "lock") == 0) return "Vergrendelen";
+  if (std::strcmp(key, "lawn_mower") == 0) return "Grasmaaier";
   if (std::strcmp(key, "low") == 0) return "Laag";
   if (std::strcmp(key, "low_target") == 0) return "Laag doel";
   if (std::strcmp(key, "mode") == 0) return "Modus";
   if (std::strcmp(key, "monthly") == 0) return "Maandelijks";
   if (std::strcmp(key, "more") == 0) return "meer";
   if (std::strcmp(key, "more_items") == 0) return "Meer items";
+  if (std::strcmp(key, "mowing") == 0) return "Maaien";
   if (std::strcmp(key, "january") == 0) return "januari";
   if (std::strcmp(key, "february") == 0) return "februari";
   if (std::strcmp(key, "march") == 0) return "maart";
@@ -6123,6 +6212,7 @@ inline const char *espcontrol_i18n_key_nl(const char *key) {
   if (std::strcmp(key, "target") == 0) return "Doel";
   if (std::strcmp(key, "today") == 0) return "Vandaag";
   if (std::strcmp(key, "todo") == 0) return "Taken";
+  if (std::strcmp(key, "too_many") == 0) return "Te veel";
   if (std::strcmp(key, "toggle_this_device") == 0) return "Dit apparaat schakelen?";
   if (std::strcmp(key, "tomorrow") == 0) return "Morgen";
   if (std::strcmp(key, "track") == 0) return "Nummer";
@@ -6251,12 +6341,14 @@ inline const char *espcontrol_i18n_key_pl(const char *key) {
   if (std::strcmp(key, "loading") == 0) return "Ładowanie";
   if (std::strcmp(key, "locate") == 0) return "Zlokalizuj";
   if (std::strcmp(key, "lock") == 0) return "Zablokuj";
+  if (std::strcmp(key, "lawn_mower") == 0) return "Kosiarka";
   if (std::strcmp(key, "low") == 0) return "Niski";
   if (std::strcmp(key, "low_target") == 0) return "Niski cel";
   if (std::strcmp(key, "mode") == 0) return "Tryb";
   if (std::strcmp(key, "monthly") == 0) return "Co miesiąc";
   if (std::strcmp(key, "more") == 0) return "więcej";
   if (std::strcmp(key, "more_items") == 0) return "Więcej elementów";
+  if (std::strcmp(key, "mowing") == 0) return "Koszenie";
   if (std::strcmp(key, "january") == 0) return "styczeń";
   if (std::strcmp(key, "february") == 0) return "luty";
   if (std::strcmp(key, "march") == 0) return "marzec";
@@ -6323,6 +6415,7 @@ inline const char *espcontrol_i18n_key_pl(const char *key) {
   if (std::strcmp(key, "target") == 0) return "Cel";
   if (std::strcmp(key, "today") == 0) return "Dziś";
   if (std::strcmp(key, "todo") == 0) return "Zadanie";
+  if (std::strcmp(key, "too_many") == 0) return "Za dużo";
   if (std::strcmp(key, "toggle_this_device") == 0) return "Przełączyć to urządzenie?";
   if (std::strcmp(key, "tomorrow") == 0) return "Jutro";
   if (std::strcmp(key, "track") == 0) return "Utwór";
@@ -6453,6 +6546,7 @@ inline const char *espcontrol_i18n_key_pt_br(const char *key) {
   if (std::strcmp(key, "loading") == 0) return "Carregando";
   if (std::strcmp(key, "locate") == 0) return "Localizar";
   if (std::strcmp(key, "lock") == 0) return "Bloquear";
+  if (std::strcmp(key, "lawn_mower") == 0) return "Cortador de grama";
   if (std::strcmp(key, "low") == 0) return "Baixo";
   if (std::strcmp(key, "low_target") == 0) return "Alvo baixo";
   if (std::strcmp(key, "media") == 0) return "Mídia";
@@ -6460,6 +6554,7 @@ inline const char *espcontrol_i18n_key_pt_br(const char *key) {
   if (std::strcmp(key, "monthly") == 0) return "Mensal";
   if (std::strcmp(key, "more") == 0) return "mais";
   if (std::strcmp(key, "more_items") == 0) return "Mais itens";
+  if (std::strcmp(key, "mowing") == 0) return "Cortando";
   if (std::strcmp(key, "january") == 0) return "janeiro";
   if (std::strcmp(key, "february") == 0) return "fevereiro";
   if (std::strcmp(key, "march") == 0) return "março";
@@ -6528,6 +6623,7 @@ inline const char *espcontrol_i18n_key_pt_br(const char *key) {
   if (std::strcmp(key, "target") == 0) return "Alvo";
   if (std::strcmp(key, "today") == 0) return "Hoje";
   if (std::strcmp(key, "todo") == 0) return "Tarefa";
+  if (std::strcmp(key, "too_many") == 0) return "Muitos";
   if (std::strcmp(key, "toggle_this_device") == 0) return "Alternar este dispositivo?";
   if (std::strcmp(key, "tomorrow") == 0) return "Amanhã";
   if (std::strcmp(key, "track") == 0) return "Faixa";
@@ -6658,6 +6754,7 @@ inline const char *espcontrol_i18n_key_pt(const char *key) {
   if (std::strcmp(key, "loading") == 0) return "A carregar";
   if (std::strcmp(key, "locate") == 0) return "Localizar";
   if (std::strcmp(key, "lock") == 0) return "Bloquear";
+  if (std::strcmp(key, "lawn_mower") == 0) return "Corta-relva";
   if (std::strcmp(key, "low") == 0) return "Baixo";
   if (std::strcmp(key, "low_target") == 0) return "Alvo baixo";
   if (std::strcmp(key, "media") == 0) return "Multimédia";
@@ -6665,6 +6762,7 @@ inline const char *espcontrol_i18n_key_pt(const char *key) {
   if (std::strcmp(key, "monthly") == 0) return "Mensal";
   if (std::strcmp(key, "more") == 0) return "mais";
   if (std::strcmp(key, "more_items") == 0) return "Mais itens";
+  if (std::strcmp(key, "mowing") == 0) return "A cortar";
   if (std::strcmp(key, "january") == 0) return "janeiro";
   if (std::strcmp(key, "february") == 0) return "fevereiro";
   if (std::strcmp(key, "march") == 0) return "março";
@@ -6733,6 +6831,7 @@ inline const char *espcontrol_i18n_key_pt(const char *key) {
   if (std::strcmp(key, "target") == 0) return "Alvo";
   if (std::strcmp(key, "today") == 0) return "Hoje";
   if (std::strcmp(key, "todo") == 0) return "Tarefa";
+  if (std::strcmp(key, "too_many") == 0) return "Demasiados";
   if (std::strcmp(key, "toggle_this_device") == 0) return "Alternar este dispositivo?";
   if (std::strcmp(key, "tomorrow") == 0) return "Amanhã";
   if (std::strcmp(key, "track") == 0) return "Faixa";
@@ -6866,6 +6965,7 @@ inline const char *espcontrol_i18n_key_ro(const char *key) {
   if (std::strcmp(key, "loading") == 0) return "Se încarcă";
   if (std::strcmp(key, "locate") == 0) return "Localizare";
   if (std::strcmp(key, "lock") == 0) return "Încuietoare";
+  if (std::strcmp(key, "lawn_mower") == 0) return "Mașină de tuns iarba";
   if (std::strcmp(key, "low") == 0) return "Scăzut";
   if (std::strcmp(key, "low_target") == 0) return "Țintă scăzută";
   if (std::strcmp(key, "medium") == 0) return "Mediu";
@@ -6873,6 +6973,7 @@ inline const char *espcontrol_i18n_key_ro(const char *key) {
   if (std::strcmp(key, "monthly") == 0) return "Lunar";
   if (std::strcmp(key, "more") == 0) return "încă";
   if (std::strcmp(key, "more_items") == 0) return "Mai multe elemente";
+  if (std::strcmp(key, "mowing") == 0) return "Tunde iarba";
   if (std::strcmp(key, "january") == 0) return "Ianuarie";
   if (std::strcmp(key, "february") == 0) return "Februarie";
   if (std::strcmp(key, "march") == 0) return "Martie";
@@ -6944,6 +7045,7 @@ inline const char *espcontrol_i18n_key_ro(const char *key) {
   if (std::strcmp(key, "temporaryhold") == 0) return "Menținere temporară";
   if (std::strcmp(key, "today") == 0) return "Astăzi";
   if (std::strcmp(key, "todo") == 0) return "De făcut";
+  if (std::strcmp(key, "too_many") == 0) return "Prea multe";
   if (std::strcmp(key, "toggle_this_device") == 0) return "Comuți acest dispozitiv?";
   if (std::strcmp(key, "tomorrow") == 0) return "Mâine";
   if (std::strcmp(key, "tornado") == 0) return "Tornadă";
@@ -7076,6 +7178,7 @@ inline const char *espcontrol_i18n_key_sk(const char *key) {
   if (std::strcmp(key, "loading") == 0) return "Načítanie";
   if (std::strcmp(key, "locate") == 0) return "Nájsť";
   if (std::strcmp(key, "lock") == 0) return "Zamknúť";
+  if (std::strcmp(key, "lawn_mower") == 0) return "Kosačka";
   if (std::strcmp(key, "low") == 0) return "Nízke";
   if (std::strcmp(key, "low_target") == 0) return "Nízky cieľ";
   if (std::strcmp(key, "media") == 0) return "Médiá";
@@ -7083,6 +7186,7 @@ inline const char *espcontrol_i18n_key_sk(const char *key) {
   if (std::strcmp(key, "monthly") == 0) return "Mesačne";
   if (std::strcmp(key, "more") == 0) return "ďalšie";
   if (std::strcmp(key, "more_items") == 0) return "Ďalšie položky";
+  if (std::strcmp(key, "mowing") == 0) return "Kosí";
   if (std::strcmp(key, "january") == 0) return "január";
   if (std::strcmp(key, "february") == 0) return "február";
   if (std::strcmp(key, "march") == 0) return "marec";
@@ -7151,6 +7255,7 @@ inline const char *espcontrol_i18n_key_sk(const char *key) {
   if (std::strcmp(key, "target") == 0) return "Cieľ";
   if (std::strcmp(key, "today") == 0) return "Dnes";
   if (std::strcmp(key, "todo") == 0) return "Úloha";
+  if (std::strcmp(key, "too_many") == 0) return "Príliš veľa";
   if (std::strcmp(key, "toggle_this_device") == 0) return "Prepnúť toto zariadenie?";
   if (std::strcmp(key, "tomorrow") == 0) return "Zajtra";
   if (std::strcmp(key, "tornado") == 0) return "Tornádo";
@@ -7285,6 +7390,7 @@ inline const char *espcontrol_i18n_key_sl(const char *key) {
   if (std::strcmp(key, "loading") == 0) return "Nalaganje";
   if (std::strcmp(key, "locate") == 0) return "Poišči";
   if (std::strcmp(key, "lock") == 0) return "Ključavnica";
+  if (std::strcmp(key, "lawn_mower") == 0) return "Kosilnica";
   if (std::strcmp(key, "low") == 0) return "Nizko";
   if (std::strcmp(key, "low_target") == 0) return "Nizka ciljna vrednost";
   if (std::strcmp(key, "media") == 0) return "Predstavnost";
@@ -7293,6 +7399,7 @@ inline const char *espcontrol_i18n_key_sl(const char *key) {
   if (std::strcmp(key, "monthly") == 0) return "Mesečno";
   if (std::strcmp(key, "more") == 0) return "več";
   if (std::strcmp(key, "more_items") == 0) return "Več elementov";
+  if (std::strcmp(key, "mowing") == 0) return "Košnja";
   if (std::strcmp(key, "january") == 0) return "Januar";
   if (std::strcmp(key, "february") == 0) return "Februar";
   if (std::strcmp(key, "march") == 0) return "Marec";
@@ -7361,6 +7468,7 @@ inline const char *espcontrol_i18n_key_sl(const char *key) {
   if (std::strcmp(key, "temporaryhold") == 0) return "Začasno zadržanje";
   if (std::strcmp(key, "today") == 0) return "Danes";
   if (std::strcmp(key, "todo") == 0) return "Opravilo";
+  if (std::strcmp(key, "too_many") == 0) return "Preveč";
   if (std::strcmp(key, "toggle_this_device") == 0) return "Preklopim to napravo?";
   if (std::strcmp(key, "tomorrow") == 0) return "Jutri";
   if (std::strcmp(key, "track") == 0) return "Skladba";
@@ -7493,12 +7601,14 @@ inline const char *espcontrol_i18n_key_sv(const char *key) {
   if (std::strcmp(key, "loading") == 0) return "Laddar";
   if (std::strcmp(key, "locate") == 0) return "Hitta";
   if (std::strcmp(key, "lock") == 0) return "Lås";
+  if (std::strcmp(key, "lawn_mower") == 0) return "Gräsklippare";
   if (std::strcmp(key, "low") == 0) return "Låg";
   if (std::strcmp(key, "low_target") == 0) return "Lågt mål";
   if (std::strcmp(key, "mode") == 0) return "Läge";
   if (std::strcmp(key, "monthly") == 0) return "Månadsvis";
   if (std::strcmp(key, "more") == 0) return "fler";
   if (std::strcmp(key, "more_items") == 0) return "Fler objekt";
+  if (std::strcmp(key, "mowing") == 0) return "Klipper";
   if (std::strcmp(key, "january") == 0) return "januari";
   if (std::strcmp(key, "february") == 0) return "februari";
   if (std::strcmp(key, "march") == 0) return "mars";
@@ -7564,6 +7674,7 @@ inline const char *espcontrol_i18n_key_sv(const char *key) {
   if (std::strcmp(key, "target") == 0) return "Mål";
   if (std::strcmp(key, "today") == 0) return "Idag";
   if (std::strcmp(key, "todo") == 0) return "Uppgift";
+  if (std::strcmp(key, "too_many") == 0) return "För många";
   if (std::strcmp(key, "toggle_this_device") == 0) return "Växla denna enhet?";
   if (std::strcmp(key, "tomorrow") == 0) return "I morgon";
   if (std::strcmp(key, "track") == 0) return "Spår";
@@ -7696,6 +7807,7 @@ inline const char *espcontrol_i18n_key_tr(const char *key) {
   if (std::strcmp(key, "loading") == 0) return "Yükleniyor";
   if (std::strcmp(key, "locate") == 0) return "Bul";
   if (std::strcmp(key, "lock") == 0) return "Kilit";
+  if (std::strcmp(key, "lawn_mower") == 0) return "Çim biçme makinesi";
   if (std::strcmp(key, "low") == 0) return "Düşük";
   if (std::strcmp(key, "low_target") == 0) return "Düşük hedef";
   if (std::strcmp(key, "media") == 0) return "Medya";
@@ -7704,6 +7816,7 @@ inline const char *espcontrol_i18n_key_tr(const char *key) {
   if (std::strcmp(key, "monthly") == 0) return "Aylık";
   if (std::strcmp(key, "more") == 0) return "daha";
   if (std::strcmp(key, "more_items") == 0) return "Daha fazla öğe";
+  if (std::strcmp(key, "mowing") == 0) return "Biçiyor";
   if (std::strcmp(key, "january") == 0) return "Ocak";
   if (std::strcmp(key, "february") == 0) return "Şubat";
   if (std::strcmp(key, "march") == 0) return "Mart";
@@ -7776,6 +7889,7 @@ inline const char *espcontrol_i18n_key_tr(const char *key) {
   if (std::strcmp(key, "temporaryhold") == 0) return "Geçici tutma";
   if (std::strcmp(key, "today") == 0) return "Bugün";
   if (std::strcmp(key, "todo") == 0) return "Yapılacak";
+  if (std::strcmp(key, "too_many") == 0) return "Çok fazla";
   if (std::strcmp(key, "toggle_this_device") == 0) return "Bu cihazın durumunu değiştir?";
   if (std::strcmp(key, "tomorrow") == 0) return "Yarın";
   if (std::strcmp(key, "tornado") == 0) return "Hortum";
@@ -7912,6 +8026,7 @@ inline const char *espcontrol_i18n_key_uk(const char *key) {
   if (std::strcmp(key, "loading") == 0) return "Завантаження";
   if (std::strcmp(key, "locate") == 0) return "Знайти";
   if (std::strcmp(key, "lock") == 0) return "Замок";
+  if (std::strcmp(key, "lawn_mower") == 0) return "Газонокосарка";
   if (std::strcmp(key, "low") == 0) return "Низько";
   if (std::strcmp(key, "low_target") == 0) return "Низька ціль";
   if (std::strcmp(key, "media") == 0) return "Медіа";
@@ -7920,6 +8035,7 @@ inline const char *espcontrol_i18n_key_uk(const char *key) {
   if (std::strcmp(key, "monthly") == 0) return "Щомісяця";
   if (std::strcmp(key, "more") == 0) return "ще";
   if (std::strcmp(key, "more_items") == 0) return "Більше елементів";
+  if (std::strcmp(key, "mowing") == 0) return "Косить";
   if (std::strcmp(key, "january") == 0) return "Січень";
   if (std::strcmp(key, "february") == 0) return "Лютий";
   if (std::strcmp(key, "march") == 0) return "Березень";
@@ -7992,6 +8108,7 @@ inline const char *espcontrol_i18n_key_uk(const char *key) {
   if (std::strcmp(key, "temporaryhold") == 0) return "Тимчасове утримання";
   if (std::strcmp(key, "today") == 0) return "Сьогодні";
   if (std::strcmp(key, "todo") == 0) return "Справи";
+  if (std::strcmp(key, "too_many") == 0) return "Забагато";
   if (std::strcmp(key, "toggle_this_device") == 0) return "Перемкнути цей пристрій?";
   if (std::strcmp(key, "tomorrow") == 0) return "Завтра";
   if (std::strcmp(key, "tornado") == 0) return "Торнадо";
