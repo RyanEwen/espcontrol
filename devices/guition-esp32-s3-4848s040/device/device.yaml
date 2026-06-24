@@ -66,6 +66,8 @@ esphome:
     build_flags:
       - "-DESPCONTROL_DISABLE_TODO=1"
       - "-DESPCONTROL_MAX_GRID_SLOTS=9"
+    build_src_flags:
+      - "-mtext-section-literals"
   on_boot:
     - priority: 800
       then:
