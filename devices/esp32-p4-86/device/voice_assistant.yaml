@@ -1085,13 +1085,13 @@ switch:
     optimistic: true
     web_server:
       sorting_group_id: sg_display
-    turn_on_action:
+    on_turn_on:
       - text_sensor.template.publish:
           id: voice_assistant_stage
           state: Idle
       - script.execute: apply_restored_voice_wake_word
       - script.execute: clock_bar_apply
-    turn_off_action:
+    on_turn_off:
       - script.stop: release_voice_after_response
       - script.stop: play_voice_timer_alert
       - if:
