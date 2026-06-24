@@ -1375,7 +1375,7 @@ script:
           int32_t pause_remaining_ms = id(cover_art_manual_pause_until_ms) != 0
               ? (int32_t)(id(cover_art_manual_pause_until_ms) - millis())
               : 0;
-          if (pause_remaining_ms > 0 && (uint32_t) pause_remaining_ms > delay_ms) {
+          if (pause_remaining_ms > 0) {
             delay_ms = (uint32_t) pause_remaining_ms;
             ESP_LOGI("cover_art", "Waiting %.0fs before showing cover art after touch",
                      delay_ms / 1000.0f);
