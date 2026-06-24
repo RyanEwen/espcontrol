@@ -223,9 +223,15 @@ var CSS =
   ".sp-settings-modal::-webkit-scrollbar-thumb{background:#fff;border-radius:999px}" +
   "@media(max-width:600px){.sp-settings-modal{width:100%;max-width:none;max-height:none;" +
   "height:100%;margin:0;border-radius:0;border:none}}" +
-  ".sp-settings-close{position:absolute;top:8px;right:12px;background:none;border:none;" +
-  "color:var(--text2);font-size:1.4rem;cursor:pointer;z-index:1;line-height:1;padding:4px}" +
-  ".sp-settings-close:hover{color:var(--text)}" +
+  ".sp-settings-close{position:absolute;top:10px;right:12px;width:36px;height:36px;" +
+  "border-radius:999px;border:1px solid var(--border);background:var(--surface2);" +
+  "color:var(--text2);display:flex;align-items:center;justify-content:center;" +
+  "font-size:20px;cursor:pointer;z-index:1;line-height:1;padding:0;" +
+  "box-shadow:var(--shadow-1);transition:background .2s,border-color .2s,color .2s}" +
+  ".sp-settings-close:hover{background:var(--border);border-color:#4a4d54;color:var(--text)}" +
+  ".sp-settings-close:focus-visible{outline:none;border-color:var(--accent);" +
+  "box-shadow:0 0 0 3px var(--accent-soft)}" +
+  ".sp-settings-close-icon{width:20px;height:20px;display:block;fill:currentColor;pointer-events:none}" +
 
   ".sp-section-title{font-size:.8rem;font-weight:600;color:var(--text2);" +
   "margin:var(--gap) 0 8px;letter-spacing:-.01em}" +
