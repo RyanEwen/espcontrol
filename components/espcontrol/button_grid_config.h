@@ -81,6 +81,19 @@ constexpr uint32_t DARK_CONTROL_NEUTRAL = correct_display_color(0x424242);
 constexpr uint32_t DARK_OVERLAY = 0x000000;
 constexpr uint32_t DARK_TRACK_BACKGROUND = correct_display_color(0x2F2F2F);
 
+constexpr uint32_t readable_text_color_for_bg(uint32_t bg_color) {
+  uint32_t red = (bg_color >> 16) & 0xFF;
+  uint32_t green = (bg_color >> 8) & 0xFF;
+  uint32_t blue = bg_color & 0xFF;
+  uint32_t brightness = (red * 299 + green * 587 + blue * 114) / 1000;
+  return brightness > 186 ? DEFAULT_TERTIARY_COLOR : DARK_TEXT_PRIMARY;
+}
+
+static_assert(readable_text_color_for_bg(0xFFFFFF) == DEFAULT_TERTIARY_COLOR,
+              "light backgrounds need dark text");
+static_assert(readable_text_color_for_bg(0x000000) == DARK_TEXT_PRIMARY,
+              "dark backgrounds need light text");
+
 inline uint32_t &current_button_primary_color_ref() {
   static uint32_t color = DEFAULT_SLIDER_COLOR;
   return color;
