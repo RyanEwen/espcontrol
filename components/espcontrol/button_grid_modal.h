@@ -221,7 +221,8 @@ inline bool control_modal_is_jc4880p443_size(const ControlModalLayout &layout) {
 }
 
 inline bool control_modal_uses_compact_portrait_tuning(const ControlModalLayout &layout) {
-  return control_modal_is_jc4880p443_size(layout);
+  (void) layout;
+  return false;
 }
 
 inline bool control_modal_uses_square_tuning(const ControlModalLayout &layout) {
@@ -229,7 +230,8 @@ inline bool control_modal_uses_square_tuning(const ControlModalLayout &layout) {
 }
 
 inline bool control_modal_uses_4848_tuning(const ControlModalLayout &layout) {
-  return display_modal_is_4848_size(layout.sw, layout.sh);
+  return display_modal_is_4848_size(layout.sw, layout.sh) ||
+         control_modal_is_jc4880p443_size(layout);
 }
 
 inline bool control_modal_uses_large_landscape_tuning(const ControlModalLayout &layout) {
