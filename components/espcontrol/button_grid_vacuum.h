@@ -50,14 +50,14 @@ inline const char *vacuum_state_icon_name(const std::string &state) {
 
 inline std::string vacuum_state_label(const std::string &state,
                                       const std::string &fallback) {
-  if (state == "cleaning") return "Cleaning";
-  if (state == "docked") return "Docked";
-  if (state == "error") return "Error";
-  if (state == "idle") return "Idle";
-  if (state == "paused") return "Paused";
-  if (state == "returning") return "Returning";
-  if (state == "unavailable") return "Unavailable";
-  if (state == "unknown") return "Unknown";
+  if (state == "cleaning") return espcontrol_i18n(std::string("Cleaning"));
+  if (state == "docked") return espcontrol_i18n(std::string("Docked"));
+  if (state == "error") return espcontrol_i18n(std::string("Error"));
+  if (state == "idle") return espcontrol_i18n(std::string("Idle"));
+  if (state == "paused") return espcontrol_i18n(std::string("Paused"));
+  if (state == "returning") return espcontrol_i18n(std::string("Returning"));
+  if (state == "unavailable") return espcontrol_i18n(std::string("Unavailable"));
+  if (state == "unknown") return espcontrol_i18n(std::string("Unknown"));
   return fallback;
 }
 
