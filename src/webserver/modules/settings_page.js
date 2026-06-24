@@ -51,6 +51,14 @@ function infoPanel(id, text) {
   return panel;
 }
 
+function statusBadge(label) {
+  var badge = document.createElement("span");
+  badge.setAttribute("aria-label", label);
+  badge.appendChild(textSpan("", "sp-card-badge-dot"));
+  badge.appendChild(textSpan("ON"));
+  return badge;
+}
+
 function inlineDisclosure(title, bodyElement, defaultOpen) {
   var panel = document.createElement("div");
   panel.className = "sp-disclosure" + (defaultOpen ? " sp-open" : "");
@@ -418,9 +426,7 @@ function buildSettingsPage(parent) {
     setScheduleTrigger("sensor");
   });
 
-  var scheduleBadge = document.createElement("span");
-  scheduleBadge.setAttribute("aria-label", "Schedule on");
-  scheduleBadge.innerHTML = '<span class="sp-card-badge-dot"></span><span>ON</span>';
+  var scheduleBadge = statusBadge("Schedule on");
   els.setScheduleBadge = scheduleBadge;
   syncScreenScheduleUi();
   var scheduleCard = makeCollapsibleCard("Night Schedule", scheduleBody, true, scheduleBadge);
@@ -538,9 +544,7 @@ function buildSettingsPage(parent) {
     postClockBar(state.clockBarOn);
   });
 
-  var clockBarBadge = document.createElement("span");
-  clockBarBadge.setAttribute("aria-label", "Clock bar on");
-  clockBarBadge.innerHTML = '<span class="sp-card-badge-dot"></span><span>ON</span>';
+  var clockBarBadge = statusBadge("Clock bar on");
   els.setClockBarBadge = clockBarBadge;
   syncClockBarUi();
   syncTemperatureUi();
@@ -895,9 +899,7 @@ function buildSettingsPage(parent) {
   syncMediaPlayerSleepPreventionUi();
   syncCoverArtScreensaverUi();
 
-  var ssBadge = document.createElement("span");
-  ssBadge.setAttribute("aria-label", "Screensaver on");
-  ssBadge.innerHTML = '<span class="sp-card-badge-dot"></span><span>ON</span>';
+  var ssBadge = statusBadge("Screensaver on");
   els.setScreensaverBadge = ssBadge;
 
   function setSsMode(mode) {
@@ -959,17 +961,13 @@ function buildSettingsPage(parent) {
   });
   idleBody.appendChild(hsSelect);
   els.setHSTimeout = hsSelect;
-  var idleBadge = document.createElement("span");
-  idleBadge.setAttribute("aria-label", "Idle on");
-  idleBadge.innerHTML = '<span class="sp-card-badge-dot"></span><span>ON</span>';
+  var idleBadge = statusBadge("Idle on");
   els.setIdleBadge = idleBadge;
   syncIdleUi();
   var idleCard = makeCollapsibleCard("Idle", idleBody, true, idleBadge);
   var coverArtCard = null;
   if (!isEpaperPreview()) {
-    var coverArtBadge = document.createElement("span");
-    coverArtBadge.setAttribute("aria-label", "Media cover art on");
-    coverArtBadge.innerHTML = '<span class="sp-card-badge-dot"></span><span>ON</span>';
+    var coverArtBadge = statusBadge("Media cover art on");
     els.setCoverArtBadge = coverArtBadge;
     syncCoverArtScreensaverUi();
     coverArtCard = makeCollapsibleCard("Media Cover Art", coverArtBody, true, coverArtBadge);

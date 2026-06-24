@@ -64,7 +64,7 @@ No critical issues were found in this pass. I did not find an obvious data-loss 
 - Why it matters: Several settings cards build the same "ON" badge markup by hand. It is not broken, but it adds noise and makes small UI changes repetitive.
 - Recommendation: Add a tiny `statusBadge(label)` helper and use it for schedule, clock bar, screensaver, idle, and cover art badges.
 - Safe to fix now: Yes, but lower value than the safety/duplication fixes above.
-- Status: Left for a future polish pass.
+- Status: Fixed in this pass with `statusBadge(label)`.
 
 ### 3.2 Generated and vendored files dominate simple scans
 
@@ -72,4 +72,4 @@ No critical issues were found in this pass. I did not find an obvious data-loss 
 - Why it matters: Basic repository scans produce noisy results unless generated and vendor paths are excluded. That makes cleanup work look worse than it is.
 - Recommendation: Add a short note or helper command for maintainability scans that excludes generated bundles and vendored libraries.
 - Safe to fix now: Yes, but documentation-only and not required for this pass.
-- Status: Left for a future polish pass.
+- Status: Fixed in this pass by extending the broad review scan note in `dev-docs/README.md`.
