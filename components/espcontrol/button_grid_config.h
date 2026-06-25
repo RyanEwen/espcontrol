@@ -1856,6 +1856,32 @@ inline void apply_weather_forecast_card_text(const WeatherForecastCardRef &ref,
   lv_label_set_text(ref.unit_lbl, normalized_unit.c_str());
 }
 
+inline lv_timer_t *&weather_forecast_visual_refresh_timer() {
+  static lv_timer_t *timer = nullptr;
+  return timer;
+}
+
+inline void weather_forecast_apply_visuals_cb(lv_timer_t *timer) {
+  lv_timer_t *&active_timer = weather_forecast_visual_refresh_timer();
+  if (active_timer == timer) active_timer = nullptr;
+  lv_timer_del(timer);
+
+  WeatherForecastCardRef *refs = weather_forecast_card_refs();
+  int count = weather_forecast_card_count();
+  for (int i = 0; i < count; i++) {
+    apply_control_availability(refs[i].btn, refs[i].btn, refs[i].valid, false);
+    apply_weather_forecast_card_text(refs[i], refs[i].valid, refs[i].high,
+                                     refs[i].low, refs[i].source_unit);
+  }
+  if (count > 0) notify_dashboard_content_changed();
+}
+
+inline void weather_forecast_schedule_visual_refresh() {
+  lv_timer_t *&timer = weather_forecast_visual_refresh_timer();
+  if (timer) lv_timer_reset(timer);
+  else timer = lv_timer_create(weather_forecast_apply_visuals_cb, 1, nullptr);
+}
+
 inline void apply_weather_forecast_to_entity(const std::string &entity_id,
                                              const std::string &day,
                                              bool valid, float high, float low,
@@ -1872,9 +1898,7 @@ inline void apply_weather_forecast_to_entity(const std::string &entity_id,
       refs[i].low = low;
       refs[i].source_unit = unit;
       refs[i].status_label = "";
-      apply_control_availability(refs[i].btn, refs[i].btn, valid, false);
-      apply_weather_forecast_card_text(refs[i], valid, high, low, unit);
-      notify_dashboard_content_changed();
+      weather_forecast_schedule_visual_refresh();
     }
   }
 }
@@ -1890,9 +1914,7 @@ inline void apply_weather_forecast_unavailable_for_entity(const std::string &ent
       refs[i].low = 0;
       refs[i].source_unit = "";
       refs[i].status_label = "";
-      apply_control_availability(refs[i].btn, refs[i].btn, false, false);
-      apply_weather_forecast_card_text(refs[i], false, 0, 0, "");
-      notify_dashboard_content_changed();
+      weather_forecast_schedule_visual_refresh();
     }
   }
 }
@@ -1907,10 +1929,8 @@ inline void apply_weather_forecast_unavailable_all() {
     refs[i].low = 0;
     refs[i].source_unit = "";
     refs[i].status_label = "";
-    apply_control_availability(refs[i].btn, refs[i].btn, false, false);
-    apply_weather_forecast_card_text(refs[i], false, 0, 0, "");
+    weather_forecast_schedule_visual_refresh();
   }
-  if (count > 0) notify_dashboard_content_changed();
 }
 
 inline void apply_weather_forecast_actions_required_for_entity(const std::string &entity_id) {
@@ -1926,9 +1946,7 @@ inline void apply_weather_forecast_actions_required_for_entity(const std::string
       refs[i].low = 0;
       refs[i].source_unit = "";
       refs[i].status_label = "";
-      apply_control_availability(refs[i].btn, refs[i].btn, false, false);
-      apply_weather_forecast_card_text(refs[i], false, 0, 0, "");
-      notify_dashboard_content_changed();
+      weather_forecast_schedule_visual_refresh();
     }
   }
 }
