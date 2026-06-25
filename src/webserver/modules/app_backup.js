@@ -151,6 +151,7 @@ function importConfig() {
       }
 
       setPostThrottle(importPostThrottleMs);
+      resetPostQueueError();
       postText(entityName("button_on_color"), backupPlan.config.button_on_color);
       postText(entityName("button_off_color"), backupPlan.config.button_off_color);
       postText(entityName("sensor_card_color"), backupPlan.config.sensor_card_color);
@@ -387,7 +388,7 @@ function importConfig() {
       switchTab("screen");
       setPostThrottle(0);
       postQueueIdle().then(function () {
-        showBanner("Configuration imported successfully", "success");
+        if (!postQueueHadError()) showBanner("Configuration imported successfully", "success");
       });
       cleanupInput();
     };

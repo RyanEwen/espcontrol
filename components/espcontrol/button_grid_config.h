@@ -1861,6 +1861,31 @@ inline void weather_forecast_schedule_visual_refresh() {
   // values cached, but avoid touching LVGL objects from this async path.
 }
 
+inline bool weather_forecast_card_ref_ready(const WeatherForecastCardRef &ref) {
+  if (!esphome::App.is_setup_complete()) return false;
+  if (!lv_display_get_default()) return false;
+  if (!ref.btn || !ref.value_lbl || !ref.unit_lbl) return false;
+  if (!lv_obj_is_valid(ref.btn)) return false;
+  if (!lv_obj_is_valid(ref.value_lbl)) return false;
+  if (!lv_obj_is_valid(ref.unit_lbl)) return false;
+  if (ref.label_lbl && !lv_obj_is_valid(ref.label_lbl)) return false;
+  return true;
+}
+
+inline void refresh_weather_forecast_card_unit_labels() {
+  WeatherForecastCardRef *refs = weather_forecast_card_refs();
+  int count = weather_forecast_card_count();
+  bool updated = false;
+  for (int i = 0; i < count; i++) {
+    if (!weather_forecast_card_ref_ready(refs[i])) continue;
+    apply_control_availability(refs[i].btn, refs[i].btn, refs[i].valid, false);
+    apply_weather_forecast_card_text(refs[i], refs[i].valid, refs[i].high,
+                                     refs[i].low, refs[i].source_unit);
+    updated = true;
+  }
+  if (updated) notify_dashboard_content_changed();
+}
+
 inline void apply_weather_forecast_to_entity(const std::string &entity_id,
                                              const std::string &day,
                                              bool valid, float high, float low,
@@ -2434,6 +2459,7 @@ inline void refresh_temperature_unit_labels() {
     climate_update_card(climate_refs[i]);
     climate_control_set_modal_value(climate_refs[i]);
   }
+  refresh_weather_forecast_card_unit_labels();
   if (climate_count > 0) notify_dashboard_content_changed();
 }
 
