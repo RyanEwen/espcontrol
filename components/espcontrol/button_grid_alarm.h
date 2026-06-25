@@ -1148,11 +1148,11 @@ inline void alarm_control_create_arming_view(AlarmControlModalUi &ui,
 
   bool jc4880p443_layout = control_modal_uses_compact_portrait_tuning(layout);
   lv_coord_t status_center_y = -control_modal_scaled_px(64, layout.short_side);
-  lv_coord_t countdown_gap = control_modal_scaled_px(18, layout.short_side);
+  lv_coord_t countdown_gap = control_modal_scaled_px(28, layout.short_side);
   lv_coord_t disarm_extra_padding = 0;
   if (jc4880p443_layout) {
     status_center_y = -control_modal_scaled_px(56, layout.short_side);
-    countdown_gap = control_modal_scaled_px(24, layout.short_side);
+    countdown_gap = control_modal_scaled_px(34, layout.short_side);
     disarm_extra_padding = control_modal_scaled_px(24, layout.short_side);
   }
 
@@ -1184,12 +1184,12 @@ inline void alarm_control_create_arming_view(AlarmControlModalUi &ui,
   lv_coord_t progress_h = control_modal_scaled_px(12, layout.short_side);
   if (progress_h < 8) progress_h = 8;
   if (progress_h > 16) progress_h = 16;
-  lv_coord_t progress_w = layout.panel_w - layout.inset * 3;
-  if (progress_w < layout.panel_w / 2) progress_w = layout.panel_w / 2;
-  lv_coord_t progress_gap = control_modal_scaled_px(8, layout.short_side);
-  if (progress_gap < 6) progress_gap = 6;
-  if (jc4880p443_layout) progress_gap = control_modal_scaled_px(10, layout.short_side);
-  if (jc4880p443_layout && progress_gap < 8) progress_gap = 8;
+  lv_coord_t progress_w = layout.panel_w / 3;
+  if (progress_w < progress_h * 4) progress_w = progress_h * 4;
+  lv_coord_t progress_gap = control_modal_scaled_px(20, layout.short_side);
+  if (progress_gap < 14) progress_gap = 14;
+  if (jc4880p443_layout) progress_gap = control_modal_scaled_px(24, layout.short_side);
+  if (jc4880p443_layout && progress_gap < 16) progress_gap = 16;
   lv_coord_t progress_center_y = countdown_y + countdown_h / 2 + progress_gap + progress_h / 2;
 
   ui.arming_progress = lv_obj_create(ui.arming_view);
