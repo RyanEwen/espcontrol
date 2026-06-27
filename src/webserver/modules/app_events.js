@@ -46,7 +46,9 @@ function handleWebServerPingEvent(e) {
     applyPageTitle("");
     return;
   }
-  applyPageTitle(data && data.title);
+  if (data && Object.prototype.hasOwnProperty.call(data, "title")) {
+    applyPageTitle(data.title);
+  }
 }
 
 function applyClockBarStateValue(val, d, matchedKey) {

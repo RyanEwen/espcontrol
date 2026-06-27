@@ -338,11 +338,15 @@ async function assertPageTitleEvents(browser) {
     await page.evaluate(() => window.__seedEspPing({ title: "EspControl 7inch P4" }));
     assert.strictEqual(await page.title(), "EspControl 7inch P4", "ping title should set browser title");
 
+    await page.evaluate(() => window.__seedEspPing({ uptime: 12 }));
+    assert.strictEqual(await page.title(), "EspControl 7inch P4", "keepalive ping should preserve browser title");
+
     await page.evaluate(() => window.__seedEspPing({ title: "   " }));
     assert.strictEqual(await page.title(), "EspControl", "blank ping title should restore fallback title");
 
+    await page.evaluate(() => window.__seedEspPing({ title: "EspControl 7inch P4" }));
     await page.evaluate(() => window.__seedEspPing({}));
-    assert.strictEqual(await page.title(), "EspControl", "missing ping title should use fallback title");
+    assert.strictEqual(await page.title(), "EspControl 7inch P4", "missing ping title should preserve current title");
 
     await page.evaluate(() => window.__seedEspPing("not-json"));
     assert.strictEqual(await page.title(), "EspControl", "malformed ping payload should not break title fallback");
