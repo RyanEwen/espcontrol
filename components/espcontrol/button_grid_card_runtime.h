@@ -110,6 +110,10 @@ constexpr const char *card_runtime_option_name_fan_tabs() {
   return CARD_CONTRACT_OPTION_NAME_FAN_TABS;
 }
 
+constexpr const char *card_runtime_option_name_label_display() {
+  return CARD_CONTRACT_OPTION_NAME_LABEL_DISPLAY;
+}
+
 inline bool card_runtime_large_numbers_supported(const std::string &type,
                                                  const std::string &precision) {
   return card_contract_large_numbers_supported(type, precision);
