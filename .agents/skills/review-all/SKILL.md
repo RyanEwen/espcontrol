@@ -37,15 +37,19 @@ If the user supplied a different owner or author, use that explicit value. Other
 
 ### 2. Collect unresolved review feedback
 
-For each open PR, use thread-level GraphQL data so resolved feedback is not repeated:
+For each open PR, use thread-level GraphQL data so resolved feedback is not repeated. Review threads must be paginated before filtering for unresolved items; do not assume `first:100` is the complete result set.
 
 ```bash
-gh api graphql -f owner='{owner}' -f name='{repo}' -F number=<pr-number> -f query='
-query($owner:String!, $name:String!, $number:Int!) {
+gh api graphql -f owner='{owner}' -f name='{repo}' -F number=<pr-number> -f cursor=null -f query='
+query($owner:String!, $name:String!, $number:Int!, $cursor:String) {
   repository(owner:$owner, name:$name) {
     pullRequest(number:$number) {
       reviewDecision
-      reviewThreads(first:100) {
+      reviewThreads(first:100, after:$cursor) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
         nodes {
           id
           isResolved
@@ -75,7 +79,7 @@ query($owner:String!, $name:String!, $number:Int!) {
 }'
 ```
 
-Summarize the actionable unresolved threads before editing. Ignore already-resolved threads. Treat ordinary PR comments as context unless they clearly describe a current failing check or requested change.
+If `reviewThreads.pageInfo.hasNextPage` is true, repeat the query with `cursor` set to `endCursor` until every page has been collected, then filter for unresolved threads. Summarize the actionable unresolved threads before editing. Ignore already-resolved threads. Treat ordinary PR comments as context unless they clearly describe a current failing check or requested change.
 
 ### 3. Prepare each PR branch
 
@@ -160,7 +164,7 @@ If resolving fails, keep going and report the thread URL so the user can resolve
 
 ### 8. Verify completion
 
-Run one final unresolved-thread pass across the user's open PRs. The goal is a concrete result such as:
+Run one final paginated unresolved-thread pass across the user's open PRs. The goal is a concrete result such as:
 
 ```text
 No unresolved review threads found across <n> open PRs authored by @me.
