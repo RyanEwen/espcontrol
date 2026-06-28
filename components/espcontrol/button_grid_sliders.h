@@ -384,6 +384,12 @@ inline void light_control_set_current_light_color(LightControlCtx *ctx, uint32_t
   light_control_refresh_brightness_fill(ctx);
 }
 
+inline void light_control_clear_current_light_color(LightControlCtx *ctx) {
+  if (!ctx) return;
+  ctx->has_current_light_color = false;
+  light_control_refresh_brightness_fill(ctx);
+}
+
 inline void light_control_refresh_brightness_fill(LightControlCtx *ctx) {
   LightControlModalUi &ui = light_control_modal_ui();
   if (!ctx || ui.active != ctx) return;
@@ -1315,6 +1321,8 @@ inline void subscribe_light_control_state(LightControlCtx *ctx) {
         uint32_t color = 0;
         if (light_control_parse_rgb_triplet(value, color)) {
           light_control_set_current_light_color(ctx, color);
+        } else {
+          light_control_clear_current_light_color(ctx);
         }
       })
   );
