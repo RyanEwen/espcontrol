@@ -32,6 +32,39 @@ inline void apply_sensor_active_color(lv_obj_t *btn, bool active_color,
     static_cast<lv_style_selector_t>(LV_PART_MAIN) | static_cast<lv_style_selector_t>(LV_STATE_DEFAULT));
 }
 
+inline void apply_control_availability(lv_obj_t *visual_obj, lv_obj_t *input_obj,
+                                       bool available) {
+  if (visual_obj) {
+    lv_obj_set_style_opa(visual_obj, available ? LV_OPA_COVER : LV_OPA_50, LV_PART_MAIN);
+    if (available) lv_obj_clear_state(visual_obj, LV_STATE_DISABLED);
+    else lv_obj_add_state(visual_obj, LV_STATE_DISABLED);
+  }
+  if (input_obj && input_obj != visual_obj) {
+    if (available) lv_obj_clear_state(input_obj, LV_STATE_DISABLED);
+    else lv_obj_add_state(input_obj, LV_STATE_DISABLED);
+  }
+  if (!input_obj) return;
+  if (available) lv_obj_add_flag(input_obj, LV_OBJ_FLAG_CLICKABLE);
+  else lv_obj_clear_flag(input_obj, LV_OBJ_FLAG_CLICKABLE);
+}
+
+inline void register_ha_control_availability(lv_obj_t *visual_obj, lv_obj_t *input_obj) {
+  apply_control_availability(visual_obj, input_obj, true);
+}
+
+inline void subscribe_control_availability(lv_obj_t *visual_obj, lv_obj_t *input_obj,
+                                           const std::string &entity_id) {
+  register_ha_control_availability(visual_obj, input_obj);
+  if (entity_id.empty()) return;
+  ha_subscribe_state(
+    entity_id,
+    std::function<void(esphome::StringRef)>(
+      [visual_obj, input_obj](esphome::StringRef state) {
+        apply_control_availability(visual_obj, input_obj, !ha_state_unavailable_ref(state));
+      })
+  );
+}
+
 // Subscribe to a HA sensor entity and update an LVGL label with its numeric value.
 inline void subscribe_sensor_value(lv_obj_t *sensor_lbl, const std::string &sensor_id,
                                    int precision = 0,
