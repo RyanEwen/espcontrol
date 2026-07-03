@@ -135,6 +135,7 @@ inline void media_control_layout_modal(MediaControlCtx *ctx);
 inline void media_control_refresh_modal(MediaControlCtx *ctx);
 inline void media_control_refresh_progress(MediaControlCtx *ctx);
 inline void media_control_refresh_volume(MediaControlCtx *ctx);
+inline void media_control_ensure_tab_content(MediaControlCtx *ctx);
 inline void media_control_set_volume_value(MediaControlCtx *ctx, int pct);
 inline int media_control_clamp_volume(MediaControlCtx *ctx, int pct);
 inline float media_control_current_position_seconds(MediaControlCtx *ctx);
@@ -1104,6 +1105,7 @@ inline lv_obj_t *media_control_create_tab_button(lv_obj_t *parent, const char *i
       reinterpret_cast<uintptr_t>(lv_event_get_user_data(e)));
     MediaControlModalUi &ui = media_control_modal_ui();
     ui.tab = tab;
+    media_control_ensure_tab_content(ui.active);
     media_control_apply_tab_visibility();
     media_control_layout_modal(ui.active);
   }, LV_EVENT_CLICKED, reinterpret_cast<void *>(static_cast<uintptr_t>(tab)));
@@ -1172,9 +1174,206 @@ inline void media_control_style_progress_slider(lv_obj_t *slider, uint32_t backg
   lv_obj_set_style_height(slider, 0, LV_PART_KNOB);
 }
 
+inline void media_control_create_controls_tab_content(MediaControlCtx *ctx) {
+  MediaControlModalUi &ui = media_control_modal_ui();
+  if (!ctx || !ui.controls_box || ui.title_lbl) return;
+
+  ui.title_lbl = lv_label_create(ui.controls_box);
+  if (!ui.title_lbl) return;
+  lv_obj_set_style_text_color(ui.title_lbl, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
+  lv_obj_set_style_text_align(ui.title_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+  lv_obj_set_style_text_line_space(ui.title_lbl, 0, LV_PART_MAIN);
+  if (ctx->title_font) lv_obj_set_style_text_font(ui.title_lbl, ctx->title_font, LV_PART_MAIN);
+  lv_label_set_long_mode(ui.title_lbl, LV_LABEL_LONG_WRAP);
+  apply_width_compensation(ui.title_lbl, ctx->width_compensation_percent);
+
+  ui.artist_lbl = lv_label_create(ui.controls_box);
+  if (ui.artist_lbl) {
+    lv_obj_set_style_text_color(ui.artist_lbl, lv_color_hex(DARK_TEXT_MUTED), LV_PART_MAIN);
+    lv_obj_set_style_text_align(ui.artist_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+    if (ctx->label_font) lv_obj_set_style_text_font(ui.artist_lbl, ctx->label_font, LV_PART_MAIN);
+    lv_label_set_long_mode(ui.artist_lbl, LV_LABEL_LONG_DOT);
+    apply_width_compensation(ui.artist_lbl, ctx->width_compensation_percent);
+  }
+
+  ui.previous_btn = media_control_create_icon_button(
+    ui.controls_box, find_icon("Skip Previous"), ctx->icon_font, ctx->accent_color);
+  ui.play_btn = media_control_create_icon_button(
+    ui.controls_box, find_icon("Play"), ctx->icon_font, ctx->accent_color);
+  ui.play_icon_lbl = ui.play_btn ? lv_obj_get_child(ui.play_btn, 0) : nullptr;
+  ui.next_btn = media_control_create_icon_button(
+    ui.controls_box, find_icon("Skip Next"), ctx->icon_font, ctx->accent_color);
+  if (ui.previous_btn) lv_obj_add_event_cb(ui.previous_btn, [](lv_event_t *) {
+    MediaControlModalUi &ui = media_control_modal_ui();
+    if (ui.active && ui.active->available) {
+      media_control_reset_track_position(ui.active);
+      send_media_playback_action(ui.active->entity_id, "previous");
+    }
+  }, LV_EVENT_CLICKED, nullptr);
+  if (ui.play_btn) lv_obj_add_event_cb(ui.play_btn, [](lv_event_t *) {
+    MediaControlModalUi &ui = media_control_modal_ui();
+    if (ui.active && ui.active->available) send_media_playback_action(ui.active->entity_id, "play_pause");
+  }, LV_EVENT_CLICKED, nullptr);
+  if (ui.next_btn) lv_obj_add_event_cb(ui.next_btn, [](lv_event_t *) {
+    MediaControlModalUi &ui = media_control_modal_ui();
+    if (ui.active && ui.active->available) {
+      media_control_reset_track_position(ui.active);
+      send_media_playback_action(ui.active->entity_id, "next");
+    }
+  }, LV_EVENT_CLICKED, nullptr);
+}
+
+inline void media_control_create_progress_tab_content(MediaControlCtx *ctx) {
+  MediaControlModalUi &ui = media_control_modal_ui();
+  if (!ctx || !ui.progress_box || ui.progress_slider) return;
+
+  ui.progress_slider = lv_slider_create(ui.progress_box);
+  if (!ui.progress_slider) return;
+  media_control_style_progress_slider(
+    ui.progress_slider, DARK_BACKGROUND_SECONDARY, ctx->accent_color);
+  ui.progress_fill = media_control_create_progress_fill(
+    ui.progress_slider, lv_color_hex(ctx->accent_color));
+  ui.progress_handle = media_control_create_progress_handle(ui.progress_slider);
+  ui.progress_time_lbl = lv_label_create(ui.progress_box);
+  if (ui.progress_time_lbl) {
+    lv_label_set_text(ui.progress_time_lbl, "0:00");
+    lv_obj_set_style_text_color(ui.progress_time_lbl, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
+    lv_obj_set_style_text_align(ui.progress_time_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+    if (ctx->title_font) lv_obj_set_style_text_font(ui.progress_time_lbl, ctx->title_font, LV_PART_MAIN);
+    apply_width_compensation(ui.progress_time_lbl, ctx->width_compensation_percent);
+  }
+  lv_obj_add_event_cb(ui.progress_slider, [](lv_event_t *e) {
+    MediaControlModalUi &ui = media_control_modal_ui();
+    if (!ui.active || ui.updating_progress) return;
+    if (ui.active) ui.active->dragging_progress = true;
+    lv_obj_t *slider = static_cast<lv_obj_t *>(lv_event_get_target(e));
+    int value = lv_slider_get_value(slider);
+    media_control_update_progress_fill(
+      slider, ui.progress_fill, ui.progress_handle, value,
+      lv_color_hex(ui.active->accent_color));
+    media_control_update_progress_handle(slider, ui.progress_handle, value);
+    if (ui.active && ui.active->duration > 0.0f) {
+      media_control_refresh_progress_time_label(
+        ui.active, ui.active->duration * value / 100.0f);
+    }
+  }, LV_EVENT_VALUE_CHANGED, nullptr);
+  lv_obj_add_event_cb(ui.progress_slider, [](lv_event_t *) {
+    MediaControlModalUi &ui = media_control_modal_ui();
+    if (ui.active) ui.active->dragging_progress = true;
+  }, LV_EVENT_PRESSED, nullptr);
+  lv_obj_add_event_cb(ui.progress_slider, [](lv_event_t *e) {
+    MediaControlModalUi &ui = media_control_modal_ui();
+    if (!ui.active) return;
+    ui.active->dragging_progress = false;
+    if (!ui.active->available || ui.active->duration <= 0.0f) return;
+    lv_obj_t *slider = static_cast<lv_obj_t *>(lv_event_get_target(e));
+    int value = lv_slider_get_value(slider);
+    ui.active->seek_pending = true;
+    ui.active->seek_target_seconds = ui.active->duration * value / 100.0f;
+    ui.active->seek_pending_ms = esphome::millis();
+    ui.active->position_seconds = ui.active->seek_target_seconds;
+    ui.active->position_updated_ms = ui.active->seek_pending_ms;
+    media_control_refresh_progress(ui.active);
+    send_media_seek_action(ui.active->entity_id, value, ui.active->duration);
+  }, LV_EVENT_RELEASED, nullptr);
+  lv_obj_add_event_cb(ui.progress_slider, [](lv_event_t *) {
+    MediaControlModalUi &ui = media_control_modal_ui();
+    if (ui.active) {
+      ui.active->dragging_progress = false;
+      media_control_refresh_progress(ui.active);
+    }
+  }, LV_EVENT_PRESS_LOST, nullptr);
+}
+
+inline void media_control_create_volume_tab_content(MediaControlCtx *ctx) {
+  MediaControlModalUi &ui = media_control_modal_ui();
+  if (!ctx || !ui.volume_box || ui.volume_arc) return;
+
+  ui.volume_arc = lv_arc_create(ui.volume_box);
+  if (!ui.volume_arc) return;
+  lv_arc_set_bg_angles(ui.volume_arc, 135, 45);
+  lv_arc_set_range(ui.volume_arc, 0, media_control_volume_max_pct(ctx));
+  lv_arc_set_value(ui.volume_arc, media_control_clamp_volume(ctx, ctx->current_pct));
+  lv_obj_set_style_bg_opa(ui.volume_arc, LV_OPA_TRANSP, LV_PART_MAIN);
+  lv_obj_set_style_border_width(ui.volume_arc, 0, LV_PART_MAIN);
+  lv_obj_set_style_arc_color(ui.volume_arc, lv_color_hex(DARK_TRACK_BACKGROUND), LV_PART_MAIN);
+  lv_obj_set_style_arc_color(ui.volume_arc, lv_color_hex(ctx->accent_color), LV_PART_INDICATOR);
+  lv_obj_set_style_arc_rounded(ui.volume_arc, true, LV_PART_MAIN);
+  lv_obj_set_style_arc_rounded(ui.volume_arc, true, LV_PART_INDICATOR);
+  lv_obj_set_style_bg_color(ui.volume_arc, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_KNOB);
+  lv_obj_set_style_border_width(ui.volume_arc, 0, LV_PART_KNOB);
+  lv_obj_set_style_shadow_width(ui.volume_arc, 0, LV_PART_KNOB);
+  lv_obj_add_flag(ui.volume_arc, LV_OBJ_FLAG_ADV_HITTEST);
+  lv_obj_add_event_cb(ui.volume_arc, [](lv_event_t *e) {
+    MediaControlModalUi &ui = media_control_modal_ui();
+    if (!ui.active || ui.updating_volume) return;
+    ui.active->dragging_volume = true;
+    lv_obj_t *arc = static_cast<lv_obj_t *>(lv_event_get_target(e));
+    media_control_apply_volume_percent(ui.active, lv_arc_get_value(arc), true, true);
+  }, LV_EVENT_VALUE_CHANGED, nullptr);
+  lv_obj_add_event_cb(ui.volume_arc, [](lv_event_t *) {
+    MediaControlModalUi &ui = media_control_modal_ui();
+    if (ui.active) ui.active->dragging_volume = true;
+  }, LV_EVENT_PRESSED, nullptr);
+  lv_obj_add_event_cb(ui.volume_arc, [](lv_event_t *) {
+    MediaControlModalUi &ui = media_control_modal_ui();
+    if (!ui.active) return;
+    ui.active->dragging_volume = false;
+    media_control_refresh_volume(ui.active);
+  }, LV_EVENT_RELEASED, nullptr);
+  lv_obj_add_event_cb(ui.volume_arc, [](lv_event_t *) {
+    MediaControlModalUi &ui = media_control_modal_ui();
+    if (ui.active) {
+      ui.active->dragging_volume = false;
+      media_control_refresh_volume(ui.active);
+    }
+  }, LV_EVENT_PRESS_LOST, nullptr);
+
+  ui.volume_pct_lbl = lv_label_create(ui.volume_box);
+  if (ui.volume_pct_lbl) {
+    lv_label_set_text(ui.volume_pct_lbl, "0");
+    lv_obj_set_style_text_color(ui.volume_pct_lbl, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
+    lv_obj_set_style_text_align(ui.volume_pct_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+    if (ctx->number_font) lv_obj_set_style_text_font(ui.volume_pct_lbl, ctx->number_font, LV_PART_MAIN);
+    apply_width_compensation(ui.volume_pct_lbl, ctx->width_compensation_percent);
+  }
+
+  ui.volume_minus_btn = control_modal_create_round_button(
+    ui.volume_box, 56, find_icon("Minus"), ctx->icon_font,
+    DARK_BORDER, DARK_BACKGROUND_TERTIARY, ctx->width_compensation_percent);
+  ui.volume_plus_btn = control_modal_create_round_button(
+    ui.volume_box, 56, find_icon("Plus"), ctx->icon_font,
+    DARK_BORDER, DARK_BACKGROUND_TERTIARY, ctx->width_compensation_percent);
+  media_control_apply_primary_pressed_fill(ui.volume_minus_btn, ctx->accent_color);
+  media_control_apply_primary_pressed_fill(ui.volume_plus_btn, ctx->accent_color);
+  if (ui.volume_minus_btn) {
+    lv_obj_add_event_cb(ui.volume_minus_btn, [](lv_event_t *) {
+      MediaControlModalUi &ui = media_control_modal_ui();
+      if (!ui.active) return;
+      media_control_apply_volume_percent(ui.active, ui.active->current_pct - 1, true, true);
+    }, LV_EVENT_CLICKED, nullptr);
+  }
+  if (ui.volume_plus_btn) {
+    lv_obj_add_event_cb(ui.volume_plus_btn, [](lv_event_t *) {
+      MediaControlModalUi &ui = media_control_modal_ui();
+      if (!ui.active) return;
+      media_control_apply_volume_percent(ui.active, ui.active->current_pct + 1, true, true);
+    }, LV_EVENT_CLICKED, nullptr);
+  }
+}
+
+inline void media_control_ensure_tab_content(MediaControlCtx *ctx) {
+  MediaControlModalUi &ui = media_control_modal_ui();
+  if (!ctx || ui.active != ctx) return;
+  if (ui.tab == MediaControlTab::CONTROLS) media_control_create_controls_tab_content(ctx);
+  else if (ui.tab == MediaControlTab::PROGRESS) media_control_create_progress_tab_content(ctx);
+  else if (ui.tab == MediaControlTab::VOLUME) media_control_create_volume_tab_content(ctx);
+}
+
 inline void media_control_layout_modal(MediaControlCtx *ctx) {
   MediaControlModalUi &ui = media_control_modal_ui();
   if (!ctx || !ui.overlay || !ui.panel) return;
+  media_control_ensure_tab_content(ctx);
   ControlModalLayout layout = control_modal_calc_layout(ctx->width_compensation_percent);
   control_modal_apply_panel_layout(ui.overlay, ui.panel, layout, control_modal_card_radius(ctx->btn));
   control_modal_apply_back_button_layout(ui.back_btn, layout);
@@ -1451,176 +1650,6 @@ inline void media_control_open_modal(MediaControlCtx *ctx) {
   ui.volume_box = media_control_create_box(ui.panel);
   if (ui.progress_box) lv_obj_add_flag(ui.progress_box, LV_OBJ_FLAG_HIDDEN);
   if (ui.volume_box) lv_obj_add_flag(ui.volume_box, LV_OBJ_FLAG_HIDDEN);
-
-  ui.title_lbl = lv_label_create(ui.controls_box);
-  lv_obj_set_style_text_color(ui.title_lbl, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
-  lv_obj_set_style_text_align(ui.title_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-  lv_obj_set_style_text_line_space(ui.title_lbl, 0, LV_PART_MAIN);
-  if (ctx->title_font) lv_obj_set_style_text_font(ui.title_lbl, ctx->title_font, LV_PART_MAIN);
-  lv_label_set_long_mode(ui.title_lbl, LV_LABEL_LONG_WRAP);
-  apply_width_compensation(ui.title_lbl, ctx->width_compensation_percent);
-
-  ui.artist_lbl = lv_label_create(ui.controls_box);
-  lv_obj_set_style_text_color(ui.artist_lbl, lv_color_hex(DARK_TEXT_MUTED), LV_PART_MAIN);
-  lv_obj_set_style_text_align(ui.artist_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-  if (ctx->label_font) lv_obj_set_style_text_font(ui.artist_lbl, ctx->label_font, LV_PART_MAIN);
-  lv_label_set_long_mode(ui.artist_lbl, LV_LABEL_LONG_DOT);
-  apply_width_compensation(ui.artist_lbl, ctx->width_compensation_percent);
-
-  ui.progress_slider = lv_slider_create(ui.progress_box);
-  media_control_style_progress_slider(
-    ui.progress_slider, DARK_BACKGROUND_SECONDARY, ctx->accent_color);
-  ui.progress_fill = media_control_create_progress_fill(
-    ui.progress_slider, lv_color_hex(ctx->accent_color));
-  ui.progress_handle = media_control_create_progress_handle(ui.progress_slider);
-  ui.progress_time_lbl = lv_label_create(ui.progress_box);
-  if (ui.progress_time_lbl) {
-    lv_label_set_text(ui.progress_time_lbl, "0:00");
-    lv_obj_set_style_text_color(ui.progress_time_lbl, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
-    lv_obj_set_style_text_align(ui.progress_time_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    if (ctx->title_font) lv_obj_set_style_text_font(ui.progress_time_lbl, ctx->title_font, LV_PART_MAIN);
-    apply_width_compensation(ui.progress_time_lbl, ctx->width_compensation_percent);
-  }
-  lv_obj_add_event_cb(ui.progress_slider, [](lv_event_t *e) {
-    MediaControlModalUi &ui = media_control_modal_ui();
-    if (!ui.active || ui.updating_progress) return;
-    if (ui.active) ui.active->dragging_progress = true;
-    lv_obj_t *slider = static_cast<lv_obj_t *>(lv_event_get_target(e));
-    int value = lv_slider_get_value(slider);
-    media_control_update_progress_fill(
-      slider, ui.progress_fill, ui.progress_handle, value,
-      lv_color_hex(ui.active->accent_color));
-    media_control_update_progress_handle(slider, ui.progress_handle, value);
-    if (ui.active && ui.active->duration > 0.0f) {
-      media_control_refresh_progress_time_label(
-        ui.active, ui.active->duration * value / 100.0f);
-    }
-  }, LV_EVENT_VALUE_CHANGED, nullptr);
-  lv_obj_add_event_cb(ui.progress_slider, [](lv_event_t *) {
-    MediaControlModalUi &ui = media_control_modal_ui();
-    if (ui.active) ui.active->dragging_progress = true;
-  }, LV_EVENT_PRESSED, nullptr);
-  lv_obj_add_event_cb(ui.progress_slider, [](lv_event_t *e) {
-    MediaControlModalUi &ui = media_control_modal_ui();
-    if (!ui.active) return;
-    ui.active->dragging_progress = false;
-    if (!ui.active->available || ui.active->duration <= 0.0f) return;
-    lv_obj_t *slider = static_cast<lv_obj_t *>(lv_event_get_target(e));
-    int value = lv_slider_get_value(slider);
-    ui.active->seek_pending = true;
-    ui.active->seek_target_seconds = ui.active->duration * value / 100.0f;
-    ui.active->seek_pending_ms = esphome::millis();
-    ui.active->position_seconds = ui.active->seek_target_seconds;
-    ui.active->position_updated_ms = ui.active->seek_pending_ms;
-    media_control_refresh_progress(ui.active);
-    send_media_seek_action(ui.active->entity_id, value, ui.active->duration);
-  }, LV_EVENT_RELEASED, nullptr);
-  lv_obj_add_event_cb(ui.progress_slider, [](lv_event_t *) {
-    MediaControlModalUi &ui = media_control_modal_ui();
-    if (ui.active) {
-      ui.active->dragging_progress = false;
-      media_control_refresh_progress(ui.active);
-    }
-  }, LV_EVENT_PRESS_LOST, nullptr);
-
-  ui.previous_btn = media_control_create_icon_button(
-    ui.controls_box, find_icon("Skip Previous"), ctx->icon_font, ctx->accent_color);
-  ui.play_btn = media_control_create_icon_button(
-    ui.controls_box, find_icon("Play"), ctx->icon_font, ctx->accent_color);
-  ui.play_icon_lbl = ui.play_btn ? lv_obj_get_child(ui.play_btn, 0) : nullptr;
-  ui.next_btn = media_control_create_icon_button(
-    ui.controls_box, find_icon("Skip Next"), ctx->icon_font, ctx->accent_color);
-  lv_obj_add_event_cb(ui.previous_btn, [](lv_event_t *) {
-    MediaControlModalUi &ui = media_control_modal_ui();
-    if (ui.active && ui.active->available) {
-      media_control_reset_track_position(ui.active);
-      send_media_playback_action(ui.active->entity_id, "previous");
-    }
-  }, LV_EVENT_CLICKED, nullptr);
-  lv_obj_add_event_cb(ui.play_btn, [](lv_event_t *) {
-    MediaControlModalUi &ui = media_control_modal_ui();
-    if (ui.active && ui.active->available) send_media_playback_action(ui.active->entity_id, "play_pause");
-  }, LV_EVENT_CLICKED, nullptr);
-  lv_obj_add_event_cb(ui.next_btn, [](lv_event_t *) {
-    MediaControlModalUi &ui = media_control_modal_ui();
-    if (ui.active && ui.active->available) {
-      media_control_reset_track_position(ui.active);
-      send_media_playback_action(ui.active->entity_id, "next");
-    }
-  }, LV_EVENT_CLICKED, nullptr);
-
-  ui.volume_arc = lv_arc_create(ui.volume_box);
-  if (ui.volume_arc) {
-    lv_arc_set_bg_angles(ui.volume_arc, 135, 45);
-    lv_arc_set_range(ui.volume_arc, 0, media_control_volume_max_pct(ctx));
-    lv_arc_set_value(ui.volume_arc, media_control_clamp_volume(ctx, ctx->current_pct));
-    lv_obj_set_style_bg_opa(ui.volume_arc, LV_OPA_TRANSP, LV_PART_MAIN);
-    lv_obj_set_style_border_width(ui.volume_arc, 0, LV_PART_MAIN);
-    lv_obj_set_style_arc_color(ui.volume_arc, lv_color_hex(DARK_TRACK_BACKGROUND), LV_PART_MAIN);
-    lv_obj_set_style_arc_color(ui.volume_arc, lv_color_hex(ctx->accent_color), LV_PART_INDICATOR);
-    lv_obj_set_style_arc_rounded(ui.volume_arc, true, LV_PART_MAIN);
-    lv_obj_set_style_arc_rounded(ui.volume_arc, true, LV_PART_INDICATOR);
-    lv_obj_set_style_bg_color(ui.volume_arc, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_KNOB);
-    lv_obj_set_style_border_width(ui.volume_arc, 0, LV_PART_KNOB);
-    lv_obj_set_style_shadow_width(ui.volume_arc, 0, LV_PART_KNOB);
-    lv_obj_add_flag(ui.volume_arc, LV_OBJ_FLAG_ADV_HITTEST);
-    lv_obj_add_event_cb(ui.volume_arc, [](lv_event_t *e) {
-      MediaControlModalUi &ui = media_control_modal_ui();
-      if (!ui.active || ui.updating_volume) return;
-      ui.active->dragging_volume = true;
-      lv_obj_t *arc = static_cast<lv_obj_t *>(lv_event_get_target(e));
-      media_control_apply_volume_percent(ui.active, lv_arc_get_value(arc), true, true);
-    }, LV_EVENT_VALUE_CHANGED, nullptr);
-    lv_obj_add_event_cb(ui.volume_arc, [](lv_event_t *) {
-      MediaControlModalUi &ui = media_control_modal_ui();
-      if (ui.active) ui.active->dragging_volume = true;
-    }, LV_EVENT_PRESSED, nullptr);
-    lv_obj_add_event_cb(ui.volume_arc, [](lv_event_t *) {
-      MediaControlModalUi &ui = media_control_modal_ui();
-      if (!ui.active) return;
-      ui.active->dragging_volume = false;
-      media_control_refresh_volume(ui.active);
-    }, LV_EVENT_RELEASED, nullptr);
-    lv_obj_add_event_cb(ui.volume_arc, [](lv_event_t *) {
-      MediaControlModalUi &ui = media_control_modal_ui();
-      if (ui.active) {
-        ui.active->dragging_volume = false;
-        media_control_refresh_volume(ui.active);
-      }
-    }, LV_EVENT_PRESS_LOST, nullptr);
-  }
-
-  ui.volume_pct_lbl = lv_label_create(ui.volume_box);
-  if (ui.volume_pct_lbl) {
-    lv_label_set_text(ui.volume_pct_lbl, "0");
-    lv_obj_set_style_text_color(ui.volume_pct_lbl, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
-    lv_obj_set_style_text_align(ui.volume_pct_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    if (ctx->number_font) lv_obj_set_style_text_font(ui.volume_pct_lbl, ctx->number_font, LV_PART_MAIN);
-    apply_width_compensation(ui.volume_pct_lbl, ctx->width_compensation_percent);
-  }
-
-  ui.volume_minus_btn = control_modal_create_round_button(
-    ui.volume_box, 56, find_icon("Minus"), ctx->icon_font,
-    DARK_BORDER, DARK_BACKGROUND_TERTIARY, ctx->width_compensation_percent);
-  ui.volume_plus_btn = control_modal_create_round_button(
-    ui.volume_box, 56, find_icon("Plus"), ctx->icon_font,
-    DARK_BORDER, DARK_BACKGROUND_TERTIARY, ctx->width_compensation_percent);
-  media_control_apply_primary_pressed_fill(ui.volume_minus_btn, ctx->accent_color);
-  media_control_apply_primary_pressed_fill(ui.volume_plus_btn, ctx->accent_color);
-  if (ui.volume_minus_btn) {
-    lv_obj_add_event_cb(ui.volume_minus_btn, [](lv_event_t *) {
-      MediaControlModalUi &ui = media_control_modal_ui();
-      if (!ui.active) return;
-      media_control_apply_volume_percent(ui.active, ui.active->current_pct - 1, true, true);
-    }, LV_EVENT_CLICKED, nullptr);
-  }
-  if (ui.volume_plus_btn) {
-    lv_obj_add_event_cb(ui.volume_plus_btn, [](lv_event_t *) {
-      MediaControlModalUi &ui = media_control_modal_ui();
-      if (!ui.active) return;
-      media_control_apply_volume_percent(ui.active, ui.active->current_pct + 1, true, true);
-    }, LV_EVENT_CLICKED, nullptr);
-  }
 
   media_control_layout_modal(ctx);
   lv_obj_move_foreground(ui.overlay);
