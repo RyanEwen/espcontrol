@@ -217,6 +217,19 @@ function seededEvents() {
     },
     { id: "select-screen__language", state: "en", value: "en", option: ["en"] },
     {
+      id: "select-home_assistant_artwork_protocol",
+      state: "http",
+      value: "http",
+      option: ["http", "https"],
+    },
+    { id: "switch-firmware__auto_update", state: "ON", value: true },
+    {
+      id: "select-firmware__update_frequency",
+      state: "Daily",
+      value: "Daily",
+      option: ["Hourly", "Daily", "Weekly", "Monthly"],
+    },
+    {
       id: "select-screen__clock_format",
       state: "24h",
       value: "24h",
@@ -1773,6 +1786,10 @@ function backupFixture(device, slots) {
       cover_art_touch_pause: 180,
       cover_art_track_overlay_duration: 10,
       cover_art_hide_external_input: false,
+      home_assistant_artwork_protocol: "https",
+      home_assistant_artwork_port: 9443,
+      firmware_auto_update: false,
+      firmware_update_frequency: "Weekly",
       screensaver_action: "dim",
       clock_brightness_day: 44,
       clock_brightness_night: 22,
@@ -2025,6 +2042,41 @@ async function assertBackupImportSmoke(page, posts, testCase) {
         action: "turn_off",
       },
       "backup cover art external input import",
+    ],
+    [
+      {
+        domain: "select",
+        name: "home_assistant_artwork_protocol",
+        action: "set",
+        option: "https",
+      },
+      "backup Home Assistant artwork protocol import",
+    ],
+    [
+      {
+        domain: "number",
+        name: "home_assistant_artwork_port",
+        action: "set",
+        value: "9443",
+      },
+      "backup Home Assistant artwork port import",
+    ],
+    [
+      {
+        domain: "switch",
+        name: "firmware__auto_update",
+        action: "turn_off",
+      },
+      "backup firmware auto-update import",
+    ],
+    [
+      {
+        domain: "select",
+        name: "firmware__update_frequency",
+        action: "set",
+        option: "Weekly",
+      },
+      "backup firmware update frequency import",
     ],
     [
       {

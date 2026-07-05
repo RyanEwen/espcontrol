@@ -1062,7 +1062,8 @@ function buildSettingsPage(parent) {
       syncFirmwareUpdateUi();
       return;
     }
-    postSwitch(entityName("firmware_auto_update"), this.checked);
+    state.autoUpdate = this.checked;
+    postFirmwareAutoUpdate(state.autoUpdate);
     syncFirmwareUpdateUi();
   });
   els.setAutoUpdateRow = autoUpdateToggle.row;
@@ -1082,7 +1083,8 @@ function buildSettingsPage(parent) {
   freqSelect.value = state.updateFrequency;
   freqSelect.addEventListener("change", function () {
     if (!firmwareUpdateControlsVisible()) return;
-    postSelect(entityName("firmware_update_frequency"), this.value);
+    state.updateFrequency = this.value;
+    postFirmwareUpdateFrequency(state.updateFrequency);
   });
   freqWrap.appendChild(freqSelect);
   fwBody.appendChild(freqWrap);
@@ -1172,10 +1174,7 @@ function buildSettingsPage(parent) {
   haProtocolSelect.addEventListener("change", function () {
     state.homeAssistantArtworkProtocol = normalizeHomeAssistantArtworkProtocol(this.value);
     this.value = state.homeAssistantArtworkProtocol;
-    postSelectWithObjectIds(
-      entityName("home_assistant_artwork_protocol"),
-      entityObjectIds("home_assistant_artwork_protocol"),
-      state.homeAssistantArtworkProtocol);
+    postHomeAssistantArtworkProtocol(state.homeAssistantArtworkProtocol);
   });
   haProtocolField.appendChild(haProtocolSelect);
   homeAssistantSettingsBody.appendChild(haProtocolField);

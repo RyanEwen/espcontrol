@@ -498,11 +498,21 @@ var ENTITY_CATALOG = {
     },
     "firmware_auto_update": {
       "domain": "switch",
-      "name": "Firmware: Auto Update"
+      "name": "Firmware: Auto Update",
+      "objectIds": [
+        "firmware__auto_update",
+        "firmware_auto_update",
+        "auto_update_switch"
+      ]
     },
     "firmware_update_frequency": {
       "domain": "select",
-      "name": "Firmware: Update Frequency"
+      "name": "Firmware: Update Frequency",
+      "objectIds": [
+        "firmware__update_frequency",
+        "firmware_update_frequency",
+        "update_frequency_select"
+      ]
     },
     "esp32_c6_update_available": {
       "domain": "text_sensor",

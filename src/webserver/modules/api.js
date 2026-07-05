@@ -729,6 +729,30 @@ function postHomeAssistantArtworkPort(value) {
   return post(homeAssistantArtworkPortPostUrls(value));
 }
 
+function postHomeAssistantArtworkProtocol(value) {
+  return postSelectWithObjectIds(
+    entityName("home_assistant_artwork_protocol"),
+    entityObjectIds("home_assistant_artwork_protocol"),
+    normalizeHomeAssistantArtworkProtocol(value)
+  );
+}
+
+function postFirmwareAutoUpdate(on) {
+  return postSwitchWithObjectIds(
+    entityName("firmware_auto_update"),
+    entityObjectIds("firmware_auto_update"),
+    on
+  );
+}
+
+function postFirmwareUpdateFrequency(value) {
+  return postSelectWithObjectIds(
+    entityName("firmware_update_frequency"),
+    entityObjectIds("firmware_update_frequency"),
+    value
+  );
+}
+
 function postNumber(name, value) {
   return post(entityPostUrls("number", name, [], "set?value=" + encodeURIComponent(value)));
 }

@@ -32,6 +32,8 @@ var SSE_ALIAS_GROUPS = {
   ntpServer1: ["text-screen__ntp_server_1", "text-ntp_server_1"],
   ntpServer2: ["text-screen__ntp_server_2", "text-ntp_server_2"],
   ntpServer3: ["text-screen__ntp_server_3", "text-ntp_server_3"],
+  firmwareAutoUpdate: ["switch-firmware__auto_update", "switch-firmware_auto_update", "switch-auto_update_switch"],
+  firmwareUpdateFrequency: ["select-firmware__update_frequency", "select-firmware_update_frequency", "select-update_frequency_select"],
 };
 
 function applyPageTitle(title) {
@@ -564,6 +566,8 @@ function connectEvents() {
   addSseAliases(sseHandlers, SSE_ALIAS_GROUPS.ntpServer1, sseHandlers["text-screen__ntp_server_1"]);
   addSseAliases(sseHandlers, SSE_ALIAS_GROUPS.ntpServer2, sseHandlers["text-screen__ntp_server_2"]);
   addSseAliases(sseHandlers, SSE_ALIAS_GROUPS.ntpServer3, sseHandlers["text-screen__ntp_server_3"]);
+  addSseAliases(sseHandlers, SSE_ALIAS_GROUPS.firmwareAutoUpdate, sseHandlers["switch-firmware__auto_update"]);
+  addSseAliases(sseHandlers, SSE_ALIAS_GROUPS.firmwareUpdateFrequency, sseHandlers["select-firmware__update_frequency"]);
 
   var ssePatterns = [
     {
