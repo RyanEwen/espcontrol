@@ -1812,9 +1812,13 @@ script:
                   cover_entity != id(cover_art_media_player_entity).state) return;
               std::string next = string_ref_limited(source, HA_STATE_TEXT_MAX_LEN);
               if (next == "unknown" || next == "unavailable") next.clear();
-              bool external = next == "TV" || next == "tv" ||
-                              next == "Line-in" || next == "line-in" ||
-                              next == "Line in" || next == "line in";
+              std::string normalized_source = next;
+              for (char &ch : normalized_source) {
+                ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+              }
+              bool external = normalized_source == "tv" ||
+                              normalized_source == "line-in" ||
+                              normalized_source == "line in";
               if (next == id(cover_art_media_source) &&
                   external == id(cover_art_external_input_active)) return;
               id(cover_art_media_source) = next;

@@ -131,10 +131,11 @@ inline void media_set_metadata_text(lv_obj_t *label, esphome::StringRef value,
   lv_label_set_text(label, text.c_str());
 }
 
-inline bool media_external_source_input(const std::string &source) {
-  return source == "TV" || source == "tv" ||
-         source == "Line-in" || source == "line-in" ||
-         source == "Line in" || source == "line in";
+inline bool media_external_source_input(std::string source) {
+  for (char &ch : source) {
+    ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+  }
+  return source == "tv" || source == "line-in" || source == "line in";
 }
 
 inline void media_apply_now_playing_artist_text(MediaNowPlayingCtx *ctx) {

@@ -655,7 +655,10 @@ def firmware_cover_art_external_input_errors(path: Path, root: Path) -> list[str
         errors.append(f"{rel}: release retired cover art Home Assistant subscriptions")
     if 'ha_get_attribute(cover_entity, std::string("source"), handle_media_source)' not in text:
         errors.append(f"{rel}: refresh the media player source attribute")
-    if 'next == "TV"' not in text or 'next == "Line-in"' not in text:
+    if ('normalized_source == "tv"' not in text or
+            'normalized_source == "line-in"' not in text or
+            'normalized_source == "line in"' not in text or
+            "std::tolower" not in text):
         errors.append(f"{rel}: treat TV and Line-in sources as external inputs")
     if "cover_art_apply_external_input_policy" not in text:
         errors.append(f"{rel}: centralize cover art external-input behavior")
@@ -3138,7 +3141,13 @@ def run_self_test() -> int:
         "      - script.stop: cover_art_request_artwork\n"
         "      - lambda: |-\n"
         "          id(cover_art_hide_external_input_enabled).state && id(cover_art_external_input_active);\n"
-        "          bool external = next == \"TV\" || next == \"Line-in\";\n"
+        "          std::string normalized_source = next;\n"
+        "          for (char &ch : normalized_source) {\n"
+        "            ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));\n"
+        "          }\n"
+        "          bool external = normalized_source == \"tv\" ||\n"
+        "                          normalized_source == \"line-in\" ||\n"
+        "                          normalized_source == \"line in\";\n"
         "          ha_reset_subscription_callbacks(HA_SUBSCRIPTION_SCOPE_COVER_ART);\n"
         "          ha_subscribe_attribute(\n"
         "            cover_entity,\n"
