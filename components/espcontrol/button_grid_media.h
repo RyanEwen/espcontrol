@@ -117,24 +117,54 @@ inline constexpr bool media_control_progress_supported() {
   return !media_control_low_heap_mode();
 }
 
-inline void media_set_metadata_text(lv_obj_t *label, esphome::StringRef value,
-                                    const char *fallback) {
-  if (!label) return;
+inline std::string media_metadata_text(esphome::StringRef value, const char *fallback) {
   std::string text = string_ref_limited(value, HA_STATE_TEXT_MAX_LEN);
   if (text.empty() || text == "unknown" || text == "unavailable")
     text = fallback ? fallback : "--";
+  return text;
+}
+
+inline void media_set_metadata_text(lv_obj_t *label, esphome::StringRef value,
+                                    const char *fallback) {
+  if (!label) return;
+  std::string text = media_metadata_text(value, fallback);
   lv_label_set_text(label, text.c_str());
 }
 
-inline void media_refresh_artist_text(lv_obj_t *artist_lbl,
+inline bool media_external_source_input(std::string source) {
+  for (char &ch : source) {
+    ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+  }
+  return source == "tv" || source == "line-in" || source == "line in";
+}
+
+inline void media_apply_now_playing_artist_text(MediaNowPlayingCtx *ctx) {
+  if (!ctx || !ctx->artist_lbl) return;
+  const char *text = ctx->external_source
+    ? espcontrol_i18n("Source")
+    : ctx->artist;
+  lv_label_set_text(ctx->artist_lbl, text);
+}
+
+inline void media_set_now_playing_artist(MediaNowPlayingCtx *ctx,
+                                         esphome::StringRef artist) {
+  if (!ctx) return;
+  std::string text = media_metadata_text(artist, "");
+  std::strncpy(ctx->artist, text.c_str(), sizeof(ctx->artist) - 1);
+  ctx->artist[sizeof(ctx->artist) - 1] = '\0';
+}
+
+inline void media_refresh_artist_text(MediaNowPlayingCtx *ctx,
                                       const std::string &entity_id) {
-  if (!artist_lbl || entity_id.empty()) return;
-  lv_label_set_text(artist_lbl, "");
+  if (!ctx || entity_id.empty()) return;
+  ctx->artist[0] = '\0';
+  media_apply_now_playing_artist_text(ctx);
   ha_get_attribute(
     entity_id, std::string("media_artist"),
     std::function<void(esphome::StringRef)>(
-      [artist_lbl](esphome::StringRef artist) {
-        media_set_metadata_text(artist_lbl, artist, "");
+      [ctx](esphome::StringRef artist) {
+        media_set_now_playing_artist(ctx, artist);
+        media_apply_now_playing_artist_text(ctx);
       })
   );
 }
@@ -1927,26 +1957,36 @@ inline void subscribe_media_slider_state(lv_obj_t *btn_ptr,
 
 inline void subscribe_media_now_playing_state(MediaNowPlayingCtx *ctx,
                                               const std::string &entity_id) {
-  if (entity_id.empty()) return;
-  lv_obj_t *title_lbl = ctx ? ctx->title_lbl : nullptr;
-  lv_obj_t *artist_lbl = ctx ? ctx->artist_lbl : nullptr;
+  if (!ctx || entity_id.empty()) return;
   ha_subscribe_attribute(
     entity_id, std::string("media_title"),
     std::function<void(esphome::StringRef)>(
-      [title_lbl, artist_lbl, entity_id](esphome::StringRef title) {
-        media_set_metadata_text(title_lbl, title, "--");
+      [ctx, entity_id](esphome::StringRef title) {
+        media_set_metadata_text(ctx->title_lbl, title, "--");
         if (!media_control_low_heap_mode()) {
-          media_refresh_artist_text(artist_lbl, entity_id);
+          media_refresh_artist_text(ctx, entity_id);
         }
       })
   );
   ha_subscribe_attribute(
     entity_id, std::string("media_artist"),
     std::function<void(esphome::StringRef)>(
-      [artist_lbl](esphome::StringRef artist) {
-        media_set_metadata_text(artist_lbl, artist, "");
+      [ctx](esphome::StringRef artist) {
+        media_set_now_playing_artist(ctx, artist);
+        media_apply_now_playing_artist_text(ctx);
       })
   );
+  auto handle_media_source = [ctx](esphome::StringRef source) {
+    bool external = media_external_source_input(media_metadata_text(source, ""));
+    if (external == ctx->external_source) return;
+    ctx->external_source = external;
+    media_apply_now_playing_artist_text(ctx);
+  };
+  ha_subscribe_attribute(
+    entity_id, std::string("source"),
+    std::function<void(esphome::StringRef)>(handle_media_source)
+  );
+  ha_get_attribute(entity_id, std::string("source"), handle_media_source);
   if (ctx && ctx->progress_slider) {
     subscribe_media_slider_state(lv_obj_get_parent(ctx->progress_slider), ctx->progress_slider, entity_id);
   }
