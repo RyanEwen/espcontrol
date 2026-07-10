@@ -1343,7 +1343,7 @@ async function assertEmptyCellSettings(page, posts, label) {
   assert.strictEqual(
     initialTypeSelection.selectedIndex,
     0,
-    `${label}: new card draft defaults to the top card type option`,
+    `${label}: new card draft defaults to the first card type option`,
   );
   assert.strictEqual(
     initialTypeSelection.value,
@@ -1450,8 +1450,20 @@ async function assertEmptyCellSettings(page, posts, label) {
 
   await page.locator(`.sp-main [data-pos="${pos}"]`).click();
   await page.waitForSelector(".sp-settings-overlay.sp-visible");
+  await page.locator("#sp-inp-label").fill("Keep this label");
+  await page.locator("#sp-inp-entity").fill("switch.keep_this_entity");
   await page.locator("#sp-inp-type").selectOption({ label: "Switch" });
   await page.locator("#sp-inp-entity").waitFor({ state: "visible" });
+  assert.strictEqual(
+    await page.locator("#sp-inp-label").inputValue(),
+    "Keep this label",
+    `${label}: changing the default card type preserves the typed label`,
+  );
+  assert.strictEqual(
+    await page.locator("#sp-inp-entity").inputValue(),
+    "switch.keep_this_entity",
+    `${label}: changing the default card type preserves the typed entity`,
+  );
   assert.strictEqual(
     await page.locator("#sp-inp-icon").inputValue(),
     "Auto",

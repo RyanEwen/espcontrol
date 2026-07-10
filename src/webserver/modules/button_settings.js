@@ -376,14 +376,28 @@ function renderButtonSettings(forceOpen) {
     }
     var td = BUTTON_TYPES[newType];
     if (td && td.onSelect) td.onSelect(b);
+    if (state.settingsDraft && state.settingsDraft.key === draftKey) {
+      state.settingsDraft.autoSelectedButton = cloneButtonConfig(b);
+    }
     return pickerType;
+  }
+
+  function clearAutomaticTypeDefaults() {
+    var draft = state.settingsDraft;
+    var automatic = draft && draft.key === draftKey && draft.autoSelectedButton;
+    if (!isNewDraft || !automatic) return;
+    var empty = emptyButtonConfig();
+    ["entity", "label", "icon", "icon_on", "sensor", "unit", "precision", "options"].forEach(function (field) {
+      if (b[field] === automatic[field]) b[field] = empty[field];
+    });
+    draft.autoSelectedButton = null;
   }
 
   function selectCardType(newType) {
     var pickerType = newType;
     newType = defaultButtonTypeForPicker(newType);
     var keepMediaEntity = pickerType === "media_control" && b.type === "media";
-    if (isNewDraft) EspControlModel.copyCardConfig(b, emptyButtonConfig());
+    clearAutomaticTypeDefaults();
     b.type = newType;
     if (state.settingsDraft && state.settingsDraft.key === draftKey) {
       state.settingsDraft.typeSelected = true;
