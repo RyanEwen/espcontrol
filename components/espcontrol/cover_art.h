@@ -47,8 +47,8 @@ struct RuntimeState {
   void record_failure() {
     effective_download_url.clear(); active_download_source_url.clear();
     if (retry_url != source_url) { retry_url = source_url; retry_count = 0; }
-    if (can_retry()) ++retry_count;
   }
+  bool begin_retry() { if (!can_retry()) return false; ++retry_count; return true; }
   void clear_image() {
     source_url.clear(); effective_download_url.clear(); active_download_source_url.clear(); loaded_url.clear();
     last_good_url.clear();

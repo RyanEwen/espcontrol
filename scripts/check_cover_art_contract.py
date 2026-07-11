@@ -35,7 +35,8 @@ int main() {
   s.begin_download("track-b"); assert(s.download_active());
   assert(s.apply_download("track-b") && s.current_image_loaded() && !s.needs_download());
   s.select_source("broken");
-  for (int i = 0; i < MAX_DOWNLOAD_RETRIES; ++i) s.record_failure();
+  s.record_failure(); assert(s.retry_count == 0);
+  for (int i = 0; i < MAX_DOWNLOAD_RETRIES; ++i) assert(s.begin_retry());
   assert(!s.can_retry() && s.retry_count == MAX_DOWNLOAD_RETRIES);
   s.select_source("recovered"); assert(s.retry_count == 0 && s.can_retry());
   // Playback stop/disable while a retry is pending must cancel all artwork work.

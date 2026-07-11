@@ -692,7 +692,7 @@ script:
                       id(cover_art_runtime).record_failure();
                       if (id(cover_art_runtime).can_retry()) {
                         ESP_LOGW("cover_art", "Artwork download failed, scheduling retry %d/%d (url %u chars)",
-                                 id(cover_art_runtime).retry_count, espcontrol::cover_art::MAX_DOWNLOAD_RETRIES,
+                                 id(cover_art_runtime).retry_count + 1, espcontrol::cover_art::MAX_DOWNLOAD_RETRIES,
                                  (unsigned) id(cover_art_runtime).source_url.size());
                       } else {
                         ESP_LOGW("cover_art", "Artwork download failed, retries exhausted (url %u chars)",
@@ -1052,6 +1052,7 @@ script:
                            id(cover_art_runtime).can_retry();
                 then:
                   - lambda: |-
+                      id(cover_art_runtime).begin_retry();
                       ESP_LOGI("cover_art", "Retrying artwork download %d/%d",
                                id(cover_art_runtime).retry_count, espcontrol::cover_art::MAX_DOWNLOAD_RETRIES);
                   - script.execute: cover_art_download
