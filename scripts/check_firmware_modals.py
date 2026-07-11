@@ -388,6 +388,12 @@ def firmware_light_control_brightness_errors(root: Path) -> list[str]:
         errors.append("components/espcontrol/button_grid_sliders.h: refresh brightness slider from light on/off and brightness updates")
     if "light_control_set_modal_value(ui.active, light_control_display_pct(ui.active));" not in text:
         errors.append("components/espcontrol/button_grid_sliders.h: update brightness slider immediately when the light power button is used")
+    if (
+        "bool turn_on = !ui.active->on;" not in text
+        or "lv_obj_add_event_cb(ui.power_group" not in text
+        or "lv_obj_clear_flag(btn, LV_OBJ_FLAG_CLICKABLE);" not in text
+    ):
+        errors.append("components/espcontrol/button_grid_sliders.h: toggle light power from the whole modal control")
 
     return errors
 
