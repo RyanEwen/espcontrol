@@ -22,7 +22,7 @@ enum class Phase : uint8_t { DISABLED, WAITING_FOR_PLAYBACK, WAITING_FOR_ARTWORK
 struct RuntimeState {
   Phase phase{Phase::DISABLED};
   std::string source_url, effective_download_url, active_download_source_url;
-  std::string loaded_url, retry_url, fallback_url;
+  std::string loaded_url, last_good_url, retry_url, fallback_url;
   int retry_count{0};
   bool image_available{false};
   bool refresh_needed{false};
@@ -44,7 +44,8 @@ struct RuntimeState {
     const std::string completed_source = active_download_source_url;
     effective_download_url.clear(); active_download_source_url.clear();
     if (completed_source.empty()) return false;
-    loaded_url = completed_source; image_available = true; retry_count = 0; retry_url = completed_source;
+    loaded_url = completed_source; last_good_url = completed_source;
+    image_available = true; retry_count = 0; retry_url = completed_source;
     refresh_needed = completed_source != source_url; phase = Phase::DISPLAYING; return true;
   }
   bool can_retry() const { return retry_count < MAX_DOWNLOAD_RETRIES; }
@@ -56,6 +57,7 @@ struct RuntimeState {
   }
   void clear_image() {
     source_url.clear(); effective_download_url.clear(); active_download_source_url.clear(); loaded_url.clear();
+    last_good_url.clear();
     retry_url.clear(); fallback_url.clear(); retry_count = 0; image_available = false; refresh_needed = false;
     phase = Phase::WAITING_FOR_ARTWORK;
   }
