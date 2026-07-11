@@ -17,7 +17,7 @@ external_components:
 esp_afe:
   id: voice_afe_processor
   type: sr
-  mode: low_cost
+  mode: high_perf
   mic_num: 2
   input_format: MMNR
   se_enabled: true
@@ -30,9 +30,12 @@ esp_afe:
   # Dual-mic SE/BSS is the active enhancement path, so AFE AGC remains disabled.
   agc_enabled: false
   task_priority: 5
-  feed_buf_in_psram: true
+  memory_alloc_mode: more_psram
+  # Keep frame buffers internal to reduce latency, but leave the feed ring in PSRAM.
+  # Moving the feed ring internal as well caused a memory-pressure segfault.
+  feed_buf_in_psram: false
   feed_ring_in_psram: true
-  fetch_ring_in_psram: true
+  fetch_ring_in_psram: false
 
 esp_audio_stack:
   id: voice_audio_stack

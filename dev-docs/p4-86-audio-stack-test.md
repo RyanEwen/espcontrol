@@ -22,16 +22,21 @@ Follow-up test on 2026-07-11:
 - Removed the remaining temporary telemetry, heap logger, cover-art download gate, and image-card download gate, then built and flashed successfully on `COM3`.
 - Changed the AFE test profile to `mode: high_perf` with `input_format: MMNR`, then built and flashed successfully on `COM3`.
 - Changed the AFE test profile to `mode: low_cost` while keeping `input_format: MMNR` and `aec_nlp_level: normal`, then built and flashed successfully on `COM3`.
+- Locally switched the AFE test profile back to `mode: high_perf` with `input_format: MMNR` and `aec_nlp_level: normal`, then built and flashed successfully on `COM3`.
+- Set `memory_alloc_mode: more_psram`, kept `task_priority: 5`, and moved the AFE feed/fetch frame buffers back to internal RAM while leaving the feed ring in PSRAM, then built and flashed successfully on `COM3`.
+- Tried `feed_ring_in_psram: false`, but the device segfaulted because there was not enough internal memory. Reverted it to `true` and flashed successfully on `COM3`.
 
 ## Current Working Candidate
 
 Audio configuration:
 
 - External audio stack from `github://n-IA-hane/esphome-audio-stack@3c30b96ad2540f676eadd30bdbb93104b105dee0`.
-- `esp_afe` uses `type: sr`, `mode: low_cost`.
+- `esp_afe` uses `type: sr`, `mode: high_perf`.
 - Dual microphone speech enhancement is enabled with `mic_num: 2`, `input_format: MMNR`, and `se_enabled: true`.
 - AEC remains enabled.
 - NS, VAD gating, VAD mute playback, and AGC are disabled.
+- `memory_alloc_mode: more_psram`, `feed_buf_in_psram: false`, `feed_ring_in_psram: true`, and `fetch_ring_in_psram: false`.
+- The feed and fetch frame buffers are kept internal to reduce latency and improve responsiveness, but the feed ring stays in PSRAM because moving it internal caused a memory-pressure segfault.
 - TDM remapping is enabled with four slots:
   - slot 0: microphone 1
   - slot 1: hardware speaker/AEC reference
