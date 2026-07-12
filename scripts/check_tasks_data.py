@@ -64,7 +64,8 @@ FAST = ("fast", "ci", "all")
 CI = ("ci", "all")
 RELEASE = ("release",)
 MAINTAINER_DOCS = ("dev-docs/**", "DEVELOPERS.md", "README.md", "product/README.md")
-WEB_SOURCE_HELPERS = ("scripts/web_source.js", "scripts/build_web_bundle.js", "scripts/build.py", "scripts/web_modules.json")
+WEB_SOURCE_HELPERS = ("scripts/web_source.js", "scripts/build_web_bundle.js", "scripts/web_modules.json")
+WEB_BUNDLE_INPUTS = ("devices/**", "common/addon/time.yaml")
 
 
 # Declaration order is the stable tie-breaker used by the planner.
@@ -117,7 +118,8 @@ TASKS = (
     task("pr-testing-guidance", ("python3", "scripts/pr_testing_guidance.py", "--self-test"), profiles=FAST,
          domains=("workflow",), inputs=(".github/**", "scripts/pr_testing_guidance.py"), cache="never"),
     task("config", ("node", "scripts/check_config_formats.js"), profiles=FAST,
-         domains=("product", "web"), inputs=("common/config/**", "src/webserver/**", "compatibility/fixtures/product_compatibility.json", "scripts/check_config_formats.js") + WEB_SOURCE_HELPERS, parallel_safe=True),
+         domains=("product", "web"), inputs=("common/config/**", "src/webserver/**", "compatibility/fixtures/product_compatibility.json", "scripts/check_config_formats.js") + WEB_SOURCE_HELPERS + WEB_BUNDLE_INPUTS,
+         cache_inputs=("scripts/build.py",), parallel_safe=True),
     task("backup-contract", ("node", "scripts/check_backup_contract.js"), dependencies=("generated",), profiles=PRODUCT,
          domains=("product", "web", "firmware"), inputs=("compatibility/**", "common/config/**", "src/webserver/**", "components/**", "scripts/check_backup_contract.js") + WEB_SOURCE_HELPERS, parallel_safe=True),
     task("model-contract", ("node", "scripts/check_model_contract.js"), dependencies=("generated",), profiles=PRODUCT,
