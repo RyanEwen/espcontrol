@@ -632,8 +632,16 @@ def self_test() -> None:
         return {item.id for item in selected}
 
     docs_selected, _, docs_fallback = changed_plan(["dev-docs/README.md"])
-    if docs_fallback is not None or "dev-docs" not in task_ids(docs_selected):
+    if docs_fallback is not None or not {"dev-docs", "docs-build"} <= task_ids(docs_selected):
         raise AssertionError("docs-only changes do not select documentation checks")
+
+    for maintainer_doc in ("README.md", "DEVELOPERS.md", "product/README.md"):
+        maintainer_selected, _, maintainer_fallback = changed_plan([maintainer_doc])
+        if (
+            maintainer_fallback is not None
+            or not {"dev-docs", "docs-build"} <= task_ids(maintainer_selected)
+        ):
+            raise AssertionError(f"{maintainer_doc} does not select maintainer documentation checks")
 
     web_selected, _, web_fallback = changed_plan(["src/webserver/modules/example.js"])
     if web_fallback is not None or "web-smoke" not in task_ids(web_selected):
