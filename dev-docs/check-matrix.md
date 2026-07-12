@@ -25,7 +25,7 @@ This detailed routing table is generated directly from `scripts/check_tasks_data
 
 | Task | Domains | Parallel-safe | Cache | Cache environment | Cache tools | Declared inputs | Focused command |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `generated` | product, firmware, web, docs | Yes | deterministic | — | `node_modules/.bin/esbuild` | `common/**`<br>`devices/**`<br>`src/webserver/**`<br>`scripts/build.py` | `npm run check:generated` |
+| `generated` | product, firmware, web, docs | Yes | deterministic | — | `node_modules/.bin/esbuild` | `common/**`<br>`devices/**`<br>`src/webserver/**`<br>`scripts/build.py`<br>`scripts/web_modules.json` | `npm run check:generated` |
 | `device-manifest` | product, firmware | Yes | deterministic | — | — | `devices/**`<br>`builds/**`<br>`scripts/check_device_manifest.py` | `python3 scripts/check_tasks.py run-task device-manifest` |
 | `device-manifest-output` | product, firmware, docs | Yes | deterministic | — | — | `devices/catalog.json`<br>`scripts/generate_device_manifest.py` | `python3 scripts/check_tasks.py run-task device-manifest-output` |
 | `product-schema` | product | Yes | deterministic | — | — | `common/config/**`<br>`devices/**`<br>`scripts/check_product_schema.py` | `npm run check:product-schema` |
@@ -35,12 +35,12 @@ This detailed routing table is generated directly from `scripts/check_tasks_data
 | `dev-docs` | docs | Yes | deterministic | — | — | `dev-docs/**`<br>`DEVELOPERS.md`<br>`README.md`<br>`product/README.md`<br>`scripts/check_dev_docs.py` | `npm run check:dev-docs` |
 | `pr-process` | workflow | No | never | — | — | `.github/**`<br>`scripts/check_pr_process.py` | `npm run check:pr-process` |
 | `pr-testing-guidance` | workflow | No | never | — | — | `.github/**`<br>`scripts/pr_testing_guidance.py` | `npm run check:pr-testing-guidance` |
-| `config` | product, web | Yes | deterministic | — | — | `common/config/**`<br>`src/webserver/**`<br>`scripts/check_config_formats.js` | `npm run check:config` |
-| `backup-contract` | product, web, firmware | Yes | deterministic | — | — | `compatibility/**`<br>`common/config/**`<br>`src/webserver/**`<br>`components/**` | `npm run check:backup-contract` |
+| `config` | product, web | Yes | deterministic | — | — | `common/config/**`<br>`src/webserver/**`<br>`scripts/check_config_formats.js`<br>`scripts/web_source.js`<br>`scripts/web_modules.json` | `npm run check:config` |
+| `backup-contract` | product, web, firmware | Yes | deterministic | — | — | `compatibility/**`<br>`common/config/**`<br>`src/webserver/**`<br>`components/**`<br>`scripts/check_backup_contract.js`<br>`scripts/web_source.js`<br>`scripts/web_modules.json` | `npm run check:backup-contract` |
 | `model-contract` | product, web | Yes | deterministic | — | — | `src/webserver/model/**`<br>`src/webserver/contracts/**`<br>`scripts/check_model_contract.js` | `npm run check:model-contract` |
 | `memory-monitor` | firmware | Yes | deterministic | — | — | `scripts/monitor_display_memory.py` | `npm run check:memory-monitor` |
 | `cover-art-contract` | firmware | Yes | deterministic | — | `c++` | `common/device/screen_cover_art.yaml`<br>`components/espcontrol/cover_art.h`<br>`scripts/check_cover_art_contract.py` | `npm run check:cover-art-contract` |
-| `web-smoke` | web, product | Yes | deterministic | — | — | `src/webserver/**`<br>`scripts/check_web_smoke.js` | `npm run check:web-smoke` |
+| `web-smoke` | web, product | Yes | deterministic | — | — | `src/webserver/**`<br>`scripts/check_web_smoke.js`<br>`scripts/web_source.js`<br>`scripts/web_modules.json` | `npm run check:web-smoke` |
 | `types` | web | Yes | deterministic | — | `node_modules/.bin/tsc` | `src/**/*.ts`<br>`tsconfig.json`<br>`package-lock.json` | `npm run check:types` |
 | `firmware-parser` | firmware | Yes | deterministic | — | `c++`<br>`g++`<br>`clang++` | `components/**`<br>`scripts/check_firmware_parser.py` | `npm run check:firmware-parser` |
 | `firmware-modals` | firmware | Yes | deterministic | — | — | `components/**`<br>`scripts/check_firmware_modals.py` | `npm run check:firmware-modals` |

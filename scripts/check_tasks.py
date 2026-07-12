@@ -1254,6 +1254,9 @@ def self_test() -> None:
         raise AssertionError("browser cache policy omits required web, layout, or environment inputs")
     if "node_modules/.bin/esbuild" not in registry["generated"].cache_tools:
         raise AssertionError("generated-output cache keys omit the esbuild tool version")
+    for task_id in ("config", "backup-contract", "web-smoke"):
+        if not {"scripts/web_source.js", "scripts/web_modules.json"} <= set(registry[task_id].inputs):
+            raise AssertionError(f"{task_id} cache keys omit shared web-source helpers")
     if not {"c++", "g++", "clang++"} <= set(registry["firmware-parser"].cache_tools):
         raise AssertionError("firmware parser cache keys omit compiler tool versions")
 

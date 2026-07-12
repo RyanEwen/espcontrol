@@ -61,12 +61,13 @@ FAST = ("fast", "ci", "all")
 CI = ("ci", "all")
 RELEASE = ("release",)
 MAINTAINER_DOCS = ("dev-docs/**", "DEVELOPERS.md", "README.md", "product/README.md")
+WEB_SOURCE_HELPERS = ("scripts/web_source.js", "scripts/web_modules.json")
 
 
 # Declaration order is the stable tie-breaker used by the planner.
 TASKS = (
     task("generated", ("python3", "scripts/build.py", "--check"), profiles=PRODUCT,
-         domains=("product", "firmware", "web", "docs"), inputs=("common/**", "devices/**", "src/webserver/**", "scripts/build.py"),
+         domains=("product", "firmware", "web", "docs"), inputs=("common/**", "devices/**", "src/webserver/**", "scripts/build.py", "scripts/web_modules.json"),
          generated_inputs=("components/espcontrol/*_generated.h", "docs/generated/**", "docs/public/**"),
          parallel_safe=True, cache_tools=("node_modules/.bin/esbuild",)),
     task("device-manifest", ("python3", "scripts/check_device_manifest.py"),
@@ -93,9 +94,9 @@ TASKS = (
     task("pr-testing-guidance", ("python3", "scripts/pr_testing_guidance.py", "--self-test"), profiles=FAST,
          domains=("workflow",), inputs=(".github/**", "scripts/pr_testing_guidance.py"), cache="never"),
     task("config", ("node", "scripts/check_config_formats.js"), profiles=FAST,
-         domains=("product", "web"), inputs=("common/config/**", "src/webserver/**", "scripts/check_config_formats.js"), parallel_safe=True),
+         domains=("product", "web"), inputs=("common/config/**", "src/webserver/**", "scripts/check_config_formats.js") + WEB_SOURCE_HELPERS, parallel_safe=True),
     task("backup-contract", ("node", "scripts/check_backup_contract.js"), dependencies=("generated",), profiles=PRODUCT,
-         domains=("product", "web", "firmware"), inputs=("compatibility/**", "common/config/**", "src/webserver/**", "components/**"), parallel_safe=True),
+         domains=("product", "web", "firmware"), inputs=("compatibility/**", "common/config/**", "src/webserver/**", "components/**", "scripts/check_backup_contract.js") + WEB_SOURCE_HELPERS, parallel_safe=True),
     task("model-contract", ("node", "scripts/check_model_contract.js"), dependencies=("generated",), profiles=PRODUCT,
          domains=("product", "web"), inputs=("src/webserver/model/**", "src/webserver/contracts/**", "scripts/check_model_contract.js"), parallel_safe=True),
     task("memory-monitor", ("python3", "scripts/monitor_display_memory.py", "--self-test"), profiles=FAST,
@@ -104,7 +105,7 @@ TASKS = (
          domains=("firmware",), inputs=("common/device/screen_cover_art.yaml", "components/espcontrol/cover_art.h", "scripts/check_cover_art_contract.py"),
          parallel_safe=True, cache_tools=("c++",)),
     task("web-smoke", ("node", "scripts/check_web_smoke.js"), dependencies=("generated", "device-manifest-output"), profiles=PRODUCT,
-         domains=("web", "product"), inputs=("src/webserver/**", "scripts/check_web_smoke.js"), generated_inputs=("docs/public/webserver/**",), parallel_safe=True),
+         domains=("web", "product"), inputs=("src/webserver/**", "scripts/check_web_smoke.js") + WEB_SOURCE_HELPERS, generated_inputs=("docs/public/webserver/**",), parallel_safe=True),
     task("types", ("npm", "exec", "--", "tsc", "--noEmit"), profiles=FAST,
          domains=("web",), inputs=("src/**/*.ts", "tsconfig.json", "package-lock.json"),
          parallel_safe=True, cache_tools=("node_modules/.bin/tsc",)),
