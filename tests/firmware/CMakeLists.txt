@@ -19,6 +19,9 @@ file(GLOB SAVED_CONFIG_FIXTURES
   CONFIGURE_DEPENDS
   ${CMAKE_CURRENT_SOURCE_DIR}/../../common/config/*_card_normalization_fixtures.json
 )
+list(APPEND SAVED_CONFIG_FIXTURES
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../common/config/card_normalization_fixtures.json
+)
 set(SAVED_CONFIG_TEST_SOURCE ${CMAKE_CURRENT_BINARY_DIR}/saved_config_parser_test.cpp)
 add_custom_command(
   OUTPUT ${SAVED_CONFIG_TEST_SOURCE}
