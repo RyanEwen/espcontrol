@@ -32,7 +32,7 @@ This detailed routing table is generated directly from `scripts/check_tasks_data
 | `product-snapshot` | product | `common/config/**`<br>`common/assets/**`<br>`devices/**`<br>`compatibility/**` | `npm run check:product-snapshot` |
 | `local-artifacts` | workflow | `scripts/check_local_artifacts.py` | `npm run check:local-artifacts` |
 | `local-esphome` | firmware, workflow | `scripts/local_esphome.py` | `npm run check:local-esphome` |
-| `dev-docs` | docs | `dev-docs/**`<br>`scripts/check_dev_docs.py` | `npm run check:dev-docs` |
+| `dev-docs` | docs | `dev-docs/**`<br>`DEVELOPERS.md`<br>`README.md`<br>`product/README.md`<br>`scripts/check_dev_docs.py` | `npm run check:dev-docs` |
 | `pr-process` | workflow | `.github/**`<br>`scripts/check_pr_process.py` | `npm run check:pr-process` |
 | `pr-testing-guidance` | workflow | `.github/**`<br>`scripts/pr_testing_guidance.py` | `npm run check:pr-testing-guidance` |
 | `config` | product, web | `common/config/**`<br>`src/webserver/**`<br>`scripts/check_config_formats.js` | `npm run check:config` |
@@ -47,7 +47,7 @@ This detailed routing table is generated directly from `scripts/check_tasks_data
 | `firmware-display-tokens` | firmware | `components/**`<br>`scripts/check_firmware_display_tokens.py` | `npm run check:firmware-display-tokens` |
 | `firmware-ha-bindings` | firmware | `components/**`<br>`devices/**`<br>`scripts/check_firmware_ha_bindings.py` | `npm run check:firmware-ha-bindings` |
 | `firmware-card-runtime` | firmware, product | `components/**`<br>`common/config/card_contract.json`<br>`scripts/check_firmware_card_runtime.py` | `npm run check:firmware-card-runtime` |
-| `firmware-release` | firmware, workflow | `builds/**`<br>`devices/**`<br>`.github/workflows/release.yml`<br>`scripts/check_firmware_release.py` | `npm run check:firmware-release` |
+| `firmware-release` | firmware, workflow | `builds/**`<br>`devices/**`<br>`.github/esphome.env`<br>`.github/workflows/release.yml`<br>`scripts/check_firmware_release.py` | `npm run check:firmware-release` |
 | `device-matrix` | firmware, product | `builds/**`<br>`devices/**`<br>`scripts/check_device_matrix.py` | `npm run check:device-matrix` |
 | `device-profiles` | firmware, product | `devices/**`<br>`scripts/check_device_profiles.py` | `npm run check:device-profiles` |
 | `release-confidence` | product, workflow | `builds/**`<br>`devices/**`<br>`scripts/check_release_confidence.py` | `npm run check:release-confidence` |
@@ -58,5 +58,5 @@ This detailed routing table is generated directly from `scripts/check_tasks_data
 | `timezones` | firmware, web | `common/**`<br>`src/webserver/**`<br>`scripts/check_timezones.py` | `npm run check:timezones` |
 | `public-firmware-script` | firmware, workflow | `scripts/**`<br>`docs/public/**` | `npm run check:public-firmware-script` |
 | `web-browser-smoke` | web | `src/webserver/**`<br>`scripts/check_web_browser_smoke.js`<br>`package-lock.json` | `npm run check:web-browser-smoke` |
-| `docs-build` | docs | `docs/**`<br>`package-lock.json` | `python3 scripts/check_tasks.py run-task docs-build` |
+| `docs-build` | docs | `docs/**`<br>`dev-docs/**`<br>`DEVELOPERS.md`<br>`README.md`<br>`product/README.md`<br>`package-lock.json` | `python3 scripts/check_tasks.py run-task docs-build` |
 <!-- END GENERATED CHECK MATRIX -->

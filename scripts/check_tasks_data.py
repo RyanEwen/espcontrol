@@ -42,6 +42,7 @@ PRODUCT = ("product", "fast", "ci", "all", "release")
 FAST = ("fast", "ci", "all")
 CI = ("ci", "all")
 RELEASE = ("release",)
+MAINTAINER_DOCS = ("dev-docs/**", "DEVELOPERS.md", "README.md", "product/README.md")
 
 
 # Declaration order is the stable tie-breaker used by the planner.
@@ -67,7 +68,7 @@ TASKS = (
     task("local-esphome", ("python3", "scripts/local_esphome.py", "--self-test"), profiles=FAST,
          domains=("firmware", "workflow"), inputs=("scripts/local_esphome.py",), cache="never"),
     task("dev-docs", ("python3", "scripts/check_dev_docs.py", "--check"), profiles=FAST,
-         domains=("docs",), inputs=("dev-docs/**", "scripts/check_dev_docs.py")),
+         domains=("docs",), inputs=MAINTAINER_DOCS + ("scripts/check_dev_docs.py",)),
     task("pr-process", ("python3", "scripts/check_pr_process.py", "--self-test"), profiles=FAST,
          domains=("workflow",), inputs=(".github/**", "scripts/check_pr_process.py"), cache="never"),
     task("pr-testing-guidance", ("python3", "scripts/pr_testing_guidance.py", "--self-test"), profiles=FAST,
@@ -101,7 +102,7 @@ TASKS = (
          ("python3", "scripts/check_firmware_card_runtime.py", "--self-test"), dependencies=("generated",), profiles=PRODUCT,
          domains=("firmware", "product"), inputs=("components/**", "common/config/card_contract.json", "scripts/check_firmware_card_runtime.py")),
     task("firmware-release", ("python3", "scripts/check_firmware_release.py"), profiles=FAST + RELEASE,
-         domains=("firmware", "workflow"), inputs=("builds/**", "devices/**", ".github/workflows/release.yml", "scripts/check_firmware_release.py")),
+         domains=("firmware", "workflow"), inputs=("builds/**", "devices/**", ".github/esphome.env", ".github/workflows/release.yml", "scripts/check_firmware_release.py")),
     task("device-matrix", ("python3", "scripts/check_device_matrix.py"), profiles=FAST,
          domains=("firmware", "product"), inputs=("builds/**", "devices/**", "scripts/check_device_matrix.py")),
     task("device-profiles", ("python3", "scripts/check_device_profiles.py"), dependencies=("generated", "device-slots"), profiles=PRODUCT,
@@ -127,5 +128,6 @@ TASKS = (
     task("web-browser-smoke", ("node", "scripts/check_web_browser_smoke.js"), dependencies=("generated", "device-manifest-output"), profiles=CI,
          domains=("web",), inputs=("src/webserver/**", "scripts/check_web_browser_smoke.js", "package-lock.json"), cache="never"),
     task("docs-build", ("npm", "run", "docs:build"), dependencies=("generated",), profiles=("all", "release"),
-         domains=("docs",), inputs=("docs/**", "package-lock.json"), generated_inputs=("docs/generated/**",)),
+         domains=("docs",), inputs=("docs/**",) + MAINTAINER_DOCS + ("package-lock.json",),
+         generated_inputs=("docs/generated/**",)),
 )
