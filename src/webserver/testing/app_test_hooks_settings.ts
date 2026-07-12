@@ -63,7 +63,8 @@ export function installAppTestHooksSettings(): GlobalDescriptors {
                     version: state.firmwareVersion,
                     latest: state.firmwareLatestVersion,
                     updateState: state.firmwareUpdateState,
-                    installAvailable: firmwareInstallAvailable(),
+                    installAvailable: latestFirmwareInstallAvailable(),
+                    installAction: latestFirmwareInstallAction(),
                 };
                 state.firmwareVersion = oldVersion;
                 state.firmwareLatestVersion = oldLatest;
@@ -106,7 +107,7 @@ export function installAppTestHooksSettings(): GlobalDescriptors {
                     updateState: state.firmwareUpdateState,
                     releaseUrl: state.firmwareReleaseUrl,
                     updateAvailable: firmwareUpdateAvailable(),
-                    installAvailable: firmwareInstallAvailable(),
+                    installAvailable: latestFirmwareInstallAvailable(),
                 };
                 state.firmwareVersion = oldVersion;
                 state.firmwareLatestVersion = oldLatest;
@@ -146,13 +147,14 @@ export function installAppTestHooksSettings(): GlobalDescriptors {
                 setPublicFirmwareVersions(firmwareInfosFromPublicVersions(versionIndex));
                 if (selectedVersion)
                     state.firmwareSelectedVersion = selectedVersion;
-                var selected: any = selectedFirmwareInfo();
+                var selected: any = selectedPreviousFirmwareInfo();
                 var result: any = {
                     latest: state.firmwareLatestVersion,
                     selected: selected && selected.latest_version,
-                    installAvailable: firmwareInstallAvailable(),
+                    installAvailable: previousFirmwareInstallAvailable(),
                     selectorVisible: firmwareVersionSelectorVisible(),
-                    installedSelected: selectedFirmwareMatchesInstalled(),
+                    installedSelected: !!selected && firmwareVersionsSame(selected.latest_version, state.firmwareVersion),
+                    previous: previousFirmwareInfos().map(function (this: any, info?: any) { return info.latest_version; }),
                 };
                 state.firmwareVersion = oldVersion;
                 state.firmwareLatestVersion = oldLatest;

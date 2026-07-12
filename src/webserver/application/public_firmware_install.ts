@@ -26,8 +26,10 @@ export function installPublicFirmwareInstallModule(): GlobalDescriptors {
     }
     function installPublicFirmwareViaWebOta(this: any, info?: any) {
         info = info || selectedFirmwareInfo();
+        var installingLatest: any = !info ||
+            firmwareVersionsSame(info.latest_version, state.firmwareLatestVersion);
         return getJsonQuietly(publicFirmwareManifestUrl(), function (this: any, d?: any) {
-            if (!info || selectedFirmwareIsLatest())
+            if (installingLatest)
                 setPublicFirmwareInfo(firmwareInfoFromPublicManifest(d));
         }).then(function (this: any) {
             info = info || selectedFirmwareInfo();

@@ -1413,10 +1413,11 @@ assert.deepStrictEqual(plain(hooks.firmwareInfosFromPublicVersions(publicVersion
 }]);
 assert.deepStrictEqual(plain(hooks.firmwareStateAfterVersionIndex("v1.12.0", publicVersionIndex)), {
   latest: "v1.12.0",
-  selected: "v1.12.0",
-  installAvailable: false,
+  selected: "v1.11.0",
+  installAvailable: true,
   selectorVisible: true,
-  installedSelected: true,
+  installedSelected: false,
+  previous: ["v1.11.0"],
 });
 assert.deepStrictEqual(plain(hooks.firmwareStateAfterVersionIndex("v1.12.0", publicVersionIndex, "v1.11.0")), {
   latest: "v1.12.0",
@@ -1424,6 +1425,7 @@ assert.deepStrictEqual(plain(hooks.firmwareStateAfterVersionIndex("v1.12.0", pub
   installAvailable: true,
   selectorVisible: true,
   installedSelected: false,
+  previous: ["v1.11.0"],
 });
 assert.strictEqual(hooks.firmwareVersionLabelFor("", true), "Checking version...");
 assert.strictEqual(hooks.firmwareVersionLabelFor("", false), "Version unknown");
