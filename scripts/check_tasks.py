@@ -244,6 +244,10 @@ def changed_plan(
         "scripts/check_tasks_data.py",
         "package-lock.json",
     )
+    sensitive_patterns = (
+        "scripts/check_*",
+        "scripts/generate_*",
+    )
 
     for path in paths:
         path_matches = []
@@ -252,7 +256,12 @@ def changed_plan(
             if any(matches_input(path, pattern) for pattern in patterns):
                 matched.setdefault(item.id, []).append(path)
                 path_matches.append(item.id)
-        if path in sensitive or matches_input(path, ".github/workflows/**"):
+        if (
+            path in sensitive
+            or path == "scripts/build.py"
+            or any(matches_input(path, pattern) for pattern in sensitive_patterns)
+            or matches_input(path, ".github/workflows/**")
+        ):
             force_fast.append(path)
         elif not path_matches:
             unmatched.append(path)
@@ -662,6 +671,18 @@ def self_test() -> None:
     workflow_selected, _, workflow_fallback = changed_plan([".github/workflows/example.yml"])
     if workflow_fallback is None or task_ids(workflow_selected) != task_ids(plan("fast")):
         raise AssertionError("workflow changes do not fall back to the full fast profile")
+
+    for safety_script in (
+        "scripts/build.py",
+        "scripts/check_device_manifest.py",
+        "scripts/check_web_smoke.js",
+        "scripts/generate_device_manifest.py",
+    ):
+        script_selected, _, script_fallback = changed_plan([safety_script])
+        if script_fallback is None or task_ids(script_selected) != task_ids(plan("fast")):
+            raise AssertionError(
+                f"generator or validator change {safety_script} does not select the full fast profile"
+            )
 
     broadened_selected, _, broadened_fallback = changed_plan([
         "docs/reference/faq.md",
