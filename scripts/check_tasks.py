@@ -1254,6 +1254,11 @@ def self_test() -> None:
         raise AssertionError("browser cache policy omits required web, layout, or environment inputs")
     if "node_modules/.bin/esbuild" not in registry["generated"].cache_tools:
         raise AssertionError("generated-output cache keys omit the esbuild tool version")
+    if (
+        "compatibility/**" not in registry["generated"].inputs
+        or "product/product_snapshot.json" not in registry["generated"].generated_inputs
+    ):
+        raise AssertionError("generated-output cache keys omit product inputs or outputs")
     for task_id in ("config", "backup-contract", "web-smoke"):
         if not {"scripts/web_source.js", "scripts/web_modules.json"} <= set(registry[task_id].inputs):
             raise AssertionError(f"{task_id} cache keys omit shared web-source helpers")
@@ -1272,6 +1277,12 @@ def self_test() -> None:
         raise AssertionError("firmware parser cache keys omit normalization fixtures")
     if "components/espcontrol/sun_calc.h" not in registry["timezones"].inputs:
         raise AssertionError("timezone cache keys omit the firmware timezone table")
+    if not {"common/**", "scripts/generate_device_slots.py"} <= set(registry["firmware-modals"].inputs):
+        raise AssertionError("firmware modal cache keys omit common or generator inputs")
+    if "common/**" not in registry["firmware-ha-bindings"].inputs:
+        raise AssertionError("firmware binding cache keys omit common configuration")
+    if not {"common/**", "components/**", "src/webserver/**", "compatibility/**"} <= set(registry["device-profiles"].inputs):
+        raise AssertionError("device profile cache keys omit cross-layer inputs")
 
     if registry["types"].commands != (("npm", "exec", "--", "tsc", "--noEmit"),):
         raise AssertionError("TypeScript checks do not use the project-managed compiler")

@@ -25,7 +25,7 @@ This detailed routing table is generated directly from `scripts/check_tasks_data
 
 | Task | Domains | Parallel-safe | Cache | Cache environment | Cache tools | Declared inputs | Focused command |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `generated` | product, firmware, web, docs | Yes | deterministic | — | `node_modules/.bin/esbuild` | `common/**`<br>`devices/**`<br>`src/webserver/**`<br>`scripts/build.py`<br>`scripts/web_modules.json` | `npm run check:generated` |
+| `generated` | product, firmware, web, docs | Yes | deterministic | — | `node_modules/.bin/esbuild` | `common/**`<br>`devices/**`<br>`src/webserver/**`<br>`compatibility/**`<br>`scripts/build.py`<br>`scripts/web_modules.json` | `npm run check:generated` |
 | `device-manifest` | product, firmware | Yes | deterministic | — | — | `devices/**`<br>`builds/**`<br>`scripts/check_device_manifest.py` | `python3 scripts/check_tasks.py run-task device-manifest` |
 | `device-manifest-output` | product, firmware, docs | Yes | deterministic | — | — | `devices/catalog.json`<br>`scripts/generate_device_manifest.py` | `python3 scripts/check_tasks.py run-task device-manifest-output` |
 | `product-schema` | product | Yes | deterministic | — | — | `common/config/**`<br>`devices/**`<br>`scripts/check_product_schema.py` | `npm run check:product-schema` |
@@ -43,13 +43,13 @@ This detailed routing table is generated directly from `scripts/check_tasks_data
 | `web-smoke` | web, product | Yes | deterministic | — | — | `src/webserver/**`<br>`scripts/check_web_smoke.js`<br>`scripts/web_source.js`<br>`scripts/web_modules.json` | `npm run check:web-smoke` |
 | `types` | web | Yes | deterministic | — | `node_modules/.bin/tsc` | `src/**/*.ts`<br>`tsconfig.json`<br>`package-lock.json` | `npm run check:types` |
 | `firmware-parser` | firmware | Yes | deterministic | — | `c++`<br>`g++`<br>`clang++` | `components/**`<br>`common/config/*_card_normalization_fixtures.json`<br>`scripts/check_firmware_parser.py` | `npm run check:firmware-parser` |
-| `firmware-modals` | firmware | Yes | deterministic | — | — | `components/**`<br>`scripts/check_firmware_modals.py` | `npm run check:firmware-modals` |
+| `firmware-modals` | firmware | Yes | deterministic | — | — | `common/**`<br>`components/**`<br>`scripts/check_firmware_modals.py`<br>`scripts/generate_device_slots.py` | `npm run check:firmware-modals` |
 | `firmware-display-tokens` | firmware | Yes | deterministic | — | — | `components/**`<br>`scripts/check_firmware_display_tokens.py` | `npm run check:firmware-display-tokens` |
-| `firmware-ha-bindings` | firmware | Yes | deterministic | — | — | `components/**`<br>`devices/**`<br>`scripts/check_firmware_ha_bindings.py` | `npm run check:firmware-ha-bindings` |
+| `firmware-ha-bindings` | firmware | Yes | deterministic | — | — | `common/**`<br>`components/**`<br>`devices/**`<br>`scripts/check_firmware_ha_bindings.py` | `npm run check:firmware-ha-bindings` |
 | `firmware-card-runtime` | firmware, product | Yes | deterministic | — | — | `components/**`<br>`common/config/card_contract.json`<br>`scripts/check_firmware_card_runtime.py` | `npm run check:firmware-card-runtime` |
 | `firmware-release` | firmware, workflow | No | never | — | — | `builds/**`<br>`devices/**`<br>`.github/esphome.env`<br>`.github/workflows/release.yml`<br>`scripts/check_firmware_release.py` | `npm run check:firmware-release` |
 | `device-matrix` | firmware, product | Yes | deterministic | — | — | `builds/**`<br>`devices/**`<br>`scripts/check_device_matrix.py` | `npm run check:device-matrix` |
-| `device-profiles` | firmware, product | Yes | deterministic | — | — | `devices/**`<br>`scripts/check_device_profiles.py` | `npm run check:device-profiles` |
+| `device-profiles` | firmware, product | Yes | deterministic | — | — | `common/**`<br>`components/**`<br>`devices/**`<br>`src/webserver/**`<br>`compatibility/**`<br>`scripts/check_device_profiles.py` | `npm run check:device-profiles` |
 | `release-confidence` | product, workflow | No | never | — | — | `builds/**`<br>`devices/**`<br>`scripts/check_release_confidence.py` | `npm run check:release-confidence` |
 | `release-changelog` | docs, workflow | No | never | — | — | `docs/**`<br>`scripts/check_release_changelog.py` | `npm run check:release-changelog` |
 | `card-contract-outputs` | product, firmware, web, docs | Yes | deterministic | — | — | `common/config/card_contract.json`<br>`scripts/check_card_contract_outputs.py` | `npm run check:card-contract-outputs` |
