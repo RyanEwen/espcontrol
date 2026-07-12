@@ -74,7 +74,7 @@ TASKS = (
          ("cmake", "--build", "build/tests/firmware"),
          ("ctest", "--test-dir", "build/tests/firmware", "--output-on-failure"), profiles=FAST,
          domains=("firmware",), inputs=("tests/firmware/**",), parallel_safe=True,
-         cache_env=("CC", "CXX"), cache_tools=("cmake", "c++")),
+         cache="never"),
     task("web-unit", ("node", "--test", "tests/web/unit/**/*.test.js"), profiles=FAST,
          domains=("web",), inputs=("tests/web/unit/**", "src/webserver/**"), parallel_safe=True,
          cache_tools=("node",)),
