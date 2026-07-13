@@ -68,23 +68,57 @@ inline int hex_digit(char c) {
   return -1;
 }
 
+inline bool valid_utf8_bytes(const std::string &value) {
+  size_t index = 0;
+  while (index < value.size()) {
+    const unsigned char first = static_cast<unsigned char>(value[index]);
+    if (first <= 0x7F) { ++index; continue; }
+    size_t count = 0;
+    if (first >= 0xC2 && first <= 0xDF) count = 1;
+    else if (first >= 0xE0 && first <= 0xEF) count = 2;
+    else if (first >= 0xF0 && first <= 0xF4) count = 3;
+    else return false;
+    if (index + count >= value.size()) return false;
+    const unsigned char second = static_cast<unsigned char>(value[index + 1]);
+    if ((second & 0xC0) != 0x80) return false;
+    if (first == 0xE0 && second < 0xA0) return false;
+    if (first == 0xED && second > 0x9F) return false;
+    if (first == 0xF0 && second < 0x90) return false;
+    if (first == 0xF4 && second > 0x8F) return false;
+    for (size_t offset = 2; offset <= count; ++offset) {
+      if ((static_cast<unsigned char>(value[index + offset]) & 0xC0) != 0x80) return false;
+    }
+    index += count + 1;
+  }
+  return true;
+}
+
 inline std::string decode_compact_field(const std::string &value, size_t start, size_t len) {
   if (start > value.size()) return "";
   size_t end = start + len;
   if (end < start || end > value.size()) end = value.size();
   std::string out;
   out.reserve(end - start);
-  for (size_t i = start; i < end; i++) {
+  for (size_t i = start; i < end;) {
     if (value[i] == '%' && i + 2 < end) {
-      int hi = hex_digit(value[i + 1]);
-      int lo = hex_digit(value[i + 2]);
-      if (hi >= 0 && lo >= 0) {
-        out.push_back(static_cast<char>((hi << 4) | lo));
-        i += 2;
+      size_t run_end = i;
+      std::string decoded;
+      while (run_end + 2 < end && value[run_end] == '%') {
+        int hi = hex_digit(value[run_end + 1]);
+        int lo = hex_digit(value[run_end + 2]);
+        if (hi < 0 || lo < 0) break;
+        decoded.push_back(static_cast<char>((hi << 4) | lo));
+        run_end += 3;
+      }
+      if (run_end > i) {
+        if (valid_utf8_bytes(decoded)) out += decoded;
+        else out.append(value, i, run_end - i);
+        i = run_end;
         continue;
       }
     }
     out.push_back(value[i]);
+    ++i;
   }
   return out;
 }
@@ -457,10 +491,10 @@ inline std::string sensor_card_options_normalized(const std::string &options,
     std::string output = cfg_option_value(options, SENSOR_STATE_OUTPUT_OPTION);
     if (input.empty() && !cfg_option_value(options, SENSOR_STATE_HIGH_LABEL_OPTION).empty()) {
       input = "high";
-      output = cfg_option_value(options, SENSOR_STATE_HIGH_LABEL_OPTION);
+      if (output.empty()) output = cfg_option_value(options, SENSOR_STATE_HIGH_LABEL_OPTION);
     } else if (input.empty() && !cfg_option_value(options, SENSOR_STATE_LOW_LABEL_OPTION).empty()) {
       input = "low";
-      output = cfg_option_value(options, SENSOR_STATE_LOW_LABEL_OPTION);
+      if (output.empty()) output = cfg_option_value(options, SENSOR_STATE_LOW_LABEL_OPTION);
     }
     if (!input.empty()) {
       out += ",";
@@ -861,14 +895,14 @@ inline void append_config_token(std::string &out, const std::string &token) {
 inline std::string action_card_options_normalized(const std::string &options,
                                                   const std::string &action) {
   std::string out;
-  std::string state_entity = cfg_option_value(options, "state_entity");
+  std::string state_entity = trim_saved_option_value(cfg_option_value(options, "state_entity"));
   if (!state_entity.empty()) {
     append_config_token(out, "state_entity=" + encode_compact_field(state_entity));
     std::string state_precision = cfg_option_value(options, "state_precision");
     if (state_precision == "icon" || state_precision == "text") {
       append_config_token(out, "state_precision=" + state_precision);
     } else {
-      std::string state_unit = cfg_option_value(options, "state_unit");
+      std::string state_unit = trim_saved_option_value(cfg_option_value(options, "state_unit"));
       if (!state_unit.empty()) {
         append_config_token(out, "state_unit=" + encode_compact_field(state_unit));
       }
@@ -880,7 +914,7 @@ inline std::string action_card_options_normalized(const std::string &options,
   }
 
   if (action == "script.turn_on") {
-    std::string fields = cfg_option_value(options, "script_fields");
+    std::string fields = trim_saved_option_value(cfg_option_value(options, "script_fields"));
     if (!fields.empty()) {
       append_config_token(out, "script_fields=" + encode_compact_field(fields));
     }
@@ -888,9 +922,9 @@ inline std::string action_card_options_normalized(const std::string &options,
 
   if (action == "script.turn_on" && cfg_option_token_present(options, "confirm_on")) {
     append_config_token(out, "confirm_on");
-    std::string message = cfg_option_value(options, "confirm_message");
-    std::string yes = cfg_option_value(options, "confirm_yes");
-    std::string no = cfg_option_value(options, "confirm_no");
+    std::string message = trim_saved_option_value(cfg_option_value(options, "confirm_message"));
+    std::string yes = trim_saved_option_value(cfg_option_value(options, "confirm_yes"));
+    std::string no = trim_saved_option_value(cfg_option_value(options, "confirm_no"));
     if (!message.empty() && message != "Run this script?") {
       append_config_token(out, "confirm_message=" + encode_compact_field(message));
     }

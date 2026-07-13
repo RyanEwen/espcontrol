@@ -105,6 +105,11 @@ function shadowCases() {
       input: "scene.movie;Movie;Flash;Auto;scene.turn_on;;action;;state_entity=sensor.mode,state_unit=W,state_precision=icon,large_numbers",
       expected: config({ entity: "scene.movie", label: "Movie", icon: "Flash", sensor: "scene.turn_on", type: "action", options: "state_entity=sensor.mode,state_precision=icon" }),
     },
+    {
+      name: "short action receives default icons",
+      input: "scene.movie;Movie;;;scene.turn_on;;action;;",
+      expected: config({ entity: "scene.movie", label: "Movie", icon: "Auto", sensor: "scene.turn_on", type: "action" }),
+    },
   ]);
   const media = JSON.parse(fs.readFileSync(path.join(ROOT, "common/config/media_card_normalization_fixtures.json"), "utf8")).concat([
     {

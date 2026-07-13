@@ -711,8 +711,8 @@ def gen_saved_config_shadow_ts(data):
         "  if (config.precision === \"text\" && optionPresent(source, \"state_labels\")) {\n"
         "    out.push(\"state_labels\");\n"
         "    let stateInput = optionValue(source, \"state_input\"); let stateOutput = optionValue(source, \"state_output\");\n"
-        "    if (!stateInput && optionValue(source, \"state_high_label\")) { stateInput = \"high\"; stateOutput = optionValue(source, \"state_high_label\"); }\n"
-        "    else if (!stateInput && optionValue(source, \"state_low_label\")) { stateInput = \"low\"; stateOutput = optionValue(source, \"state_low_label\"); }\n"
+        "    if (!stateInput && optionValue(source, \"state_high_label\")) { stateInput = \"high\"; if (!stateOutput) stateOutput = optionValue(source, \"state_high_label\"); }\n"
+        "    else if (!stateInput && optionValue(source, \"state_low_label\")) { stateInput = \"low\"; if (!stateOutput) stateOutput = optionValue(source, \"state_low_label\"); }\n"
         "    for (const [name, value] of [[\"state_input\", stateInput], [\"state_output\", stateOutput], [\"state_input_2\", optionValue(source, \"state_input_2\")], [\"state_output_2\", optionValue(source, \"state_output_2\")]] as const) {\n"
         "      const trimmed = value.trim();\n"
         "      if (trimmed) out.push(name + \"=\" + encodeOptionValue(trimmed));\n"
@@ -734,22 +734,22 @@ def gen_saved_config_shadow_ts(data):
         "    config.unit = \"\"; config.precision = \"\"; config.options = \"\"; config.icon_on = \"Auto\";\n"
         "    if (!config.icon || config.icon === \"Auto\" || config.icon === \"Flash\") config.icon = \"Gesture Tap\"; return config;\n"
         "  }\n"
-        "  config.precision = \"\"; const source = config.options; const out: string[] = []; const stateEntity = optionValue(source, \"state_entity\");\n"
+        "  config.precision = \"\"; const source = config.options; const out: string[] = []; const stateEntity = optionValue(source, \"state_entity\").trim();\n"
         "  if (stateEntity) {\n"
         "    out.push(\"state_entity=\" + encodeOptionValue(stateEntity)); const rawPrecision = optionValue(source, \"state_precision\");\n"
         "    if (rawPrecision === \"icon\" || rawPrecision === \"text\") out.push(\"state_precision=\" + rawPrecision);\n"
         "    else {\n"
-        "      const stateUnit = optionValue(source, \"state_unit\"); const numericPrecision = [\"0\", \"1\", \"2\"].indexOf(rawPrecision) >= 0;\n"
+        "      const stateUnit = optionValue(source, \"state_unit\").trim(); const numericPrecision = [\"0\", \"1\", \"2\"].indexOf(rawPrecision) >= 0;\n"
         "      if (stateUnit) out.push(\"state_unit=\" + encodeOptionValue(stateUnit));\n"
         "      if (numericPrecision) out.push(\"state_precision=\" + rawPrecision);\n"
         "      if (optionValue(source, \"large_numbers\") === \"off\") out.push(\"large_numbers=off\"); else if (optionPresent(source, \"large_numbers\")) out.push(\"large_numbers\");\n"
         "    }\n"
         "  }\n"
         "  if (config.sensor === \"script.turn_on\") {\n"
-        "    const fields = optionValue(source, \"script_fields\"); if (fields) out.push(\"script_fields=\" + encodeOptionValue(fields));\n"
+        "    const fields = optionValue(source, \"script_fields\").trim(); if (fields) out.push(\"script_fields=\" + encodeOptionValue(fields));\n"
         "    if (optionPresent(source, \"confirm_on\")) {\n"
         "      out.push(\"confirm_on\"); const values: readonly (readonly [string, string])[] = [[\"confirm_message\", \"Run this script?\"], [\"confirm_yes\", \"Yes\"], [\"confirm_no\", \"No\"]];\n"
-        "      for (const [name, defaultValue] of values) { const value = optionValue(source, name); if (value && value !== defaultValue) out.push(name + \"=\" + encodeOptionValue(value)); }\n"
+        "      for (const [name, defaultValue] of values) { const value = optionValue(source, name).trim(); if (value && value !== defaultValue) out.push(name + \"=\" + encodeOptionValue(value)); }\n"
         "    }\n"
         "  }\n"
         "  config.options = out.join(\",\"); return config;\n"
@@ -870,8 +870,8 @@ def gen_saved_config_shadow_h(data):
         "  if (config.precision != \"icon\" && config.precision != \"text\") append_large_numbers_option(out, source);\n",
         "  if (config.precision == \"text\" && cfg_option_token_present(source, \"state_labels\")) {\n",
         "    saved_config_shadow_append_option(out, \"state_labels\"); std::string input = cfg_option_value(source, \"state_input\"); std::string output = cfg_option_value(source, \"state_output\");\n",
-        "    if (input.empty() && !cfg_option_value(source, \"state_high_label\").empty()) { input = \"high\"; output = cfg_option_value(source, \"state_high_label\"); }\n",
-        "    else if (input.empty() && !cfg_option_value(source, \"state_low_label\").empty()) { input = \"low\"; output = cfg_option_value(source, \"state_low_label\"); }\n",
+        "    if (input.empty() && !cfg_option_value(source, \"state_high_label\").empty()) { input = \"high\"; if (output.empty()) output = cfg_option_value(source, \"state_high_label\"); }\n",
+        "    else if (input.empty() && !cfg_option_value(source, \"state_low_label\").empty()) { input = \"low\"; if (output.empty()) output = cfg_option_value(source, \"state_low_label\"); }\n",
         "    input = saved_config_shadow_trim(input); output = saved_config_shadow_trim(output);\n",
         "    if (!input.empty()) saved_config_shadow_append_option(out, \"state_input\", input);\n",
         "    if (!output.empty()) saved_config_shadow_append_option(out, \"state_output\", output);\n",
@@ -885,6 +885,8 @@ def gen_saved_config_shadow_h(data):
         "  if (config.type == \"local\") { config.type = \"action\"; config.sensor = \"local\"; }\n",
         "  if (config.type == \"option_select\") { config.type = \"action\"; config.sensor = \"input_select.select_option\"; }\n",
         "  if (config.type != \"action\") return false;\n",
+        "  if (config.icon.empty()) config.icon = \"Auto\";\n",
+        "  if (config.icon_on.empty()) config.icon_on = \"Auto\";\n",
         "  if (saved_config_shadow_string_in(config.sensor, SAVED_CONFIG_SHADOW_ACTION_OPTION_SELECT_ACTIONS, sizeof(SAVED_CONFIG_SHADOW_ACTION_OPTION_SELECT_ACTIONS) / sizeof(SAVED_CONFIG_SHADOW_ACTION_OPTION_SELECT_ACTIONS[0]))) {\n",
         "    config.sensor = \"input_select.select_option\"; config.unit.clear(); config.precision.clear(); config.options.clear(); config.icon_on = \"Auto\";\n",
         "    if (config.icon.empty() || config.icon == \"Auto\" || config.icon == \"Chevron Down\") config.icon = \"Flash\";\n",
@@ -895,11 +897,11 @@ def gen_saved_config_shadow_h(data):
         "    if (config.icon.empty() || config.icon == \"Auto\" || config.icon == \"Flash\") config.icon = \"Gesture Tap\";\n",
         "    return true;\n",
         "  }\n",
-        "  config.precision.clear(); const std::string source = config.options; std::string out; const std::string state_entity = cfg_option_value(source, \"state_entity\");\n",
+        "  config.precision.clear(); const std::string source = config.options; std::string out; const std::string state_entity = saved_config_shadow_trim(cfg_option_value(source, \"state_entity\"));\n",
         "  if (!state_entity.empty()) { saved_config_shadow_append_option(out, \"state_entity\", state_entity); const std::string raw_precision = cfg_option_value(source, \"state_precision\");\n",
         "    if (raw_precision == \"icon\" || raw_precision == \"text\") saved_config_shadow_append_option(out, \"state_precision\", raw_precision);\n",
         "    else {\n",
-        "      const std::string state_unit = cfg_option_value(source, \"state_unit\");\n",
+        "      const std::string state_unit = saved_config_shadow_trim(cfg_option_value(source, \"state_unit\"));\n",
         "      const bool numeric_precision = raw_precision == \"0\" || raw_precision == \"1\" || raw_precision == \"2\";\n",
         "      if (!state_unit.empty()) saved_config_shadow_append_option(out, \"state_unit\", state_unit);\n",
         "      if (numeric_precision) saved_config_shadow_append_option(out, \"state_precision\", raw_precision);\n",
@@ -907,13 +909,13 @@ def gen_saved_config_shadow_h(data):
         "    }\n",
         "  }\n",
         "  if (config.sensor == \"script.turn_on\") {\n",
-        "    const std::string fields = cfg_option_value(source, \"script_fields\");\n",
+        "    const std::string fields = saved_config_shadow_trim(cfg_option_value(source, \"script_fields\"));\n",
         "    if (!fields.empty()) saved_config_shadow_append_option(out, \"script_fields\", fields);\n",
         "    if (cfg_option_token_present(source, \"confirm_on\")) {\n",
         "      saved_config_shadow_append_option(out, \"confirm_on\");\n",
-        "      const std::string message = cfg_option_value(source, \"confirm_message\");\n",
-        "      const std::string yes = cfg_option_value(source, \"confirm_yes\");\n",
-        "      const std::string no = cfg_option_value(source, \"confirm_no\");\n",
+        "      const std::string message = saved_config_shadow_trim(cfg_option_value(source, \"confirm_message\"));\n",
+        "      const std::string yes = saved_config_shadow_trim(cfg_option_value(source, \"confirm_yes\"));\n",
+        "      const std::string no = saved_config_shadow_trim(cfg_option_value(source, \"confirm_no\"));\n",
         "      if (!message.empty() && message != \"Run this script?\") saved_config_shadow_append_option(out, \"confirm_message\", message);\n",
         "      if (!yes.empty() && yes != \"Yes\") saved_config_shadow_append_option(out, \"confirm_yes\", yes);\n",
         "      if (!no.empty() && no != \"No\") saved_config_shadow_append_option(out, \"confirm_no\", no);\n",
