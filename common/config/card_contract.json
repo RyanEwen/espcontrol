@@ -21,6 +21,8 @@
     "normalize_weather_options",
     "normalize_image_fields",
     "normalize_image_options",
+    "normalize_climate_fields",
+    "normalize_climate_options",
     "normalize_sensor_fields",
     "normalize_sensor_options",
     "normalize_vacuum_fields"
@@ -595,28 +597,48 @@
           "label": "Label Display",
           "kind": "choice",
           "values": ["label", "status", "actual", "target"],
-          "defaultValue": "label"
+          "defaultValue": "label",
+          "omitDefault": true
         },
         {
           "name": "number_display",
           "label": "Icon & Temperatures",
           "kind": "choice",
           "values": ["icon", "actual", "target"],
-          "defaultValue": "target"
+          "defaultValue": "target",
+          "omitDefault": true
         },
         {
           "name": "temperature_step",
           "label": "Temperature Step",
           "kind": "choice",
           "values": ["1", "0.5"],
-          "defaultValue": "1"
+          "defaultValue": "1",
+          "omitDefault": true
         },
         {
           "name": "large_numbers",
           "label": "Large Temperature Numbers",
-          "kind": "flag"
+          "kind": "flag",
+          "omitDefault": true
         }
       ],
+      "normalization": {
+        "fields": {
+          "entity": { "policy": "keep" },
+          "label": { "policy": "keep" },
+          "icon": { "policy": "hook", "hook": "normalize_climate_fields" },
+          "icon_on": { "policy": "hook", "hook": "normalize_climate_fields" },
+          "sensor": { "policy": "clear" },
+          "unit": { "policy": "clear" },
+          "type": { "policy": "alias", "aliases": { "climate": "climate_control" } },
+          "precision": { "policy": "hook", "hook": "normalize_climate_fields" },
+          "options": { "policy": "hook", "hook": "normalize_climate_options" }
+        },
+        "unknownOptions": "drop",
+        "canonicalOptionOrder": ["label_display", "number_display", "temperature_step", "large_numbers"],
+        "optionHook": "normalize_climate_options"
+      },
       "behavior": {
         "climate": {
           "defaultLabelDisplay": "label",
@@ -649,34 +671,55 @@
           "label": "Label Display",
           "kind": "choice",
           "values": ["label", "status", "actual", "target"],
-          "defaultValue": "label"
+          "defaultValue": "label",
+          "omitDefault": true
         },
         {
           "name": "number_display",
           "label": "Icon & Temperatures",
           "kind": "choice",
           "values": ["icon", "actual", "target"],
-          "defaultValue": "target"
+          "defaultValue": "target",
+          "omitDefault": true
         },
         {
           "name": "temperature_step",
           "label": "Temperature Step",
           "kind": "choice",
           "values": ["1", "0.5"],
-          "defaultValue": "1"
+          "defaultValue": "1",
+          "omitDefault": true
         },
         {
           "name": "large_numbers",
           "label": "Large Temperature Numbers",
-          "kind": "flag"
+          "kind": "flag",
+          "omitDefault": true
         },
         {
           "name": "climate_tabs",
           "label": "Visible Tabs",
           "kind": "text",
-          "defaultValue": "temperature|mode|preset|fan|swing"
+          "defaultValue": "temperature|mode|preset|fan|swing",
+          "omitDefault": true
         }
       ],
+      "normalization": {
+        "fields": {
+          "entity": { "policy": "keep" },
+          "label": { "policy": "keep" },
+          "icon": { "policy": "hook", "hook": "normalize_climate_fields" },
+          "icon_on": { "policy": "hook", "hook": "normalize_climate_fields" },
+          "sensor": { "policy": "clear" },
+          "unit": { "policy": "clear" },
+          "type": { "policy": "alias", "aliases": { "climate": "climate_control" } },
+          "precision": { "policy": "hook", "hook": "normalize_climate_fields" },
+          "options": { "policy": "hook", "hook": "normalize_climate_options" }
+        },
+        "unknownOptions": "drop",
+        "canonicalOptionOrder": ["label_display", "number_display", "temperature_step", "large_numbers", "climate_tabs"],
+        "optionHook": "normalize_climate_options"
+      },
       "behavior": {
         "climate": {
           "defaultLabelDisplay": "label",

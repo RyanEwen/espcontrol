@@ -10,7 +10,7 @@ type LargeNumbersRule = true | {
 };
 
 export const CARD_CONTRACT_VERSION = 1 as const;
-export const CARD_CONTRACT_NORMALIZATION_HOOKS = ["normalize_action_fields", "action_large_numbers_supported", "normalize_action_options", "normalize_media_fields", "normalize_media_options", "normalize_fan_fields", "normalize_fan_options", "normalize_date_time_fields", "normalize_date_time_options", "normalize_mower_fields", "normalize_occupancy_fields", "normalize_occupancy_options", "normalize_access_fields", "normalize_access_options", "normalize_security_fields", "normalize_security_options", "normalize_weather_fields", "normalize_weather_options", "normalize_image_fields", "normalize_image_options", "normalize_sensor_fields", "normalize_sensor_options", "normalize_vacuum_fields"] as const;
+export const CARD_CONTRACT_NORMALIZATION_HOOKS = ["normalize_action_fields", "action_large_numbers_supported", "normalize_action_options", "normalize_media_fields", "normalize_media_options", "normalize_fan_fields", "normalize_fan_options", "normalize_date_time_fields", "normalize_date_time_options", "normalize_mower_fields", "normalize_occupancy_fields", "normalize_occupancy_options", "normalize_access_fields", "normalize_access_options", "normalize_security_fields", "normalize_security_options", "normalize_weather_fields", "normalize_weather_options", "normalize_image_fields", "normalize_image_options", "normalize_climate_fields", "normalize_climate_options", "normalize_sensor_fields", "normalize_sensor_options", "normalize_vacuum_fields"] as const;
 export const CARD_CONTRACT_MIGRATION_ACTIONS: Readonly<Record<string, MigrationActionSpec>> = {
   "legacy_local_action": {
     "when": [
@@ -1079,7 +1079,8 @@ export const CARD_CONTRACT_CARDS: Readonly<Record<string, CardTypeSpec>> = {
           "actual",
           "target"
         ],
-        "defaultValue": "label"
+        "defaultValue": "label",
+        "omitDefault": true
       },
       {
         "name": "number_display",
@@ -1090,7 +1091,8 @@ export const CARD_CONTRACT_CARDS: Readonly<Record<string, CardTypeSpec>> = {
           "actual",
           "target"
         ],
-        "defaultValue": "target"
+        "defaultValue": "target",
+        "omitDefault": true
       },
       {
         "name": "temperature_step",
@@ -1100,14 +1102,62 @@ export const CARD_CONTRACT_CARDS: Readonly<Record<string, CardTypeSpec>> = {
           "1",
           "0.5"
         ],
-        "defaultValue": "1"
+        "defaultValue": "1",
+        "omitDefault": true
       },
       {
         "name": "large_numbers",
         "label": "Large Temperature Numbers",
-        "kind": "flag"
+        "kind": "flag",
+        "omitDefault": true
       }
     ],
+    "normalization": {
+      "fields": {
+        "entity": {
+          "policy": "keep"
+        },
+        "label": {
+          "policy": "keep"
+        },
+        "icon": {
+          "policy": "hook",
+          "hook": "normalize_climate_fields"
+        },
+        "icon_on": {
+          "policy": "hook",
+          "hook": "normalize_climate_fields"
+        },
+        "sensor": {
+          "policy": "clear"
+        },
+        "unit": {
+          "policy": "clear"
+        },
+        "type": {
+          "policy": "alias",
+          "aliases": {
+            "climate": "climate_control"
+          }
+        },
+        "precision": {
+          "policy": "hook",
+          "hook": "normalize_climate_fields"
+        },
+        "options": {
+          "policy": "hook",
+          "hook": "normalize_climate_options"
+        }
+      },
+      "unknownOptions": "drop",
+      "canonicalOptionOrder": [
+        "label_display",
+        "number_display",
+        "temperature_step",
+        "large_numbers"
+      ],
+      "optionHook": "normalize_climate_options"
+    },
     "behavior": {
       "climate": {
         "defaultLabelDisplay": "label",
@@ -1152,7 +1202,8 @@ export const CARD_CONTRACT_CARDS: Readonly<Record<string, CardTypeSpec>> = {
           "actual",
           "target"
         ],
-        "defaultValue": "label"
+        "defaultValue": "label",
+        "omitDefault": true
       },
       {
         "name": "number_display",
@@ -1163,7 +1214,8 @@ export const CARD_CONTRACT_CARDS: Readonly<Record<string, CardTypeSpec>> = {
           "actual",
           "target"
         ],
-        "defaultValue": "target"
+        "defaultValue": "target",
+        "omitDefault": true
       },
       {
         "name": "temperature_step",
@@ -1173,20 +1225,70 @@ export const CARD_CONTRACT_CARDS: Readonly<Record<string, CardTypeSpec>> = {
           "1",
           "0.5"
         ],
-        "defaultValue": "1"
+        "defaultValue": "1",
+        "omitDefault": true
       },
       {
         "name": "large_numbers",
         "label": "Large Temperature Numbers",
-        "kind": "flag"
+        "kind": "flag",
+        "omitDefault": true
       },
       {
         "name": "climate_tabs",
         "label": "Visible Tabs",
         "kind": "text",
-        "defaultValue": "temperature|mode|preset|fan|swing"
+        "defaultValue": "temperature|mode|preset|fan|swing",
+        "omitDefault": true
       }
     ],
+    "normalization": {
+      "fields": {
+        "entity": {
+          "policy": "keep"
+        },
+        "label": {
+          "policy": "keep"
+        },
+        "icon": {
+          "policy": "hook",
+          "hook": "normalize_climate_fields"
+        },
+        "icon_on": {
+          "policy": "hook",
+          "hook": "normalize_climate_fields"
+        },
+        "sensor": {
+          "policy": "clear"
+        },
+        "unit": {
+          "policy": "clear"
+        },
+        "type": {
+          "policy": "alias",
+          "aliases": {
+            "climate": "climate_control"
+          }
+        },
+        "precision": {
+          "policy": "hook",
+          "hook": "normalize_climate_fields"
+        },
+        "options": {
+          "policy": "hook",
+          "hook": "normalize_climate_options"
+        }
+      },
+      "unknownOptions": "drop",
+      "canonicalOptionOrder": [
+        "label_display",
+        "number_display",
+        "temperature_step",
+        "large_numbers",
+        "climate_tabs"
+      ],
+      "optionHook": "normalize_climate_options"
+    },
     "behavior": {
       "climate": {
         "defaultLabelDisplay": "label",

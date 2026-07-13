@@ -18,6 +18,7 @@ import { normalizeSavedConfigAccess } from "../generated/saved_config_access";
 import { normalizeSavedConfigSecurity } from "../generated/saved_config_security";
 import { migrateSavedConfigWeatherLegacy, normalizeSavedConfigWeather } from "../generated/saved_config_weather";
 import { normalizeSavedConfigImage } from "../generated/saved_config_image";
+import { normalizeSavedConfigClimate } from "../generated/saved_config_climate";
 export function installConfigCodecModule(): GlobalDescriptors {
     // ── Subpage helpers ────────────────────────────────────────────────────
     function normalizeWithRegisteredCardType(this: any, b?: any) {
@@ -200,6 +201,18 @@ export function installConfigCodecModule(): GlobalDescriptors {
     function normalizeSavedConfigImageOptions(this: any, options?: any, _b?: any) {
         return normalizeImageOptions(options || "");
     }
+    function normalizeSavedConfigClimateFields(this: any, b?: any) {
+        if (!b)
+            return;
+        if (!b.icon)
+            b.icon = "Thermostat";
+        if (!b.icon_on)
+            b.icon_on = "Auto";
+        b.precision = normalizeClimatePrecisionConfig(b.precision);
+    }
+    function normalizeSavedConfigClimateOptions(this: any, options?: any, _b?: any) {
+        return normalizeClimateOptions(options || "", true);
+    }
     function normalizeButtonConfig(this: any, b?: any) {
         if (b)
             b.options = b.options || "";
@@ -219,17 +232,8 @@ export function installConfigCodecModule(): GlobalDescriptors {
             normalizeSavedConfigWeather(b, wasLegacyWeatherForecast, normalizeSavedConfigWeatherFields, normalizeSavedConfigWeatherOptions);
         if (b)
             normalizeSavedConfigMedia(b, normalizeSavedConfigMediaFields, normalizeMediaOptions);
-        if (b && isClimateCardType(b.type)) {
-            b.type = "climate_control";
-            b.sensor = "";
-            b.unit = "";
-            if (!b.icon)
-                b.icon = "Thermostat";
-            if (!b.icon_on)
-                b.icon_on = "Auto";
-            b.precision = normalizeClimatePrecisionConfig(b.precision);
-            b.options = normalizeClimateOptions(b.options, true);
-        }
+        if (b)
+            normalizeSavedConfigClimate(b, normalizeSavedConfigClimateFields, normalizeSavedConfigClimateOptions);
         var normalizedSavedAccess: any = !!(b && normalizeSavedConfigAccess(b, normalizeSavedConfigAccessFields, normalizeSavedConfigAccessOptions));
         if (b)
             normalizeSavedConfigSecurity(b, normalizeSavedConfigSecurityFields, normalizeSavedConfigSecurityOptions);

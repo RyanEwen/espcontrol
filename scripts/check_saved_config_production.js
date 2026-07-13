@@ -30,6 +30,7 @@ function checkCompiledHelper() {
 #include "button_grid_saved_config_security_generated.h"
 #include "button_grid_saved_config_weather_generated.h"
 #include "button_grid_saved_config_image_generated.h"
+#include "button_grid_saved_config_climate_generated.h"
 #include "button_grid_saved_config_date_time_generated.h"
 #include "button_grid_saved_config_fan_generated.h"
 #include "button_grid_saved_config_media_generated.h"
@@ -380,6 +381,30 @@ int main() {
     unrelated, [](Config &) {},
     [](const std::string &options, const Config &) { return options; }
   ));
+  Config climate{"climate", "stale", "unit", "bad", "label_display=status,number_display=actual,unknown=1", "Radiator", "climate.hall", "Hall", ""};
+  bool climate_fields_called = false;
+  bool climate_options_called = false;
+  assert(normalize_saved_config_climate(
+    climate,
+    [&](Config &config) {
+      climate_fields_called = true;
+      config.icon = "Thermostat";
+      config.precision.clear();
+    },
+    [&](const std::string &, const Config &config) {
+      climate_options_called = config.type == "climate_control" && config.sensor.empty();
+      return std::string("label_display=status,number_display=actual");
+    }
+  ));
+  assert(climate_fields_called && climate_options_called);
+  assert(climate.type == "climate_control" && climate.entity == "climate.hall");
+  assert(climate.label == "Hall" && climate.icon == "Thermostat" && climate.icon_on == "Radiator");
+  assert(climate.sensor.empty() && climate.unit.empty() && climate.precision.empty());
+  assert(climate.options == "label_display=status,number_display=actual");
+  assert(!normalize_saved_config_climate(
+    unrelated, [](Config &) {},
+    [](const std::string &options, const Config &) { return options; }
+  ));
 }
 `);
     childProcess.execFileSync(compiler(), [
@@ -638,6 +663,19 @@ function main() {
   assert.deepStrictEqual(imageCard, { type: "image", entity: "camera.front", label: "Front", icon: "Camera", icon_on: "Auto", sensor: "", unit: "", precision: "", options: "image_label,image_icon,image_modal_mode=fit" });
   assert.strictEqual(generatedImage.normalizeSavedConfigImage({ type: "sensor" }, () => {}, (options) => options), false);
 
+  const generatedClimate = loadTypeScriptModule(path.join(ROOT, "src/webserver/generated/saved_config_climate.ts"));
+  const climateCard = { type: "climate", entity: "climate.hall", label: "Hall", icon: "", icon_on: "Radiator", sensor: "stale", unit: "unit", precision: "bad", options: "label_display=status,number_display=actual,unknown=1" };
+  let climateFieldsCalled = false;
+  let climateOptionsCalled = false;
+  assert.strictEqual(generatedClimate.normalizeSavedConfigClimate(
+    climateCard,
+    (config) => { climateFieldsCalled = true; config.icon = "Thermostat"; config.precision = ""; },
+    (_options, config) => { climateOptionsCalled = config.type === "climate_control" && config.sensor === ""; return "label_display=status,number_display=actual"; },
+  ), true);
+  assert(climateFieldsCalled && climateOptionsCalled);
+  assert.deepStrictEqual(climateCard, { type: "climate_control", entity: "climate.hall", label: "Hall", icon: "Thermostat", icon_on: "Radiator", sensor: "", unit: "", precision: "", options: "label_display=status,number_display=actual" });
+  assert.strictEqual(generatedClimate.normalizeSavedConfigClimate({ type: "sensor" }, () => {}, (options) => options), false);
+
   const browser = fs.readFileSync(path.join(ROOT, "src/webserver/application/config_codec.ts"), "utf8");
   assert.match(browser, /from "\.\.\/generated\/saved_config_vacuum";/);
   assert.match(browser, /migrateSavedConfigVacuumLegacy\(b\)/);
@@ -701,6 +739,9 @@ function main() {
   assert.match(browser, /from "\.\.\/generated\/saved_config_image";/);
   assert.match(browser, /normalizeSavedConfigImage\(b, normalizeSavedConfigImageFields, normalizeSavedConfigImageOptions\)/);
   assert.doesNotMatch(browser, /if \(b && b\.type === "image"\)/);
+  assert.match(browser, /from "\.\.\/generated\/saved_config_climate";/);
+  assert.match(browser, /normalizeSavedConfigClimate\(b, normalizeSavedConfigClimateFields, normalizeSavedConfigClimateOptions\)/);
+  assert.doesNotMatch(browser, /if \(b && isClimateCardType\(b\.type\)\)/);
 
   const vacuumCard = fs.readFileSync(path.join(ROOT, "src/webserver/cards/vacuum.ts"), "utf8");
   assert.match(vacuumCard, /normalizeSavedConfigVacuumSensor\(String\(b\.sensor \|\| ""\)\)/);
@@ -775,9 +816,12 @@ function main() {
   assert.match(firmware, /#include "button_grid_saved_config_image_generated\.h"/);
   assert.match(firmware, /normalize_saved_config_image\(\s*p, normalize_saved_config_image_fields,/);
   assert.doesNotMatch(normalizeParser, /if \(p\.type == "image"\)/);
+  assert.match(firmware, /#include "button_grid_saved_config_climate_generated\.h"/);
+  assert.match(firmware, /normalize_saved_config_climate\(\s*p, normalize_saved_config_climate_fields,/);
+  assert.doesNotMatch(normalizeParser, /if \(climate_card_type\(p\.type\)\)/);
 
   checkCompiledHelper();
-  console.log("Saved-config production check passed: Access, Action, Date/Time, Fan, Image, Lawn Mower, Media, Occupancy, Security, Sensor, Vacuum, Weather, and static card normalization use generated browser and compiled firmware helpers.");
+  console.log("Saved-config production check passed: Access, Action, Climate, Date/Time, Fan, Image, Lawn Mower, Media, Occupancy, Security, Sensor, Vacuum, Weather, and static card normalization use generated browser and compiled firmware helpers.");
 }
 
 main();

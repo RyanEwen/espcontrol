@@ -390,3 +390,6 @@ Weather and its legacy Weather Forecast alias also use generated production
 routing, with only their named supported-mode and Large Numbers hooks kept by hand.
 Image also uses generated production routing, with only its named label/icon
 visibility and modal-option hooks kept by hand.
+Climate and Climate Control also use generated production routing, with only
+their named icon/precision and climate-option hooks kept by hand; the legacy
+`climate` saved type remains compatible and normalizes to `climate_control`.

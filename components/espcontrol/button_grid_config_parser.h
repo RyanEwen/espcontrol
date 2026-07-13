@@ -15,6 +15,7 @@
 #include "button_grid_saved_config_security_generated.h"
 #include "button_grid_saved_config_weather_generated.h"
 #include "button_grid_saved_config_image_generated.h"
+#include "button_grid_saved_config_climate_generated.h"
 #include "button_grid_saved_config_date_time_generated.h"
 #include "button_grid_saved_config_fan_generated.h"
 #include "button_grid_saved_config_media_generated.h"
@@ -1110,6 +1111,17 @@ inline std::string normalize_saved_config_image_options(
   return image_card_options_normalized(options);
 }
 
+inline void normalize_saved_config_climate_fields(ParsedCfg &p) {
+  if (p.icon.empty()) p.icon = "Thermostat";
+  if (p.icon_on.empty()) p.icon_on = "Auto";
+  p.precision = normalize_climate_precision_config(p.precision);
+}
+
+inline std::string normalize_saved_config_climate_options(
+    const std::string &options, const ParsedCfg &) {
+  return climate_card_options_normalized(options, true);
+}
+
 inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
   migrate_saved_config_action_legacy(p);
   const bool was_legacy_text_sensor = p.type == "text_sensor";
@@ -1122,14 +1134,8 @@ inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
       normalize_saved_config_weather_options);
   normalize_saved_config_media(p, normalize_saved_config_media_fields,
                                media_card_options_normalized);
-  if (climate_card_type(p.type)) {
-    p.type = "climate_control";
-    p.sensor.clear();
-    p.unit.clear();
-    if (p.icon.empty()) p.icon = "Thermostat";
-    p.precision = normalize_climate_precision_config(p.precision);
-    p.options = climate_card_options_normalized(p.options, true);
-  }
+  normalize_saved_config_climate(
+      p, normalize_saved_config_climate_fields, normalize_saved_config_climate_options);
   const bool normalized_saved_access = normalize_saved_config_access(
       p, normalize_saved_config_access_fields, normalize_saved_config_access_options);
   normalize_saved_config_security(
