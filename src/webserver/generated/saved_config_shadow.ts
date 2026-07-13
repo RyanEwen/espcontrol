@@ -366,7 +366,7 @@ export function normalizeSavedConfigSensorShadow(input: Partial<CardConfig>): Ca
     let stateInput = optionValue(source, "state_input"); let stateOutput = optionValue(source, "state_output");
     if (!stateInput && optionValue(source, "state_high_label")) { stateInput = "high"; stateOutput = optionValue(source, "state_high_label"); }
     else if (!stateInput && optionValue(source, "state_low_label")) { stateInput = "low"; stateOutput = optionValue(source, "state_low_label"); }
-    for (const [name, value] of [["state_input", stateInput], ["state_output", stateOutput], ["state_input_2", optionValue(source, "state_input_2")], ["state_output_2", optionValue(source, "state_output_2")]]) {
+    for (const [name, value] of [["state_input", stateInput], ["state_output", stateOutput], ["state_input_2", optionValue(source, "state_input_2")], ["state_output_2", optionValue(source, "state_output_2")]] as const) {
       const trimmed = value.trim();
       if (trimmed) out.push(name + "=" + encodeOptionValue(trimmed));
     }
@@ -427,7 +427,7 @@ export function normalizeSavedConfigMediaShadow(input: Partial<CardConfig>): Car
   if (config.sensor === "control_modal") {
     if (optionValue(source, "label_display").trim() === "label") out.push("label_display=label"); if (optionValue(source, "number_display").trim() === "volume") out.push("number_display=volume"); if (maxVolume !== MEDIA_VOLUME_DEFAULT) out.push("volume_max=" + maxVolume);
   } else if (config.sensor === "playlist") {
-    for (const [name, defaultValue] of [["playlist_content_id", ""], ["playlist_content_type", "playlist"], ["playlist_player_source", ""]] as const) { const value = optionValue(source, name) || defaultValue; if (value && value !== defaultValue) out.push(name + "=" + encodeOptionValue(value)); }
+    for (const [name, defaultValue] of [["playlist_content_id", ""], ["playlist_content_type", "playlist"], ["playlist_player_source", ""]] as const) { const value = optionValue(source, name).trim() || defaultValue; if (value && value !== defaultValue) out.push(name + "=" + encodeOptionValue(value)); }
   } else if (config.sensor === "volume" || config.sensor === "position") {
     if (config.sensor === "volume" && maxVolume !== MEDIA_VOLUME_DEFAULT) out.push("volume_max=" + maxVolume); if (optionValue(source, "large_numbers") === "off") out.push("large_numbers=off"); else if (optionPresent(source, "large_numbers")) out.push("large_numbers");
   }

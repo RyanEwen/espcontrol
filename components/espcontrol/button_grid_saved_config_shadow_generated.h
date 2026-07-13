@@ -215,9 +215,9 @@ inline bool normalize_saved_config_media_shadow(Config &config) {
     if (saved_config_shadow_trim(cfg_option_value(source, "number_display")) == "volume") saved_config_shadow_append_option(out, "number_display", "volume");
     if (max_volume != SAVED_CONFIG_SHADOW_MEDIA_VOLUME_DEFAULT) saved_config_shadow_append_option(out, "volume_max", std::to_string(max_volume));
   } else if (config.sensor == "playlist") {
-    const std::string content_id = cfg_option_value(source, "playlist_content_id");
-    const std::string content_type = cfg_option_value(source, "playlist_content_type");
-    const std::string player_source = cfg_option_value(source, "playlist_player_source");
+    const std::string content_id = saved_config_shadow_trim(cfg_option_value(source, "playlist_content_id"));
+    const std::string content_type = saved_config_shadow_trim(cfg_option_value(source, "playlist_content_type"));
+    const std::string player_source = saved_config_shadow_trim(cfg_option_value(source, "playlist_player_source"));
     if (!content_id.empty()) saved_config_shadow_append_option(out, "playlist_content_id", content_id);
     if (!content_type.empty() && content_type != "playlist") saved_config_shadow_append_option(out, "playlist_content_type", content_type);
     if (!player_source.empty()) saved_config_shadow_append_option(out, "playlist_player_source", player_source);
