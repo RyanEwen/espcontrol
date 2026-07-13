@@ -524,6 +524,27 @@ def validate_card_normalization(
             if name not in migration_actions:
                 errors.append(path_error(f"{path}.migrationActions", f"references missing action {name!r}"))
 
+    hook_data = normalization.get("hookData", {})
+    if not isinstance(hook_data, dict):
+        errors.append(path_error(f"{path}.hookData", "must be an object"))
+    else:
+        unknown_hook_data = sorted(set(hook_data) - hook_names)
+        if unknown_hook_data:
+            errors.append(path_error(f"{path}.hookData", f"contains hooks outside the allow-list: {', '.join(unknown_hook_data)}"))
+        vacuum = hook_data.get("normalize_vacuum_fields")
+        if vacuum is not None:
+            if not isinstance(vacuum, dict):
+                errors.append(path_error(f"{path}.hookData.normalize_vacuum_fields", "must be an object"))
+            else:
+                modes = vacuum.get("preserveUnitForModes")
+                icons = vacuum.get("defaultIcons")
+                if not isinstance(modes, list) or not all(isinstance(mode, str) and mode for mode in modes):
+                    errors.append(path_error(f"{path}.hookData.normalize_vacuum_fields.preserveUnitForModes", "must be a list of non-empty strings"))
+                if not isinstance(icons, dict) or not all(isinstance(mode, str) and isinstance(icon, str) and icon for mode, icon in icons.items()):
+                    errors.append(path_error(f"{path}.hookData.normalize_vacuum_fields.defaultIcons", "must be an object of non-empty strings"))
+                elif "default" not in icons:
+                    errors.append(path_error(f"{path}.hookData.normalize_vacuum_fields.defaultIcons", "must include default"))
+
 
 def validate_migration_actions(
     value: Any,

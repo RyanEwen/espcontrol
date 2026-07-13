@@ -1541,7 +1541,21 @@
           "migrationActions": [
             "legacy_vacuum_start",
             "legacy_vacuum_dock"
-          ]
+          ],
+          "hookData": {
+            "normalize_vacuum_fields": {
+              "preserveUnitForModes": [
+                "clean_area"
+              ],
+              "defaultIcons": {
+                "dock": "Robot Vacuum Variant",
+                "clean_spot": "Vacuum",
+                "locate": "Robot Vacuum Alert",
+                "clean_area": "Vacuum Outline",
+                "default": "Robot Vacuum"
+              }
+            }
+          }
         },
         "default": {
           "entity": "",

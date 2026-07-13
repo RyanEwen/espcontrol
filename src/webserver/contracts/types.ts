@@ -32,6 +32,7 @@ export interface CardNormalizationSpec {
   canonicalOptionOrder: readonly string[];
   optionHook?: string;
   migrationActions?: readonly string[];
+  hookData?: Readonly<Record<string, unknown>>;
 }
 
 export interface MigrationActionSpec {
