@@ -62,6 +62,7 @@ inline const CardContractShadowFieldPolicy SAVED_CONFIG_SHADOW_VACUUM_FIELDS[] =
 
 inline const char *const SAVED_CONFIG_SHADOW_VACUUM_MODES[] = {"status", "start_stop", "dock", "pause_resume", "clean_spot", "locate", "clean_area"};
 inline const char *const SAVED_CONFIG_SHADOW_VACUUM_UNIT_MODES[] = {"clean_area"};
+inline const char *const SAVED_CONFIG_SHADOW_ACTION_OPTION_SELECT_ACTIONS[] = {"input_select.select_option", "select.select_option"};
 
 inline bool saved_config_shadow_string_in(const std::string &value, const char *const *values, size_t count) {
   for (size_t index = 0; index < count; ++index) if (value == values[index]) return true;
@@ -115,7 +116,26 @@ inline bool normalize_saved_config_sensor_shadow(Config &config) {
 }
 
 template<typename Config>
+inline bool normalize_saved_config_action_shadow(Config &config) {
+  if (config.type == "local") { config.type = "action"; config.sensor = "local"; }
+  if (config.type == "option_select") { config.type = "action"; config.sensor = "input_select.select_option"; }
+  if (config.type != "action") return false;
+  if (saved_config_shadow_string_in(config.sensor, SAVED_CONFIG_SHADOW_ACTION_OPTION_SELECT_ACTIONS, sizeof(SAVED_CONFIG_SHADOW_ACTION_OPTION_SELECT_ACTIONS) / sizeof(SAVED_CONFIG_SHADOW_ACTION_OPTION_SELECT_ACTIONS[0]))) { config.sensor = "input_select.select_option"; config.unit.clear(); config.precision.clear(); config.options.clear(); config.icon_on = "Auto"; if (config.icon.empty() || config.icon == "Auto" || config.icon == "Chevron Down") config.icon = "Flash"; return true; }
+  if (config.sensor == "local") { config.unit.clear(); config.precision.clear(); config.options.clear(); config.icon_on = "Auto"; if (config.icon.empty() || config.icon == "Auto" || config.icon == "Flash") config.icon = "Gesture Tap"; return true; }
+  config.precision.clear(); const std::string source = config.options; std::string out; const std::string state_entity = cfg_option_value(source, "state_entity");
+  if (!state_entity.empty()) { saved_config_shadow_append_option(out, "state_entity", state_entity); const std::string raw_precision = cfg_option_value(source, "state_precision");
+    if (raw_precision == "icon" || raw_precision == "text") saved_config_shadow_append_option(out, "state_precision", raw_precision);
+    else { const std::string state_unit = cfg_option_value(source, "state_unit"); const bool numeric_precision = raw_precision == "0" || raw_precision == "1" || raw_precision == "2"; if (!state_unit.empty()) saved_config_shadow_append_option(out, "state_unit", state_unit); if (numeric_precision) saved_config_shadow_append_option(out, "state_precision", raw_precision); if (!state_unit.empty() || numeric_precision) append_large_numbers_option(out, source); }
+  }
+  if (config.sensor == "script.turn_on") { const std::string fields = cfg_option_value(source, "script_fields"); if (!fields.empty()) saved_config_shadow_append_option(out, "script_fields", fields);
+    if (cfg_option_token_present(source, "confirm_on")) { saved_config_shadow_append_option(out, "confirm_on"); const std::string message = cfg_option_value(source, "confirm_message"); const std::string yes = cfg_option_value(source, "confirm_yes"); const std::string no = cfg_option_value(source, "confirm_no"); if (!message.empty() && message != "Run this script?") saved_config_shadow_append_option(out, "confirm_message", message); if (!yes.empty() && yes != "Yes") saved_config_shadow_append_option(out, "confirm_yes", yes); if (!no.empty() && no != "No") saved_config_shadow_append_option(out, "confirm_no", no); }
+  }
+  config.options = out; return true;
+}
+
+template<typename Config>
 inline bool normalize_saved_config_shadow(Config &config) {
   if (normalize_saved_config_vacuum_shadow(config)) return true;
-  return normalize_saved_config_sensor_shadow(config);
+  if (normalize_saved_config_sensor_shadow(config)) return true;
+  return normalize_saved_config_action_shadow(config);
 }

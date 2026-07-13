@@ -68,7 +68,23 @@ function shadowCases() {
     },
   ]);
   const sensor = JSON.parse(fs.readFileSync(path.join(ROOT, "common/config/sensor_card_normalization_fixtures.json"), "utf8"));
-  return vacuum.concat(sensor);
+  const confirmation = JSON.parse(fs.readFileSync(path.join(ROOT, "common/config/confirmation_card_normalization_fixtures.json"), "utf8"))
+    .filter((fixture) => fixture.expected.type === "action");
+  const baseline = JSON.parse(fs.readFileSync(path.join(ROOT, "common/config/baseline_card_normalization_fixtures.json"), "utf8"))
+    .filter((fixture) => fixture.expected.type === "action");
+  const action = confirmation.concat(baseline, [
+    {
+      name: "legacy local action receives safe action defaults",
+      input: "local.tap;Tap;Flash;Swap;ignored;unit;local;2;unknown=1",
+      expected: config({ entity: "local.tap", label: "Tap", icon: "Gesture Tap", sensor: "local", type: "action" }),
+    },
+    {
+      name: "action icon state drops numeric-only state options",
+      input: "scene.movie;Movie;Flash;Auto;scene.turn_on;;action;;state_entity=sensor.mode,state_unit=W,state_precision=icon,large_numbers",
+      expected: config({ entity: "scene.movie", label: "Movie", icon: "Flash", sensor: "scene.turn_on", type: "action", options: "state_entity=sensor.mode,state_precision=icon" }),
+    },
+  ]);
+  return vacuum.concat(sensor, action);
 }
 
 function compiler() {
@@ -147,7 +163,7 @@ function main() {
     .filter((name) => name.endsWith(".h") && name !== "button_grid_saved_config_shadow_generated.h")
     .filter((name) => fs.readFileSync(path.join(ROOT, "components/espcontrol", name), "utf8").includes("button_grid_saved_config_shadow_generated"));
   assert.deepStrictEqual(firmwareUsers, [], "shadow header must remain outside production firmware");
-  console.log(`Saved-config shadow agreement passed for ${cases.length} Vacuum and Sensor inputs across browser and compiled C++ helpers.`);
+  console.log(`Saved-config shadow agreement passed for ${cases.length} Vacuum, Sensor, and Action inputs across browser and compiled C++ helpers.`);
   console.log("Production firmware footprint delta: 0 bytes flash / 0 bytes RAM (test-only shadow; 8 KiB guard passed).");
 }
 

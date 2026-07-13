@@ -623,6 +623,7 @@ def gen_saved_config_shadow_ts(data):
         "\n"
         f"export const SAVED_CONFIG_SHADOW_PILOT_POLICIES: Readonly<Record<string, CardNormalizationSpec>> = {json.dumps(policies, indent=2)};\n"
         f"const VACUUM_MIGRATIONS: Readonly<Record<string, MigrationActionSpec>> = {json.dumps(migrations, indent=2)};\n"
+        f"const ACTION_OPTION_SELECT_ACTIONS = {json.dumps(data['optionSelect']['actions'])} as const;\n"
         "\n"
         "function conditionMatches(config: CardConfig, condition: NormalizationCondition): boolean {\n"
         "  const actual = condition.source === \"field\" ? config[condition.name as keyof CardConfig] : \"\";\n"
@@ -705,8 +706,42 @@ def gen_saved_config_shadow_ts(data):
         "  config.options = out.join(\",\"); return config;\n"
         "}\n"
         "\n"
+        "export function normalizeSavedConfigActionShadow(input: Partial<CardConfig>): CardConfig | null {\n"
+        "  const config = shaped(input);\n"
+        "  if (config.type === \"local\") { config.type = \"action\"; config.sensor = \"local\"; }\n"
+        "  if (config.type === \"option_select\") { config.type = \"action\"; config.sensor = \"input_select.select_option\"; }\n"
+        "  if (config.type !== \"action\") return null;\n"
+        "  if (ACTION_OPTION_SELECT_ACTIONS.indexOf(config.sensor as typeof ACTION_OPTION_SELECT_ACTIONS[number]) >= 0) {\n"
+        "    config.sensor = \"input_select.select_option\"; config.unit = \"\"; config.precision = \"\"; config.options = \"\"; config.icon_on = \"Auto\";\n"
+        "    if (!config.icon || config.icon === \"Auto\" || config.icon === \"Chevron Down\") config.icon = \"Flash\"; return config;\n"
+        "  }\n"
+        "  if (config.sensor === \"local\") {\n"
+        "    config.unit = \"\"; config.precision = \"\"; config.options = \"\"; config.icon_on = \"Auto\";\n"
+        "    if (!config.icon || config.icon === \"Auto\" || config.icon === \"Flash\") config.icon = \"Gesture Tap\"; return config;\n"
+        "  }\n"
+        "  config.precision = \"\"; const source = config.options; const out: string[] = []; const stateEntity = optionValue(source, \"state_entity\");\n"
+        "  if (stateEntity) {\n"
+        "    out.push(\"state_entity=\" + encodeOptionValue(stateEntity)); const rawPrecision = optionValue(source, \"state_precision\");\n"
+        "    if (rawPrecision === \"icon\" || rawPrecision === \"text\") out.push(\"state_precision=\" + rawPrecision);\n"
+        "    else {\n"
+        "      const stateUnit = optionValue(source, \"state_unit\"); const numericPrecision = [\"0\", \"1\", \"2\"].indexOf(rawPrecision) >= 0;\n"
+        "      if (stateUnit) out.push(\"state_unit=\" + encodeOptionValue(stateUnit));\n"
+        "      if (numericPrecision) out.push(\"state_precision=\" + rawPrecision);\n"
+        "      if (stateUnit || numericPrecision) { if (optionValue(source, \"large_numbers\") === \"off\") out.push(\"large_numbers=off\"); else if (optionPresent(source, \"large_numbers\")) out.push(\"large_numbers\"); }\n"
+        "    }\n"
+        "  }\n"
+        "  if (config.sensor === \"script.turn_on\") {\n"
+        "    const fields = optionValue(source, \"script_fields\"); if (fields) out.push(\"script_fields=\" + encodeOptionValue(fields));\n"
+        "    if (optionPresent(source, \"confirm_on\")) {\n"
+        "      out.push(\"confirm_on\"); const values: readonly (readonly [string, string])[] = [[\"confirm_message\", \"Run this script?\"], [\"confirm_yes\", \"Yes\"], [\"confirm_no\", \"No\"]];\n"
+        "      for (const [name, defaultValue] of values) { const value = optionValue(source, name); if (value && value !== defaultValue) out.push(name + \"=\" + encodeOptionValue(value)); }\n"
+        "    }\n"
+        "  }\n"
+        "  config.options = out.join(\",\"); return config;\n"
+        "}\n"
+        "\n"
         "export function normalizeSavedConfigShadow(input: Partial<CardConfig>): CardConfig | null {\n"
-        "  return normalizeSavedConfigVacuumShadow(input) || normalizeSavedConfigSensorShadow(input);\n"
+        "  return normalizeSavedConfigVacuumShadow(input) || normalizeSavedConfigSensorShadow(input) || normalizeSavedConfigActionShadow(input);\n"
         "}\n"
     )
 
@@ -745,6 +780,7 @@ def gen_saved_config_shadow_h(data):
     lines.extend([
         cpp_string_array("SAVED_CONFIG_SHADOW_VACUUM_MODES", modes),
         cpp_string_array("SAVED_CONFIG_SHADOW_VACUUM_UNIT_MODES", hook["preserveUnitForModes"]),
+        cpp_string_array("SAVED_CONFIG_SHADOW_ACTION_OPTION_SELECT_ACTIONS", data["optionSelect"]["actions"]),
         "\ninline bool saved_config_shadow_string_in(const std::string &value, const char *const *values, size_t count) {\n",
         "  for (size_t index = 0; index < count; ++index) if (value == values[index]) return true;\n",
         "  return false;\n}\n\n",
@@ -786,9 +822,25 @@ def gen_saved_config_shadow_h(data):
         "    if (!output_2.empty()) saved_config_shadow_append_option(out, \"state_output_2\", output_2);\n",
         "  }\n",
         "  config.options = out; return true;\n}\n\n",
+        "template<typename Config>\ninline bool normalize_saved_config_action_shadow(Config &config) {\n",
+        "  if (config.type == \"local\") { config.type = \"action\"; config.sensor = \"local\"; }\n",
+        "  if (config.type == \"option_select\") { config.type = \"action\"; config.sensor = \"input_select.select_option\"; }\n",
+        "  if (config.type != \"action\") return false;\n",
+        "  if (saved_config_shadow_string_in(config.sensor, SAVED_CONFIG_SHADOW_ACTION_OPTION_SELECT_ACTIONS, sizeof(SAVED_CONFIG_SHADOW_ACTION_OPTION_SELECT_ACTIONS) / sizeof(SAVED_CONFIG_SHADOW_ACTION_OPTION_SELECT_ACTIONS[0]))) { config.sensor = \"input_select.select_option\"; config.unit.clear(); config.precision.clear(); config.options.clear(); config.icon_on = \"Auto\"; if (config.icon.empty() || config.icon == \"Auto\" || config.icon == \"Chevron Down\") config.icon = \"Flash\"; return true; }\n",
+        "  if (config.sensor == \"local\") { config.unit.clear(); config.precision.clear(); config.options.clear(); config.icon_on = \"Auto\"; if (config.icon.empty() || config.icon == \"Auto\" || config.icon == \"Flash\") config.icon = \"Gesture Tap\"; return true; }\n",
+        "  config.precision.clear(); const std::string source = config.options; std::string out; const std::string state_entity = cfg_option_value(source, \"state_entity\");\n",
+        "  if (!state_entity.empty()) { saved_config_shadow_append_option(out, \"state_entity\", state_entity); const std::string raw_precision = cfg_option_value(source, \"state_precision\");\n",
+        "    if (raw_precision == \"icon\" || raw_precision == \"text\") saved_config_shadow_append_option(out, \"state_precision\", raw_precision);\n",
+        "    else { const std::string state_unit = cfg_option_value(source, \"state_unit\"); const bool numeric_precision = raw_precision == \"0\" || raw_precision == \"1\" || raw_precision == \"2\"; if (!state_unit.empty()) saved_config_shadow_append_option(out, \"state_unit\", state_unit); if (numeric_precision) saved_config_shadow_append_option(out, \"state_precision\", raw_precision); if (!state_unit.empty() || numeric_precision) append_large_numbers_option(out, source); }\n",
+        "  }\n",
+        "  if (config.sensor == \"script.turn_on\") { const std::string fields = cfg_option_value(source, \"script_fields\"); if (!fields.empty()) saved_config_shadow_append_option(out, \"script_fields\", fields);\n",
+        "    if (cfg_option_token_present(source, \"confirm_on\")) { saved_config_shadow_append_option(out, \"confirm_on\"); const std::string message = cfg_option_value(source, \"confirm_message\"); const std::string yes = cfg_option_value(source, \"confirm_yes\"); const std::string no = cfg_option_value(source, \"confirm_no\"); if (!message.empty() && message != \"Run this script?\") saved_config_shadow_append_option(out, \"confirm_message\", message); if (!yes.empty() && yes != \"Yes\") saved_config_shadow_append_option(out, \"confirm_yes\", yes); if (!no.empty() && no != \"No\") saved_config_shadow_append_option(out, \"confirm_no\", no); }\n",
+        "  }\n",
+        "  config.options = out; return true;\n}\n\n",
         "template<typename Config>\ninline bool normalize_saved_config_shadow(Config &config) {\n",
         "  if (normalize_saved_config_vacuum_shadow(config)) return true;\n",
-        "  return normalize_saved_config_sensor_shadow(config);\n",
+        "  if (normalize_saved_config_sensor_shadow(config)) return true;\n",
+        "  return normalize_saved_config_action_shadow(config);\n",
         "}\n",
     ])
     return "".join(lines)
