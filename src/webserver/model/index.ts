@@ -81,6 +81,7 @@ export {
   normalizeHexColor,
   normalizeHour,
   normalizeHomeAssistantArtworkPort,
+  normalizeHomeAssistantArtworkProtocol,
   normalizeLanguage,
   normalizeNtpServer,
   normalizeScheduleClockBrightness,
