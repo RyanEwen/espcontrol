@@ -14,6 +14,7 @@
 #include "button_grid_saved_config_access_generated.h"
 #include "button_grid_saved_config_security_generated.h"
 #include "button_grid_saved_config_weather_generated.h"
+#include "button_grid_saved_config_image_generated.h"
 #include "button_grid_saved_config_date_time_generated.h"
 #include "button_grid_saved_config_fan_generated.h"
 #include "button_grid_saved_config_media_generated.h"
@@ -1097,6 +1098,18 @@ inline std::string normalize_saved_config_weather_options(
   return weather_card_options_normalized(options, p);
 }
 
+inline void normalize_saved_config_image_fields(ParsedCfg &p) {
+  p.icon = image_card_icon_enabled(p)
+    ? (p.icon.empty() || p.icon == "Auto" ? "Camera" : p.icon)
+    : "Auto";
+  if (!image_card_label_enabled(p)) p.label.clear();
+}
+
+inline std::string normalize_saved_config_image_options(
+    const std::string &options, const ParsedCfg &) {
+  return image_card_options_normalized(options);
+}
+
 inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
   migrate_saved_config_action_legacy(p);
   const bool was_legacy_text_sensor = p.type == "text_sensor";
@@ -1129,17 +1142,8 @@ inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
     if (p.icon.empty()) p.icon = "Auto";
     p.options = webhook_card_options_normalized(p.options);
   }
-  if (p.type == "image") {
-    p.icon_on = "Auto";
-    p.sensor.clear();
-    p.unit.clear();
-    p.precision.clear();
-    p.options = image_card_options_normalized(p.options);
-    p.icon = image_card_icon_enabled(p)
-      ? (p.icon.empty() || p.icon == "Auto" ? "Camera" : p.icon)
-      : "Auto";
-    if (!image_card_label_enabled(p)) p.label.clear();
-  }
+  normalize_saved_config_image(
+      p, normalize_saved_config_image_fields, normalize_saved_config_image_options);
   const bool normalized_saved_static = normalize_saved_config_static(p);
   normalize_saved_config_date_time(
       p, normalize_saved_config_date_time_fields, date_time_card_options_normalized);

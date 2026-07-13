@@ -17,6 +17,7 @@ import { normalizeSavedConfigOccupancy } from "../generated/saved_config_occupan
 import { normalizeSavedConfigAccess } from "../generated/saved_config_access";
 import { normalizeSavedConfigSecurity } from "../generated/saved_config_security";
 import { migrateSavedConfigWeatherLegacy, normalizeSavedConfigWeather } from "../generated/saved_config_weather";
+import { normalizeSavedConfigImage } from "../generated/saved_config_image";
 export function installConfigCodecModule(): GlobalDescriptors {
     // ── Subpage helpers ────────────────────────────────────────────────────
     function normalizeWithRegisteredCardType(this: any, b?: any) {
@@ -189,6 +190,16 @@ export function installConfigCodecModule(): GlobalDescriptors {
     function normalizeSavedConfigWeatherOptions(this: any, options?: any, b?: any) {
         return b && cardLargeNumbersSupported(b) ? copyLargeNumbersOption("", options || "") : "";
     }
+    function normalizeSavedConfigImageFields(this: any, b?: any) {
+        if (!b)
+            return;
+        b.icon = imageIconEnabled(b) ? (b.icon && b.icon !== "Auto" ? b.icon : "Camera") : "Auto";
+        if (!imageLabelEnabled(b))
+            b.label = "";
+    }
+    function normalizeSavedConfigImageOptions(this: any, options?: any, _b?: any) {
+        return normalizeImageOptions(options || "");
+    }
     function normalizeButtonConfig(this: any, b?: any) {
         if (b)
             b.options = b.options || "";
@@ -239,16 +250,8 @@ export function installConfigCodecModule(): GlobalDescriptors {
                 b.icon = "Check";
             b.options = normalizeTodoOptions(b.options);
         }
-        if (b && b.type === "image") {
-            b.icon_on = "Auto";
-            b.sensor = "";
-            b.unit = "";
-            b.precision = "";
-            b.options = normalizeImageOptions(b.options);
-            b.icon = imageIconEnabled(b) ? (b.icon && b.icon !== "Auto" ? b.icon : "Camera") : "Auto";
-            if (!imageLabelEnabled(b))
-                b.label = "";
-        }
+        if (b)
+            normalizeSavedConfigImage(b, normalizeSavedConfigImageFields, normalizeSavedConfigImageOptions);
         if (b && b.type === "light_control") {
             b.sensor = "";
             b.unit = "";
