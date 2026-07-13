@@ -33,9 +33,9 @@ function shape(value) {
 function parseRawButtonConfig(value) {
   const compact = String(value || "").startsWith("~");
   const parts = compact ? String(value).substring(1).split(",") : String(value || "").split(";");
-  const decoded = compact ? parts.map((field) => {
-    try { return decodeURIComponent(field); } catch (_) { return field; }
-  }) : parts;
+  const decoded = compact ? parts.map((field) => field.replace(/(%[0-9a-f]{2})+/gi, (run) => {
+    try { return decodeURIComponent(run); } catch (_) { return run; }
+  })) : parts;
   return shape(Object.fromEntries(FIELDS.map((field, index) => [field, decoded[index] || ""])));
 }
 
@@ -55,6 +55,11 @@ function vacuumCases() {
       name: "legacy vacuum preserves Unicode label",
       input: "vacuum.robot;Küche 🤖;Auto;Auto;dock;ignored;vacuum;2;unknown=1",
       expected: config({ label: "Küche 🤖", icon: "Robot Vacuum Variant", sensor: "dock" }),
+    },
+    {
+      name: "compact vacuum decodes valid escapes beside malformed text",
+      input: "~vacuum.robot,a%3Ab%ZZ,Auto,Auto,status,,vacuum,,",
+      expected: config({ label: "a:b%ZZ", sensor: "status" }),
     },
     {
       name: "vacuum preserves a 255 byte label",
