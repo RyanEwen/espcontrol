@@ -26,6 +26,7 @@ function checkCompiledHelper() {
 #include <cassert>
 #include <string>
 #include "button_grid_saved_config_action_generated.h"
+#include "button_grid_saved_config_fan_generated.h"
 #include "button_grid_saved_config_media_generated.h"
 #include "button_grid_saved_config_sensor_generated.h"
 #include "button_grid_saved_config_static_generated.h"
@@ -157,6 +158,36 @@ int main() {
   assert(light_temperature.sensor == "sensor.temp" && light_temperature.unit == "K");
   assert(light_temperature.precision == "2" && light_temperature.options.empty());
   assert(!normalize_saved_config_static(unrelated));
+  Config fan_control{"fan_control", "stale", "unit", "2", "fan_tabs=speed%7Cpower", "Custom", "fan.office", "Office", "Auto"};
+  bool fan_fields_called = false;
+  bool fan_options_called = false;
+  assert(normalize_saved_config_fan(
+    fan_control,
+    [&](Config &config) {
+      fan_fields_called = true;
+      config.icon = "Fan";
+      config.icon_on = "Auto";
+    },
+    [&](const std::string &options) {
+      fan_options_called = true;
+      return options + ",normalized";
+    }
+  ));
+  assert(fan_fields_called && fan_options_called);
+  assert(fan_control.sensor.empty() && fan_control.unit.empty() && fan_control.precision.empty());
+  assert(fan_control.icon == "Fan" && fan_control.icon_on == "Auto");
+  assert(fan_control.options == "fan_tabs=speed%7Cpower,normalized");
+  Config fan_switch{"fan_switch", "stale", "unit", "2", "unknown=1", "Auto", "fan.office", "Office", "Auto"};
+  assert(normalize_saved_config_fan(
+    fan_switch,
+    [](Config &config) { config.icon = "Fan Off"; config.icon_on = "Fan"; },
+    [](const std::string &) { return std::string("unexpected"); }
+  ));
+  assert(fan_switch.sensor.empty() && fan_switch.unit.empty() && fan_switch.precision.empty());
+  assert(fan_switch.options.empty() && fan_switch.icon == "Fan Off" && fan_switch.icon_on == "Fan");
+  assert(!normalize_saved_config_fan(
+    unrelated, [](Config &) {}, [](const std::string &options) { return options; }
+  ));
 }
 `);
     childProcess.execFileSync(compiler(), [
@@ -296,6 +327,26 @@ function main() {
   assert.deepStrictEqual(lightTemperature, { type: "light_temperature", sensor: "sensor.temp", unit: "K", precision: "2", options: "" });
   assert.strictEqual(generatedStatic.normalizeSavedConfigStatic({ type: "sensor", options: "keep" }), false);
 
+  const generatedFan = loadTypeScriptModule(path.join(ROOT, "src/webserver/generated/saved_config_fan.ts"));
+  const fanControl = { type: "fan_control", sensor: "stale", unit: "unit", precision: "2", icon: "Auto", icon_on: "Custom", options: "fan_tabs=speed%7Cpower" };
+  let fanFieldsCalled = false;
+  let fanOptionsCalled = false;
+  assert.strictEqual(generatedFan.normalizeSavedConfigFan(
+    fanControl,
+    (config) => { fanFieldsCalled = true; config.icon = "Fan"; config.icon_on = "Auto"; },
+    (options) => { fanOptionsCalled = true; return options + ",normalized"; },
+  ), true);
+  assert(fanFieldsCalled && fanOptionsCalled);
+  assert.deepStrictEqual(fanControl, { type: "fan_control", sensor: "", unit: "", precision: "", icon: "Fan", icon_on: "Auto", options: "fan_tabs=speed%7Cpower,normalized" });
+  const fanSwitch = { type: "fan_switch", sensor: "stale", unit: "unit", precision: "2", icon: "Auto", icon_on: "Auto", options: "unknown=1" };
+  assert.strictEqual(generatedFan.normalizeSavedConfigFan(
+    fanSwitch,
+    (config) => { config.icon = "Fan Off"; config.icon_on = "Fan"; },
+    () => "unexpected",
+  ), true);
+  assert.deepStrictEqual(fanSwitch, { type: "fan_switch", sensor: "", unit: "", precision: "", icon: "Fan Off", icon_on: "Fan", options: "" });
+  assert.strictEqual(generatedFan.normalizeSavedConfigFan({ type: "sensor", options: "keep" }, () => {}, (options) => options), false);
+
   const browser = fs.readFileSync(path.join(ROOT, "src/webserver/application/config_codec.ts"), "utf8");
   assert.match(browser, /from "\.\.\/generated\/saved_config_vacuum";/);
   assert.match(browser, /migrateSavedConfigVacuumLegacy\(b\)/);
@@ -325,6 +376,10 @@ function main() {
   assert.doesNotMatch(browser, /if \(b && b\.type === "screen_lock"\)/);
   assert.doesNotMatch(browser, /if \(b && b\.type === "light_switch"\)/);
   assert.doesNotMatch(browser, /if \(b && isBrightnessSliderType\(b\.type\) && b\.sensor\)/);
+  assert.match(browser, /from "\.\.\/generated\/saved_config_fan";/);
+  assert.match(browser, /normalizeSavedConfigFan\(b, normalizeSavedConfigFanFields, normalizeFanControlOptions\)/);
+  assert.doesNotMatch(browser, /if \(b && isFanCardType\(b\.type\)\)/);
+  assert.doesNotMatch(browser, /if \(b && b\.type === "fan_control"\)/);
 
   const vacuumCard = fs.readFileSync(path.join(ROOT, "src/webserver/cards/vacuum.ts"), "utf8");
   assert.match(vacuumCard, /normalizeSavedConfigVacuumSensor\(String\(b\.sensor \|\| ""\)\)/);
@@ -365,9 +420,12 @@ function main() {
   assert.doesNotMatch(firmware, /if \(p\.type == "screen_lock"\)/);
   assert.doesNotMatch(firmware, /if \(p\.type == "light_switch"\)/);
   assert.doesNotMatch(firmware, /brightness_slider_type\(p\.type\) && !p\.sensor\.empty\(\)/);
+  assert.match(firmware, /#include "button_grid_saved_config_fan_generated\.h"/);
+  assert.match(firmware, /normalize_saved_config_fan\(\s*p, normalize_saved_config_fan_fields, fan_control_card_options_normalized\)/);
+  assert.doesNotMatch(firmware, /if \(fan_card_type\(p\.type\)\)/);
 
   checkCompiledHelper();
-  console.log("Saved-config production check passed: Action, Media, Sensor, Vacuum, and static card normalization use generated browser and compiled firmware helpers.");
+  console.log("Saved-config production check passed: Action, Fan, Media, Sensor, Vacuum, and static card normalization use generated browser and compiled firmware helpers.");
 }
 
 main();

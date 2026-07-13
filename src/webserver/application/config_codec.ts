@@ -10,6 +10,7 @@ import { migrateSavedConfigSensorLegacy, normalizeSavedConfigSensor } from "../g
 import { migrateSavedConfigActionLegacy, normalizeSavedConfigAction } from "../generated/saved_config_action";
 import { normalizeSavedConfigMedia } from "../generated/saved_config_media";
 import { normalizeSavedConfigStatic } from "../generated/saved_config_static";
+import { normalizeSavedConfigFan } from "../generated/saved_config_fan";
 export function installConfigCodecModule(): GlobalDescriptors {
     // ── Subpage helpers ────────────────────────────────────────────────────
     function normalizeWithRegisteredCardType(this: any, b?: any) {
@@ -70,6 +71,19 @@ export function installConfigCodecModule(): GlobalDescriptors {
         else
             b.precision = "";
     }
+    function normalizeSavedConfigFanFields(this: any, b?: any) {
+        if (!b)
+            return;
+        if (!b.icon || b.icon === "Auto")
+            b.icon = fanCardDefaultIcon(b.type);
+        if (b.type === "fan_switch") {
+            if (!b.icon_on || b.icon_on === "Auto")
+                b.icon_on = "Fan";
+        }
+        else {
+            b.icon_on = "Auto";
+        }
+    }
     function normalizeButtonConfig(this: any, b?: any) {
         if (b)
             b.options = b.options || "";
@@ -82,21 +96,7 @@ export function installConfigCodecModule(): GlobalDescriptors {
             if (!b.icon || b.icon === "Auto")
                 b.icon = vacuumModeDefaultIcon(b.sensor);
         }
-        if (b && isFanCardType(b.type)) {
-            b.sensor = "";
-            b.unit = "";
-            b.precision = "";
-            b.options = b.type === "fan_control" ? normalizeFanControlOptions(b.options) : "";
-            if (!b.icon || b.icon === "Auto")
-                b.icon = fanCardDefaultIcon(b.type);
-            if (b.type === "fan_switch") {
-                if (!b.icon_on || b.icon_on === "Auto")
-                    b.icon_on = "Fan";
-            }
-            else {
-                b.icon_on = "Auto";
-            }
-        }
+        var normalizedSavedFan: any = !!(b && normalizeSavedConfigFan(b, normalizeSavedConfigFanFields, normalizeFanControlOptions));
         if (b && b.type === "weather_forecast") {
             var weatherAlias: any = cardContractMigrationAlias(b.type);
             b.type = weatherAlias && weatherAlias.type || "weather";
@@ -235,12 +235,6 @@ export function installConfigCodecModule(): GlobalDescriptors {
             b.precision = "";
             b.options = normalizeLightControlOptions(b.options);
         }
-        if (b && b.type === "fan_control") {
-            b.sensor = "";
-            b.unit = "";
-            b.precision = "";
-            b.options = normalizeFanControlOptions(b.options);
-        }
         if (b && b.type === "subpage") {
             applySubpagePresetConfig(b);
             b.options = normalizeSubpageOptions(b.options, b.sensor, b.precision);
@@ -271,7 +265,7 @@ export function installConfigCodecModule(): GlobalDescriptors {
                 b.icon_on = "Motion Sensor";
             b.options = normalizePresenceOptions(b.options);
         }
-        else if (b && !normalizedSavedSensor && !normalizedSavedStatic && b.type !== "action" && b.type !== "alarm" && b.type !== "alarm_action" && !isClimateCardType(b.type) && b.type !== "cover" && b.type !== "garage" && b.type !== "gate" && b.type !== "webhook" && b.type !== "todo" && b.type !== "media" && b.type !== "presence" && b.type !== "subpage" && b.type !== "image" && b.type !== "light_control" && b.type !== "vacuum" && b.type !== "lawn_mower" && !isFanCardType(b.type) && !cardLargeNumbersSupported(b)) {
+        else if (b && !normalizedSavedSensor && !normalizedSavedStatic && !normalizedSavedFan && b.type !== "action" && b.type !== "alarm" && b.type !== "alarm_action" && !isClimateCardType(b.type) && b.type !== "cover" && b.type !== "garage" && b.type !== "gate" && b.type !== "webhook" && b.type !== "todo" && b.type !== "media" && b.type !== "presence" && b.type !== "subpage" && b.type !== "image" && b.type !== "light_control" && b.type !== "vacuum" && b.type !== "lawn_mower" && !cardLargeNumbersSupported(b)) {
             b.options = "";
         }
         return b;

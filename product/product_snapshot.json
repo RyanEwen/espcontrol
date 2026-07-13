@@ -1128,6 +1128,8 @@
       "normalize_action_options",
       "normalize_media_fields",
       "normalize_media_options",
+      "normalize_fan_fields",
+      "normalize_fan_options",
       "normalize_sensor_fields",
       "normalize_sensor_options",
       "normalize_vacuum_fields"
@@ -2087,6 +2089,42 @@
         "domains": [
           "fan"
         ],
+        "normalization": {
+          "fields": {
+            "entity": {
+              "policy": "keep"
+            },
+            "label": {
+              "policy": "keep"
+            },
+            "icon": {
+              "policy": "hook",
+              "hook": "normalize_fan_fields"
+            },
+            "icon_on": {
+              "policy": "hook",
+              "hook": "normalize_fan_fields"
+            },
+            "sensor": {
+              "policy": "clear"
+            },
+            "unit": {
+              "policy": "clear"
+            },
+            "type": {
+              "policy": "default",
+              "value": "fan_direction"
+            },
+            "precision": {
+              "policy": "clear"
+            },
+            "options": {
+              "policy": "clear"
+            }
+          },
+          "unknownOptions": "drop",
+          "canonicalOptionOrder": []
+        },
         "default": {
           "entity": "",
           "label": "",
@@ -2106,6 +2144,42 @@
         "domains": [
           "fan"
         ],
+        "normalization": {
+          "fields": {
+            "entity": {
+              "policy": "keep"
+            },
+            "label": {
+              "policy": "keep"
+            },
+            "icon": {
+              "policy": "hook",
+              "hook": "normalize_fan_fields"
+            },
+            "icon_on": {
+              "policy": "hook",
+              "hook": "normalize_fan_fields"
+            },
+            "sensor": {
+              "policy": "clear"
+            },
+            "unit": {
+              "policy": "clear"
+            },
+            "type": {
+              "policy": "default",
+              "value": "fan_oscillate"
+            },
+            "precision": {
+              "policy": "clear"
+            },
+            "options": {
+              "policy": "clear"
+            }
+          },
+          "unknownOptions": "drop",
+          "canonicalOptionOrder": []
+        },
         "default": {
           "entity": "",
           "label": "",
@@ -2125,6 +2199,42 @@
         "domains": [
           "fan"
         ],
+        "normalization": {
+          "fields": {
+            "entity": {
+              "policy": "keep"
+            },
+            "label": {
+              "policy": "keep"
+            },
+            "icon": {
+              "policy": "hook",
+              "hook": "normalize_fan_fields"
+            },
+            "icon_on": {
+              "policy": "hook",
+              "hook": "normalize_fan_fields"
+            },
+            "sensor": {
+              "policy": "clear"
+            },
+            "unit": {
+              "policy": "clear"
+            },
+            "type": {
+              "policy": "default",
+              "value": "fan_preset"
+            },
+            "precision": {
+              "policy": "clear"
+            },
+            "options": {
+              "policy": "clear"
+            }
+          },
+          "unknownOptions": "drop",
+          "canonicalOptionOrder": []
+        },
         "default": {
           "entity": "",
           "label": "",
@@ -2143,6 +2253,42 @@
         "domains": [
           "fan"
         ],
+        "normalization": {
+          "fields": {
+            "entity": {
+              "policy": "keep"
+            },
+            "label": {
+              "policy": "keep"
+            },
+            "icon": {
+              "policy": "hook",
+              "hook": "normalize_fan_fields"
+            },
+            "icon_on": {
+              "policy": "hook",
+              "hook": "normalize_fan_fields"
+            },
+            "sensor": {
+              "policy": "clear"
+            },
+            "unit": {
+              "policy": "clear"
+            },
+            "type": {
+              "policy": "default",
+              "value": "fan_speed"
+            },
+            "precision": {
+              "policy": "clear"
+            },
+            "options": {
+              "policy": "clear"
+            }
+          },
+          "unknownOptions": "drop",
+          "canonicalOptionOrder": []
+        },
         "default": {
           "entity": "",
           "label": "",
@@ -2167,9 +2313,50 @@
             "name": "fan_tabs",
             "label": "Visible Tabs",
             "kind": "text",
-            "defaultValue": "power|speed|preset|oscillation|direction"
+            "defaultValue": "power|speed|preset|oscillation|direction",
+            "omitDefault": true
           }
         ],
+        "normalization": {
+          "fields": {
+            "entity": {
+              "policy": "keep"
+            },
+            "label": {
+              "policy": "keep"
+            },
+            "icon": {
+              "policy": "hook",
+              "hook": "normalize_fan_fields"
+            },
+            "icon_on": {
+              "policy": "hook",
+              "hook": "normalize_fan_fields"
+            },
+            "sensor": {
+              "policy": "clear"
+            },
+            "unit": {
+              "policy": "clear"
+            },
+            "type": {
+              "policy": "default",
+              "value": "fan_control"
+            },
+            "precision": {
+              "policy": "clear"
+            },
+            "options": {
+              "policy": "hook",
+              "hook": "normalize_fan_options"
+            }
+          },
+          "unknownOptions": "drop",
+          "canonicalOptionOrder": [
+            "fan_tabs"
+          ],
+          "optionHook": "normalize_fan_options"
+        },
         "default": {
           "entity": "",
           "label": "",
@@ -2189,6 +2376,42 @@
         "domains": [
           "fan"
         ],
+        "normalization": {
+          "fields": {
+            "entity": {
+              "policy": "keep"
+            },
+            "label": {
+              "policy": "keep"
+            },
+            "icon": {
+              "policy": "hook",
+              "hook": "normalize_fan_fields"
+            },
+            "icon_on": {
+              "policy": "hook",
+              "hook": "normalize_fan_fields"
+            },
+            "sensor": {
+              "policy": "clear"
+            },
+            "unit": {
+              "policy": "clear"
+            },
+            "type": {
+              "policy": "default",
+              "value": "fan_switch"
+            },
+            "precision": {
+              "policy": "clear"
+            },
+            "options": {
+              "policy": "clear"
+            }
+          },
+          "unknownOptions": "drop",
+          "canonicalOptionOrder": []
+        },
         "default": {
           "entity": "",
           "label": "",

@@ -11,6 +11,7 @@
 
 #include "button_grid_card_runtime.h"
 #include "button_grid_saved_config_action_generated.h"
+#include "button_grid_saved_config_fan_generated.h"
 #include "button_grid_saved_config_media_generated.h"
 #include "button_grid_saved_config_sensor_generated.h"
 #include "button_grid_saved_config_static_generated.h"
@@ -998,22 +999,21 @@ inline void normalize_saved_config_action_fields(ParsedCfg &p) {
   p.precision.clear();
 }
 
+inline void normalize_saved_config_fan_fields(ParsedCfg &p) {
+  if (p.icon.empty() || p.icon == "Auto") p.icon = fan_card_default_icon_name(p.type);
+  if (p.type == "fan_switch") {
+    if (p.icon_on.empty() || p.icon_on == "Auto") p.icon_on = "Fan";
+  } else {
+    p.icon_on = "Auto";
+  }
+}
+
 inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
   migrate_saved_config_action_legacy(p);
   const bool was_legacy_text_sensor = p.type == "text_sensor";
   migrate_saved_config_sensor_legacy(p);
-  if (fan_card_type(p.type)) {
-    p.sensor.clear();
-    p.unit.clear();
-    p.precision.clear();
-    p.options = p.type == "fan_control" ? fan_control_card_options_normalized(p.options) : "";
-    if (p.icon.empty() || p.icon == "Auto") p.icon = fan_card_default_icon_name(p.type);
-    if (p.type == "fan_switch") {
-      if (p.icon_on.empty() || p.icon_on == "Auto") p.icon_on = "Fan";
-    } else {
-      p.icon_on = "Auto";
-    }
-  }
+  const bool normalized_saved_fan = normalize_saved_config_fan(
+      p, normalize_saved_config_fan_fields, fan_control_card_options_normalized);
   if (p.type == "weather_forecast") {
     p.type = "weather";
     p.precision = "tomorrow";
@@ -1192,7 +1192,7 @@ inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
     if (p.icon_on.empty() || p.icon_on == "Auto") p.icon_on = "Motion Sensor";
     p.options = presence_card_options_normalized(p.options);
   }
-  if (!normalized_saved_static && !p.type.empty() && p.type != "action" && p.type != "alarm" && p.type != "alarm_action" && !climate_card_type(p.type) && p.type != "cover" && p.type != "garage" && p.type != "gate" && p.type != "webhook" && p.type != "todo" && p.type != "sensor" && p.type != "door_window" && p.type != "presence" && p.type != "media" && p.type != "subpage" && p.type != "image" && p.type != "light_control" && p.type != "vacuum" && p.type != "lawn_mower" && !fan_card_type(p.type) && !card_large_numbers_supported(p)) {
+  if (!normalized_saved_static && !normalized_saved_fan && !p.type.empty() && p.type != "action" && p.type != "alarm" && p.type != "alarm_action" && !climate_card_type(p.type) && p.type != "cover" && p.type != "garage" && p.type != "gate" && p.type != "webhook" && p.type != "todo" && p.type != "sensor" && p.type != "door_window" && p.type != "presence" && p.type != "media" && p.type != "subpage" && p.type != "image" && p.type != "light_control" && p.type != "vacuum" && p.type != "lawn_mower" && !card_large_numbers_supported(p)) {
     p.options.clear();
   }
   normalize_saved_config_sensor(p, was_legacy_text_sensor,

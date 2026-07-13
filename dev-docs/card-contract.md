@@ -44,12 +44,14 @@ Generated consumers include:
 - `src/webserver/generated/saved_config_action.ts`
 - `src/webserver/generated/saved_config_media.ts`
 - `src/webserver/generated/saved_config_static.ts`
+- `src/webserver/generated/saved_config_fan.ts`
 - `components/espcontrol/button_grid_contract_generated.h`
 - `components/espcontrol/button_grid_saved_config_vacuum_generated.h`
 - `components/espcontrol/button_grid_saved_config_sensor_generated.h`
 - `components/espcontrol/button_grid_saved_config_action_generated.h`
 - `components/espcontrol/button_grid_saved_config_media_generated.h`
 - `components/espcontrol/button_grid_saved_config_static_generated.h`
+- `components/espcontrol/button_grid_saved_config_fan_generated.h`
 - `docs/generated/cards/capabilities.md`
 
 Vacuum's routine saved-field policies and legacy migration actions are
@@ -75,6 +77,11 @@ Trigger, Internal, Screen Lock, basic Light Switch, Slider, Light Brightness,
 and Light Temperature cards use the shared static-card generator. Their rules
 are entirely declarative, so these families need no custom normalization hooks
 in either browser or firmware.
+
+All six Fan card types use generated routing for routine field cleanup and
+option handling. The reviewed `normalize_fan_fields` hook retains only default
+icon decisions, while `normalize_fan_options` keeps Fan Control tab handling in
+its established option helper.
 
 An `allowed` field policy may declare `aliases` whose targets are in its
 allowed-value list. This preserves renamed legacy values before applying the
@@ -341,3 +348,5 @@ retained for their genuinely card-specific decisions. Trigger, Internal,
 Screen Lock, basic Light Switch, Slider, Light Brightness, and Light Temperature
 form the fully declarative static group; the remaining card families stay on
 their established production paths until their focused migration steps.
+The six Fan types also use generated production routing, with only their named
+icon and Fan Control option hooks kept by hand.
