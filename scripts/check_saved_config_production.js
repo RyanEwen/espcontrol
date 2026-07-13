@@ -26,6 +26,7 @@ function checkCompiledHelper() {
 #include <cassert>
 #include <string>
 #include "button_grid_saved_config_action_generated.h"
+#include "button_grid_saved_config_media_generated.h"
 #include "button_grid_saved_config_sensor_generated.h"
 #include "button_grid_saved_config_vacuum_generated.h"
 struct Config {
@@ -68,6 +69,24 @@ int main() {
   ));
   assert(action_fields_called && action_options_called);
   assert(regular_action.precision.empty() && regular_action.options == "unknown=1option-hook");
+  Config media{"media", "controls", "", "state", "unknown=1", "Auto", "media_player.living_room", "Media"};
+  bool media_fields_called = false;
+  bool media_options_called = false;
+  assert(normalize_saved_config_media(
+    media,
+    [&](Config &config) {
+      media_fields_called = true;
+      config.sensor = "play_pause";
+      config.label = "Play/Pause";
+    },
+    [&](const std::string &options, const std::string &mode) {
+      media_options_called = mode == "play_pause";
+      return options + "option-hook";
+    }
+  ));
+  assert(media_fields_called && media_options_called);
+  assert(media.sensor == "play_pause" && media.label == "Play/Pause");
+  assert(media.options == "unknown=1option-hook");
   Config start{"action", "vacuum.start", "area", "2", "unknown=1", "Custom", "", ""};
   assert(migrate_saved_config_vacuum_legacy(start));
   assert(start.type == "vacuum" && start.sensor == "start_stop");
@@ -156,6 +175,27 @@ function main() {
   ), true);
   assert(actionFieldsCalled && actionOptionsCalled);
   assert.deepStrictEqual(normalizedAction, { type: "action", sensor: "scene.turn_on", precision: "", options: "unknown=1option-hook" });
+  const generatedMedia = loadTypeScriptModule(path.join(ROOT, "src/webserver/generated/saved_config_media.ts"));
+  const normalizedMedia = { type: "media", sensor: "controls", label: "Media", options: "unknown=1" };
+  let mediaFieldsCalled = false;
+  let mediaOptionsCalled = false;
+  assert.strictEqual(generatedMedia.normalizeSavedConfigMedia(
+    normalizedMedia,
+    (config) => {
+      mediaFieldsCalled = true;
+      config.sensor = "play_pause";
+      config.label = "Play/Pause";
+    },
+    (options, mode) => {
+      mediaOptionsCalled = mode === "play_pause";
+      return options + "option-hook";
+    },
+  ), true);
+  assert(mediaFieldsCalled && mediaOptionsCalled);
+  assert.deepStrictEqual(normalizedMedia, { type: "media", sensor: "play_pause", label: "Play/Pause", options: "unknown=1option-hook" });
+  assert.strictEqual(generatedMedia.normalizeSavedConfigMedia(
+    { type: "sensor", options: "keep", sensor: "" }, () => {}, (options) => options,
+  ), false);
   const fields = contract.cards.vacuum.normalization.fields;
   assert.strictEqual(fields.sensor.policy, "allowed");
   assert.strictEqual(fields.sensor.fallback, "start_stop");
@@ -235,6 +275,9 @@ function main() {
   assert.doesNotMatch(browser, /if \(b && b\.type === "local"\) \{\s*b\.type = "action"/);
   assert.doesNotMatch(browser, /if \(b && b\.type === "option_select"\) \{\s*b\.type = "action"/);
   assert.doesNotMatch(browser, /else if \(b && b\.type === "action"\)/);
+  assert.match(browser, /from "\.\.\/generated\/saved_config_media";/);
+  assert.match(browser, /normalizeSavedConfigMedia\(b, normalizeSavedConfigMediaFields, normalizeMediaOptions\)/);
+  assert.doesNotMatch(browser, /if \(b && b\.type === "media"\)/);
 
   const vacuumCard = fs.readFileSync(path.join(ROOT, "src/webserver/cards/vacuum.ts"), "utf8");
   assert.match(vacuumCard, /normalizeSavedConfigVacuumSensor\(String\(b\.sensor \|\| ""\)\)/);
@@ -267,9 +310,12 @@ function main() {
   assert.doesNotMatch(firmware, /if \(p\.type == "local"\)/);
   assert.doesNotMatch(firmware, /if \(p\.type == "option_select"\)/);
   assert.doesNotMatch(firmware, /if \(p\.type == "action"\) \{\s*p\.precision\.clear\(\);/);
+  assert.match(firmware, /#include "button_grid_saved_config_media_generated\.h"/);
+  assert.match(firmware, /normalize_saved_config_media\(p, normalize_saved_config_media_fields,/);
+  assert.doesNotMatch(firmware, /if \(p\.type == "media"\) \{\s*if \(p\.sensor == "controls"\)/);
 
   checkCompiledHelper();
-  console.log("Saved-config production check passed: Action, Sensor, and Vacuum production normalization use generated browser and compiled firmware helpers.");
+  console.log("Saved-config production check passed: Action, Media, Sensor, and Vacuum production normalization use generated browser and compiled firmware helpers.");
 }
 
 main();

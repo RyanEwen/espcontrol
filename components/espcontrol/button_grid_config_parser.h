@@ -11,6 +11,7 @@
 
 #include "button_grid_card_runtime.h"
 #include "button_grid_saved_config_action_generated.h"
+#include "button_grid_saved_config_media_generated.h"
 #include "button_grid_saved_config_sensor_generated.h"
 #include "button_grid_saved_config_vacuum_generated.h"
 
@@ -297,6 +298,30 @@ inline std::string media_card_options_normalized(const std::string &options,
   }
   append_large_numbers_option(out, options);
   return out;
+}
+
+inline void normalize_saved_config_media_fields(ParsedCfg &p) {
+  const std::string raw_mode = p.sensor;
+  if (raw_mode == "controls" && (p.icon.empty() || p.icon == "Speaker")) p.icon = "Auto";
+  p.sensor = card_runtime_media_mode(p.sensor);
+  if (p.sensor == "previous" && p.label == "Skip Previous") p.label = "Previous";
+  if (p.sensor == "next" && p.label == "Skip Next") p.label = "Next";
+  if (p.sensor == "volume") {
+    if (p.label.empty() || p.label == "Media") p.label = "Volume";
+    p.icon = "Auto";
+  }
+  if (p.sensor == "playlist") {
+    if (p.label.empty() || p.label == "Media") p.label = "Playlist";
+    if (p.icon.empty() || p.icon == "Auto") p.icon = "Music";
+  }
+  if (p.sensor == "position" && (p.label.empty() || p.label == "Track")) p.label = "Position";
+  if (p.sensor == "now_playing") {
+    p.precision = card_runtime_media_now_playing_control(p.precision) ? p.precision : "";
+  } else if (card_runtime_media_state_display_mode(p.sensor) && p.precision == "state") {
+    p.precision = "state";
+  } else {
+    p.precision.clear();
+  }
 }
 
 inline std::string weather_card_options_normalized(const std::string &options,
@@ -1003,35 +1028,8 @@ inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
     p.sensor.clear();
     p.options = weather_card_options_normalized(p.options, p);
   }
-  if (p.type == "media") {
-    if (p.sensor == "controls") {
-      if (p.icon.empty() || p.icon == "Speaker") p.icon = "Auto";
-      p.sensor = card_runtime_media_mode(p.sensor);
-    } else if (p.sensor.empty()) {
-      p.sensor = card_runtime_media_mode(p.sensor);
-    } else {
-      p.sensor = card_runtime_media_mode(p.sensor);
-    }
-    if (p.sensor == "previous" && p.label == "Skip Previous") p.label = "Previous";
-    if (p.sensor == "next" && p.label == "Skip Next") p.label = "Next";
-    if (p.sensor == "volume") {
-      if (p.label.empty() || p.label == "Media") p.label = "Volume";
-      p.icon = "Auto";
-    }
-    if (p.sensor == "playlist") {
-      if (p.label.empty() || p.label == "Media") p.label = "Playlist";
-      if (p.icon.empty() || p.icon == "Auto") p.icon = "Music";
-    }
-    if (p.sensor == "position" && (p.label.empty() || p.label == "Track")) p.label = "Position";
-    if (p.sensor == "now_playing") {
-      p.precision = card_runtime_media_now_playing_control(p.precision) ? p.precision : "";
-    } else if (card_runtime_media_state_display_mode(p.sensor) && p.precision == "state") {
-      p.precision = "state";
-    } else {
-      p.precision.clear();
-    }
-    p.options = media_card_options_normalized(p.options, p.sensor);
-  }
+  normalize_saved_config_media(p, normalize_saved_config_media_fields,
+                               media_card_options_normalized);
   if (climate_card_type(p.type)) {
     p.type = "climate_control";
     p.sensor.clear();

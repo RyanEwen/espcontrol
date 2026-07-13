@@ -8,6 +8,7 @@ import {
 } from "../generated/saved_config_vacuum";
 import { migrateSavedConfigSensorLegacy, normalizeSavedConfigSensor } from "../generated/saved_config_sensor";
 import { migrateSavedConfigActionLegacy, normalizeSavedConfigAction } from "../generated/saved_config_action";
+import { normalizeSavedConfigMedia } from "../generated/saved_config_media";
 export function installConfigCodecModule(): GlobalDescriptors {
     // ── Subpage helpers ────────────────────────────────────────────────────
     function normalizeWithRegisteredCardType(this: any, b?: any) {
@@ -36,6 +37,37 @@ export function installConfigCodecModule(): GlobalDescriptors {
             if (b.precision !== "text" && (!b.icon || b.icon === "Auto"))
                 b.icon = "Auto";
         }
+    }
+    function normalizeSavedConfigMediaFields(this: any, b?: any) {
+        if (!b)
+            return;
+        var rawMediaMode: any = b.sensor;
+        if (rawMediaMode === "controls" && (!b.icon || b.icon === "Speaker"))
+            b.icon = "Auto";
+        b.sensor = mediaEditorMode(b.sensor);
+        if (b.sensor === "previous" && b.label === "Skip Previous")
+            b.label = "Previous";
+        if (b.sensor === "next" && b.label === "Skip Next")
+            b.label = "Next";
+        if (b.sensor === "volume") {
+            if (!b.label || b.label === "Media")
+                b.label = "Volume";
+            b.icon = "Auto";
+        }
+        if (b.sensor === "playlist") {
+            if (!b.label || b.label === "Media")
+                b.label = "Playlist";
+            if (!b.icon || b.icon === "Auto")
+                b.icon = "Music";
+        }
+        if (b.sensor === "position" && (!b.label || b.label === "Track"))
+            b.label = "Position";
+        if (b.sensor === "now_playing")
+            b.precision = mediaNowPlayingControls(b);
+        else if (mediaStateDisplayModeSupported(b.sensor) && b.precision === "state")
+            b.precision = "state";
+        else
+            b.precision = "";
     }
     function normalizeButtonConfig(this: any, b?: any) {
         if (b)
@@ -79,41 +111,8 @@ export function installConfigCodecModule(): GlobalDescriptors {
             b.precision = normalizeWeatherCardMode(b.precision);
             b.options = cardLargeNumbersSupported(b) ? copyLargeNumbersOption("", b.options) : "";
         }
-        if (b && b.type === "media") {
-            var rawMediaMode: any = b.sensor;
-            if (rawMediaMode === "controls") {
-                if (!b.icon || b.icon === "Speaker")
-                    b.icon = "Auto";
-            }
-            b.sensor = mediaEditorMode(b.sensor);
-            if (b.sensor === "previous" && b.label === "Skip Previous")
-                b.label = "Previous";
-            if (b.sensor === "next" && b.label === "Skip Next")
-                b.label = "Next";
-            if (b.sensor === "volume") {
-                if (!b.label || b.label === "Media")
-                    b.label = "Volume";
-                b.icon = "Auto";
-            }
-            if (b.sensor === "playlist") {
-                if (!b.label || b.label === "Media")
-                    b.label = "Playlist";
-                if (!b.icon || b.icon === "Auto")
-                    b.icon = "Music";
-            }
-            if (b.sensor === "position" && (!b.label || b.label === "Track"))
-                b.label = "Position";
-            if (b.sensor === "now_playing") {
-                b.precision = mediaNowPlayingControls(b);
-            }
-            else if (mediaStateDisplayModeSupported(b.sensor) && b.precision === "state") {
-                b.precision = "state";
-            }
-            else {
-                b.precision = "";
-            }
-            b.options = normalizeMediaOptions(b.options, b.sensor);
-        }
+        if (b)
+            normalizeSavedConfigMedia(b, normalizeSavedConfigMediaFields, normalizeMediaOptions);
         if (b && isClimateCardType(b.type)) {
             b.type = "climate_control";
             b.sensor = "";

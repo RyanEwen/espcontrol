@@ -45,6 +45,7 @@ Generated consumers include:
 - `components/espcontrol/button_grid_saved_config_vacuum_generated.h`
 - `components/espcontrol/button_grid_saved_config_sensor_generated.h`
 - `components/espcontrol/button_grid_saved_config_action_generated.h`
+- `components/espcontrol/button_grid_saved_config_media_generated.h`
 - `docs/generated/cards/capabilities.md`
 
 Vacuum's routine saved-field policies and legacy migration actions are
@@ -61,6 +62,10 @@ Action's legacy `local` and `option_select` type migrations and routine
 orchestration are generated for browser and firmware. The generated routine
 invokes the reviewed `normalize_action_fields` hook before
 `normalize_action_options`.
+
+Media routine orchestration is generated for browser and firmware. The
+generated routine invokes the reviewed `normalize_media_fields` hook before
+`normalize_media_options`.
 
 An `allowed` field policy may declare `aliases` whose targets are in its
 allowed-value list. This preserves renamed legacy values before applying the
