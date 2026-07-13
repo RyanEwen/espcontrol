@@ -339,6 +339,7 @@ export function normalizeSavedConfigVacuumShadow(input: Partial<CardConfig>): Ca
 
 export function normalizeSavedConfigSensorShadow(input: Partial<CardConfig>): CardConfig | null {
   const config = shaped(input);
+  if (config.type === "text_sensor") { config.type = "sensor"; config.precision = "text"; config.entity = ""; config.label = ""; config.unit = ""; config.icon_on = "Auto"; }
   if (config.type === "local_sensor") { config.type = "sensor"; config.sensor = "local"; config.icon_on = "Auto"; config.options = ""; }
   if (config.type !== "sensor") return null;
   if (config.sensor === "local") {
@@ -385,7 +386,7 @@ export function normalizeSavedConfigActionShadow(input: Partial<CardConfig>): Ca
       const stateUnit = optionValue(source, "state_unit"); const numericPrecision = ["0", "1", "2"].indexOf(rawPrecision) >= 0;
       if (stateUnit) out.push("state_unit=" + encodeOptionValue(stateUnit));
       if (numericPrecision) out.push("state_precision=" + rawPrecision);
-      if (stateUnit || numericPrecision) { if (optionValue(source, "large_numbers") === "off") out.push("large_numbers=off"); else if (optionPresent(source, "large_numbers")) out.push("large_numbers"); }
+      if (optionValue(source, "large_numbers") === "off") out.push("large_numbers=off"); else if (optionPresent(source, "large_numbers")) out.push("large_numbers");
     }
   }
   if (config.sensor === "script.turn_on") {

@@ -681,6 +681,7 @@ def gen_saved_config_shadow_ts(data):
         "\n"
         "export function normalizeSavedConfigSensorShadow(input: Partial<CardConfig>): CardConfig | null {\n"
         "  const config = shaped(input);\n"
+        "  if (config.type === \"text_sensor\") { config.type = \"sensor\"; config.precision = \"text\"; config.entity = \"\"; config.label = \"\"; config.unit = \"\"; config.icon_on = \"Auto\"; }\n"
         "  if (config.type === \"local_sensor\") { config.type = \"sensor\"; config.sensor = \"local\"; config.icon_on = \"Auto\"; config.options = \"\"; }\n"
         "  if (config.type !== \"sensor\") return null;\n"
         "  if (config.sensor === \"local\") {\n"
@@ -727,7 +728,7 @@ def gen_saved_config_shadow_ts(data):
         "      const stateUnit = optionValue(source, \"state_unit\"); const numericPrecision = [\"0\", \"1\", \"2\"].indexOf(rawPrecision) >= 0;\n"
         "      if (stateUnit) out.push(\"state_unit=\" + encodeOptionValue(stateUnit));\n"
         "      if (numericPrecision) out.push(\"state_precision=\" + rawPrecision);\n"
-        "      if (stateUnit || numericPrecision) { if (optionValue(source, \"large_numbers\") === \"off\") out.push(\"large_numbers=off\"); else if (optionPresent(source, \"large_numbers\")) out.push(\"large_numbers\"); }\n"
+        "      if (optionValue(source, \"large_numbers\") === \"off\") out.push(\"large_numbers=off\"); else if (optionPresent(source, \"large_numbers\")) out.push(\"large_numbers\");\n"
         "    }\n"
         "  }\n"
         "  if (config.sensor === \"script.turn_on\") {\n"
@@ -806,6 +807,7 @@ def gen_saved_config_shadow_h(data):
         "  if (!value.empty()) out += \"=\" + encode_compact_field(value);\n",
         "}\n\n",
         "template<typename Config>\ninline bool normalize_saved_config_sensor_shadow(Config &config) {\n",
+        "  if (config.type == \"text_sensor\") { config.type = \"sensor\"; config.precision = \"text\"; config.entity.clear(); config.label.clear(); config.unit.clear(); config.icon_on = \"Auto\"; if (config.icon.empty()) config.icon = \"Auto\"; }\n",
         "  if (config.type == \"local_sensor\") { config.type = \"sensor\"; config.sensor = \"local\"; config.icon_on = \"Auto\"; config.options.clear(); }\n",
         "  if (config.type != \"sensor\") return false;\n",
         "  if (config.sensor == \"local\") { config.icon_on = \"Auto\"; config.options.clear(); if (config.precision != \"text\" && config.precision != \"1\" && config.precision != \"2\") config.precision.clear(); if (config.precision != \"text\" && (config.icon.empty() || config.icon == \"Auto\")) config.icon = \"Auto\"; return true; }\n",
@@ -844,7 +846,7 @@ def gen_saved_config_shadow_h(data):
         "      const bool numeric_precision = raw_precision == \"0\" || raw_precision == \"1\" || raw_precision == \"2\";\n",
         "      if (!state_unit.empty()) saved_config_shadow_append_option(out, \"state_unit\", state_unit);\n",
         "      if (numeric_precision) saved_config_shadow_append_option(out, \"state_precision\", raw_precision);\n",
-        "      if (!state_unit.empty() || numeric_precision) append_large_numbers_option(out, source);\n",
+        "      append_large_numbers_option(out, source);\n",
         "    }\n",
         "  }\n",
         "  if (config.sensor == \"script.turn_on\") {\n",

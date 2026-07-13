@@ -97,6 +97,7 @@ inline void saved_config_shadow_append_option(std::string &out, const std::strin
 
 template<typename Config>
 inline bool normalize_saved_config_sensor_shadow(Config &config) {
+  if (config.type == "text_sensor") { config.type = "sensor"; config.precision = "text"; config.entity.clear(); config.label.clear(); config.unit.clear(); config.icon_on = "Auto"; if (config.icon.empty()) config.icon = "Auto"; }
   if (config.type == "local_sensor") { config.type = "sensor"; config.sensor = "local"; config.icon_on = "Auto"; config.options.clear(); }
   if (config.type != "sensor") return false;
   if (config.sensor == "local") { config.icon_on = "Auto"; config.options.clear(); if (config.precision != "text" && config.precision != "1" && config.precision != "2") config.precision.clear(); if (config.precision != "text" && (config.icon.empty() || config.icon == "Auto")) config.icon = "Auto"; return true; }
@@ -138,7 +139,7 @@ inline bool normalize_saved_config_action_shadow(Config &config) {
       const bool numeric_precision = raw_precision == "0" || raw_precision == "1" || raw_precision == "2";
       if (!state_unit.empty()) saved_config_shadow_append_option(out, "state_unit", state_unit);
       if (numeric_precision) saved_config_shadow_append_option(out, "state_precision", raw_precision);
-      if (!state_unit.empty() || numeric_precision) append_large_numbers_option(out, source);
+      append_large_numbers_option(out, source);
     }
   }
   if (config.sensor == "script.turn_on") {

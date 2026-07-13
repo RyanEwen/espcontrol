@@ -33,9 +33,9 @@ function shape(value) {
 function parseRawButtonConfig(value) {
   const compact = String(value || "").startsWith("~");
   const parts = compact ? String(value).substring(1).split(",") : String(value || "").split(";");
-  const decoded = compact ? parts.map((field) => {
-    try { return decodeURIComponent(field); } catch (_) { return field; }
-  }) : parts;
+  const decoded = compact ? parts.map((field) => field.replace(/(%[0-9a-f]{2})+/gi, (run) => {
+    try { return decodeURIComponent(run); } catch (_) { return run; }
+  })) : parts;
   return shape(Object.fromEntries(FIELDS.map((field, index) => [field, decoded[index] || ""])));
 }
 
@@ -68,6 +68,8 @@ function shadowCases() {
     },
   ]);
   const sensor = JSON.parse(fs.readFileSync(path.join(ROOT, "common/config/sensor_card_normalization_fixtures.json"), "utf8"));
+  const sensorAliases = JSON.parse(fs.readFileSync(path.join(ROOT, "common/config/baseline_card_normalization_fixtures.json"), "utf8"))
+    .filter((fixture) => fixture.expected.type === "sensor");
   const confirmation = JSON.parse(fs.readFileSync(path.join(ROOT, "common/config/confirmation_card_normalization_fixtures.json"), "utf8"))
     .filter((fixture) => fixture.expected.type === "action");
   const baseline = JSON.parse(fs.readFileSync(path.join(ROOT, "common/config/baseline_card_normalization_fixtures.json"), "utf8"))
@@ -84,7 +86,7 @@ function shadowCases() {
       expected: config({ entity: "scene.movie", label: "Movie", icon: "Flash", sensor: "scene.turn_on", type: "action", options: "state_entity=sensor.mode,state_precision=icon" }),
     },
   ]);
-  return vacuum.concat(sensor, action);
+  return vacuum.concat(sensor, sensorAliases, action);
 }
 
 function compiler() {
