@@ -39,8 +39,14 @@ conditions, duplicate compact codes, and reuse of a code listed in
 Generated consumers include:
 
 - `src/webserver/generated/card_contract.ts`
+- `src/webserver/generated/saved_config_vacuum.ts`
 - `components/espcontrol/button_grid_contract_generated.h`
+- `components/espcontrol/button_grid_saved_config_vacuum_generated.h`
 - `docs/generated/cards/capabilities.md`
+
+Vacuum's routine saved-field policies are generated for both browser and
+firmware. Its mode-specific unit and icon decisions remain in the reviewed
+`normalize_vacuum_fields` hook.
 
 ## Saved Button Config
 

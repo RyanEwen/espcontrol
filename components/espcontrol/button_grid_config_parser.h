@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "button_grid_card_runtime.h"
-#include "button_grid_saved_config_options_generated.h"
+#include "button_grid_saved_config_vacuum_generated.h"
 
 constexpr const char *SENSOR_STATE_LABELS_OPTION = card_runtime_option_name_state_labels();
 constexpr const char *SENSOR_STATE_INPUT_OPTION = card_runtime_option_name_state_input();
@@ -1208,11 +1208,11 @@ inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
     p.options = action_card_options_normalized(p.options, p.sensor);
   }
   if (p.type == "vacuum") {
-    p.sensor = card_runtime_vacuum_mode(p.sensor);
+    p.sensor = normalize_saved_config_vacuum_sensor(p.sensor);
     if (p.sensor != "clean_area") p.unit.clear();
-    p.precision.clear();
+    p.precision = normalize_saved_config_vacuum_precision(p.precision);
     p.options = normalize_saved_config_vacuum_options(p.options);
-    p.icon_on = "Auto";
+    p.icon_on = normalize_saved_config_vacuum_icon_on(p.icon_on);
     if (p.icon.empty() || p.icon == "Auto") p.icon = card_runtime_vacuum_default_icon_name(p.sensor);
   }
   if (p.type == "lawn_mower") {

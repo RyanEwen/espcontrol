@@ -1,5 +1,10 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-import { normalizeSavedConfigVacuumOptions } from "../generated/saved_config_options";
+import {
+    normalizeSavedConfigVacuumIconOn,
+    normalizeSavedConfigVacuumOptions,
+    normalizeSavedConfigVacuumPrecision,
+    normalizeSavedConfigVacuumSensor,
+} from "../generated/saved_config_vacuum";
 export function installConfigCodecModule(): GlobalDescriptors {
     // ── Subpage helpers ────────────────────────────────────────────────────
     function normalizeWithRegisteredCardType(this: any, b?: any) {
@@ -441,10 +446,10 @@ export function installConfigCodecModule(): GlobalDescriptors {
                 : (mediaStateDisplayModeSupported(sensor) && precision === "state" ? "state" : "");
         }
         if (type === "vacuum") {
-            sensor = normalizeVacuumMode(sensor);
+            sensor = normalizeSavedConfigVacuumSensor(sensor);
             unit = vacuumModeNeedsArea(sensor) ? unit : "";
-            precision = "";
-            iconOn = "Auto";
+            precision = normalizeSavedConfigVacuumPrecision(precision);
+            iconOn = normalizeSavedConfigVacuumIconOn(iconOn);
             if (!icon || icon === "Auto")
                 icon = vacuumModeDefaultIcon(sensor);
         }

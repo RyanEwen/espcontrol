@@ -20,13 +20,17 @@ function compiler() {
 function checkCompiledHelper() {
   const temporary = fs.mkdtempSync(path.join(os.tmpdir(), "espcontrol-saved-config-production-"));
   try {
-    const source = path.join(temporary, "saved_config_options.cpp");
-    const binary = path.join(temporary, "saved_config_options");
+    const source = path.join(temporary, "saved_config_vacuum.cpp");
+    const binary = path.join(temporary, "saved_config_vacuum");
     fs.writeFileSync(source, `
 #include <cassert>
 #include <string>
-#include "button_grid_saved_config_options_generated.h"
+#include "button_grid_saved_config_vacuum_generated.h"
 int main() {
+  assert(normalize_saved_config_vacuum_sensor("dock") == "dock");
+  assert(normalize_saved_config_vacuum_sensor("unknown") == "start_stop");
+  assert(normalize_saved_config_vacuum_icon_on("Custom") == "Auto");
+  assert(normalize_saved_config_vacuum_precision("2").empty());
   assert(normalize_saved_config_vacuum_options("").empty());
   assert(normalize_saved_config_vacuum_options("unknown=1").empty());
 }
@@ -43,28 +47,44 @@ int main() {
 
 function main() {
   const contract = JSON.parse(fs.readFileSync(path.join(ROOT, "common/config/card_contract.json"), "utf8"));
-  assert.strictEqual(contract.cards.vacuum.normalization.fields.options.policy, "clear");
+  const fields = contract.cards.vacuum.normalization.fields;
+  assert.strictEqual(fields.sensor.policy, "allowed");
+  assert.strictEqual(fields.sensor.fallback, "start_stop");
+  assert.strictEqual(fields.icon_on.policy, "default");
+  assert.strictEqual(fields.icon_on.value, "Auto");
+  assert.strictEqual(fields.precision.policy, "clear");
+  assert.strictEqual(fields.options.policy, "clear");
 
-  const generated = loadTypeScriptModule(path.join(ROOT, "src/webserver/generated/saved_config_options.ts"));
+  const generated = loadTypeScriptModule(path.join(ROOT, "src/webserver/generated/saved_config_vacuum.ts"));
+  assert.strictEqual(generated.normalizeSavedConfigVacuumSensor("dock"), "dock");
+  assert.strictEqual(generated.normalizeSavedConfigVacuumSensor("unknown"), "start_stop");
+  assert.strictEqual(generated.normalizeSavedConfigVacuumIconOn("Custom"), "Auto");
+  assert.strictEqual(generated.normalizeSavedConfigVacuumPrecision("2"), "");
   assert.strictEqual(generated.normalizeSavedConfigVacuumOptions(""), "");
   assert.strictEqual(generated.normalizeSavedConfigVacuumOptions("unknown=1"), "");
 
   const browser = fs.readFileSync(path.join(ROOT, "src/webserver/application/config_codec.ts"), "utf8");
-  assert.match(browser, /import \{ normalizeSavedConfigVacuumOptions \} from "\.\.\/generated\/saved_config_options";/);
+  assert.match(browser, /from "\.\.\/generated\/saved_config_vacuum";/);
+  assert.match(browser, /sensor = normalizeSavedConfigVacuumSensor\(sensor\);/);
+  assert.match(browser, /precision = normalizeSavedConfigVacuumPrecision\(precision\);/);
+  assert.match(browser, /iconOn = normalizeSavedConfigVacuumIconOn\(iconOn\);/);
   assert.match(browser, /type === "vacuum"[\s\S]*?normalizeSavedConfigVacuumOptions\(options\)/);
   assert.doesNotMatch(browser, /type === "vacuum" \|\| type === "lawn_mower"/);
 
   const firmware = fs.readFileSync(path.join(ROOT, "components/espcontrol/button_grid_config_parser.h"), "utf8");
-  assert.match(firmware, /#include "button_grid_saved_config_options_generated\.h"/);
+  assert.match(firmware, /#include "button_grid_saved_config_vacuum_generated\.h"/);
   const vacuumStart = firmware.indexOf('if (p.type == "vacuum")');
   const mowerStart = firmware.indexOf('if (p.type == "lawn_mower")', vacuumStart);
   assert(vacuumStart >= 0 && mowerStart > vacuumStart, "Vacuum production normalization block not found");
   const vacuumBlock = firmware.slice(vacuumStart, mowerStart);
+  assert.match(vacuumBlock, /p\.sensor = normalize_saved_config_vacuum_sensor\(p\.sensor\);/);
+  assert.match(vacuumBlock, /p\.precision = normalize_saved_config_vacuum_precision\(p\.precision\);/);
+  assert.match(vacuumBlock, /p\.icon_on = normalize_saved_config_vacuum_icon_on\(p\.icon_on\);/);
   assert.match(vacuumBlock, /p\.options = normalize_saved_config_vacuum_options\(p\.options\);/);
   assert.doesNotMatch(vacuumBlock, /p\.options\.clear\(\);/);
 
   checkCompiledHelper();
-  console.log("Saved-config production check passed: Vacuum options use generated browser and compiled firmware helpers.");
+  console.log("Saved-config production check passed: routine Vacuum fields use generated browser and compiled firmware helpers.");
 }
 
 main();
