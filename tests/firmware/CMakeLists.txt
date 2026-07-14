@@ -48,5 +48,8 @@ add_custom_command(
 add_executable(saved_config_parser_test ${SAVED_CONFIG_TEST_SOURCE})
 target_compile_features(saved_config_parser_test PRIVATE cxx_std_17)
 target_compile_options(saved_config_parser_test PRIVATE -Wall -Wextra -Werror)
-target_include_directories(saved_config_parser_test PRIVATE ../../components/espcontrol)
+target_include_directories(saved_config_parser_test PRIVATE
+  stubs
+  ../../components/espcontrol
+)
 add_test(NAME saved_config_parser_test COMMAND saved_config_parser_test)
