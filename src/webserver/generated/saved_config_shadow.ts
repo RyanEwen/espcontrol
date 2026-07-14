@@ -111,6 +111,7 @@ export const SAVED_CONFIG_SHADOW_PILOT_POLICIES: Readonly<Record<string, CardNor
     "optionHook": "normalize_sensor_options",
     "migrationActions": [
       "legacy_local_sensor",
+      "legacy_text_sensor",
       "legacy_sensor_state_high_label",
       "legacy_sensor_state_low_label"
     ]

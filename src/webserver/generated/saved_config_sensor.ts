@@ -12,5 +12,29 @@ export function migrateSavedConfigSensorLegacy(config: CardConfig): boolean {
     config.options = "";
     return true;
   }
+  if (config.type === "text_sensor") {
+    config.type = "sensor";
+    config.entity = "";
+    config.label = "";
+    config.unit = "";
+    config.precision = "text";
+    config.icon_on = "Auto";
+    return true;
+  }
   return false;
+}
+
+export type SavedConfigSensorFieldHook = (config: CardConfig, wasLegacyTextSensor: boolean) => void;
+export type SavedConfigSensorOptionHook = (options: string, precision: string) => string;
+
+export function normalizeSavedConfigSensor(
+  config: CardConfig,
+  wasLegacyTextSensor: boolean,
+  normalizeFields: SavedConfigSensorFieldHook,
+  normalizeOptions: SavedConfigSensorOptionHook,
+): boolean {
+  if (config.type !== "sensor") return false;
+  normalizeFields(config, wasLegacyTextSensor);
+  config.options = normalizeOptions(config.options || "", config.precision || "");
+  return true;
 }
