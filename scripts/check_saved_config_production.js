@@ -31,6 +31,7 @@ function checkCompiledHelper() {
 #include "button_grid_saved_config_weather_generated.h"
 #include "button_grid_saved_config_image_generated.h"
 #include "button_grid_saved_config_climate_generated.h"
+#include "button_grid_saved_config_light_control_generated.h"
 #include "button_grid_saved_config_date_time_generated.h"
 #include "button_grid_saved_config_fan_generated.h"
 #include "button_grid_saved_config_media_generated.h"
@@ -405,6 +406,23 @@ int main() {
     unrelated, [](Config &) {},
     [](const std::string &options, const Config &) { return options; }
   ));
+  Config light_control{"light_control", "stale", "unit", "2", "light_tabs=brightness%7Cpower,unknown=1", "Lightbulb", "light.kitchen", "Kitchen", "Lightbulb Outline"};
+  bool light_control_options_called = false;
+  assert(normalize_saved_config_light_control(
+    light_control,
+    [&](const std::string &, const Config &config) {
+      light_control_options_called = config.type == "light_control" && config.sensor.empty();
+      return std::string("light_tabs=brightness%7Cpower");
+    }
+  ));
+  assert(light_control_options_called);
+  assert(light_control.entity == "light.kitchen" && light_control.label == "Kitchen");
+  assert(light_control.icon == "Lightbulb Outline" && light_control.icon_on == "Lightbulb");
+  assert(light_control.sensor.empty() && light_control.unit.empty() && light_control.precision.empty());
+  assert(light_control.options == "light_tabs=brightness%7Cpower");
+  assert(!normalize_saved_config_light_control(
+    unrelated, [](const std::string &options, const Config &) { return options; }
+  ));
 }
 `);
     childProcess.execFileSync(compiler(), [
@@ -676,6 +694,17 @@ function main() {
   assert.deepStrictEqual(climateCard, { type: "climate_control", entity: "climate.hall", label: "Hall", icon: "Thermostat", icon_on: "Radiator", sensor: "", unit: "", precision: "", options: "label_display=status,number_display=actual" });
   assert.strictEqual(generatedClimate.normalizeSavedConfigClimate({ type: "sensor" }, () => {}, (options) => options), false);
 
+  const generatedLightControl = loadTypeScriptModule(path.join(ROOT, "src/webserver/generated/saved_config_light_control.ts"));
+  const lightControlCard = { type: "light_control", entity: "light.kitchen", label: "Kitchen", icon: "Lightbulb Outline", icon_on: "Lightbulb", sensor: "stale", unit: "unit", precision: "2", options: "light_tabs=brightness%7Cpower,unknown=1" };
+  let lightControlOptionsCalled = false;
+  assert.strictEqual(generatedLightControl.normalizeSavedConfigLightControl(
+    lightControlCard,
+    (_options, config) => { lightControlOptionsCalled = config.type === "light_control" && config.sensor === ""; return "light_tabs=brightness%7Cpower"; },
+  ), true);
+  assert(lightControlOptionsCalled);
+  assert.deepStrictEqual(lightControlCard, { type: "light_control", entity: "light.kitchen", label: "Kitchen", icon: "Lightbulb Outline", icon_on: "Lightbulb", sensor: "", unit: "", precision: "", options: "light_tabs=brightness%7Cpower" });
+  assert.strictEqual(generatedLightControl.normalizeSavedConfigLightControl({ type: "sensor" }, (options) => options), false);
+
   const browser = fs.readFileSync(path.join(ROOT, "src/webserver/application/config_codec.ts"), "utf8");
   assert.match(browser, /from "\.\.\/generated\/saved_config_vacuum";/);
   assert.match(browser, /migrateSavedConfigVacuumLegacy\(b\)/);
@@ -742,6 +771,9 @@ function main() {
   assert.match(browser, /from "\.\.\/generated\/saved_config_climate";/);
   assert.match(browser, /normalizeSavedConfigClimate\(b, normalizeSavedConfigClimateFields, normalizeSavedConfigClimateOptions\)/);
   assert.doesNotMatch(browser, /if \(b && isClimateCardType\(b\.type\)\)/);
+  assert.match(browser, /from "\.\.\/generated\/saved_config_light_control";/);
+  assert.match(browser, /normalizeSavedConfigLightControl\(b, normalizeSavedConfigLightControlOptions\)/);
+  assert.doesNotMatch(browser, /if \(b && b\.type === "light_control"\)/);
 
   const vacuumCard = fs.readFileSync(path.join(ROOT, "src/webserver/cards/vacuum.ts"), "utf8");
   assert.match(vacuumCard, /normalizeSavedConfigVacuumSensor\(String\(b\.sensor \|\| ""\)\)/);
@@ -819,9 +851,12 @@ function main() {
   assert.match(firmware, /#include "button_grid_saved_config_climate_generated\.h"/);
   assert.match(firmware, /normalize_saved_config_climate\(\s*p, normalize_saved_config_climate_fields,/);
   assert.doesNotMatch(normalizeParser, /if \(climate_card_type\(p\.type\)\)/);
+  assert.match(firmware, /#include "button_grid_saved_config_light_control_generated\.h"/);
+  assert.match(firmware, /normalize_saved_config_light_control\(p, normalize_saved_config_light_control_options\)/);
+  assert.doesNotMatch(normalizeParser, /if \(p\.type == "light_control"\)/);
 
   checkCompiledHelper();
-  console.log("Saved-config production check passed: Access, Action, Climate, Date/Time, Fan, Image, Lawn Mower, Media, Occupancy, Security, Sensor, Vacuum, Weather, and static card normalization use generated browser and compiled firmware helpers.");
+  console.log("Saved-config production check passed: Access, Action, Climate, Date/Time, Fan, Image, Lawn Mower, Light Control, Media, Occupancy, Security, Sensor, Vacuum, Weather, and static card normalization use generated browser and compiled firmware helpers.");
 }
 
 main();

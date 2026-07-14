@@ -16,6 +16,7 @@
 #include "button_grid_saved_config_weather_generated.h"
 #include "button_grid_saved_config_image_generated.h"
 #include "button_grid_saved_config_climate_generated.h"
+#include "button_grid_saved_config_light_control_generated.h"
 #include "button_grid_saved_config_date_time_generated.h"
 #include "button_grid_saved_config_fan_generated.h"
 #include "button_grid_saved_config_media_generated.h"
@@ -1122,6 +1123,11 @@ inline std::string normalize_saved_config_climate_options(
   return climate_card_options_normalized(options, true);
 }
 
+inline std::string normalize_saved_config_light_control_options(
+    const std::string &options, const ParsedCfg &) {
+  return light_control_card_options_normalized(options);
+}
+
 inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
   migrate_saved_config_action_legacy(p);
   const bool was_legacy_text_sensor = p.type == "text_sensor";
@@ -1161,12 +1167,7 @@ inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
     if (p.icon.empty() || p.icon == "Auto") p.icon = "Check";
     p.options = todo_card_options_normalized(p.options);
   }
-  if (p.type == "light_control") {
-    p.sensor.clear();
-    p.unit.clear();
-    p.precision.clear();
-    p.options = light_control_card_options_normalized(p.options);
-  }
+  normalize_saved_config_light_control(p, normalize_saved_config_light_control_options);
   if (p.type == "subpage") {
     p.options = subpage_card_options_normalized(p.options, p.sensor, p.precision);
   }

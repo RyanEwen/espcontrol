@@ -19,6 +19,7 @@ import { normalizeSavedConfigSecurity } from "../generated/saved_config_security
 import { migrateSavedConfigWeatherLegacy, normalizeSavedConfigWeather } from "../generated/saved_config_weather";
 import { normalizeSavedConfigImage } from "../generated/saved_config_image";
 import { normalizeSavedConfigClimate } from "../generated/saved_config_climate";
+import { normalizeSavedConfigLightControl } from "../generated/saved_config_light_control";
 export function installConfigCodecModule(): GlobalDescriptors {
     // ── Subpage helpers ────────────────────────────────────────────────────
     function normalizeWithRegisteredCardType(this: any, b?: any) {
@@ -213,6 +214,9 @@ export function installConfigCodecModule(): GlobalDescriptors {
     function normalizeSavedConfigClimateOptions(this: any, options?: any, _b?: any) {
         return normalizeClimateOptions(options || "", true);
     }
+    function normalizeSavedConfigLightControlOptions(this: any, options?: any, _b?: any) {
+        return normalizeLightControlOptions(options || "");
+    }
     function normalizeButtonConfig(this: any, b?: any) {
         if (b)
             b.options = b.options || "";
@@ -256,12 +260,8 @@ export function installConfigCodecModule(): GlobalDescriptors {
         }
         if (b)
             normalizeSavedConfigImage(b, normalizeSavedConfigImageFields, normalizeSavedConfigImageOptions);
-        if (b && b.type === "light_control") {
-            b.sensor = "";
-            b.unit = "";
-            b.precision = "";
-            b.options = normalizeLightControlOptions(b.options);
-        }
+        if (b)
+            normalizeSavedConfigLightControl(b, normalizeSavedConfigLightControlOptions);
         if (b && b.type === "subpage") {
             applySubpagePresetConfig(b);
             b.options = normalizeSubpageOptions(b.options, b.sensor, b.precision);

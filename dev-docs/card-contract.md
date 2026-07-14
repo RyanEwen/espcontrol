@@ -393,3 +393,5 @@ visibility and modal-option hooks kept by hand.
 Climate and Climate Control also use generated production routing, with only
 their named icon/precision and climate-option hooks kept by hand; the legacy
 `climate` saved type remains compatible and normalizes to `climate_control`.
+Light Control also uses generated production routing, with only its named
+visible-tab option hook kept by hand.

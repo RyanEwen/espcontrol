@@ -23,6 +23,7 @@
     "normalize_image_options",
     "normalize_climate_fields",
     "normalize_climate_options",
+    "normalize_light_control_options",
     "normalize_sensor_fields",
     "normalize_sensor_options",
     "normalize_vacuum_fields"
@@ -1363,9 +1364,26 @@
           "label": "Visible Tabs",
           "kind": "text",
           "values": ["power", "brightness", "temperature", "color"],
-          "defaultValue": "power|brightness|temperature|color"
+          "defaultValue": "power|brightness|temperature|color",
+          "omitDefault": true
         }
       ],
+      "normalization": {
+        "fields": {
+          "entity": { "policy": "keep" },
+          "label": { "policy": "keep" },
+          "icon": { "policy": "keep" },
+          "icon_on": { "policy": "keep" },
+          "sensor": { "policy": "clear" },
+          "unit": { "policy": "clear" },
+          "type": { "policy": "default", "value": "light_control" },
+          "precision": { "policy": "clear" },
+          "options": { "policy": "hook", "hook": "normalize_light_control_options" }
+        },
+        "unknownOptions": "drop",
+        "canonicalOptionOrder": ["light_tabs"],
+        "optionHook": "normalize_light_control_options"
+      },
       "default": {
         "entity": "",
         "label": "",
