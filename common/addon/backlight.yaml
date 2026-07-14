@@ -578,6 +578,13 @@ script:
     mode: restart
     then:
       - script.stop: setup_screen_dim
+      - if:
+          condition:
+            lambda: 'return id(setup_screen_dimmed_shadow_active);'
+          then:
+            - globals.set:
+                id: display_asleep
+                value: 'false'
       - globals.set:
           id: setup_screen_dimmed_shadow_active
           value: 'false'
