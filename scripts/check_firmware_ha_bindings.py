@@ -1491,6 +1491,25 @@ def firmware_screen_schedule_screensaver_override_errors(backlight_path: Path, r
     ):
         errors.append(f"{rel}: screen schedule display-off should clear cover art before forcing the screen off")
 
+    schedule_path = backlight_path.with_name("backlight_schedule.yaml")
+    if schedule_path.exists():
+        schedule_rel = schedule_path.relative_to(root)
+        schedule_text = schedule_path.read_text(encoding="utf-8")
+        sleep_body = yaml_script_body(schedule_text, "screen_schedule_sleep")
+        if sleep_body is None:
+            errors.append(f"{schedule_rel}: missing screen_schedule_sleep script")
+        else:
+            asleep_index = sleep_body.find("id: screen_schedule_asleep")
+            asleep_true_index = sleep_body.find("value: 'true'", asleep_index)
+            request_index = sleep_body.find("DisplayRequestSource::SCREEN_SCHEDULE")
+            reconcile_index = sleep_body.find("script.execute: display_mode_reconcile")
+            if not (
+                0 <= asleep_index <= asleep_true_index < request_index < reconcile_index
+            ):
+                errors.append(
+                    f"{schedule_rel}: set the schedule-asleep marker before reconciling display-off"
+                )
+
     wake_body = yaml_script_body(text, "screensaver_presence_wake")
     if wake_body is None:
         errors.append(f"{rel}: missing screensaver_presence_wake script")
@@ -2327,12 +2346,17 @@ def expect_screen_schedule_screensaver_override_errors(
     name: str,
     text: str,
     expected: tuple[str, ...],
+    schedule_text: str | None = None,
 ) -> None:
     with TemporaryDirectory() as tmp:
         root = Path(tmp)
         path = root / "common" / "addon" / "backlight.yaml"
         path.parent.mkdir(parents=True)
         path.write_text(text, encoding="utf-8")
+        if schedule_text is not None:
+            path.with_name("backlight_schedule.yaml").write_text(
+                schedule_text, encoding="utf-8"
+            )
         errors = firmware_screen_schedule_screensaver_override_errors(path, root)
         for item in expected:
             assert any(item in error for error in errors), f"{name}: missing {item!r} in {errors!r}"
@@ -4341,10 +4365,36 @@ def run_self_test() -> int:
         "      - script.stop: cover_art_delay_timer\n"
         "      - script.execute: hide_cover_art_view\n"
     )
+    valid_schedule_sleep_order = (
+        "script:\n"
+        "  - id: screen_schedule_sleep\n"
+        "    then:\n"
+        "      - globals.set:\n"
+        "          id: screen_schedule_asleep\n"
+        "          value: 'true'\n"
+        "      - lambda: |-\n"
+        "          id(display_mode_controller).request(\n"
+        "              espcontrol::DisplayRequestSource::SCREEN_SCHEDULE,\n"
+        "              espcontrol::DisplayMode::DISPLAY_OFF);\n"
+        "      - script.execute: display_mode_reconcile\n"
+    )
     expect_screen_schedule_screensaver_override_errors(
         "night schedule overrides timer and sensor screensaver",
         valid_schedule_screensaver_override,
         (),
+        valid_schedule_sleep_order,
+    )
+    expect_screen_schedule_screensaver_override_errors(
+        "schedule display-off reconciles before publishing its marker",
+        valid_schedule_screensaver_override,
+        ("set the schedule-asleep marker before reconciling display-off",),
+        valid_schedule_sleep_order.replace(
+            "      - globals.set:\n"
+            "          id: screen_schedule_asleep\n"
+            "          value: 'true'\n",
+            "",
+            1,
+        ),
     )
     expect_screen_schedule_screensaver_override_errors(
         "timer screensaver bypasses night schedule",

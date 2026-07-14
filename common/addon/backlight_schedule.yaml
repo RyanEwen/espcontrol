@@ -485,6 +485,11 @@ script:
   - id: screen_schedule_sleep
     mode: restart
     then:
+      # Publish the schedule marker before reconciliation so the controller
+      # cannot clear this higher-priority request while the off effect runs.
+      - globals.set:
+          id: screen_schedule_asleep
+          value: 'true'
       - lambda: |-
           id(display_mode_controller).request(
               espcontrol::DisplayRequestSource::SCREEN_SCHEDULE,
@@ -505,9 +510,6 @@ script:
           value: '0'
       - script.execute: backlight_sleep_display_off
       - script.wait: backlight_sleep_display_off
-      - globals.set:
-          id: screen_schedule_asleep
-          value: 'true'
       - lambda: 'global_preferences->sync();'
 
   # ---------------------------------------------------------------------------
