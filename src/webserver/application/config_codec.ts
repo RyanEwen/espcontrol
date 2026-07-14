@@ -20,6 +20,7 @@ import { migrateSavedConfigWeatherLegacy, normalizeSavedConfigWeather } from "..
 import { normalizeSavedConfigImage } from "../generated/saved_config_image";
 import { normalizeSavedConfigClimate } from "../generated/saved_config_climate";
 import { normalizeSavedConfigLightControl } from "../generated/saved_config_light_control";
+import { normalizeSavedConfigWebhook } from "../generated/saved_config_webhook";
 export function installConfigCodecModule(): GlobalDescriptors {
     // ── Subpage helpers ────────────────────────────────────────────────────
     function normalizeWithRegisteredCardType(this: any, b?: any) {
@@ -217,6 +218,19 @@ export function installConfigCodecModule(): GlobalDescriptors {
     function normalizeSavedConfigLightControlOptions(this: any, options?: any, _b?: any) {
         return normalizeLightControlOptions(options || "");
     }
+    function normalizeSavedConfigWebhookFields(this: any, b?: any) {
+        if (!b)
+            return;
+        b.sensor = webhookMethod(b.sensor);
+        if (b.sensor === "GET" || b.sensor === "DELETE")
+            b.unit = "";
+        if (!b.icon)
+            b.icon = "Auto";
+    }
+    function normalizeSavedConfigWebhookOptions(this: any, options?: any, _b?: any) {
+        var headers: any = configOptionValue(options || "", "webhook_headers");
+        return headers ? setConfigOptionValue("", "webhook_headers", headers) : "";
+    }
     function normalizeButtonConfig(this: any, b?: any) {
         if (b)
             b.options = b.options || "";
@@ -241,10 +255,8 @@ export function installConfigCodecModule(): GlobalDescriptors {
         var normalizedSavedAccess: any = !!(b && normalizeSavedConfigAccess(b, normalizeSavedConfigAccessFields, normalizeSavedConfigAccessOptions));
         if (b)
             normalizeSavedConfigSecurity(b, normalizeSavedConfigSecurityFields, normalizeSavedConfigSecurityOptions);
-        if (b && b.type === "webhook") {
-            if (typeof normalizeWebhookConfig === "function")
-                normalizeWebhookConfig(b);
-        }
+        if (b)
+            normalizeSavedConfigWebhook(b, normalizeSavedConfigWebhookFields, normalizeSavedConfigWebhookOptions);
         normalizeWithRegisteredCardType(b);
         var normalizedSavedStatic: any = !!(b && normalizeSavedConfigStatic(b));
         if (b)
