@@ -46,8 +46,25 @@ class DisplayModeController {
 
   bool request(DisplayRequestSource source, DisplayMode mode) {
     if (!request_is_valid(source, mode)) return false;
+
+    Request &manual_sleep = requests_[source_index(DisplayRequestSource::MANUAL_SLEEP)];
+    if (source == DisplayRequestSource::USER_WAKE && manual_sleep.active) return false;
+
+    bool changed = false;
+    if (source == DisplayRequestSource::MANUAL_SLEEP) {
+      Request &user_wake = requests_[source_index(DisplayRequestSource::USER_WAKE)];
+      if (user_wake.active) {
+        user_wake.active = false;
+        user_wake.sequence = ++sequence_;
+        changed = true;
+      }
+    }
+
     Request &entry = requests_[source_index(source)];
-    if (entry.active && entry.mode == mode) return false;
+    if (entry.active && entry.mode == mode) {
+      if (changed) advance_generation();
+      return changed;
+    }
     entry.active = true;
     entry.mode = mode;
     entry.sequence = ++sequence_;
@@ -282,7 +299,8 @@ class DisplayModeShadowObserver {
 
     set_request(DisplayRequestSource::MANUAL_SLEEP, state.backlight_manual_off,
                 DisplayMode::DISPLAY_OFF);
-    set_request(DisplayRequestSource::USER_WAKE, state.temporary_user_wake,
+    set_request(DisplayRequestSource::USER_WAKE,
+                state.temporary_user_wake && !state.backlight_manual_off,
                 DisplayMode::ACTIVE);
     set_request(DisplayRequestSource::BOOT_GUARD, boot_guard_active,
                 DisplayMode::DISPLAY_OFF);

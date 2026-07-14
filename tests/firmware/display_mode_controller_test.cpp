@@ -81,8 +81,6 @@ int main() {
   CHECK(decision_is(controller, DisplayMode::DISPLAY_OFF,
                     DisplayRequestSource::MANUAL_SLEEP));
   CHECK(controller.clear(DisplayRequestSource::MANUAL_SLEEP));
-  CHECK(decision_is(controller, DisplayMode::ACTIVE, DisplayRequestSource::USER_WAKE));
-  CHECK(controller.clear(DisplayRequestSource::USER_WAKE));
   CHECK(decision_is(controller, DisplayMode::CLOCK,
                     DisplayRequestSource::SCREEN_SCHEDULE));
   CHECK(controller.clear(DisplayRequestSource::SCREEN_SCHEDULE));
@@ -98,6 +96,21 @@ int main() {
                     DisplayRequestSource::BOOT_GUARD));
   CHECK(!controller.request(DisplayRequestSource::BOOT_GUARD, DisplayMode::CLOCK));
   CHECK(controller.clear(DisplayRequestSource::BOOT_GUARD));
+
+  // Manual sleep removes a temporary wake regardless of request order, so
+  // clearing manual sleep always re-resolves the live schedule.
+  DisplayModeController manual_sleep;
+  CHECK(manual_sleep.request(DisplayRequestSource::SCREEN_SCHEDULE, DisplayMode::CLOCK));
+  CHECK(manual_sleep.request(DisplayRequestSource::USER_WAKE, DisplayMode::ACTIVE));
+  CHECK(manual_sleep.request(DisplayRequestSource::MANUAL_SLEEP, DisplayMode::DISPLAY_OFF));
+  CHECK(manual_sleep.clear(DisplayRequestSource::MANUAL_SLEEP));
+  CHECK(decision_is(manual_sleep, DisplayMode::CLOCK,
+                    DisplayRequestSource::SCREEN_SCHEDULE));
+  CHECK(manual_sleep.request(DisplayRequestSource::MANUAL_SLEEP, DisplayMode::DISPLAY_OFF));
+  CHECK(!manual_sleep.request(DisplayRequestSource::USER_WAKE, DisplayMode::ACTIVE));
+  CHECK(manual_sleep.clear(DisplayRequestSource::MANUAL_SLEEP));
+  CHECK(decision_is(manual_sleep, DisplayMode::CLOCK,
+                    DisplayRequestSource::SCREEN_SCHEDULE));
 
   // Every request source accepts its documented mode and returns to default
   // after its clear path when tested independently.
