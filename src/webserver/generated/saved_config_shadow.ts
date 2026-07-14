@@ -111,6 +111,7 @@ export const SAVED_CONFIG_SHADOW_PILOT_POLICIES: Readonly<Record<string, CardNor
     "optionHook": "normalize_sensor_options",
     "migrationActions": [
       "legacy_local_sensor",
+      "legacy_text_sensor",
       "legacy_sensor_state_high_label",
       "legacy_sensor_state_low_label"
     ]
@@ -190,6 +191,10 @@ export const SAVED_CONFIG_SHADOW_PILOT_POLICIES: Readonly<Record<string, CardNor
           "locate",
           "clean_area"
         ],
+        "aliases": {
+          "vacuum.start": "start_stop",
+          "vacuum.return_to_base": "dock"
+        },
         "fallback": "start_stop"
       },
       "unit": {
@@ -282,6 +287,14 @@ const VACUUM_MIGRATIONS: Readonly<Record<string, MigrationActionSpec>> = {
   }
 };
 const ACTION_OPTION_SELECT_ACTIONS = ["input_select.select_option", "select.select_option"] as const;
+const MEDIA_MODES = ["control_modal", "play_pause", "previous", "next", "volume", "position", "now_playing", "playlist"] as const;
+const MEDIA_DEFAULT_MODE = "play_pause";
+const MEDIA_MODE_ALIASES: Readonly<Record<string, string>> = {"controls": "play_pause"};
+const MEDIA_STATE_DISPLAY_MODES = ["play_pause", "position"] as const;
+const MEDIA_NOW_PLAYING_CONTROLS = ["", "progress", "play_pause"] as const;
+const MEDIA_VOLUME_MIN = 1;
+const MEDIA_VOLUME_MAX = 100;
+const MEDIA_VOLUME_DEFAULT = "100";
 
 function conditionMatches(config: CardConfig, condition: NormalizationCondition): boolean {
   const actual = condition.source === "field" ? config[condition.name as keyof CardConfig] : "";
@@ -326,7 +339,7 @@ export function normalizeSavedConfigVacuumShadow(input: Partial<CardConfig>): Ca
     const policy = spec.fields[field];
     if (policy.policy === "clear") config[field] = "";
     else if (policy.policy === "default") config[field] = policy.value;
-    else if (policy.policy === "allowed" && policy.values.indexOf(config[field]) < 0) config[field] = policy.fallback;
+    else if (policy.policy === "allowed") { config[field] = policy.aliases?.[config[field]] || config[field]; if (policy.values.indexOf(config[field]) < 0) config[field] = policy.fallback; }
     else if (policy.policy === "alias") config[field] = policy.aliases[config[field]] || config[field];
   }
   const hook = spec.hookData!.normalize_vacuum_fields as {
@@ -400,6 +413,32 @@ export function normalizeSavedConfigActionShadow(input: Partial<CardConfig>): Ca
   config.options = out.join(","); return config;
 }
 
+function normalizedMediaVolume(value: string): string {
+  if (!value) return MEDIA_VOLUME_DEFAULT; const parsed = parseInt(value, 10);
+  if (!isFinite(parsed)) return MEDIA_VOLUME_DEFAULT; return String(Math.max(MEDIA_VOLUME_MIN, Math.min(MEDIA_VOLUME_MAX, parsed)));
+}
+export function normalizeSavedConfigMediaShadow(input: Partial<CardConfig>): CardConfig | null {
+  const config = shaped(input); if (config.type !== "media") return null; const rawMode = config.sensor;
+  const aliasedMode = MEDIA_MODE_ALIASES[rawMode] || rawMode; config.sensor = MEDIA_MODES.indexOf(aliasedMode as typeof MEDIA_MODES[number]) >= 0 ? aliasedMode : MEDIA_DEFAULT_MODE;
+  if (rawMode === "controls" && (!config.icon || config.icon === "Speaker")) config.icon = "Auto";
+  if (config.sensor === "previous" && config.label === "Skip Previous") config.label = "Previous";
+  if (config.sensor === "next" && config.label === "Skip Next") config.label = "Next";
+  if (config.sensor === "volume") { if (!config.label || config.label === "Media") config.label = "Volume"; config.icon = "Auto"; }
+  if (config.sensor === "playlist") { if (!config.label || config.label === "Media") config.label = "Playlist"; if (!config.icon || config.icon === "Auto") config.icon = "Music"; }
+  if (config.sensor === "position" && (!config.label || config.label === "Track")) config.label = "Position";
+  if (config.sensor === "now_playing") config.precision = MEDIA_NOW_PLAYING_CONTROLS.indexOf(config.precision as typeof MEDIA_NOW_PLAYING_CONTROLS[number]) >= 0 ? config.precision : "";
+  else if (MEDIA_STATE_DISPLAY_MODES.indexOf(config.sensor as typeof MEDIA_STATE_DISPLAY_MODES[number]) < 0 || config.precision !== "state") config.precision = "";
+  const source = config.options; const out: string[] = []; const maxVolume = normalizedMediaVolume(optionValue(source, "volume_max"));
+  if (config.sensor === "control_modal") {
+    if (optionValue(source, "label_display").trim() === "label") out.push("label_display=label"); if (optionValue(source, "number_display").trim() === "volume") out.push("number_display=volume"); if (maxVolume !== MEDIA_VOLUME_DEFAULT) out.push("volume_max=" + maxVolume);
+  } else if (config.sensor === "playlist") {
+    for (const [name, defaultValue] of [["playlist_content_id", ""], ["playlist_content_type", "playlist"], ["playlist_player_source", ""]] as const) { const value = optionValue(source, name).trim() || defaultValue; if (value && value !== defaultValue) out.push(name + "=" + encodeOptionValue(value)); }
+  } else if (config.sensor === "volume" || config.sensor === "position") {
+    if (config.sensor === "volume" && maxVolume !== MEDIA_VOLUME_DEFAULT) out.push("volume_max=" + maxVolume); if (optionValue(source, "large_numbers") === "off") out.push("large_numbers=off"); else if (optionPresent(source, "large_numbers")) out.push("large_numbers");
+  }
+  config.options = out.join(","); return config;
+}
+
 export function normalizeSavedConfigShadow(input: Partial<CardConfig>): CardConfig | null {
-  return normalizeSavedConfigVacuumShadow(input) || normalizeSavedConfigSensorShadow(input) || normalizeSavedConfigActionShadow(input);
+  return normalizeSavedConfigVacuumShadow(input) || normalizeSavedConfigSensorShadow(input) || normalizeSavedConfigActionShadow(input) || normalizeSavedConfigMediaShadow(input);
 }

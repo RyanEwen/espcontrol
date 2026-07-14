@@ -63,6 +63,12 @@ inline const CardContractShadowFieldPolicy SAVED_CONFIG_SHADOW_VACUUM_FIELDS[] =
 inline const char *const SAVED_CONFIG_SHADOW_VACUUM_MODES[] = {"status", "start_stop", "dock", "pause_resume", "clean_spot", "locate", "clean_area"};
 inline const char *const SAVED_CONFIG_SHADOW_VACUUM_UNIT_MODES[] = {"clean_area"};
 inline const char *const SAVED_CONFIG_SHADOW_ACTION_OPTION_SELECT_ACTIONS[] = {"input_select.select_option", "select.select_option"};
+inline const char *const SAVED_CONFIG_SHADOW_MEDIA_MODES[] = {"control_modal", "play_pause", "previous", "next", "volume", "position", "now_playing", "playlist"};
+inline const char *const SAVED_CONFIG_SHADOW_MEDIA_STATE_DISPLAY_MODES[] = {"play_pause", "position"};
+inline const char *const SAVED_CONFIG_SHADOW_MEDIA_NOW_PLAYING_CONTROLS[] = {"", "progress", "play_pause"};
+constexpr int SAVED_CONFIG_SHADOW_MEDIA_VOLUME_MIN = 1;
+constexpr int SAVED_CONFIG_SHADOW_MEDIA_VOLUME_MAX = 100;
+constexpr int SAVED_CONFIG_SHADOW_MEDIA_VOLUME_DEFAULT = 100;
 
 inline bool saved_config_shadow_string_in(const std::string &value, const char *const *values, size_t count) {
   for (size_t index = 0; index < count; ++index) if (value == values[index]) return true;
@@ -82,6 +88,8 @@ inline bool normalize_saved_config_vacuum_shadow(Config &config) {
   if (config.type == "action" && config.sensor == "vacuum.start") { config.type = "vacuum"; config.sensor = "start_stop"; }
   if (config.type == "action" && config.sensor == "vacuum.return_to_base") { config.type = "vacuum"; config.sensor = "dock"; }
   if (config.type != "vacuum") return false;
+  if (config.sensor == "vacuum.start") config.sensor = "start_stop";
+  if (config.sensor == "vacuum.return_to_base") config.sensor = "dock";
   if (!saved_config_shadow_string_in(config.sensor, SAVED_CONFIG_SHADOW_VACUUM_MODES, sizeof(SAVED_CONFIG_SHADOW_VACUUM_MODES) / sizeof(SAVED_CONFIG_SHADOW_VACUUM_MODES[0]))) config.sensor = "start_stop";
   config.type = "vacuum"; config.icon_on = "Auto"; config.precision.clear(); config.options.clear();
   if (!saved_config_shadow_string_in(config.sensor, SAVED_CONFIG_SHADOW_VACUUM_UNIT_MODES, sizeof(SAVED_CONFIG_SHADOW_VACUUM_UNIT_MODES) / sizeof(SAVED_CONFIG_SHADOW_VACUUM_UNIT_MODES[0]))) config.unit.clear();
@@ -170,9 +178,66 @@ inline bool normalize_saved_config_action_shadow(Config &config) {
   config.options = out; return true;
 }
 
+inline std::string saved_config_shadow_media_mode(const std::string &mode) {
+  if (mode == "controls") return "play_pause";
+  if (saved_config_shadow_string_in(mode, SAVED_CONFIG_SHADOW_MEDIA_MODES, sizeof(SAVED_CONFIG_SHADOW_MEDIA_MODES) / sizeof(SAVED_CONFIG_SHADOW_MEDIA_MODES[0]))) return mode;
+  return "play_pause";
+}
+
+inline int saved_config_shadow_media_volume(const std::string &value) {
+  if (value.empty()) return SAVED_CONFIG_SHADOW_MEDIA_VOLUME_DEFAULT;
+  char *end = nullptr;
+  long parsed = std::strtol(value.c_str(), &end, 10);
+  if (end == value.c_str()) return SAVED_CONFIG_SHADOW_MEDIA_VOLUME_DEFAULT;
+  if (parsed < SAVED_CONFIG_SHADOW_MEDIA_VOLUME_MIN) return SAVED_CONFIG_SHADOW_MEDIA_VOLUME_MIN;
+  if (parsed > SAVED_CONFIG_SHADOW_MEDIA_VOLUME_MAX) return SAVED_CONFIG_SHADOW_MEDIA_VOLUME_MAX;
+  return static_cast<int>(parsed);
+}
+
+template<typename Config>
+inline bool normalize_saved_config_media_shadow(Config &config) {
+  if (config.type != "media") return false;
+  if (config.icon.empty()) config.icon = "Auto";
+  if (config.icon_on.empty()) config.icon_on = "Auto";
+  const std::string raw_mode = config.sensor;
+  config.sensor = saved_config_shadow_media_mode(raw_mode);
+  if (raw_mode == "controls" && (config.icon.empty() || config.icon == "Speaker")) config.icon = "Auto";
+  if (config.sensor == "previous" && config.label == "Skip Previous") config.label = "Previous";
+  if (config.sensor == "next" && config.label == "Skip Next") config.label = "Next";
+  if (config.sensor == "volume") {
+    if (config.label.empty() || config.label == "Media") config.label = "Volume";
+    config.icon = "Auto";
+  }
+  if (config.sensor == "playlist") {
+    if (config.label.empty() || config.label == "Media") config.label = "Playlist";
+    if (config.icon.empty() || config.icon == "Auto") config.icon = "Music";
+  }
+  if (config.sensor == "position" && (config.label.empty() || config.label == "Track")) config.label = "Position";
+  if (config.sensor == "now_playing") { if (!saved_config_shadow_string_in(config.precision, SAVED_CONFIG_SHADOW_MEDIA_NOW_PLAYING_CONTROLS, sizeof(SAVED_CONFIG_SHADOW_MEDIA_NOW_PLAYING_CONTROLS) / sizeof(SAVED_CONFIG_SHADOW_MEDIA_NOW_PLAYING_CONTROLS[0]))) config.precision.clear(); }
+  else if (!saved_config_shadow_string_in(config.sensor, SAVED_CONFIG_SHADOW_MEDIA_STATE_DISPLAY_MODES, sizeof(SAVED_CONFIG_SHADOW_MEDIA_STATE_DISPLAY_MODES) / sizeof(SAVED_CONFIG_SHADOW_MEDIA_STATE_DISPLAY_MODES[0])) || config.precision != "state") config.precision.clear();
+  const std::string source = config.options; std::string out; const int max_volume = saved_config_shadow_media_volume(cfg_option_value(source, "volume_max"));
+  if (config.sensor == "control_modal") {
+    if (saved_config_shadow_trim(cfg_option_value(source, "label_display")) == "label") saved_config_shadow_append_option(out, "label_display", "label");
+    if (saved_config_shadow_trim(cfg_option_value(source, "number_display")) == "volume") saved_config_shadow_append_option(out, "number_display", "volume");
+    if (max_volume != SAVED_CONFIG_SHADOW_MEDIA_VOLUME_DEFAULT) saved_config_shadow_append_option(out, "volume_max", std::to_string(max_volume));
+  } else if (config.sensor == "playlist") {
+    const std::string content_id = saved_config_shadow_trim(cfg_option_value(source, "playlist_content_id"));
+    const std::string content_type = saved_config_shadow_trim(cfg_option_value(source, "playlist_content_type"));
+    const std::string player_source = saved_config_shadow_trim(cfg_option_value(source, "playlist_player_source"));
+    if (!content_id.empty()) saved_config_shadow_append_option(out, "playlist_content_id", content_id);
+    if (!content_type.empty() && content_type != "playlist") saved_config_shadow_append_option(out, "playlist_content_type", content_type);
+    if (!player_source.empty()) saved_config_shadow_append_option(out, "playlist_player_source", player_source);
+  } else if (config.sensor == "volume" || config.sensor == "position") {
+    if (config.sensor == "volume" && max_volume != SAVED_CONFIG_SHADOW_MEDIA_VOLUME_DEFAULT) saved_config_shadow_append_option(out, "volume_max", std::to_string(max_volume));
+    append_large_numbers_option(out, source);
+  }
+  config.options = out; return true;
+}
+
 template<typename Config>
 inline bool normalize_saved_config_shadow(Config &config) {
   if (normalize_saved_config_vacuum_shadow(config)) return true;
   if (normalize_saved_config_sensor_shadow(config)) return true;
-  return normalize_saved_config_action_shadow(config);
+  if (normalize_saved_config_action_shadow(config)) return true;
+  return normalize_saved_config_media_shadow(config);
 }
