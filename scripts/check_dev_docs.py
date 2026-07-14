@@ -104,7 +104,7 @@ SOURCE_TRUTH_ROWS: tuple[SourceTruthRow, ...] = (
     ),
     SourceTruthRow(
         "src/webserver/",
-        ("docs/public/webserver/*/www.js",),
+        ("docs/public/webserver/www.js",),
         "python3 scripts/build.py www",
         "`npm run check:web-smoke` and `npm run check:product`",
     ),
@@ -278,7 +278,7 @@ def validate_check_guidance(value: str) -> str:
     for alias in re.findall(r"npm run (check:[\w:-]+)", value):
         if alias not in aliases:
             raise ValueError(f"developer guidance references an unregistered check alias: {alias}")
-        task_id = alias.removeprefix("check:")
+        task_id = alias[len("check:"):]
         if task_id not in task_ids and task_id not in PROFILES and alias != "check:release-preflight":
             raise ValueError(f"developer guidance references an unknown task: {task_id}")
     return value
