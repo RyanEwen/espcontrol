@@ -116,6 +116,8 @@ start in the contract and flow outward from there.
   factory-build flash, static-RAM, duration, and linker results for module work.
 - [Card Contract](card-contract.md) - how card metadata moves from JSON into the
   web UI and firmware.
+- [Saved-Configuration Normalization Baseline](saved-config-normalization-baseline.md) -
+  current browser/firmware normalization rules and their shared parity check.
 - [Card Type Map](card-type-map.md) - per-card starting points for web files,
   firmware headers, option storage, modals, Home Assistant subscriptions, and
   checks.
