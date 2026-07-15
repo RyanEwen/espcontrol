@@ -183,6 +183,7 @@ struct P4PipelineAllocationFailure {
 
 static constexpr size_t P4_PIPELINE_ALLOCATION_FAILURE_SLOTS = 16;
 static constexpr size_t P4_PIPELINE_PENDING_SLOTS = 16;
+static constexpr size_t P4_PIPELINE_COMPLETED_SLOTS = 16;
 
 class P4ImagePipeline {
  public:
@@ -236,14 +237,13 @@ class P4ImagePipeline {
       }
       failure = P4PipelineAllocationFailure{};
     }
-    auto it = this->completed_.begin();
-    while (it != this->completed_.end()) {
-      P4PipelineResult *candidate = *it;
+    for (size_t i = 0; i < this->completed_count_;) {
+      P4PipelineResult *candidate = this->completed_[i];
       if (candidate->owner != owner) {
-        ++it;
+        i++;
         continue;
       }
-      it = this->completed_.erase(it);
+      this->remove_completed_at_locked_(i);
       if (p4_pipeline_result_is_current(generation, candidate->generation, false) &&
           match == nullptr) {
         match = candidate;
@@ -278,16 +278,14 @@ class P4ImagePipeline {
         this->lock_();
         this->active_ = nullptr;
         if (result) {
-          auto it = this->completed_.begin();
-          while (it != this->completed_.end()) {
-            if ((*it)->owner == result->owner) {
-              delete *it;
-              it = this->completed_.erase(it);
-            } else {
-              ++it;
-            }
+          this->discard_completed_for_owner_locked_(result->owner);
+          if (this->completed_count_ < P4_PIPELINE_COMPLETED_SLOTS) {
+            this->completed_[this->completed_count_++] = result;
+          } else {
+            delete result;
+            result = nullptr;
+            this->record_allocation_failure_locked_(job);
           }
-          this->completed_.push_back(result);
         } else if (!job->cancelled.load()) {
           this->record_allocation_failure_locked_(job);
         }
@@ -328,6 +326,26 @@ class P4ImagePipeline {
     this->active_ = job;
     this->unlock_();
     return job;
+  }
+
+  P4PipelineResult *remove_completed_at_locked_(size_t index) {
+    if (index >= this->completed_count_) return nullptr;
+    P4PipelineResult *result = this->completed_[index];
+    for (size_t next = index + 1; next < this->completed_count_; next++) {
+      this->completed_[next - 1] = this->completed_[next];
+    }
+    this->completed_[--this->completed_count_] = nullptr;
+    return result;
+  }
+
+  void discard_completed_for_owner_locked_(ArtworkImage *owner) {
+    for (size_t i = 0; i < this->completed_count_;) {
+      if (this->completed_[i]->owner != owner) {
+        i++;
+        continue;
+      }
+      delete this->remove_completed_at_locked_(i);
+    }
   }
 
   static esp_err_t http_event_(esp_http_client_event_t *evt) {
@@ -463,15 +481,7 @@ class P4ImagePipeline {
       this->active_->cancelled.store(true);
       if (this->client_) esp_http_client_cancel_request(this->client_);
     }
-    auto it = this->completed_.begin();
-    while (it != this->completed_.end()) {
-      if ((*it)->owner == owner) {
-        delete *it;
-        it = this->completed_.erase(it);
-      } else {
-        ++it;
-      }
-    }
+    this->discard_completed_for_owner_locked_(owner);
     for (auto &failure : this->allocation_failures_) {
       if (failure.owner == owner) failure = P4PipelineAllocationFailure{};
     }
@@ -504,7 +514,8 @@ class P4ImagePipeline {
   P4PipelineJob *pending_[P4_PIPELINE_PENDING_SLOTS]{};
   size_t pending_count_{0};
   P4PipelineJob *active_{nullptr};
-  std::vector<P4PipelineResult *> completed_;
+  P4PipelineResult *completed_[P4_PIPELINE_COMPLETED_SLOTS]{};
+  size_t completed_count_{0};
   P4PipelineAllocationFailure allocation_failures_[P4_PIPELINE_ALLOCATION_FAILURE_SLOTS]{};
   uint64_t next_sequence_{0};
   esp_http_client_handle_t client_{nullptr};

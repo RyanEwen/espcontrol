@@ -82,12 +82,15 @@ for required in (
     "shrink_to(this->download_buffer_initial_size_)",
     "new (std::nothrow) P4PipelineJob()",
     "P4_PIPELINE_PENDING_SLOTS",
+    "P4_PIPELINE_COMPLETED_SLOTS",
     "can_use_p4_pipeline(this->url_)",
 ):
     if required not in downloader:
         raise SystemExit(f"Artwork downloader memory contract missing: {required}")
 if "std::make_shared<P4PipelineJob>" in downloader:
     raise SystemExit("P4 artwork jobs must fail cleanly instead of throwing during allocation")
+if "std::vector<P4PipelineResult *> completed_" in downloader:
+    raise SystemExit("P4 artwork result publication must not allocate while holding the pipeline lock")
 
 jpeg_decoder = (ROOT / "components" / "artwork_image" / "jpeg_image.cpp").read_text(encoding="utf-8")
 for required in (
