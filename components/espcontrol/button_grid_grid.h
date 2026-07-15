@@ -260,7 +260,7 @@ inline void setup_media_cover_art(BtnSlot &s, const ParsedCfg &p,
   if (!media_ctx || !media_ctx->btn) return;
   clear_media_cover_art(media_ctx);
   if (!media_cover_art_enabled(p) || p.entity.empty()) return;
-  ImageCardCtx *art = acquire_image_card_context(cfg);
+  ImageCardCtx *art = acquire_image_card_context(cfg, p.entity);
   if (!art) {
     ESP_LOGW("media_card", "No image downloader available for media cover art: %s",
              p.entity.c_str());
