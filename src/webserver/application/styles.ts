@@ -518,7 +518,7 @@ export function installStylesModule(): GlobalDescriptors {
         ".sp-field-hint{font-size:.75rem;color:var(--text2);margin-top:6px;margin-bottom:16px}" +
         ".sp-fw-row{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:36px;margin-bottom:12px}" +
         ".sp-fw-info-row{min-height:28px;margin-bottom:8px}" +
-        ".sp-fw-overview{margin-bottom:18px}" +
+        ".sp-fw-overview{margin-bottom:0}" +
         ".sp-fw-subpanels{display:grid;gap:12px}" +
         ".sp-fw-subpanels .sp-disclosure{margin-top:0;background:var(--surface)}" +
         ".sp-fw-subpanels .sp-disclosure+.sp-disclosure{margin-top:0}" +

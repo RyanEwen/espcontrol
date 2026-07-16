@@ -98,10 +98,12 @@ export function installSettingsSystemSectionModule(): GlobalDescriptors {
         fwStatus.className = "sp-fw-status";
         fwOverview.appendChild(fwStatus);
         els.fwStatus = fwStatus;
-        fwBody.appendChild(fwOverview);
         renderFirmwareUpdateStatus();
         var firmwareSubpanels: any = document.createElement("div");
         firmwareSubpanels.className = "sp-fw-subpanels";
+        var firmwareUpdatesPanel: any = inlineDisclosure("Firmware updates", fwOverview, false);
+        firmwareUpdatesPanel.id = "sp-fw-updates-panel";
+        firmwareSubpanels.appendChild(firmwareUpdatesPanel);
         var autoUpdateBody: any = document.createElement("div");
         var autoUpdateToggle: any = toggleRow("Auto Update", "sp-set-auto-update", state.autoUpdate);
         autoUpdateBody.appendChild(autoUpdateToggle.row);

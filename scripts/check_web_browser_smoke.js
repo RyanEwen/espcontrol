@@ -789,13 +789,28 @@ async function assertSettingsPage(page, label, options = {}) {
   );
   if (options.exerciseInteractions) {
     await firmwareCard.locator(":scope > .card-header").click();
-    await page.waitForSelector("#sp-fw-previous-panel", { state: "visible" });
+    await page.waitForSelector("#sp-fw-updates-panel", { state: "visible" });
     assert.deepStrictEqual(
       await firmwareCard
         .locator(".sp-fw-subpanels > .sp-disclosure")
         .evaluateAll((nodes) => nodes.map((node) => node.id)),
-      ["sp-fw-auto-panel", "sp-fw-wifi-panel", "sp-fw-previous-panel"],
+      ["sp-fw-updates-panel", "sp-fw-auto-panel", "sp-fw-wifi-panel", "sp-fw-previous-panel"],
       `${label}: firmware sub-panels should use the requested order`,
+    );
+    assert.strictEqual(
+      await page.locator("#sp-fw-updates-panel .sp-disclosure-button").innerText(),
+      "Firmware updates",
+      `${label}: firmware update details should have a clear panel title`,
+    );
+    assert.strictEqual(
+      await page.locator("#sp-fw-updates-panel .sp-disclosure-button").getAttribute("aria-expanded"),
+      "false",
+      `${label}: firmware updates should start closed`,
+    );
+    await page.locator("#sp-fw-updates-panel .sp-disclosure-button").click();
+    assert(
+      await page.locator("#sp-fw-updates-panel .sp-fw-overview").isVisible(),
+      `${label}: firmware update details should render inside the panel`,
     );
     assert.strictEqual(
       await page.locator("#sp-fw-auto-panel").getAttribute("class"),
