@@ -798,7 +798,7 @@ async function assertSettingsPage(page, label, options = {}) {
       `${label}: firmware sub-panels should use the requested order`,
     );
     assert.strictEqual(
-      await page.locator("#sp-fw-updates-panel .sp-disclosure-button").innerText(),
+      await page.locator("#sp-fw-updates-panel .sp-disclosure-button > span").first().innerText(),
       "Firmware updates",
       `${label}: firmware update details should have a clear panel title`,
     );
@@ -807,10 +807,19 @@ async function assertSettingsPage(page, label, options = {}) {
       "false",
       `${label}: firmware updates should start closed`,
     );
+    assert(
+      await page.locator("#sp-fw-updates-panel .sp-disclosure-badge").isVisible(),
+      `${label}: available firmware should show an update badge while closed`,
+    );
     await page.locator("#sp-fw-updates-panel .sp-disclosure-button").click();
     assert(
       await page.locator("#sp-fw-updates-panel .sp-fw-overview").isVisible(),
       `${label}: firmware update details should render inside the panel`,
+    );
+    assert.strictEqual(
+      await page.locator("#sp-fw-updates-panel .sp-disclosure-badge").isVisible(),
+      false,
+      `${label}: firmware update badge should hide while open`,
     );
     assert.strictEqual(
       await page.locator("#sp-fw-auto-panel").getAttribute("class"),

@@ -101,8 +101,10 @@ export function installSettingsSystemSectionModule(): GlobalDescriptors {
         renderFirmwareUpdateStatus();
         var firmwareSubpanels: any = document.createElement("div");
         firmwareSubpanels.className = "sp-fw-subpanels";
-        var firmwareUpdatesPanel: any = inlineDisclosure("Firmware updates", fwOverview, false);
+        var firmwareUpdatesBadge: any = disclosureBadge("Update available", "Firmware update available");
+        var firmwareUpdatesPanel: any = inlineDisclosure("Firmware updates", fwOverview, false, firmwareUpdatesBadge);
         firmwareUpdatesPanel.id = "sp-fw-updates-panel";
+        els.firmwareUpdatesBadge = firmwareUpdatesBadge;
         firmwareSubpanels.appendChild(firmwareUpdatesPanel);
         var autoUpdateBody: any = document.createElement("div");
         var autoUpdateToggle: any = toggleRow("Auto Update", "sp-set-auto-update", state.autoUpdate);

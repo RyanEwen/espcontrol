@@ -174,6 +174,8 @@ export function installFirmwareUpdateStateModule(): GlobalDescriptors {
             els.autoUpdatePanel.style.display = show ? "" : "none";
         if (els.autoUpdateBadge)
             els.autoUpdateBadge.classList.toggle("sp-hidden", !state.autoUpdate);
+        if (els.firmwareUpdatesBadge)
+            els.firmwareUpdatesBadge.classList.toggle("sp-hidden", !latestFirmwareInstallAvailable());
         if (els.setAutoUpdateRow)
             els.setAutoUpdateRow.style.display = show ? "" : "none";
         if (els.updateFreqWrap) {
