@@ -346,6 +346,9 @@ def _preview_truth_cqw(slug: str, profile: dict) -> dict[str, dict[str, float]]:
             "padding": cq(sub_int("padding")),
             "iconSize": cq(font_size(str(subs.get("icon_font", "font_icon_main")))),
             "labelSize": cq(font_size(str(subs.get("label_font", "font_text_body")))),
+            "numberSize": cq(font_size(profile["firmware"]["fonts"]["sensor"])),
+            "largeNumberSize": cq(font_size(profile["firmware"]["fonts"]["largeSensor"])),
+            "mediaTitleSize": cq(font_size(profile["firmware"]["fonts"]["mediaTitle"])),
         },
     }
 

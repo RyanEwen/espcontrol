@@ -83,7 +83,10 @@
           "iconSize": 5.37,
           "labelSize": 2.15,
           "labelLines": 2,
-          "labelLinesDouble": 3
+          "labelLinesDouble": 3,
+          "numberSize": 5.37,
+          "largeNumberSize": 13.48,
+          "mediaTitleSize": 4.2
         },
         "emptyCell": {
           "radius": 0.78
@@ -275,7 +278,10 @@
           "iconSize": 12.92,
           "labelSize": 6.04,
           "labelLines": 2,
-          "labelLinesDouble": 3
+          "labelLinesDouble": 3,
+          "numberSize": 12.92,
+          "largeNumberSize": 32.29,
+          "mediaTitleSize": 11.67
         },
         "emptyCell": {
           "radius": 1.18
@@ -466,7 +472,10 @@
           "iconSize": 4.38,
           "labelSize": 1.88,
           "labelLines": 2,
-          "labelLinesDouble": 3
+          "labelLinesDouble": 3,
+          "numberSize": 4.06,
+          "largeNumberSize": 10.16,
+          "mediaTitleSize": 3.59
         },
         "emptyCell": {
           "radius": 0.86
@@ -653,7 +662,10 @@
           "iconSize": 4.38,
           "labelSize": 1.88,
           "labelLines": 2,
-          "labelLinesDouble": 3
+          "labelLinesDouble": 3,
+          "numberSize": 4.06,
+          "largeNumberSize": 10.16,
+          "mediaTitleSize": 3.59
         },
         "emptyCell": {
           "radius": 0.86
@@ -840,7 +852,10 @@
           "iconSize": 9.17,
           "labelSize": 4.58,
           "labelLines": 2,
-          "labelLinesDouble": 3
+          "labelLinesDouble": 3,
+          "numberSize": 9.17,
+          "largeNumberSize": 22.92,
+          "mediaTitleSize": 7.22
         },
         "emptyCell": {
           "radius": 1.67
@@ -1048,7 +1063,10 @@
           "iconSize": 9.17,
           "labelSize": 4.58,
           "labelLines": 2,
-          "labelLinesDouble": 3
+          "labelLinesDouble": 3,
+          "numberSize": 9.17,
+          "largeNumberSize": 22.92,
+          "mediaTitleSize": 7.08
         },
         "emptyCell": {
           "radius": 1.67
