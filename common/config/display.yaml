@@ -431,6 +431,7 @@ select:
       - "Display Off"
       - "Screen Dimmed"
       - "Clock"
+      - "Photos"
     web_server:
       sorting_group_id: sg_screensaver
     on_value:
@@ -439,6 +440,7 @@ select:
             std::string action = id(screensaver_action).current_option();
             id(screensaver_action_clock) = screensaver_action_clock_mode(action);
             id(screensaver_action_dimmed) = screensaver_action_dimmed_mode(action);
+            id(screensaver_action_photos) = screensaver_action_photos_mode(action);
         - if:
             condition:
               lambda: |-

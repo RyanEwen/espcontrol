@@ -1,0 +1,138 @@
+#pragma once
+
+// Pure logic for the photo screensaver's Home Assistant media-source index.
+//
+// Everything here is host-testable and free of ESP-IDF, LVGL, and ArduinoJson.
+// The websocket transport and JSON decoding live in the device-only layer and
+// feed this index through add_photo(); the index owns ordering, rotation, and
+// URL composition.
+//
+// Home Assistant facts this encodes (see dev-docs/photo-screensaver.md):
+//   - A media-source child is an image when media_class == "image". The
+//     media_content_type carries the guessed MIME type ("image/jpeg"), not the
+//     literal "image", so both are accepted as evidence.
+//   - can_play and can_expand are mutually exclusive for local media: a folder
+//     expands, a file plays.
+//   - resolve_media returns a *relative* signed path ("/media/local/a.jpg?authSig=..."),
+//     which must be joined to the Home Assistant base URL before download.
+
+#include <cstddef>
+#include <cstdint>
+#include <string>
+#include <vector>
+
+namespace espcontrol {
+
+// Home Assistant serves every local media file through one browse response with
+// no pagination, so a very large folder would otherwise grow this index without
+// bound. Cap it and report the truncation rather than silently listing a subset.
+inline constexpr std::size_t kPhotoIndexMaxEntries = 500;
+
+enum class PhotoOrder : uint8_t {
+  SEQUENTIAL,
+  SHUFFLE,
+};
+
+// True when a browse child describes a still image.
+inline bool media_child_is_image(const std::string &media_class,
+                                 const std::string &media_content_type) {
+  if (media_class == "image") return true;
+  return media_content_type.rfind("image/", 0) == 0;
+}
+
+// True when a browse child describes a folder that can be expanded.
+inline bool media_child_is_folder(const std::string &media_class, bool can_expand) {
+  return can_expand || media_class == "directory";
+}
+
+// Join the Home Assistant base URL to a resolve_media result. The signed path is
+// relative; any other query parameter would invalidate the signature, so the
+// path is used exactly as Home Assistant returned it.
+inline std::string media_source_absolute_url(const std::string &base_url,
+                                             const std::string &resolved_url) {
+  if (resolved_url.empty()) return std::string();
+  // Home Assistant may return an absolute URL for non-local sources.
+  if (resolved_url.rfind("http://", 0) == 0 || resolved_url.rfind("https://", 0) == 0) {
+    return resolved_url;
+  }
+  if (base_url.empty()) return std::string();
+
+  std::string base = base_url;
+  while (!base.empty() && base.back() == '/') base.pop_back();
+  if (base.empty()) return std::string();
+
+  if (resolved_url.front() != '/') return base + "/" + resolved_url;
+  return base + resolved_url;
+}
+
+// Ordered set of media_content_ids to rotate through.
+class PhotoIndex {
+ public:
+  // Returns false when the entry was rejected: either empty, a duplicate, or
+  // beyond the cap. truncated() reports whether the cap was reached.
+  bool add_photo(const std::string &media_content_id) {
+    if (media_content_id.empty()) return false;
+    if (photos_.size() >= kPhotoIndexMaxEntries) {
+      truncated_ = true;
+      return false;
+    }
+    for (const std::string &existing : photos_) {
+      if (existing == media_content_id) return false;
+    }
+    photos_.push_back(media_content_id);
+    return true;
+  }
+
+  void clear() {
+    photos_.clear();
+    cursor_ = 0;
+    truncated_ = false;
+    started_ = false;
+  }
+
+  bool empty() const { return photos_.empty(); }
+  std::size_t size() const { return photos_.size(); }
+  bool truncated() const { return truncated_; }
+  const std::vector<std::string> &photos() const { return photos_; }
+
+  // The photo the screensaver should currently be showing. Empty when the index
+  // holds nothing or rotation has not started.
+  const std::string &current() const {
+    static const std::string kEmpty;
+    if (photos_.empty() || !started_) return kEmpty;
+    return photos_[cursor_];
+  }
+
+  // Advance to the next photo and return it. The first call after clear()/add()
+  // yields the first photo rather than skipping it. Wraps at the end.
+  const std::string &advance(PhotoOrder order, uint32_t random_value) {
+    static const std::string kEmpty;
+    if (photos_.empty()) return kEmpty;
+
+    if (!started_) {
+      started_ = true;
+      cursor_ = order == PhotoOrder::SHUFFLE ? random_value % photos_.size() : 0;
+      return photos_[cursor_];
+    }
+
+    if (photos_.size() == 1) return photos_[cursor_];
+
+    if (order == PhotoOrder::SHUFFLE) {
+      // Pick from the other entries so the same photo never repeats twice in a
+      // row, which reads as a stall rather than a shuffle.
+      const std::size_t offset = random_value % (photos_.size() - 1);
+      cursor_ = (cursor_ + 1 + offset) % photos_.size();
+    } else {
+      cursor_ = (cursor_ + 1) % photos_.size();
+    }
+    return photos_[cursor_];
+  }
+
+ private:
+  std::vector<std::string> photos_;
+  std::size_t cursor_{0};
+  bool truncated_{false};
+  bool started_{false};
+};
+
+}  // namespace espcontrol

@@ -23,6 +23,12 @@ target_compile_options(display_mode_controller_test PRIVATE -Wall -Wextra -Werro
 target_include_directories(display_mode_controller_test PRIVATE ../../components/espcontrol)
 add_test(NAME display_mode_controller_test COMMAND display_mode_controller_test)
 
+add_executable(photo_screensaver_test photo_screensaver_test.cpp)
+target_compile_features(photo_screensaver_test PRIVATE cxx_std_17)
+target_compile_options(photo_screensaver_test PRIVATE -Wall -Wextra -Werror)
+target_include_directories(photo_screensaver_test PRIVATE ../../components/espcontrol)
+add_test(NAME photo_screensaver_test COMMAND photo_screensaver_test)
+
 add_executable(ha_read_coordinator_test ha_read_coordinator_test.cpp)
 target_compile_features(ha_read_coordinator_test PRIVATE cxx_std_17)
 target_compile_options(ha_read_coordinator_test PRIVATE -Wall -Wextra -Werror)

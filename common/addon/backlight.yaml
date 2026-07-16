@@ -68,6 +68,9 @@ globals:
   - id: screensaver_action_dimmed
     type: bool
     initial_value: 'false'
+  - id: screensaver_action_photos
+    type: bool
+    initial_value: 'false'
   - id: display_mode_controller
     type: espcontrol::DisplayModeController
   # Connectivity setup must remain visible even when a restored time-based
@@ -84,6 +87,7 @@ esphome:
           auto update_screensaver_action_cache = []() {
             std::string action = id(screensaver_action).current_option();
             id(screensaver_action_clock) = screensaver_action_clock_mode(action);
+            id(screensaver_action_photos) = screensaver_action_photos_mode(action);
             id(screensaver_action_dimmed) = screensaver_action_dimmed_mode(action);
           };
           update_screensaver_action_cache();
