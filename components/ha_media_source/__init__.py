@@ -20,9 +20,10 @@ AUTO_LOAD = ["json"]
 CONF_TOKEN = "token"
 
 # esp_websocket_client is not part of the base ESP-IDF install; pull the managed
-# component from the Espressif component registry. Pinned so builds are
-# reproducible across the supported P4 and S3 targets.
-ESP_WEBSOCKET_CLIENT_REF = "1.4.0"
+# component from the Espressif component registry. A range lets the IDF component
+# manager resolve a build compatible with the ESP-IDF version ESPHome bundles,
+# across the supported P4 and S3 targets.
+ESP_WEBSOCKET_CLIENT_REF = ">=1.2.0"
 
 ha_media_source_ns = cg.esphome_ns.namespace("ha_media_source")
 HaMediaSource = ha_media_source_ns.class_("HaMediaSource", cg.Component)
