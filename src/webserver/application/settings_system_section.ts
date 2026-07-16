@@ -293,6 +293,54 @@ export function installSettingsSystemSectionModule(): GlobalDescriptors {
         haPortField.appendChild(haPortInput);
         homeAssistantSettingsBody.appendChild(haPortField);
         els.setCoverArtHomeAssistantPort = haPortInput;
+        // Home Assistant connection used to suggest entities in the config forms.
+        var haUrlField: any = document.createElement("div");
+        haUrlField.className = "sp-field";
+        haUrlField.appendChild(fieldLabel("Home Assistant Address", "sp-set-ha-url"));
+        var haUrlInput: any = document.createElement("input");
+        haUrlInput.className = "sp-input";
+        haUrlInput.id = "sp-set-ha-url";
+        haUrlInput.type = "text";
+        haUrlInput.placeholder = "e.g. http://homeassistant.local:8123";
+        haUrlInput.value = state.haUrl || "";
+        haUrlInput.autocomplete = "off";
+        haUrlField.appendChild(haUrlInput);
+        homeAssistantSettingsBody.appendChild(haUrlField);
+        bindTextPost(haUrlInput, entityName("home_assistant_url"), {
+            onBlur: function (this: any, value?: any) {
+                state.haUrl = String(value || "").trim();
+                scheduleHaEntityRefresh();
+            },
+        });
+        els.setHaUrl = haUrlInput;
+        var haTokenField: any = document.createElement("div");
+        haTokenField.className = "sp-field";
+        haTokenField.appendChild(fieldLabel("Access Token", "sp-set-ha-token"));
+        var haTokenInput: any = document.createElement("input");
+        haTokenInput.className = "sp-input";
+        haTokenInput.id = "sp-set-ha-token";
+        haTokenInput.type = "password";
+        haTokenInput.placeholder = "Long-lived access token";
+        haTokenInput.value = state.haToken || "";
+        haTokenInput.autocomplete = "off";
+        haTokenField.appendChild(haTokenInput);
+        homeAssistantSettingsBody.appendChild(haTokenField);
+        bindTextPost(haTokenInput, entityName("home_assistant_token"), {
+            onBlur: function (this: any, value?: any) {
+                state.haToken = String(value || "").trim();
+                scheduleHaEntityRefresh();
+            },
+        });
+        els.setHaToken = haTokenInput;
+        var haHint: any = document.createElement("div");
+        haHint.className = "sp-field-hint";
+        haHint.textContent = "Add your Home Assistant address and a long-lived access token (Home Assistant → your profile → Security) so entity boxes can suggest your entities.";
+        homeAssistantSettingsBody.appendChild(haHint);
+        var haStatus: any = document.createElement("div");
+        haStatus.className = "sp-field-hint";
+        homeAssistantSettingsBody.appendChild(haStatus);
+        els.haConnectionStatus = haStatus;
+        syncHaEntityStatus();
         var homeAssistantSettingsCard: any = makeCollapsibleCard("Home Assistant Settings", homeAssistantSettingsBody, true);
         return {
             backupCard: backupCard,

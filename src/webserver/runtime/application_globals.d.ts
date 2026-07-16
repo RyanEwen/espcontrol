@@ -891,6 +891,12 @@ declare global {
   var pushDefaultIconOn: any;
   var readNumberMeta: any;
   var refreshEntityDatalist: any;
+  var refreshHaEntities: any;
+  var scheduleHaEntityRefresh: any;
+  var refreshHaEntitiesIfStale: any;
+  var setHaConnectionStatus: any;
+  var syncHaEntityStatus: any;
+  var normalizeHaWebsocketUrl: any;
   var refreshFirmwareVersion: any;
   var refreshScreensaverTimeout: any;
   var registerButtonType: any;

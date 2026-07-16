@@ -209,4 +209,8 @@ export interface AppState {
   settingsDraft: unknown;
   entityPostPaths: Record<string, string>;
   entityNames: Record<string, string[]>;
+  haUrl: string;
+  haToken: string;
+  haConnectionStatus: string;
+  haEntityCount: number;
 }

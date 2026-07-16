@@ -648,6 +648,40 @@ text:
         - script.execute: cover_art_playback_stopped
         - script.execute: cover_art_resubscribe
 
+  # Home Assistant connection used by the web configurator to suggest entities.
+  # Stored on the device so any browser opening the setup page shares them.
+  - platform: template
+    name: "${entity_home_assistant_url}"
+    internal: true
+    id: home_assistant_url
+    optimistic: true
+    restore_value: true
+    initial_value: ""
+    min_length: 0
+    max_length: 200
+    mode: text
+    entity_category: config
+    icon: "mdi:home-assistant"
+    update_interval: never
+    web_server:
+      sorting_group_id: sg_display
+
+  - platform: template
+    name: "${entity_home_assistant_token}"
+    internal: true
+    id: home_assistant_token
+    optimistic: true
+    restore_value: true
+    initial_value: ""
+    min_length: 0
+    max_length: 250
+    mode: text
+    entity_category: config
+    icon: "mdi:key-variant"
+    update_interval: never
+    web_server:
+      sorting_group_id: sg_display
+
   - platform: template
     name: "${entity_screen_saver_cover_art_conditions}"
     internal: true

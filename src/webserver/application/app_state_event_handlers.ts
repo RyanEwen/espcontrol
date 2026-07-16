@@ -165,6 +165,16 @@ export function installAppStateEventHandlersModule(): GlobalDescriptors {
                 state.coverArtAttributeConditions = val;
                 syncInput(els.setCoverArtConditions, val);
             },
+            "text-home_assistant_url": function (this: any, val?: any) {
+                state.haUrl = val;
+                syncInput(els.setHaUrl, val);
+                scheduleHaEntityRefresh();
+            },
+            "text-home_assistant_token": function (this: any, val?: any) {
+                state.haToken = val;
+                syncInput(els.setHaToken, val);
+                scheduleHaEntityRefresh();
+            },
             "number-screen_saver__cover_art_delay": function (this: any, val?: any) {
                 state.coverArtDelay = normalizeCoverArtDelay(val);
                 syncCoverArtScreensaverUi();
