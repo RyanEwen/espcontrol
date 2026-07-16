@@ -11,6 +11,10 @@
 #include "esphome/core/defines.h"
 
 #include "esp_tls_crypto.h"
+#ifdef USE_WEBSERVER_AUTH_DIGEST
+#include <esp_random.h>
+#include <esp_rom_md5.h>
+#endif
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
@@ -404,6 +408,123 @@ void AsyncWebServerRequest::init_response_(AsyncWebServerResponse *rsp, int code
 }
 
 #ifdef USE_WEBSERVER_AUTH
+
+#ifdef USE_WEBSERVER_AUTH_DIGEST
+namespace {
+
+void bytes_to_hex(const uint8_t *data, size_t len, char *out) {
+  static const char HEX[] = "0123456789abcdef";
+  for (size_t i = 0; i < len; i++) {
+    out[i * 2] = HEX[data[i] >> 4];
+    out[i * 2 + 1] = HEX[data[i] & 0x0f];
+  }
+  out[len * 2] = '\0';
+}
+
+StringRef digest_param(StringRef params, const char *key) {
+  size_t key_len = strlen(key);
+  const char *base = params.c_str();
+  size_t n = params.size();
+  size_t i = 0;
+  while (i < n) {
+    while (i < n && (base[i] == ' ' || base[i] == ','))
+      i++;
+    size_t name_start = i;
+    while (i < n && base[i] != '=' && base[i] != ',')
+      i++;
+    if (i >= n || base[i] == ',')
+      continue;
+    size_t name_len = i - name_start;
+    while (name_len > 0 && base[name_start + name_len - 1] == ' ')
+      name_len--;
+    i++;
+    const char *val_start;
+    size_t val_len;
+    if (i < n && base[i] == '"') {
+      i++;
+      val_start = base + i;
+      while (i < n && base[i] != '"')
+        i++;
+      val_len = (base + i) - val_start;
+      if (i < n)
+        i++;
+    } else {
+      val_start = base + i;
+      while (i < n && base[i] != ',')
+        i++;
+      val_len = (base + i) - val_start;
+    }
+    if (name_len == key_len && memcmp(base + name_start, key, key_len) == 0)
+      return StringRef(val_start, val_len);
+    while (i < n && base[i] != ',')
+      i++;
+  }
+  return StringRef();
+}
+
+bool check_digest_auth(const char *username, const char *password, const std::string &header, const char *method) {
+  const size_t prefix_len = sizeof("Digest ") - 1;
+  StringRef params(header.c_str() + prefix_len, header.size() - prefix_len);
+
+  if (digest_param(params, "username") != username)
+    return false;
+
+  StringRef realm = digest_param(params, "realm");
+  StringRef nonce = digest_param(params, "nonce");
+  StringRef uri = digest_param(params, "uri");
+  StringRef qop = digest_param(params, "qop");
+  StringRef nc = digest_param(params, "nc");
+  StringRef cnonce = digest_param(params, "cnonce");
+  StringRef response = digest_param(params, "response");
+  if (response.size() != 32)
+    return false;
+
+  md5_context_t ctx;
+  uint8_t digest[16];
+
+  char ha1[33];
+  esp_rom_md5_init(&ctx);
+  esp_rom_md5_update(&ctx, username, strlen(username));
+  esp_rom_md5_update(&ctx, ":", 1);
+  esp_rom_md5_update(&ctx, realm.c_str(), realm.size());
+  esp_rom_md5_update(&ctx, ":", 1);
+  esp_rom_md5_update(&ctx, password, strlen(password));
+  esp_rom_md5_final(digest, &ctx);
+  bytes_to_hex(digest, sizeof(digest), ha1);
+
+  char ha2[33];
+  esp_rom_md5_init(&ctx);
+  esp_rom_md5_update(&ctx, method, strlen(method));
+  esp_rom_md5_update(&ctx, ":", 1);
+  esp_rom_md5_update(&ctx, uri.c_str(), uri.size());
+  esp_rom_md5_final(digest, &ctx);
+  bytes_to_hex(digest, sizeof(digest), ha2);
+
+  char expected[33];
+  esp_rom_md5_init(&ctx);
+  esp_rom_md5_update(&ctx, ha1, 32);
+  esp_rom_md5_update(&ctx, ":", 1);
+  esp_rom_md5_update(&ctx, nonce.c_str(), nonce.size());
+  esp_rom_md5_update(&ctx, ":", 1);
+  esp_rom_md5_update(&ctx, nc.c_str(), nc.size());
+  esp_rom_md5_update(&ctx, ":", 1);
+  esp_rom_md5_update(&ctx, cnonce.c_str(), cnonce.size());
+  esp_rom_md5_update(&ctx, ":", 1);
+  esp_rom_md5_update(&ctx, qop.c_str(), qop.size());
+  esp_rom_md5_update(&ctx, ":", 1);
+  esp_rom_md5_update(&ctx, ha2, 32);
+  esp_rom_md5_final(digest, &ctx);
+  bytes_to_hex(digest, sizeof(digest), expected);
+
+  uint8_t result = 0;
+  for (size_t i = 0; i < 32; i++)
+    result |= static_cast<uint8_t>(expected[i] ^ response[i]);
+  return result == 0;
+}
+
+}  // namespace
+#endif  // USE_WEBSERVER_AUTH_DIGEST
+
 bool AsyncWebServerRequest::authenticate(const char *username, const char *password) const {
   if (username == nullptr || password == nullptr || *username == 0) {
     return true;
@@ -415,9 +536,17 @@ bool AsyncWebServerRequest::authenticate(const char *username, const char *passw
 
   auto *auth_str = auth.value().c_str();
 
+#ifdef USE_WEBSERVER_AUTH_DIGEST
+  const auto auth_prefix_len = sizeof("Digest ") - 1;
+  if (strncmp("Digest ", auth_str, auth_prefix_len) != 0) {
+    ESP_LOGW(TAG, "Only Digest authorization supported");
+    return false;
+  }
+  return check_digest_auth(username, password, auth.value(), http_method_str(this->method()));
+#else
   const auto auth_prefix_len = sizeof("Basic ") - 1;
   if (strncmp("Basic ", auth_str, auth_prefix_len) != 0) {
-    ESP_LOGW(TAG, "Only Basic authorization supported yet");
+    ESP_LOGW(TAG, "Only Basic authorization supported");
     return false;
   }
 
@@ -466,16 +595,29 @@ bool AsyncWebServerRequest::authenticate(const char *username, const char *passw
     result |= static_cast<uint8_t>(digest[i] ^ provided_ch);
   }
   return result == 0;
+#endif  // USE_WEBSERVER_AUTH_DIGEST
 }
 
-void AsyncWebServerRequest::requestAuthentication(const char *realm) const {
+void AsyncWebServerRequest::requestAuthentication() const {
   httpd_resp_set_hdr(*this, "Connection", "keep-alive");
-  // Note: realm is never configured in ESPHome, always nullptr -> "Login Required"
-  (void) realm;  // Unused - always use default
+#ifdef USE_WEBSERVER_AUTH_DIGEST
+  uint8_t random_bytes[16];
+  char nonce[33];
+  char opaque[33];
+  char header[160];
+  esp_fill_random(random_bytes, sizeof(random_bytes));
+  bytes_to_hex(random_bytes, sizeof(random_bytes), nonce);
+  esp_fill_random(random_bytes, sizeof(random_bytes));
+  bytes_to_hex(random_bytes, sizeof(random_bytes), opaque);
+  snprintf(header, sizeof(header), R"(Digest realm="Login Required", qop="auth", nonce="%s", opaque="%s")", nonce,
+           opaque);
+  httpd_resp_set_hdr(*this, "WWW-Authenticate", header);
+#else
   httpd_resp_set_hdr(*this, "WWW-Authenticate", "Basic realm=\"Login Required\"");
+#endif  // USE_WEBSERVER_AUTH_DIGEST
   httpd_resp_send_err(*this, HTTPD_401_UNAUTHORIZED, nullptr);
 }
-#endif
+#endif  // USE_WEBSERVER_AUTH
 
 AsyncWebParameter *AsyncWebServerRequest::getParam(const char *name) {
   // Check cache first - only successful lookups are cached
@@ -616,10 +758,11 @@ bool AsyncEventSource::loop() {
   return !this->sessions_.empty();
 }
 
-void AsyncEventSource::try_send_nodefer(const char *message, const char *event, uint32_t id, uint32_t reconnect) {
+void AsyncEventSource::try_send_nodefer(const char *message, size_t message_len, const char *event, uint32_t id,
+                                        uint32_t reconnect) {
   for (auto *ses : this->sessions_) {
     if (ses->fd_.load() != 0) {  // Skip dead sessions
-      ses->try_send_nodefer(message, event, id, reconnect);
+      ses->try_send_nodefer(message, message_len, event, id, reconnect);
     }
   }
 }
@@ -665,7 +808,7 @@ AsyncEventSourceResponse::AsyncEventSourceResponse(const AsyncWebServerRequest *
   // Configure reconnect timeout and send config
   // this should always go through since the tcp send buffer is empty on connect
   auto message = ws->get_config_json();
-  this->try_send_nodefer(message.c_str(), "ping", millis(), 30000);
+  this->try_send_nodefer(message.c_str(), message.size(), "ping", millis(), 30000);
 
 #ifdef USE_WEBSERVER_SORTING
   for (auto &group : ws->sorting_groups_) {
@@ -679,7 +822,7 @@ AsyncEventSourceResponse::AsyncEventSourceResponse(const AsyncWebServerRequest *
 
     // a (very) large number of these should be able to be queued initially without defer
     // since the only thing in the send buffer at this point is the initial ping/config
-    this->try_send_nodefer(message.c_str(), "sorting_group");
+    this->try_send_nodefer(message.c_str(), message.size(), "sorting_group");
   }
 #endif
 
@@ -719,7 +862,7 @@ void AsyncEventSourceResponse::process_deferred_queue_() {
   while (!deferred_queue_.empty()) {
     DeferredEvent &de = deferred_queue_.front();
     auto message = de.message_generator_(web_server_, de.source_);
-    if (this->try_send_nodefer(message.c_str(), "state")) {
+    if (this->try_send_nodefer(message.c_str(), message.size(), "state")) {
       // O(n) but memory efficiency is more important than speed here which is why std::vector was chosen
       deferred_queue_.erase(deferred_queue_.begin());
     } else {
@@ -790,7 +933,7 @@ void AsyncEventSourceResponse::loop() {
     this->entities_iterator_.advance();
 }
 
-bool AsyncEventSourceResponse::try_send_nodefer(const char *message, const char *event, uint32_t id,
+bool AsyncEventSourceResponse::try_send_nodefer(const char *message, size_t message_len, const char *event, uint32_t id,
                                                 uint32_t reconnect) {
   if (this->fd_.load() == 0) {
     return false;
@@ -836,19 +979,18 @@ bool AsyncEventSourceResponse::try_send_nodefer(const char *message, const char 
 
     // Fast path: check if message contains any newlines at all
     // Most SSE messages (JSON state updates) have no newlines
-    const char *first_n = strchr(message, '\n');
-    const char *first_r = strchr(message, '\r');
+    const char *first_n = static_cast<const char *>(memchr(message, '\n', message_len));
+    const char *first_r = static_cast<const char *>(memchr(message, '\r', message_len));
 
     if (first_n == nullptr && first_r == nullptr) {
       // No newlines - fast path (most common case)
       event_buffer_.append("data: ", sizeof("data: ") - 1);
-      event_buffer_.append(message);
+      event_buffer_.append(message, message_len);
       event_buffer_.append(CRLF_STR CRLF_STR, CRLF_LEN * 2);  // data line + blank line terminator
     } else {
       // Has newlines - handle multi-line message
       const char *line_start = message;
-      size_t msg_len = strlen(message);
-      const char *msg_end = message + msg_len;
+      const char *msg_end = message + message_len;
 
       // Reuse the first search results
       const char *next_n = first_n;
@@ -861,7 +1003,7 @@ bool AsyncEventSourceResponse::try_send_nodefer(const char *message, const char 
         if (next_n == nullptr && next_r == nullptr) {
           // No more line breaks - output remaining text as final line
           event_buffer_.append("data: ", sizeof("data: ") - 1);
-          event_buffer_.append(line_start);
+          event_buffer_.append(line_start, msg_end - line_start);
           event_buffer_.append(CRLF_STR, CRLF_LEN);
           break;
         }
@@ -900,8 +1042,8 @@ bool AsyncEventSourceResponse::try_send_nodefer(const char *message, const char 
         }
 
         // Search for next newlines only in remaining string
-        next_n = strchr(line_start, '\n');
-        next_r = strchr(line_start, '\r');
+        next_n = static_cast<const char *>(memchr(line_start, '\n', msg_end - line_start));
+        next_r = static_cast<const char *>(memchr(line_start, '\r', msg_end - line_start));
       }
 
       // Terminate message with blank line
@@ -956,7 +1098,7 @@ void AsyncEventSourceResponse::deferrable_send_state(void *source, const char *e
     deq_push_back_with_dedup_(source, message_generator);
   } else {
     auto message = message_generator(web_server_, source);
-    if (!this->try_send_nodefer(message.c_str(), "state")) {
+    if (!this->try_send_nodefer(message.c_str(), message.size(), "state")) {
       deq_push_back_with_dedup_(source, message_generator);
     }
   }
