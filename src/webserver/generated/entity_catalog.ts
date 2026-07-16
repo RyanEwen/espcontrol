@@ -286,6 +286,60 @@ export const ENTITY_CATALOG = {
         "screensaver_dimmed_brightness"
       ]
     },
+    "screen_saver_photos_folder": {
+      "domain": "text",
+      "name": "Screen Saver: Photos Folder",
+      "objectIds": [
+        "screen_saver__photos_folder",
+        "screen_saver_photos_folder",
+        "screensaver_photos_folder"
+      ]
+    },
+    "screen_saver_photos_interval": {
+      "domain": "number",
+      "name": "Screen Saver: Photo Duration",
+      "objectIds": [
+        "screen_saver__photos_interval",
+        "screen_saver_photos_interval",
+        "screensaver_photos_interval"
+      ]
+    },
+    "screen_saver_photos_shuffle": {
+      "domain": "switch",
+      "name": "Screen Saver: Shuffle Photos",
+      "objectIds": [
+        "screen_saver__photos_shuffle",
+        "screen_saver_photos_shuffle",
+        "screensaver_photos_shuffle"
+      ]
+    },
+    "screen_saver_photos_show_datetime": {
+      "domain": "switch",
+      "name": "Screen Saver: Photos Show Clock",
+      "objectIds": [
+        "screen_saver__photos_show_datetime",
+        "screen_saver_photos_show_datetime",
+        "screensaver_photos_show_datetime"
+      ]
+    },
+    "screen_saver_photos_show_weather": {
+      "domain": "switch",
+      "name": "Screen Saver: Photos Show Weather",
+      "objectIds": [
+        "screen_saver__photos_show_weather",
+        "screen_saver_photos_show_weather",
+        "screensaver_photos_show_weather"
+      ]
+    },
+    "screen_saver_photos_weather_entity": {
+      "domain": "text",
+      "name": "Screen Saver: Photos Weather Entity",
+      "objectIds": [
+        "screen_saver__photos_weather_entity",
+        "screen_saver_photos_weather_entity",
+        "screensaver_photos_weather_entity"
+      ]
+    },
     "screensaver_timeout": {
       "domain": "number",
       "name": "Screensaver Timeout",
@@ -620,6 +674,12 @@ export const ENTITY_CATALOG = {
       "screen_saver_nighttime_clock_brightness",
       "screen_saver_clock_brightness",
       "screen_saver_dimmed_brightness",
+      "screen_saver_photos_folder",
+      "screen_saver_photos_interval",
+      "screen_saver_photos_shuffle",
+      "screen_saver_photos_show_datetime",
+      "screen_saver_photos_show_weather",
+      "screen_saver_photos_weather_entity",
       "screensaver_timeout",
       "home_screen_timeout",
       "screen_saver_clock",

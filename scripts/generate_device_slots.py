@@ -230,6 +230,7 @@ def package_file_text(device: dict) -> str:
             include_line("screen_setup", "!include ../../common/device/screen_button_setup.yaml"),
             include_line("screen_clock", "!include ../../common/device/screen_clock.yaml"),
             include_line("screen_art", "!include ../../common/device/screen_cover_art.yaml"),
+            include_line("screen_photos", "!include ../../common/device/screen_photos.yaml"),
             *(
                 [
                     include_line(

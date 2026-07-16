@@ -16,6 +16,7 @@
 //   - resolve_media returns a *relative* signed path ("/media/local/a.jpg?authSig=..."),
 //     which must be joined to the Home Assistant base URL before download.
 
+#include <cctype>
 #include <cstddef>
 #include <cstdint>
 #include <string>
@@ -63,6 +64,49 @@ inline std::string media_source_absolute_url(const std::string &base_url,
 
   if (resolved_url.front() != '/') return base + "/" + resolved_url;
   return base + resolved_url;
+}
+
+// Normalize a user-entered Home Assistant address into a websocket URL
+// (ws(s)://host[:port]/api/websocket). Mirrors the browser-side normalizer in
+// the web configurator so the device and the setup page agree on the endpoint.
+//   - a bare host/IP over plain ws/http defaults to port 8123
+//   - an explicit scheme is honoured; https/wss are left on their default port
+//   - an explicit port (or IPv6 literal in brackets) is preserved
+// Returns an empty string when the input has no host.
+inline std::string normalize_ha_websocket_url(const std::string &raw) {
+  std::string text;
+  // Trim surrounding whitespace.
+  size_t begin = raw.find_first_not_of(" \t\r\n");
+  if (begin == std::string::npos) return std::string();
+  size_t end = raw.find_last_not_of(" \t\r\n");
+  text = raw.substr(begin, end - begin + 1);
+  if (text.empty()) return std::string();
+
+  std::string scheme;
+  std::string rest;
+  const size_t sep = text.find("://");
+  if (sep == std::string::npos) {
+    scheme = "http";
+    rest = text;
+  } else {
+    scheme = text.substr(0, sep);
+    for (char &c : scheme) c = static_cast<char>(tolower(c));
+    rest = text.substr(sep + 3);
+  }
+
+  // Drop any trailing slashes and path; keep only the authority.
+  while (!rest.empty() && rest.back() == '/') rest.pop_back();
+  const size_t slash = rest.find('/');
+  std::string host = slash == std::string::npos ? rest : rest.substr(0, slash);
+  if (host.empty()) return std::string();
+
+  const bool secure = scheme == "https" || scheme == "wss";
+  // A colon means an explicit port (or an IPv6 literal, which is bracketed).
+  if (!secure && host.find(':') == std::string::npos) {
+    host += ":8123";
+  }
+  const std::string ws_scheme = secure ? "wss" : "ws";
+  return ws_scheme + "://" + host + "/api/websocket";
 }
 
 // Ordered set of media_content_ids to rotate through.

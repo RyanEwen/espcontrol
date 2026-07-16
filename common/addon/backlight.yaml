@@ -172,6 +172,13 @@ script:
                       generation: !lambda 'return generation;'
                       target_mode: !lambda 'return target_mode;'
                   - script.wait: cover_art_hide_effect
+            # The photo overlay lives on the top layer, so it must be dismissed
+            # for every mode other than PHOTOS or it would stay above the target.
+            - if:
+                condition:
+                  lambda: 'return target_mode != static_cast<int>(espcontrol::DisplayMode::PHOTOS);'
+                then:
+                  - script.execute: hide_photos_view
             - if:
                 condition:
                   lambda: 'return target_mode == static_cast<int>(espcontrol::DisplayMode::ACTIVE);'
@@ -269,6 +276,18 @@ script:
                                                 - lambda: |-
                                                     id(display_mode_controller).complete_transition(
                                                         static_cast<uint32_t>(generation), espcontrol::DisplayMode::COVER_ART);
+                                              else:
+                                                - if:
+                                                    condition:
+                                                      lambda: 'return target_mode == static_cast<int>(espcontrol::DisplayMode::PHOTOS);'
+                                                    then:
+                                                      - script.execute:
+                                                          id: show_photos_view
+                                                          generation: !lambda 'return generation;'
+                                                      - script.wait: show_photos_view
+                                                      - lambda: |-
+                                                          id(display_mode_controller).complete_transition(
+                                                              static_cast<uint32_t>(generation), espcontrol::DisplayMode::PHOTOS);
 
   - id: display_mode_effect_active
     mode: restart
@@ -403,6 +422,7 @@ script:
               transition.target_mode == espcontrol::DisplayMode::SETUP_DIMMED ||
               transition.target_mode == espcontrol::DisplayMode::DIMMED ||
               transition.target_mode == espcontrol::DisplayMode::CLOCK ||
+              transition.target_mode == espcontrol::DisplayMode::PHOTOS ||
               transition.target_mode == espcontrol::DisplayMode::COVER_ART ||
               transition.target_mode == espcontrol::DisplayMode::DISPLAY_OFF;
 
@@ -595,24 +615,34 @@ script:
                 else:
                   - if:
                       condition:
-                        lambda: 'return id(screensaver_action_clock);'
+                        lambda: 'return id(screensaver_action_photos);'
                       then:
+                        # Photos overlay the existing UI like the clock; the apply
+                        # cascade hides cover art for any non-cover-art target.
                         - script.execute:
                             id: display_mode_request_automatic
-                            target_mode: !lambda 'return static_cast<int>(espcontrol::DisplayMode::CLOCK);'
+                            target_mode: !lambda 'return static_cast<int>(espcontrol::DisplayMode::PHOTOS);'
                       else:
-                        - script.execute: hide_cover_art_view
                         - if:
                             condition:
-                              lambda: 'return id(screensaver_action_dimmed);'
+                              lambda: 'return id(screensaver_action_clock);'
                             then:
                               - script.execute:
                                   id: display_mode_request_automatic
-                                  target_mode: !lambda 'return static_cast<int>(espcontrol::DisplayMode::DIMMED);'
+                                  target_mode: !lambda 'return static_cast<int>(espcontrol::DisplayMode::CLOCK);'
                             else:
-                              - script.execute:
-                                  id: display_mode_request_automatic
-                                  target_mode: !lambda 'return static_cast<int>(espcontrol::DisplayMode::DISPLAY_OFF);'
+                              - script.execute: hide_cover_art_view
+                              - if:
+                                  condition:
+                                    lambda: 'return id(screensaver_action_dimmed);'
+                                  then:
+                                    - script.execute:
+                                        id: display_mode_request_automatic
+                                        target_mode: !lambda 'return static_cast<int>(espcontrol::DisplayMode::DIMMED);'
+                                  else:
+                                    - script.execute:
+                                        id: display_mode_request_automatic
+                                        target_mode: !lambda 'return static_cast<int>(espcontrol::DisplayMode::DISPLAY_OFF);'
             - globals.set:
                 id: screensaver_sensor_sleep_pending
                 value: 'false'

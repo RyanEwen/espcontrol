@@ -151,6 +151,49 @@ script:
                                     id(indoor_temp), id(outdoor_temp));
 
 switch:
+  # Photo screensaver options.
+  - platform: template
+    name: "${entity_screen_saver_photos_shuffle}"
+    internal: true
+    id: screensaver_photos_shuffle
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    entity_category: config
+    icon: "mdi:shuffle-variant"
+    web_server:
+      sorting_group_id: sg_screensaver
+
+  - platform: template
+    name: "${entity_screen_saver_photos_show_datetime}"
+    internal: true
+    id: screensaver_photos_show_datetime
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+    entity_category: config
+    icon: "mdi:clock-outline"
+    web_server:
+      sorting_group_id: sg_screensaver
+    on_turn_on:
+      - script.execute: photos_apply_widgets
+    on_turn_off:
+      - script.execute: photos_apply_widgets
+
+  - platform: template
+    name: "${entity_screen_saver_photos_show_weather}"
+    internal: true
+    id: screensaver_photos_show_weather
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    entity_category: config
+    icon: "mdi:weather-partly-cloudy"
+    web_server:
+      sorting_group_id: sg_screensaver
+    on_turn_on:
+      - script.execute: photos_apply_widgets
+      - script.execute: photos_subscribe_weather
+    on_turn_off:
+      - script.execute: photos_apply_widgets
+
   - platform: template
     name: "${entity_screen_clock_bar}"
     internal: true
@@ -667,6 +710,9 @@ text:
     update_interval: never
     web_server:
       sorting_group_id: sg_display
+    on_value:
+      then:
+        - script.execute: ha_media_source_apply_connection
 
   - platform: template
     name: "${entity_home_assistant_token}"
@@ -683,6 +729,49 @@ text:
     update_interval: never
     web_server:
       sorting_group_id: sg_display
+    on_value:
+      then:
+        - script.execute: ha_media_source_apply_connection
+
+  # Photo screensaver: media-source folder to rotate through, and an optional
+  # weather entity for the overlay widget.
+  - platform: template
+    name: "${entity_screen_saver_photos_folder}"
+    internal: true
+    id: screensaver_photos_folder
+    optimistic: true
+    restore_value: true
+    initial_value: ""
+    min_length: 0
+    max_length: 250
+    mode: text
+    entity_category: config
+    icon: "mdi:folder-multiple-image"
+    update_interval: never
+    web_server:
+      sorting_group_id: sg_screensaver
+    on_value:
+      then:
+        - lambda: 'id(photo_media).set_folder(id(screensaver_photos_folder).state);'
+
+  - platform: template
+    name: "${entity_screen_saver_photos_weather_entity}"
+    internal: true
+    id: screensaver_photos_weather_entity
+    optimistic: true
+    restore_value: true
+    initial_value: ""
+    min_length: 0
+    max_length: 120
+    mode: text
+    entity_category: config
+    icon: "mdi:weather-partly-cloudy"
+    update_interval: never
+    web_server:
+      sorting_group_id: sg_screensaver
+    on_value:
+      then:
+        - script.execute: photos_subscribe_weather
 
   - platform: template
     name: "${entity_screen_saver_cover_art_conditions}"
@@ -778,6 +867,23 @@ number:
               lambda: 'return id(display_mode_controller).current_mode_is(espcontrol::DisplayMode::DIMMED);'
             then:
               - script.execute: screensaver_dimmed_refresh_brightness
+
+  # How long each photo stays on screen in the photo screensaver.
+  - platform: template
+    name: "${entity_screen_saver_photos_interval}"
+    internal: true
+    id: screensaver_photos_interval
+    min_value: 5
+    max_value: 3600
+    step: 5
+    initial_value: 30
+    restore_value: true
+    optimistic: true
+    unit_of_measurement: "s"
+    entity_category: config
+    icon: "mdi:timer-outline"
+    web_server:
+      sorting_group_id: sg_screensaver
 
   - platform: template
     name: "${entity_screen_saver_cover_art_delay}"

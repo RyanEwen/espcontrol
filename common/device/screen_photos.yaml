@@ -1,0 +1,408 @@
+# =============================================================================
+# PHOTO SCREENSAVER - Full-screen rotating photos from a Home Assistant folder
+# =============================================================================
+# When the screensaver action is "Photos", the panel rotates through the images
+# in a Home Assistant media-source folder. Photos are indexed and resolved to
+# signed, directly-downloadable URLs by the ha_media_source websocket client,
+# then fetched through the shared artwork_image download pipeline and shown on a
+# full-screen LVGL overlay. Optional date/time and weather widgets float over the
+# photo.
+#
+# Ownership and lifecycle mirror the clock screensaver (see screen_clock.yaml and
+# common/addon/backlight.yaml): the display_mode_controller owns the PHOTOS mode
+# decision; show_photos_view / hide_photos_view apply the effect; the rotation
+# interval only advances while PHOTOS is the current mode.
+# =============================================================================
+
+globals:
+  # Advancing the rotation and resolving a signed URL are asynchronous. Each
+  # advance carries a generation so a late resolve callback from a previous photo
+  # (or a dismissed screensaver) cannot overwrite the current one.
+  - id: photos_advance_generation
+    type: uint32_t
+    initial_value: '0'
+  - id: photos_pending_url
+    type: std::string
+    initial_value: '""'
+  # Set true once a photo has actually been decoded, so show_photos_view can hold
+  # the placeholder scrim until the first image is ready instead of flashing.
+  - id: photos_first_image_ready
+    type: bool
+    initial_value: 'false'
+
+# The websocket client that browses the folder and resolves signed URLs. Its
+# connection is wired from the stored Home Assistant URL/token entities by
+# ha_media_source_apply_connection (see display.yaml).
+ha_media_source:
+  id: photo_media
+
+image:
+  - file: "${cover_art_placeholder_file}"
+    id: photos_placeholder
+    type: RGB565
+    byte_order: LITTLE_ENDIAN
+
+# Reuse the per-device cover-art decode budget so photo memory use matches a
+# size already validated for this display. Photos fill the screen with COVER
+# alignment, so a square decode is cropped rather than letterboxed.
+artwork_image:
+  - url: "https://placehold.co/${cover_art_decode_size}x${cover_art_decode_size}/000000/000000.jpg"
+    id: photos_downloaded_image
+    format: AUTO
+    type: RGB565
+    byte_order: LITTLE_ENDIAN
+    placeholder: photos_placeholder
+    resize: ${cover_art_decode_size}x${cover_art_decode_size}
+    priority: COVER_ART
+    buffer_size: 65536
+    allow_insecure_local_urls: true
+    on_download_finished:
+      - lambda: |-
+          id(photos_first_image_ready) = true;
+      - lvgl.image.update:
+          id: photos_image_widget
+          src: photos_downloaded_image
+      - lvgl.widget.show: photos_image_widget
+
+lvgl:
+  top_layer:
+    widgets:
+      - obj:
+          id: photos_screensaver
+          x: 0
+          y: 0
+          width: 100%
+          height: 100%
+          bg_color: 0x000000
+          bg_opa: 100%
+          radius: 0
+          border_width: 0
+          pad_all: 0
+          scrollable: false
+          scrollbar_mode: "off"
+          clickable: true
+          hidden: true
+          on_press:
+            then:
+              - script.execute: screensaver_wake
+          widgets:
+            - image:
+                id: photos_image_widget
+                x: 0
+                y: 0
+                width: 100%
+                height: 100%
+                src: photos_placeholder
+                align: CENTER
+                hidden: true
+            # Legibility scrim behind the optional widgets, bottom of the screen.
+            - obj:
+                id: photos_widget_scrim
+                align: BOTTOM_MID
+                x: 0
+                y: 0
+                width: 100%
+                height: 33%
+                bg_color: 0x000000
+                bg_grad_color: 0x000000
+                bg_opa: 40%
+                radius: 0
+                border_width: 0
+                pad_all: 0
+                scrollable: false
+                clickable: false
+                hidden: true
+            - label:
+                id: photos_datetime_label
+                align: BOTTOM_LEFT
+                x: 24
+                y: -20
+                text_font: font_text_title
+                text_color: 0xFFFFFF
+                text: ""
+                hidden: true
+            - label:
+                id: photos_date_label
+                align: BOTTOM_LEFT
+                x: 24
+                y: -64
+                text_font: font_text_body
+                text_color: 0xDDDDDD
+                text: ""
+                hidden: true
+            - label:
+                id: photos_weather_icon
+                align: BOTTOM_RIGHT
+                x: -110
+                y: -20
+                text_font: font_icon_main
+                text_color: 0xFFFFFF
+                text: ""
+                hidden: true
+            # subscribe_weather_state writes the condition text here; the photo
+            # overlay shows temperature instead, so this sink stays hidden.
+            - label:
+                id: photos_weather_condition
+                align: BOTTOM_RIGHT
+                x: -24
+                y: -80
+                text_font: font_text_body
+                text_color: 0xDDDDDD
+                text: ""
+                hidden: true
+            - label:
+                id: photos_weather_temp
+                align: BOTTOM_RIGHT
+                x: -24
+                y: -28
+                text_font: font_text_title
+                text_color: 0xFFFFFF
+                text: ""
+                hidden: true
+
+esphome:
+  on_boot:
+    priority: 200
+    then:
+      - script.execute: ha_media_source_apply_connection
+
+script:
+  # Push the stored Home Assistant URL and token into the media-source client,
+  # normalizing the address to a websocket URL first. Called on boot and whenever
+  # either entity changes.
+  - id: ha_media_source_apply_connection
+    mode: restart
+    then:
+      - lambda: |-
+          const std::string url =
+              espcontrol::normalize_ha_websocket_url(id(home_assistant_url).state);
+          id(photo_media).set_connection(url, id(home_assistant_token).state);
+      # Point the client at the configured folder (no-op if unchanged).
+      - lambda: 'id(photo_media).set_folder(id(screensaver_photos_folder).state);'
+
+  # Advance to the next photo and start resolving/downloading it. Runs only while
+  # PHOTOS is the current or target mode; the reconcile loop calls this on the
+  # configured interval.
+  - id: photos_screensaver_advance
+    mode: restart
+    then:
+      - lambda: |-
+          if (id(photo_media).index().empty()) {
+            // Nothing indexed yet (or folder empty). Ask the client to browse if
+            // it is ready; the on-index-ready path will kick the first advance.
+            if (id(photo_media).ready() && !id(photo_media).index_loading()) {
+              id(photo_media).refresh_index();
+            }
+            return;
+          }
+
+          const espcontrol::PhotoOrder order = id(screensaver_photos_shuffle).state
+              ? espcontrol::PhotoOrder::SHUFFLE
+              : espcontrol::PhotoOrder::SEQUENTIAL;
+          const std::string next =
+              id(photo_media).mutable_index().advance(order, esphome::random_uint32());
+          if (next.empty()) return;
+
+          const uint32_t generation = ++id(photos_advance_generation);
+          id(photo_media).resolve(next, [generation](const std::string &url) {
+            if (generation != id(photos_advance_generation)) return;  // superseded
+            if (url.empty()) return;
+            id(photos_pending_url) = url;
+            id(photos_downloaded_image)->request_update_url(url);
+          });
+
+  # Apply the optional date/time and weather widgets' visibility and content.
+  - id: photos_apply_widgets
+    mode: restart
+    then:
+      - lambda: |-
+          const bool show_datetime = id(screensaver_photos_show_datetime).state;
+          const bool show_weather = id(screensaver_photos_show_weather).state &&
+                                    !id(screensaver_photos_weather_entity).state.empty();
+          lv_obj_t *datetime_widgets[] = { id(photos_datetime_label), id(photos_date_label) };
+          for (lv_obj_t *w : datetime_widgets) {
+            if (show_datetime) lv_obj_clear_flag(w, LV_OBJ_FLAG_HIDDEN);
+            else lv_obj_add_flag(w, LV_OBJ_FLAG_HIDDEN);
+          }
+          lv_obj_t *weather_widgets[] = { id(photos_weather_icon), id(photos_weather_temp) };
+          for (lv_obj_t *w : weather_widgets) {
+            if (show_weather) lv_obj_clear_flag(w, LV_OBJ_FLAG_HIDDEN);
+            else lv_obj_add_flag(w, LV_OBJ_FLAG_HIDDEN);
+          }
+          if (show_datetime || show_weather)
+            lv_obj_clear_flag(id(photos_widget_scrim), LV_OBJ_FLAG_HIDDEN);
+          else
+            lv_obj_add_flag(id(photos_widget_scrim), LV_OBJ_FLAG_HIDDEN);
+      - script.execute: photos_refresh_datetime
+
+  # Refresh the date/time label from the panel clock. Cheap; called each second
+  # while the photo screensaver is visible.
+  - id: photos_refresh_datetime
+    mode: restart
+    then:
+      - lambda: |-
+          if (!id(screensaver_photos_show_datetime).state) return;
+          auto time = panel_time_or_fallback(id(panel_time).now(), id(homeassistant_time).now());
+          if (!time.is_valid()) return;
+          char buf[8];
+          format_clock_time_without_suffix(buf, sizeof(buf), time.hour, time.minute,
+                                           id(clock_format_12h));
+          lv_label_set_text(id(photos_datetime_label), buf);
+          char date_buf[24];
+          static const char *const kWeekdays[] = {
+            "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+          static const char *const kMonths[] = {
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+          const int wd = time.day_of_week >= 1 && time.day_of_week <= 7
+                             ? time.day_of_week - 1 : 0;
+          const int mo = time.month >= 1 && time.month <= 12 ? time.month - 1 : 0;
+          snprintf(date_buf, sizeof(date_buf), "%s %d %s", kWeekdays[wd],
+                   time.day_of_month, kMonths[mo]);
+          lv_label_set_text(id(photos_date_label), date_buf);
+
+  # Subscribe the weather widget to the configured weather entity.
+  - id: photos_subscribe_weather
+    mode: restart
+    then:
+      - lambda: |-
+          const std::string entity = id(screensaver_photos_weather_entity).state;
+          if (entity.empty() || !id(screensaver_photos_show_weather).state) return;
+          subscribe_weather_state(id(photos_weather_icon), id(photos_weather_condition),
+                                  entity);
+          ha_subscribe_attribute(
+              entity, std::string("temperature"),
+              std::function<void(esphome::StringRef)>([](esphome::StringRef value) {
+                std::string text = std::string(value.c_str(), value.size());
+                if (text.empty()) return;
+                // Trim to a whole degree and append a degree glyph.
+                double parsed = atof(text.c_str());
+                char buf[12];
+                snprintf(buf, sizeof(buf), "%d°", (int) lround(parsed));
+                lv_label_set_text(id(photos_weather_temp), buf);
+              }));
+
+  # Show the photo screensaver overlay.
+  - id: show_photos_view
+    mode: restart
+    parameters:
+      generation: int
+    then:
+      - if:
+          condition:
+            lambda: |-
+              return !id(display_mode_controller).takeover_active(
+                         espcontrol::DisplayTakeoverKind::INTERACTIVE) &&
+                  id(display_mode_controller).transition_is_current(
+                      static_cast<uint32_t>(generation), espcontrol::DisplayMode::PHOTOS);
+          then:
+            - lambda: 'navigation_return_home(id(main_page)->obj);'
+            - lvgl.widget.hide: dim_screensaver_touch_guard
+            - script.execute: photos_apply_widgets
+            - script.execute: photos_subscribe_weather
+            - lambda: |-
+                lv_obj_t *temperature_labels[] = { id(temperatures) };
+                hide_clock_bar_top_layer_widgets(temperature_labels, 1,
+                                                 id(display_time),
+                                                 id(network_status_button));
+                network_status_hide_modal();
+                refresh_screensaver_fullscreen(id(photos_screensaver), id(dim_screensaver_touch_guard));
+                lv_obj_clear_flag(id(photos_screensaver), LV_OBJ_FLAG_HIDDEN);
+                lv_obj_move_foreground(id(photos_screensaver));
+                // Only reveal the decoded image if one is already loaded; otherwise
+                // hold the black overlay until on_download_finished shows it.
+                if (id(photos_first_image_ready))
+                  lv_obj_clear_flag(id(photos_image_widget), LV_OBJ_FLAG_HIDDEN);
+                else
+                  lv_obj_add_flag(id(photos_image_widget), LV_OBJ_FLAG_HIDDEN);
+            - script.execute: clock_bar_hide
+            - script.wait: clock_bar_hide
+            - script.execute:
+                id: backlight_fade_current_ui_to_black
+                generation: !lambda 'return generation;'
+                target_mode: !lambda 'return static_cast<int>(espcontrol::DisplayMode::PHOTOS);'
+            - script.wait: backlight_fade_current_ui_to_black
+            - lambda: |-
+                if (!id(display_mode_controller).transition_is_current(
+                      static_cast<uint32_t>(generation), espcontrol::DisplayMode::PHOTOS)) {
+                  id(show_photos_view).stop();
+                }
+            # Start (or continue) rotating, then bring the backlight up to full.
+            - script.execute: photos_screensaver_advance
+            - light.turn_on:
+                id: display_backlight
+                brightness: 100%
+                transition_length: 400ms
+          else:
+            - lambda: 'ESP_LOGD("photos", "Skipping photo screensaver while image modal is active");'
+
+  # Hide the photo screensaver overlay and release its decoded image so the
+  # download buffer is available to cover art or image cards.
+  - id: hide_photos_view
+    mode: single
+    then:
+      # No-op unless the overlay is actually showing, so the generic
+      # "hide for every non-PHOTOS mode" call in the apply cascade is cheap.
+      - if:
+          condition:
+            lambda: |-
+              return !lv_obj_has_flag(id(photos_screensaver), LV_OBJ_FLAG_HIDDEN);
+          then:
+            - lvgl.widget.hide: photos_image_widget
+            - lvgl.widget.hide: photos_screensaver
+            - lambda: |-
+                id(photos_advance_generation)++;  // cancel any in-flight resolve
+                id(photos_first_image_ready) = false;
+            - artwork_image.release: photos_downloaded_image
+            - script.execute: clock_bar_apply
+
+  # Keep the overlay above any screen changes or top-layer overlays that appear
+  # after the screensaver starts. Mirrors clock_screensaver_keep_on_top.
+  - id: photos_screensaver_keep_on_top
+    mode: restart
+    then:
+      - lambda: |-
+          if (!id(display_mode_controller).current_mode_is(
+                espcontrol::DisplayMode::PHOTOS)) return;
+          lv_obj_t *temperature_labels[] = { id(temperatures) };
+          hide_clock_bar_top_layer_widgets(temperature_labels, 1,
+                                           id(display_time),
+                                           id(network_status_button));
+          network_status_hide_modal();
+          refresh_screensaver_fullscreen(id(photos_screensaver), id(dim_screensaver_touch_guard));
+          lv_obj_move_foreground(id(photos_screensaver));
+
+interval:
+  # Advance the photo and keep the overlay on top / date-time fresh.
+  - interval: 1s
+    then:
+      - script.execute: photos_screensaver_keep_on_top
+      - if:
+          condition:
+            lambda: |-
+              return id(display_mode_controller).current_mode_is(
+                  espcontrol::DisplayMode::PHOTOS);
+          then:
+            - script.execute: photos_refresh_datetime
+  - interval: 5s
+    then:
+      - if:
+          condition:
+            lambda: |-
+              if (!id(display_mode_controller).current_mode_is(
+                    espcontrol::DisplayMode::PHOTOS))
+                return false;
+              // Advance when the configured photo duration has elapsed. The
+              // number entity is in seconds; default to 30s if unset.
+              static uint32_t last_advance_ms = 0;
+              float secs = id(screensaver_photos_interval).state;
+              if (std::isnan(secs) || secs < 5) secs = 30;
+              const uint32_t now = millis();
+              if (last_advance_ms != 0 &&
+                  now - last_advance_ms < (uint32_t)(secs * 1000)) {
+                return false;
+              }
+              last_advance_ms = now;
+              return true;
+          then:
+            - script.execute: photos_screensaver_advance

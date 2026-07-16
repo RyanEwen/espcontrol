@@ -63,6 +63,8 @@ class HaMediaSource : public Component {
   bool auth_rejected() const { return this->state_ == ConnectionState::FAILED_AUTH; }
 
   const espcontrol::PhotoIndex &index() const { return this->index_; }
+  // Non-const access for the rotation adapter, which advances the cursor.
+  espcontrol::PhotoIndex &mutable_index() { return this->index_; }
 
   // Re-browse the configured folder. Results land in index(); on_index_ready
   // fires when the browse completes (with an empty index if the folder held no

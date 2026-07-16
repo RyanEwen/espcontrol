@@ -47,6 +47,31 @@ int main() {
   CHECK(media_source_absolute_url("", "/media/local/a.jpg").empty());
   CHECK(media_source_absolute_url("/", "/media/local/a.jpg").empty());
 
+  // A bare host over plain http gets Home Assistant's default port and path.
+  CHECK(normalize_ha_websocket_url("10.0.0.5") ==
+        "ws://10.0.0.5:8123/api/websocket");
+  CHECK(normalize_ha_websocket_url("  homeassistant.local  ") ==
+        "ws://homeassistant.local:8123/api/websocket");
+  CHECK(normalize_ha_websocket_url("http://10.0.0.5") ==
+        "ws://10.0.0.5:8123/api/websocket");
+  // An explicit port is preserved rather than replaced.
+  CHECK(normalize_ha_websocket_url("10.0.0.5:9000") ==
+        "ws://10.0.0.5:9000/api/websocket");
+  CHECK(normalize_ha_websocket_url("http://10.0.0.5:8123/") ==
+        "ws://10.0.0.5:8123/api/websocket");
+  // https/wss keep their default port and become wss.
+  CHECK(normalize_ha_websocket_url("https://ha.example.com") ==
+        "wss://ha.example.com/api/websocket");
+  CHECK(normalize_ha_websocket_url("wss://ha.example.com/api/websocket") ==
+        "wss://ha.example.com/api/websocket");
+  // A trailing path is discarded; only the authority is kept.
+  CHECK(normalize_ha_websocket_url("http://10.0.0.5:8123/lovelace/0") ==
+        "ws://10.0.0.5:8123/api/websocket");
+  // Blank input yields nothing rather than a malformed URL.
+  CHECK(normalize_ha_websocket_url("").empty());
+  CHECK(normalize_ha_websocket_url("   ").empty());
+  CHECK(normalize_ha_websocket_url("http://").empty());
+
   // An empty index yields nothing and never advances.
   PhotoIndex index;
   CHECK(index.empty());
