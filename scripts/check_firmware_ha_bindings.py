@@ -1537,6 +1537,22 @@ def firmware_cover_art_low_heap_progress_errors(
     if not prepared_visibility:
         errors.append(f"{rel}: prepare S3 progress before checking cover art visibility")
 
+    low_heap_refresh = re.search(
+        r"- interval: 1s.*?#ifdef ESPCONTROL_LOW_HEAP_COVER_ART(.*?)#else",
+        text,
+        re.DOTALL,
+    )
+    if not low_heap_refresh:
+        errors.append(f"{rel}: missing S3 cover art refresh condition")
+    else:
+        condition_body = low_heap_refresh.group(1)
+        active_guard = condition_body.find(
+            "if (!id(display_mode_controller).target_mode_is(espcontrol::DisplayMode::COVER_ART))"
+        )
+        prepare_progress = condition_body.find("media_playback_prepare_cover_art_progress")
+        if active_guard < 0 or prepare_progress < 0 or active_guard > prepare_progress:
+            errors.append(f"{rel}: prepare S3 progress only while cover art is active")
+
     return errors
 
 
@@ -5006,6 +5022,19 @@ def run_self_test() -> int:
         "          #endif\n"
         "          media_playback_prepare_cover_art_progress(id(cover_art_media_player_entity).state, id(cover_art_media_playing));\n"
         "          return media_playback_state_has_progress(id(cover_art_media_player_entity).state);\n"
+        "interval:\n"
+        "  - interval: 1s\n"
+        "    then:\n"
+        "      - if:\n"
+        "          condition:\n"
+        "            lambda: |-\n"
+        "              #ifdef ESPCONTROL_LOW_HEAP_COVER_ART\n"
+        "              if (!id(display_mode_controller).target_mode_is(espcontrol::DisplayMode::COVER_ART)) return false;\n"
+        "              media_playback_prepare_cover_art_progress(id(cover_art_media_player_entity).state, id(cover_art_media_playing));\n"
+        "              return true;\n"
+        "              #else\n"
+        "              return id(cover_art_media_playing);\n"
+        "              #endif\n"
         "  - id: cover_art_resubscribe\n"
         "    then:\n"
         "      - lambda: |-\n"

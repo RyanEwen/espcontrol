@@ -180,6 +180,9 @@ interval:
           condition:
             lambda: |-
               #ifdef ESPCONTROL_LOW_HEAP_COVER_ART
+              if (!id(display_mode_controller).target_mode_is(espcontrol::DisplayMode::COVER_ART)) {
+                return false;
+              }
               bool shared_playing = false;
               float shared_duration = 0.0f;
               float shared_position = 0.0f;
@@ -191,9 +194,8 @@ interval:
                 shared_playing,
                 shared_duration,
                 shared_position);
-              return id(display_mode_controller).target_mode_is(espcontrol::DisplayMode::COVER_ART) &&
-                     (id(cover_art_media_playing) ||
-                      (shared_progress && shared_playing));
+              return id(cover_art_media_playing) ||
+                     (shared_progress && shared_playing);
               #else
               return id(display_mode_controller).target_mode_is(espcontrol::DisplayMode::COVER_ART) && id(cover_art_media_playing);
               #endif
