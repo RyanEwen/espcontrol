@@ -125,6 +125,25 @@ export function installApiModule(): GlobalDescriptors {
     function postScreensaverDimmedBrightness(this: any, value?: any) {
         postNumberWithObjectIds(entityName("screen_saver_dimmed_brightness"), entityObjectIds("screen_saver_dimmed_brightness"), value, SCREENSAVER_ACTION_UNAVAILABLE);
     }
+    var PHOTOS_UNAVAILABLE: any = "The photo screensaver is not available on this firmware. Update the device firmware, then reload this page.";
+    function postScreensaverPhotosFolder(this: any, value?: any) {
+        postTextWithObjectIds(entityName("screen_saver_photos_folder"), entityObjectIds("screen_saver_photos_folder"), value, PHOTOS_UNAVAILABLE);
+    }
+    function postScreensaverPhotosInterval(this: any, value?: any) {
+        postNumberWithObjectIds(entityName("screen_saver_photos_interval"), entityObjectIds("screen_saver_photos_interval"), value, PHOTOS_UNAVAILABLE);
+    }
+    function postScreensaverPhotosShuffle(this: any, on?: any) {
+        postSwitchWithObjectIds(entityName("screen_saver_photos_shuffle"), entityObjectIds("screen_saver_photos_shuffle"), on, PHOTOS_UNAVAILABLE);
+    }
+    function postScreensaverPhotosShowDatetime(this: any, on?: any) {
+        postSwitchWithObjectIds(entityName("screen_saver_photos_show_datetime"), entityObjectIds("screen_saver_photos_show_datetime"), on, PHOTOS_UNAVAILABLE);
+    }
+    function postScreensaverPhotosShowWeather(this: any, on?: any) {
+        postSwitchWithObjectIds(entityName("screen_saver_photos_show_weather"), entityObjectIds("screen_saver_photos_show_weather"), on, PHOTOS_UNAVAILABLE);
+    }
+    function postScreensaverPhotosWeatherEntity(this: any, value?: any) {
+        postTextWithObjectIds(entityName("screen_saver_photos_weather_entity"), entityObjectIds("screen_saver_photos_weather_entity"), value, PHOTOS_UNAVAILABLE);
+    }
     function postHomeScreenTimeout(this: any, value?: any) {
         postNumberWithObjectIds(entityName("home_screen_timeout"), entityObjectIds("home_screen_timeout"), value);
     }
@@ -199,6 +218,12 @@ export function installApiModule(): GlobalDescriptors {
         "SCREENSAVER_ACTION_UNAVAILABLE": liveGlobal(() => SCREENSAVER_ACTION_UNAVAILABLE, (value?: any) => { SCREENSAVER_ACTION_UNAVAILABLE = value; }),
         "postScreensaverAction": staticGlobal(postScreensaverAction),
         "postScreensaverDimmedBrightness": staticGlobal(postScreensaverDimmedBrightness),
+        "postScreensaverPhotosFolder": staticGlobal(postScreensaverPhotosFolder),
+        "postScreensaverPhotosInterval": staticGlobal(postScreensaverPhotosInterval),
+        "postScreensaverPhotosShuffle": staticGlobal(postScreensaverPhotosShuffle),
+        "postScreensaverPhotosShowDatetime": staticGlobal(postScreensaverPhotosShowDatetime),
+        "postScreensaverPhotosShowWeather": staticGlobal(postScreensaverPhotosShowWeather),
+        "postScreensaverPhotosWeatherEntity": staticGlobal(postScreensaverPhotosWeatherEntity),
         "postHomeScreenTimeout": staticGlobal(postHomeScreenTimeout),
         "postSwitchWithObjectId": staticGlobal(postSwitchWithObjectId),
         "postSwitchWithObjectIds": staticGlobal(postSwitchWithObjectIds),

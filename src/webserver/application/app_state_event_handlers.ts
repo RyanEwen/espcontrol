@@ -139,6 +139,32 @@ export function installAppStateEventHandlersModule(): GlobalDescriptors {
                 state.screensaverDimmedBrightness = normalizeScreensaverDimmedBrightness(val);
                 syncClockScreensaverControls();
             },
+            "text-screen_saver__photos_folder": function (this: any, val?: any) {
+                state.photosFolder = val || "";
+                syncInput(els.setPhotosFolder, state.photosFolder);
+            },
+            "number-screen_saver__photos_interval": function (this: any, val?: any) {
+                var n: any = parseInt(val, 10);
+                state.photosInterval = Number.isFinite(n) && n >= 5 ? n : 30;
+                syncInput(els.setPhotosInterval, String(state.photosInterval));
+            },
+            "switch-screen_saver__photos_shuffle": function (this: any, val?: any, d?: any) {
+                state.photosShuffle = d.value === true || val === "ON";
+                if (els.setPhotosShuffle) els.setPhotosShuffle.checked = state.photosShuffle;
+            },
+            "switch-screen_saver__photos_show_datetime": function (this: any, val?: any, d?: any) {
+                state.photosShowDatetime = d.value === true || val === "ON";
+                if (els.setPhotosShowDatetime) els.setPhotosShowDatetime.checked = state.photosShowDatetime;
+            },
+            "switch-screen_saver__photos_show_weather": function (this: any, val?: any, d?: any) {
+                state.photosShowWeather = d.value === true || val === "ON";
+                if (els.setPhotosShowWeather) els.setPhotosShowWeather.checked = state.photosShowWeather;
+                syncClockScreensaverControls();
+            },
+            "text-screen_saver__photos_weather_entity": function (this: any, val?: any) {
+                state.photosWeatherEntity = val || "";
+                syncInput(els.setPhotosWeatherEntity, state.photosWeatherEntity);
+            },
             "text-presence_sensor_entity": function (this: any, val?: any) {
                 state.presenceEntity = val;
                 syncInput(els.setPresence, val);

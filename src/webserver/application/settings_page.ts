@@ -310,6 +310,12 @@ export function installSettingsPageModule(): GlobalDescriptors {
         sensorPanel.appendChild(sensorClockControls.dimBrightnessField);
         sensorPanel.appendChild(sensorClockControls.brightnessField);
         ssBody.appendChild(sensorPanel);
+        // Photo screensaver settings apply to whichever screensaver mode is
+        // active, so they live once here and are shown when the action is Photos.
+        var photosSettingsCard: any = buildPhotoSettingsCard();
+        photosSettingsCard.style.display = "none";
+        ssBody.appendChild(photosSettingsCard);
+        els.setPhotosSettingsCard = photosSettingsCard;
         els.setPresence = presInp;
         els.setSensorClockSelect = sensorClockControls.clockSelect;
         els.setSensorClockField = sensorClockControls.clockField;

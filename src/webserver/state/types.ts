@@ -125,6 +125,12 @@ export interface AppState {
   clockBrightnessNight: number;
   clockBrightnessSplitReceived: boolean;
   screensaverDimmedBrightness: number;
+  photosFolder: string;
+  photosInterval: number;
+  photosShuffle: boolean;
+  photosShowDatetime: boolean;
+  photosShowWeather: boolean;
+  photosWeatherEntity: string;
   screensaverTimeout: number;
   screensaverTimeoutMin: number;
   screensaverTimeoutMax: number;

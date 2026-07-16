@@ -271,6 +271,7 @@ declare global {
   var buildApplyBar: any;
   var buildClipboardEntry: any;
   var buildCoverArtSettingsCard: any;
+  var buildPhotoSettingsCard: any;
   var buildHeader: any;
   var buildMediaPlaylistContentId: any;
   var buildScreenPage: any;
@@ -858,6 +859,12 @@ declare global {
   var postScreenScheduleWakeTimeout: any;
   var postScreensaverAction: any;
   var postScreensaverDimmedBrightness: any;
+  var postScreensaverPhotosFolder: any;
+  var postScreensaverPhotosInterval: any;
+  var postScreensaverPhotosShuffle: any;
+  var postScreensaverPhotosShowDatetime: any;
+  var postScreensaverPhotosShowWeather: any;
+  var postScreensaverPhotosWeatherEntity: any;
   var postScreensaverMode: any;
   var postScreensaverTimeout: any;
   var postSelect: any;

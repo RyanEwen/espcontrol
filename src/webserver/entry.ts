@@ -60,6 +60,7 @@ import { installControlsShellModule } from "./application/controls_shell";
 import { installSettingsPageHelpersModule } from "./application/settings_page_helpers";
 import { installSettingsScheduleSectionModule } from "./application/settings_schedule_section";
 import { installSettingsCoverArtSectionModule } from "./application/settings_cover_art_section";
+import { installSettingsPhotosSectionModule } from "./application/settings_photos_section";
 import { installSettingsSystemSectionModule } from "./application/settings_system_section";
 import { installSettingsPageModule } from "./application/settings_page";
 import { installControlsFieldsModule } from "./application/controls_fields";
@@ -189,6 +190,7 @@ function startEspControl(): void {
   installGlobals(installSettingsPageHelpersModule());
   installGlobals(installSettingsScheduleSectionModule());
   installGlobals(installSettingsCoverArtSectionModule());
+  installGlobals(installSettingsPhotosSectionModule());
   installGlobals(installSettingsSystemSectionModule());
   installGlobals(installSettingsPageModule());
   installGlobals(installControlsFieldsModule());
