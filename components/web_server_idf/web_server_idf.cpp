@@ -15,6 +15,8 @@
 #include <freertos/task.h>
 
 #include "utils.h"
+
+#include "esphome/components/espcontrol/screen_capture.h"
 #include "web_server_idf.h"
 
 #ifdef USE_WEBSERVER_OTA
@@ -318,8 +320,91 @@ esp_err_t AsyncWebServer::request_handler(httpd_req_t *r) {
   return static_cast<AsyncWebServer *>(r->user_ctx)->request_handler_(&req);
 }
 
+// Serve the active LVGL screen as a 16-bit BMP at /espcontrol/screenshot.
+// The render happens on the ESPHome main loop (see espcontrol/screen_capture.h);
+// this handler only requests it and streams the finished buffer.
+bool handle_screen_capture_request(AsyncWebServerRequest *request) {
+  if (request->method() != HTTP_GET) {
+    return false;
+  }
+  char url_buf[AsyncWebServerRequest::URL_BUF_SIZE];
+  StringRef url = request->url_to(url_buf);
+  if (url != "/espcontrol/screenshot") {
+    return false;
+  }
+  httpd_req_t *req = *request;
+  if (!screen_capture_supported()) {
+    httpd_resp_set_status(req, "501 Not Implemented");
+    httpd_resp_set_type(req, "text/plain");
+    httpd_resp_send(req, "screen capture not compiled in", HTTPD_RESP_USE_STRLEN);
+    return true;
+  }
+  auto &capture = screen_capture_state();
+  screen_capture_request();
+  // The main loop polls for the request every 100 ms and renders the frame;
+  // wait up to ~5 s for it to land.
+  for (int i = 0; i < 100 && !capture.ready.load(); i++) {
+    vTaskDelay(pdMS_TO_TICKS(50));
+  }
+  if (!capture.ready.load()) {
+    httpd_resp_set_status(req, "503 Service Unavailable");
+    httpd_resp_set_type(req, "text/plain");
+    httpd_resp_send(req, "capture timed out", HTTPD_RESP_USE_STRLEN);
+    return true;
+  }
+
+  const int32_t width = capture.width;
+  const int32_t height = capture.height;
+  const uint32_t row_bytes = ((uint32_t) width * 2 + 3) & ~3u;  // BMP rows pad to 4 bytes
+  const uint32_t pixel_bytes = row_bytes * (uint32_t) height;
+  // BITMAPFILEHEADER(14) + BITMAPINFOHEADER(40) + 3 RGB565 bitfield masks(12)
+  uint8_t header[66] = {};
+  const uint32_t data_offset = sizeof(header);
+  const uint32_t file_size = data_offset + pixel_bytes;
+  header[0] = 'B';
+  header[1] = 'M';
+  memcpy(&header[2], &file_size, 4);
+  memcpy(&header[10], &data_offset, 4);
+  const uint32_t info_size = 40 + 12;
+  memcpy(&header[14], &info_size, 4);
+  memcpy(&header[18], &width, 4);
+  const int32_t bmp_height = -height;  // negative = top-down, matching LVGL
+  memcpy(&header[22], &bmp_height, 4);
+  const uint16_t planes = 1, bpp = 16;
+  memcpy(&header[26], &planes, 2);
+  memcpy(&header[28], &bpp, 2);
+  const uint32_t compression = 3;  // BI_BITFIELDS
+  memcpy(&header[30], &compression, 4);
+  memcpy(&header[34], &pixel_bytes, 4);
+  const uint32_t mask_r = 0xF800, mask_g = 0x07E0, mask_b = 0x001F;
+  memcpy(&header[54], &mask_r, 4);
+  memcpy(&header[58], &mask_g, 4);
+  memcpy(&header[62], &mask_b, 4);
+
+  httpd_resp_set_type(req, "image/bmp");
+  apply_no_cache_headers(req);
+  bool ok = httpd_resp_send_chunk(req, (const char *) header, sizeof(header)) == ESP_OK;
+  static const uint8_t row_pad[4] = {};
+  const uint32_t pad = row_bytes - (uint32_t) width * 2;
+  for (int32_t y = 0; ok && y < height; y++) {
+    const char *row = (const char *) (capture.pixels + (size_t) y * capture.stride);
+    ok = httpd_resp_send_chunk(req, row, (size_t) width * 2) == ESP_OK;
+    if (ok && pad != 0) {
+      ok = httpd_resp_send_chunk(req, (const char *) row_pad, pad) == ESP_OK;
+    }
+  }
+  if (ok) {
+    httpd_resp_send_chunk(req, nullptr, 0);
+  }
+  screen_capture_release();
+  return true;
+}
+
 esp_err_t AsyncWebServer::request_handler_(AsyncWebServerRequest *request) const {
   if (handle_firmware_version_request(request)) {
+    return ESP_OK;
+  }
+  if (handle_screen_capture_request(request)) {
     return ESP_OK;
   }
   for (auto *handler : this->handlers_) {

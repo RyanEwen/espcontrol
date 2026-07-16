@@ -33,6 +33,8 @@ esp32:
       # HTTPS firmware checks need more stack on ESP32-P4; the default main
       # task stack can trip the stack protector during mbedTLS setup.
       CONFIG_ESP_MAIN_TASK_STACK_SIZE: "8192"
+      # LVGL snapshot renders the screen for /espcontrol/screenshot.
+      CONFIG_LV_USE_SNAPSHOT: "y"
       CONFIG_MBEDTLS_EXTERNAL_MEM_ALLOC: "y"
       # Native OTA can block loopTask while ESP-IDF erases the alternate app
       # partition on this panel. Use the ESP-IDF maximum so the flash

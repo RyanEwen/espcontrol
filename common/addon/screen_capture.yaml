@@ -1,0 +1,14 @@
+# =============================================================================
+# SCREEN CAPTURE - serve the live screen at /espcontrol/screenshot
+# =============================================================================
+# Renders the active LVGL screen to a buffer on the main loop and lets the web
+# server stream it as a BMP. Compiled in only when the device also enables
+# CONFIG_LV_USE_SNAPSHOT (see the device's sdkconfig options); used to compare
+# the physical rendering against the web setup-page preview.
+# =============================================================================
+
+interval:
+  - interval: 100ms
+    then:
+      - lambda: |-
+          screen_capture_process();

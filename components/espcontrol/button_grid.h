@@ -34,6 +34,7 @@
 #include "button_grid_limits.h"
 #include "button_grid_string.h"
 #include "button_grid_ha.h"
+#include "screen_capture.h"
 #include "button_grid_config.h"
 #include "button_grid_style.h"
 #include "button_grid_card_runtime.h"
