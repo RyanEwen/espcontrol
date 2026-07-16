@@ -507,11 +507,13 @@ declare global {
   var findPlacementCell: any;
   var firmwareInfoFromPublicManifest: any;
   var firmwareInfoFromPublicVersionEntry: any;
+  var firmwareInfoForVersion: any;
   var firmwareInfosFromPublicVersions: any;
   var firmwareInstallRefreshTimer: any;
   var firmwareInstallRefreshUntil: any;
   var firmwareUpdateAvailable: any;
   var firmwareUpdateControlsVisible: any;
+  var firmwareUpToDateStatusAvailable: any;
   var firmwareVersionFromMetadata: any;
   var firmwareVersionLabel: any;
   var firmwareVersionMatches: any;

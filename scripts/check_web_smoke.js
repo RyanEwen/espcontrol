@@ -1456,6 +1456,11 @@ assert.deepStrictEqual(plain(hooks.firmwareStateAfterVersionIndex("v1.12.0", pub
   installedSelected: false,
   previous: ["v1.11.0"],
 });
+assert.strictEqual(
+  hooks.firmwareOtaUrlAfterVersionIndex("v1.12.0", publicVersionIndex, "v1.11.0"),
+  "https://jtenniswood.github.io/espcontrol/firmware/guition-esp32-p4-jc1060p470/guition-esp32-p4-jc1060p470.ota.bin",
+  "latest firmware OTA resolution must not follow the selected previous version"
+);
 assert.strictEqual(hooks.firmwareVersionLabelFor("", true), "Checking version...");
 assert.strictEqual(hooks.firmwareVersionLabelFor("", false), "Version unknown");
 assert.deepStrictEqual(plain(hooks.entityDetailPaths("text_sensor", hooks.entityLookupNames("firmware_version"))), [
@@ -1477,6 +1482,16 @@ assert.deepStrictEqual(plain(hooks.entityLookupNames("firmware_version")), [
 assert.strictEqual(hooks.firmwareUpdateControlsVisibleFor("wifi", true), true);
 assert.strictEqual(hooks.firmwareUpdateControlsVisibleFor("wifi", false), false);
 assert.strictEqual(hooks.firmwareUpdateControlsVisibleFor("ethernet", true), true);
+assert.strictEqual(
+  hooks.firmwareUpToDateStatusFor("v1.10.0", "v1.11.1", "NO UPDATE", false),
+  false,
+  "check-only firmware must not report up to date when the public release is newer"
+);
+assert.strictEqual(
+  hooks.firmwareUpToDateStatusFor("v1.11.1", "v1.11.1", "NO UPDATE", false),
+  true,
+  "matching installed and public versions may report up to date without install controls"
+);
 assert.strictEqual(
   hooks.firmwareVersionAfterUpdateInfo("Dev", { state: "NO UPDATE", latest_version: "v1.11.1" }).version,
   "v1.11.1"

@@ -52,6 +52,9 @@ export function installFirmwareUpdateStateModule(): GlobalDescriptors {
             return latest;
         return null;
     }
+    function firmwareInfoForVersion(this: any, version?: any) {
+        return isSpecificFirmwareVersion(version) ? findFirmwareVersionInfo(version) : selectedFirmwareInfo();
+    }
     function selectedFirmwareInfo(this: any) {
         return findFirmwareVersionInfo(state.firmwareSelectedVersion) ||
             (state.firmwareVersionOptions.length ? state.firmwareVersionOptions[0] : null) ||
@@ -161,6 +164,10 @@ export function installFirmwareUpdateStateModule(): GlobalDescriptors {
             isSpecificFirmwareVersion(state.firmwareVersion) &&
             firmwareVersionsSame(state.firmwareVersion, state.firmwareLatestVersion);
     }
+    function firmwareUpToDateStatusAvailable(this: any) {
+        return state.firmwareUpdateState === "NO UPDATE" &&
+            (!publicFirmwareReleaseKnown() || installedFirmwareMatchesPublicRelease());
+    }
     function firmwareUpdateControlsVisible(this: any) {
         return state.firmwareUpdateControlsSupported === true;
     }
@@ -204,10 +211,8 @@ export function installFirmwareUpdateStateModule(): GlobalDescriptors {
             status = escHtml(state.firmwareInstallError);
             cls += " sp-update-error";
         }
-        else if (state.firmwareUpdateState === "NO UPDATE") {
-            if (installedFirmwareMatchesPublicRelease() || !latestFirmwareInstallAvailable()) {
-                inlineStatus = "Up to date";
-            }
+        else if (firmwareUpToDateStatusAvailable()) {
+            inlineStatus = "Up to date";
         }
         els.fwStatus.className = cls;
         els.fwStatus.innerHTML = status;
@@ -352,6 +357,7 @@ export function installFirmwareUpdateStateModule(): GlobalDescriptors {
         "latestFirmwareInstallAction": staticGlobal(latestFirmwareInstallAction),
         "latestFirmwareInfoFromState": staticGlobal(latestFirmwareInfoFromState),
         "findFirmwareVersionInfo": staticGlobal(findFirmwareVersionInfo),
+        "firmwareInfoForVersion": staticGlobal(firmwareInfoForVersion),
         "selectedFirmwareInfo": staticGlobal(selectedFirmwareInfo),
         "previousFirmwareInfos": staticGlobal(previousFirmwareInfos),
         "selectedPreviousFirmwareInfo": staticGlobal(selectedPreviousFirmwareInfo),
@@ -363,6 +369,7 @@ export function installFirmwareUpdateStateModule(): GlobalDescriptors {
         "setPublicFirmwareVersions": staticGlobal(setPublicFirmwareVersions),
         "publicFirmwareReleaseKnown": staticGlobal(publicFirmwareReleaseKnown),
         "installedFirmwareMatchesPublicRelease": staticGlobal(installedFirmwareMatchesPublicRelease),
+        "firmwareUpToDateStatusAvailable": staticGlobal(firmwareUpToDateStatusAvailable),
         "firmwareUpdateControlsVisible": staticGlobal(firmwareUpdateControlsVisible),
         "syncFirmwareUpdateUi": staticGlobal(syncFirmwareUpdateUi),
         "renderFirmwareUpdateStatus": staticGlobal(renderFirmwareUpdateStatus),
