@@ -830,6 +830,8 @@ inline bool access_cover_driver_handle_main_click(
     const Context &context, const ParsedCfg &config, lv_obj_t *button);
 inline bool navigation_driver_handle_main_click(
     const Context &context, const ParsedCfg &config, lv_obj_t *button);
+inline bool image_driver_handle_main_click(
+    const Context &context, const ParsedCfg &config, lv_obj_t *button);
 }
 
 // Handle a main-grid button press: dispatch push event, subpage nav,
@@ -856,6 +858,8 @@ inline void handle_button_click(const std::string &cfg, int slot_num,
   if (espcontrol::cards::access_cover_driver_handle_main_click(
         context, p, btn_obj)) return;
   if (espcontrol::cards::navigation_driver_handle_main_click(
+        context, p, btn_obj)) return;
+  if (espcontrol::cards::image_driver_handle_main_click(
         context, p, btn_obj)) return;
   if (p.type == "alarm") {
     AlarmCardCtx *ctx = (AlarmCardCtx *)lv_obj_get_user_data(btn_obj);
@@ -897,9 +901,6 @@ inline void handle_button_click(const std::string &cfg, int slot_num,
   } else if (climate_card_type(p.type)) {
     ClimateControlCtx *ctx = (ClimateControlCtx *)lv_obj_get_user_data(btn_obj);
     if (ctx) climate_control_open_modal(ctx);
-  } else if (p.type == "image") {
-    ImageCardCtx *ctx = (ImageCardCtx *)lv_obj_get_user_data(btn_obj);
-    if (ctx) image_card_open_modal(ctx);
   } else {
     if (!p.entity.empty()) {
       bool currently_on = btn_obj && lv_obj_has_state(btn_obj, LV_STATE_CHECKED);

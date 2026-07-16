@@ -108,7 +108,7 @@ int main() {
       !card_runtime_has_capability(
         subpage, espcontrol::card_runtime::CAPABILITY_ACTIONS) ||
       !card_runtime_information_only(image) || card_runtime_passive(image) ||
-      !image.legacy_dispatch) {
+      image.legacy_dispatch) {
     return EXIT_FAILURE;
   }
   struct TestConfig {
