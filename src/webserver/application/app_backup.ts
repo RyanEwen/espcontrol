@@ -61,6 +61,8 @@ export function installAppBackupModule(): GlobalDescriptors {
                 cover_art_hide_external_input: state.coverArtHideExternalInputOn,
                 home_assistant_artwork_protocol: normalizeHomeAssistantArtworkProtocol(state.homeAssistantArtworkProtocol),
                 home_assistant_artwork_port: normalizeHomeAssistantArtworkPort(state.coverArtHomeAssistantPort),
+                home_assistant_url: state.haUrl,
+                home_assistant_token: state.haToken,
                 firmware_auto_update: !!state.autoUpdate,
                 firmware_update_frequency: state.updateFrequency,
                 screensaver_action: normalizeScreensaverAction(state.screensaverAction),
@@ -239,6 +241,8 @@ export function installAppBackupModule(): GlobalDescriptors {
                     postCoverArtHideExternalInput(importedSettings.coverArtHideExternalInput);
                     postHomeAssistantArtworkProtocol(importedSettings.coverArtHomeAssistantProtocol);
                     postHomeAssistantArtworkPort(importedSettings.coverArtHomeAssistantPort);
+                    postText(entityName("home_assistant_url"), importedSettings.homeAssistantUrl);
+                    postText(entityName("home_assistant_token"), importedSettings.homeAssistantToken);
                     if (firmwareUpdateControlsVisible()) {
                         postFirmwareAutoUpdate(importedSettings.autoUpdate);
                         postFirmwareUpdateFrequency(importedSettings.updateFrequency);
@@ -290,6 +294,8 @@ export function installAppBackupModule(): GlobalDescriptors {
                     state.coverArtHideExternalInputOn = importedSettings.coverArtHideExternalInput;
                     state.homeAssistantArtworkProtocol = importedSettings.coverArtHomeAssistantProtocol;
                     state.coverArtHomeAssistantPort = importedSettings.coverArtHomeAssistantPort;
+                    state.haUrl = importedSettings.homeAssistantUrl;
+                    state.haToken = importedSettings.homeAssistantToken;
                     state.autoUpdate = importedSettings.autoUpdate;
                     state.updateFrequency = importedSettings.updateFrequency;
                     state.screensaverAction = importedScreensaverAction;
@@ -309,6 +315,9 @@ export function installAppBackupModule(): GlobalDescriptors {
                     syncMediaPlayerSleepPreventionUi();
                     syncInput(els.setCoverArtMediaPlayer, state.coverArtMediaPlayerEntity);
                     syncInput(els.setCoverArtConditions, state.coverArtAttributeConditions);
+                    syncInput(els.setHaUrl, state.haUrl);
+                    syncInput(els.setHaToken, state.haToken);
+                    scheduleHaEntityRefresh();
                     syncCoverArtScreensaverUi();
                     if (els.setAutoUpdate)
                         els.setAutoUpdate.checked = state.autoUpdate;

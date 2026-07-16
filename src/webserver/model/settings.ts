@@ -277,6 +277,8 @@ export interface BackupPanelSettingsState {
   coverArtHideExternalInput: boolean;
   coverArtHomeAssistantProtocol: string;
   coverArtHomeAssistantPort: number;
+  homeAssistantUrl: string;
+  homeAssistantToken: string;
   autoUpdate: boolean;
   updateFrequency: string;
   screensaverAction: string;
@@ -394,6 +396,8 @@ export function normalizeBackupPanelSettings(
     coverArtHomeAssistantPort: objectValue(settings, "home_assistant_artwork_port") != null
       ? normalizeHomeAssistantArtworkPort(settings.home_assistant_artwork_port)
       : normalizeHomeAssistantArtworkPort(current.coverArtHomeAssistantPort),
+    homeAssistantUrl: String(settings.home_assistant_url || ""),
+    homeAssistantToken: String(settings.home_assistant_token || ""),
     autoUpdate: objectValue(settings, "firmware_auto_update") != null
       ? !!settings.firmware_auto_update
       : current.autoUpdate,

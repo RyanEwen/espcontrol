@@ -33,6 +33,7 @@ import { installArtworkStateModule } from "./application/artwork_state";
 import { installScreensaverStateModule } from "./application/screensaver_state";
 import { installFirmwareVersionStateModule } from "./application/firmware_version_state";
 import { installEntityStateModule } from "./application/entity_state";
+import { installHaEntityFetchModule } from "./application/ha_entity_fetch";
 import { installClockBarStateModule } from "./application/clock_bar_state";
 import { installFirmwareUpdateStateModule } from "./application/firmware_update_state";
 import { installScreensaverTimeoutModule } from "./application/screensaver_timeout";
@@ -162,6 +163,7 @@ function startEspControl(): void {
   installGlobals(installScreensaverStateModule());
   installGlobals(installFirmwareVersionStateModule());
   installGlobals(installEntityStateModule());
+  installGlobals(installHaEntityFetchModule());
   installGlobals(installClockBarStateModule());
   installGlobals(installFirmwareUpdateStateModule());
   installGlobals(installScreensaverTimeoutModule());

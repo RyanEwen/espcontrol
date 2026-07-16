@@ -181,6 +181,26 @@ export function installEntityStateModule(): GlobalDescriptors {
         if (input && input._entityDropdown)
             input._entityDropdown.classList.remove("sp-open");
     }
+    // When a card's main entity is chosen from the suggestions, fill the paired
+    // Label field with the entity's friendly name (only if the user left it
+    // blank). The label input shares the entity input's id prefix, ending in
+    // "label" instead of "entity"; other entity boxes (e.g. sensor) have no
+    // paired label and are skipped.
+    function autofillEntityLabel(this: any, input?: any, item?: any) {
+        var id: any = input && input.id ? String(input.id) : "";
+        if (!/entity$/.test(id))
+            return;
+        var labelInput: any = document.getElementById(id.replace(/entity$/, "label"));
+        if (!labelInput || String(labelInput.value || "").trim())
+            return;
+        var friendly: any = item && item.label && item.label.indexOf(" / ") === -1
+            ? item.label : titleFromEntityId(item && item.value);
+        if (!friendly)
+            return;
+        labelInput.value = friendly;
+        labelInput.dispatchEvent(new Event("input", { bubbles: true }));
+        labelInput.dispatchEvent(new Event("change", { bubbles: true }));
+    }
     function refreshEntityDatalist(this: any, input?: any) {
         if (!input)
             return;
@@ -212,6 +232,7 @@ export function installEntityStateModule(): GlobalDescriptors {
                 rememberEntityName(item.value, item.label || titleFromEntityId(item.value));
                 input.dispatchEvent(new Event("input", { bubbles: true }));
                 input.dispatchEvent(new Event("change", { bubbles: true }));
+                autofillEntityLabel(input, item);
                 closeEntityDropdown(input);
                 input._entitySuppressDropdown = false;
             });
@@ -224,9 +245,11 @@ export function installEntityStateModule(): GlobalDescriptors {
             return input;
         input._entityDomains = domains || [];
         input._entitySuggestionsAttached = true;
-        input.addEventListener("focus", function (this: any) { refreshEntityDatalist(input); });
+        input.addEventListener("focus", function (this: any) {
+            refreshHaEntitiesIfStale();
+            refreshEntityDatalist(input);
+        });
         input.addEventListener("input", function (this: any) {
-            rememberEntityName(input.value, optionLabelForEntity(input.value));
             refreshEntityDatalist(input);
         });
         input.addEventListener("blur", function (this: any) {
