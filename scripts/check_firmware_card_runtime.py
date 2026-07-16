@@ -57,6 +57,7 @@ ACCESS_COVER_HEADER = "button_grid_access_cover_driver.h"
 NAVIGATION_DRIVER_HEADER = "button_grid_navigation_driver.h"
 IMAGE_DRIVER_HEADER = "button_grid_image_driver.h"
 LIGHT_CONTROL_DRIVER_HEADER = "button_grid_light_control_driver.h"
+FAN_CONTROL_DRIVER_HEADER = "button_grid_fan_control_driver.h"
 CARDS_HEADER = "button_grid_cards.h"
 
 
@@ -173,6 +174,9 @@ def check_root(root: Path) -> list[str]:
             or "light_control_driver_setup_visual(s, p, context)" not in compact_grid
             or "light_control_driver_bind_main( s, p, context, light_control_environment)" not in compact_grid
             or "light_control_driver_bind_subpage( sub_slot, sb_cfg, context, light_control_environment)" not in compact_grid
+            or "fan_control_driver_setup_visual(s, p, context)" not in compact_grid
+            or "fan_control_driver_bind_main( s, p, context, fan_control_environment)" not in compact_grid
+            or "fan_control_driver_bind_subpage( sub_slot, sb_cfg, context, fan_control_environment)" not in compact_grid
             or "bind_basic_sensor_card(s, p, context, palette)" not in compact_grid
             or "bind_basic_sensor_card(sub_slot, sb_cfg, context, palette)" not in compact_grid
         ):
@@ -217,6 +221,7 @@ def check_root(root: Path) -> list[str]:
             'p.type == "image"', 'sb_cfg.type == "image"',
             'family == espcontrol::cards::Family::LIGHT_CONTROL',
             'p.type == "light_control"', 'sb_cfg.type == "light_control"',
+            'p.type == "fan_control"', 'sb_cfg.type == "fan_control"',
         ):
             if direct_branch in text:
                 failures.append(
@@ -235,6 +240,13 @@ def check_root(root: Path) -> list[str]:
         ):
             failures.append(
                 f"components/espcontrol/{GRID_HEADER}: include full light controls in generic subpage parent indicators"
+            )
+        if (
+            "fan_control_environment.add_parent_indicator" not in text
+            or "fan_control_driver_bind_subpage(" not in text
+        ):
+            failures.append(
+                f"components/espcontrol/{GRID_HEADER}: include full fan controls in generic subpage parent indicators"
             )
         image_reset_pos = text.find("image_driver_reset_pool(cfg);")
         subpage_clear_pos = text.find("navigation_clear_subpages();")
@@ -257,6 +269,7 @@ def check_root(root: Path) -> list[str]:
             or "navigation_driver_handle_main_click(" not in click_body
             or "image_driver_handle_main_click(" not in click_body
             or "light_control_driver_handle_main_click(" not in click_body
+            or "fan_control_driver_handle_main_click(" not in click_body
         ):
             failures.append(
                 f"components/espcontrol/{ACTION_HEADER}: route passive checks through the shared card context"
@@ -272,6 +285,7 @@ def check_root(root: Path) -> list[str]:
                 'p.type == "subpage"',
                 'p.type == "image"',
                 'p.type == "light_control"',
+                'p.type == "fan_control"',
             ):
                 if direct_branch in click_body:
                     failures.append(
@@ -592,6 +606,35 @@ def check_root(root: Path) -> list[str]:
         failures.append(
             f"components/espcontrol/{LIGHT_CONTROL_DRIVER_HEADER}: missing shared light-control driver"
         )
+    fan_control_driver_header = (
+        root / "components" / "espcontrol" / FAN_CONTROL_DRIVER_HEADER
+    )
+    if fan_control_driver_header.exists():
+        text = fan_control_driver_header.read_text(encoding="utf-8")
+        required = (
+            "fan_control_driver_setup_visual",
+            "fan_control_driver_bind_main",
+            "fan_control_driver_bind_subpage",
+            "fan_control_driver_attach_interaction",
+            "fan_control_driver_refresh_layout",
+            "fan_control_driver_cleanup",
+            "fan_control_driver_handle_main_click",
+            "create_fan_card_context",
+            "subscribe_fan_card_state",
+            "fan_control_open_modal",
+            "grid_track_fan_card_runtime",
+            "grid_delete_fan_card_with_owner",
+            '"fan_control"',
+        )
+        for needle in required:
+            if needle not in text:
+                failures.append(
+                    f"components/espcontrol/{FAN_CONTROL_DRIVER_HEADER}: missing shared fan-control lifecycle guard {needle}"
+                )
+    elif grid_header.exists():
+        failures.append(
+            f"components/espcontrol/{FAN_CONTROL_DRIVER_HEADER}: missing shared fan-control driver"
+        )
     cards_header = root / "components" / "espcontrol" / CARDS_HEADER
     if cards_header.exists():
         text = cards_header.read_text(encoding="utf-8")
@@ -802,6 +845,15 @@ def run_self_test() -> None:
                 )
             },
             ("missing shared light-control lifecycle guard",),
+        ),
+        (
+            {
+                "button_grid_fan_control_driver.h": (
+                    "inline bool fan_control_driver_setup_visual() {}\n"
+                    "inline bool fan_control_driver_bind_main() {}\n"
+                )
+            },
+            ("missing shared fan-control lifecycle guard",),
         ),
         (
             {

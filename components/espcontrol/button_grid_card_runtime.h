@@ -101,6 +101,7 @@ inline bool driver_uses_legacy_dispatch(
     case Driver::SUBPAGE:
     case Driver::IMAGE:
     case Driver::LIGHT_CONTROL:
+    case Driver::FAN_CONTROL:
       return false;
     default: return true;
   }

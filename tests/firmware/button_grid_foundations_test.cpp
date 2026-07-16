@@ -32,6 +32,7 @@ int main() {
   const auto presence = card_runtime_context("presence");
   const auto image = card_runtime_context("image");
   const auto light_control = card_runtime_context("light_control");
+  const auto fan_control = card_runtime_context("fan_control");
   const auto clock = card_runtime_context("clock");
   const auto timezone = card_runtime_context("timezone");
   const auto calendar = card_runtime_context("calendar");
@@ -112,7 +113,10 @@ int main() {
       image.legacy_dispatch ||
       light_control.runtime.driver !=
         espcontrol::card_runtime::CardDriverId::LIGHT_CONTROL ||
-      light_control.legacy_dispatch) {
+      light_control.legacy_dispatch ||
+      fan_control.runtime.driver !=
+        espcontrol::card_runtime::CardDriverId::FAN_CONTROL ||
+      fan_control.legacy_dispatch) {
     return EXIT_FAILURE;
   }
   struct TestConfig {

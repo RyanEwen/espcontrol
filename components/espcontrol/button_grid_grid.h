@@ -203,6 +203,7 @@ inline void apply_wide_large_date_time_card_layout(const BtnSlot &s,
 #include "button_grid_navigation_driver.h"
 #include "button_grid_image_driver.h"
 #include "button_grid_light_control_driver.h"
+#include "button_grid_fan_control_driver.h"
 
 inline void apply_card_label_line_clamp(lv_obj_t *label, const GridConfig &cfg,
                                         int row_span = 1) {
@@ -400,6 +401,7 @@ inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
   espcontrol::cards::navigation_driver_cleanup(s, p, context);
   espcontrol::cards::image_driver_cleanup(s, p, context);
   espcontrol::cards::light_control_driver_cleanup(s, p, context);
+  espcontrol::cards::fan_control_driver_cleanup(s, p, context);
   reset_card_slot_dynamic_children(s);
   apply_button_colors(s.btn, palette.has_on, palette.on_val,
     palette.has_off, palette.off_val);
@@ -434,6 +436,11 @@ inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
   if (espcontrol::cards::light_control_driver_setup_visual(s, p, context)) {
     espcontrol::cards::light_control_driver_attach_interaction(s, p, context);
     espcontrol::cards::light_control_driver_refresh_layout(s, p, context);
+    return;
+  }
+  if (espcontrol::cards::fan_control_driver_setup_visual(s, p, context)) {
+    espcontrol::cards::fan_control_driver_attach_interaction(s, p, context);
+    espcontrol::cards::fan_control_driver_refresh_layout(s, p, context);
     return;
   }
   if (espcontrol::cards::sensor_driver_setup_visual(
@@ -499,10 +506,6 @@ inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
   }
   if (family == espcontrol::cards::Family::ALARM) {
     setup_alarm_card(s, p);
-    return;
-  }
-  if (p.type == "fan_control") {
-    setup_fan_control_card(s, p);
     return;
   }
   if (family == espcontrol::cards::Family::COVER && cover_modal_mode(p.sensor)) {
@@ -933,6 +936,7 @@ inline FanCardCtx *grid_delete_fan_card_with_owner(lv_obj_t *owner,
     lv_obj_add_event_cb(owner, [](lv_event_t *e) {
       FanCardCtx *fan = static_cast<FanCardCtx *>(lv_event_get_user_data(e));
       if (fan != nullptr) {
+        fan_close_modals_for_context(fan);
         grid_delete_transient_status_label(fan->status_label);
         fan->status_label = nullptr;
         delete fan;
@@ -1011,6 +1015,7 @@ inline void grid_delete_alarm_action_runtime_ptr(void *ptr) {
 inline void grid_delete_fan_card_runtime_ptr(void *ptr) {
   FanCardCtx *ctx = static_cast<FanCardCtx *>(ptr);
   if (ctx != nullptr) {
+    fan_close_modals_for_context(ctx);
     grid_delete_transient_status_label(ctx->status_label);
     ctx->status_label = nullptr;
     delete ctx;
@@ -1252,6 +1257,11 @@ inline void grid_phase2(
         palette, display, s);
     if (espcontrol::cards::light_control_driver_bind_main(
           s, p, context, light_control_environment)) continue;
+    auto fan_control_environment =
+      espcontrol::cards::fan_control_driver_environment(
+        palette, display, s);
+    if (espcontrol::cards::fan_control_driver_bind_main(
+          s, p, context, fan_control_environment)) continue;
     if (bind_basic_sensor_card(s, p, context, palette)) continue;
     espcontrol::cards::ToggleDriverState toggle_state;
     toggle_state.has_sensor = &has_sensor[idx - 1];
@@ -1298,20 +1308,6 @@ inline void grid_phase2(
         subscribe_alarm_state(ctx);
         if (p.label.empty() && !ctx->show_status_label)
           subscribe_friendly_name(ctx->status_label, p.entity);
-      }
-      continue;
-    }
-    if (p.type == "fan_control") {
-      if (!p.entity.empty()) {
-        FanCardCtx *ctx = create_fan_card_context(
-          s, p,
-          has_on ? on_val : DEFAULT_SLIDER_COLOR,
-          palette.has_off ? palette.off_val : SECONDARY_GREY,
-          palette.has_sensor_color ? palette.sensor_val : TERTIARY_GREY,
-          lv_obj_get_style_text_font(s.text_lbl, LV_PART_MAIN),
-          display_icon_font(display),
-          display_main_width_percent(display));
-        subscribe_fan_card_state(ctx);
       }
       continue;
     }
@@ -1671,6 +1667,13 @@ inline void grid_phase2(
         [&](const std::string &entity_id) { add_parent_indicator(entity_id); };
       if (espcontrol::cards::light_control_driver_bind_subpage(
             sub_slot, sb_cfg, context, light_control_environment)) continue;
+      auto fan_control_environment =
+        espcontrol::cards::fan_control_driver_environment(
+          palette, display, sub_slot);
+      fan_control_environment.add_parent_indicator =
+        [&](const std::string &entity_id) { add_parent_indicator(entity_id); };
+      if (espcontrol::cards::fan_control_driver_bind_subpage(
+            sub_slot, sb_cfg, context, fan_control_environment)) continue;
       if (bind_basic_sensor_card(sub_slot, sb_cfg, context, palette)) continue;
       espcontrol::cards::BasicActionSubpageEnvironment action_environment;
       action_environment.grid_config = &cfg;
@@ -1792,25 +1795,6 @@ inline void grid_phase2(
           lv_obj_add_event_cb(sb_btn, [](lv_event_t *e) {
             AlarmCardCtx *ctx = (AlarmCardCtx *)lv_event_get_user_data(e);
             if (ctx) alarm_card_open_page(ctx);
-          }, LV_EVENT_CLICKED, ctx);
-        }
-        continue;
-      }
-      if (sb_cfg.type == "fan_control") {
-        if (!sb_cfg.entity.empty()) {
-          FanCardCtx *ctx = create_fan_card_context(
-            sub_slot, sb_cfg,
-            has_on ? on_val : DEFAULT_SLIDER_COLOR,
-            palette.has_off ? palette.off_val : SECONDARY_GREY,
-            palette.has_sensor_color ? palette.sensor_val : TERTIARY_GREY,
-            lv_obj_get_style_text_font(sub_slot.text_lbl, LV_PART_MAIN),
-            display_icon_font(display),
-            display_main_width_percent(display));
-          subscribe_fan_card_state(ctx);
-          add_parent_indicator(sb_cfg.entity);
-          lv_obj_add_event_cb(sb_btn, [](lv_event_t *e) {
-            FanCardCtx *ctx = (FanCardCtx *)lv_event_get_user_data(e);
-            if (ctx) fan_control_open_modal(ctx);
           }, LV_EVENT_CLICKED, ctx);
         }
         continue;

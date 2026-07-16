@@ -834,6 +834,8 @@ inline bool image_driver_handle_main_click(
     const Context &context, const ParsedCfg &config, lv_obj_t *button);
 inline bool light_control_driver_handle_main_click(
     const Context &context, const ParsedCfg &config, lv_obj_t *button);
+inline bool fan_control_driver_handle_main_click(
+    const Context &context, const ParsedCfg &config, lv_obj_t *button);
 }
 
 // Handle a main-grid button press: dispatch push event, subpage nav,
@@ -865,12 +867,11 @@ inline void handle_button_click(const std::string &cfg, int slot_num,
         context, p, btn_obj)) return;
   if (espcontrol::cards::light_control_driver_handle_main_click(
         context, p, btn_obj)) return;
+  if (espcontrol::cards::fan_control_driver_handle_main_click(
+        context, p, btn_obj)) return;
   if (p.type == "alarm") {
     AlarmCardCtx *ctx = (AlarmCardCtx *)lv_obj_get_user_data(btn_obj);
     if (alarm_card_context_valid(ctx)) alarm_card_open_page(ctx);
-  } else if (p.type == "fan_control") {
-    FanCardCtx *ctx = (FanCardCtx *)lv_obj_get_user_data(btn_obj);
-    if (ctx) fan_control_open_modal(ctx);
   } else if (p.type == "cover" && cover_modal_mode(p.sensor)) {
     CoverControlCtx *ctx = (CoverControlCtx *)lv_obj_get_user_data(btn_obj);
     if (ctx) cover_control_open_modal(ctx);
