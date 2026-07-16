@@ -114,10 +114,14 @@ the shared access/cover lifecycle boundary while retaining their existing
 status, supported-feature, availability, and action handling. Subpage cards use
 the shared navigation lifecycle boundary for parent visuals, direct and
 aggregate parent indicators, screen target registration, click navigation, and
-target cleanup; child-card layout remains grid infrastructure. Cover modal and
-the combined Fan Control card remain on the existing `Family` dispatch for their
-later reviewed migrations. Other families also remain on that dispatch until
-their reviewed migration PR switches them one family at a time.
+target cleanup; child-card layout remains grid infrastructure. Image cards use
+the shared `IMAGE` lifecycle boundary for main-grid and subpage visual setup,
+runtime binding, layout refresh, modal click dispatch, and pool cleanup while
+retaining their specialised downloader, cache, resizing, and modal
+implementation. Cover modal and the combined Fan Control card remain on the
+existing `Family` dispatch for their later reviewed migrations. Other families
+also remain on that dispatch until their reviewed migration PR switches them
+one family at a time.
 
 The pre-driver-migration runtime baseline is authored in
 `common/config/card_runtime_inventory.json`. It classifies contract and

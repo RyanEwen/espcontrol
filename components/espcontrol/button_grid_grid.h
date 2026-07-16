@@ -201,6 +201,7 @@ inline void apply_wide_large_date_time_card_layout(const BtnSlot &s,
 #include "button_grid_cleaning_driver.h"
 #include "button_grid_access_cover_driver.h"
 #include "button_grid_navigation_driver.h"
+#include "button_grid_image_driver.h"
 
 inline void apply_card_label_line_clamp(lv_obj_t *label, const GridConfig &cfg,
                                         int row_span = 1) {
@@ -396,6 +397,7 @@ inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
   espcontrol::cards::cleaning_driver_cleanup(s, p, context);
   espcontrol::cards::access_cover_driver_cleanup(s, p, context);
   espcontrol::cards::navigation_driver_cleanup(s, p, context);
+  espcontrol::cards::image_driver_cleanup(s, p, context);
   reset_card_slot_dynamic_children(s);
   apply_button_colors(s.btn, palette.has_on, palette.on_val,
     palette.has_off, palette.off_val);
@@ -422,8 +424,9 @@ inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
 
   screen_lock_register_controlled_button(s.btn);
 
-  if (family == espcontrol::cards::Family::IMAGE) {
-    setup_image_card(s);
+  if (espcontrol::cards::image_driver_setup_visual(s, p, context)) {
+    espcontrol::cards::image_driver_attach_interaction(s, p, context);
+    espcontrol::cards::image_driver_refresh_layout(s, p, context);
     return;
   }
   if (espcontrol::cards::sensor_driver_setup_visual(
@@ -710,29 +713,9 @@ inline void refresh_card_layout(BtnSlot &s, const ParsedCfg &p,
   if (espcontrol::cards::numeric_selectable_driver_refresh_layout(
         s, p, context)) return;
 
-  if (p.type == "image") {
-    ImageCardCtx *ctx = s.btn
-      ? static_cast<ImageCardCtx *>(lv_obj_get_user_data(s.btn))
-      : nullptr;
-    if (ctx && ctx->active) {
-      image_card_refresh_tile_geometry(ctx);
-    } else {
-      lv_obj_t *widget = s.sensor_container
-        ? static_cast<lv_obj_t *>(lv_obj_get_user_data(s.sensor_container))
-        : nullptr;
-      if (widget) {
-        image_card_position_widget(s.btn, widget);
-        lv_obj_t *loading = image_card_loading_widget(widget);
-        image_card_position_widget(s.btn, loading);
-        image_card_refresh_loading_layout(loading);
-      }
-    }
-    if (s.text_lbl && !lv_obj_has_flag(s.text_lbl, LV_OBJ_FLAG_HIDDEN)) {
-      image_card_align_label_stack(s.text_lbl, s.btn);
-    }
-    if (s.icon_lbl && !lv_obj_has_flag(s.icon_lbl, LV_OBJ_FLAG_HIDDEN)) {
-      image_card_align_icon(s.icon_lbl, s.btn);
-    }
+  if (espcontrol::cards::image_driver_refresh_layout(
+        s, p, context)) {
+    return;
   } else if (p.type == "media") {
     refresh_media_card_layout(s, p, cfg, row_span);
   } else {
@@ -813,7 +796,7 @@ inline void grid_phase1(
   const DisplayProfile display = display_profile_from_grid_config(cfg);
   display_activate_profile(display);
   // Clear image references before visual setup removes their old LVGL widgets.
-  reset_image_card_pool(cfg);
+  espcontrol::cards::image_driver_reset_pool(cfg);
   int NS = bounded_grid_slots(cfg.num_slots);
   int COLS = cfg.cols > 0 ? cfg.cols : 1;
   if (COLS > MAX_GRID_SLOTS) COLS = MAX_GRID_SLOTS;
@@ -1212,7 +1195,7 @@ inline void grid_phase2(
   grid_clear_navigation_targets(slots, NS);
   navigation_clear_home_targets();
   // Image-card contexts may still point at widgets inside subpage screens.
-  reset_image_card_pool(cfg);
+  espcontrol::cards::image_driver_reset_pool(cfg);
   navigation_clear_subpages();
   clear_subpage_vacuum_card_text_refs();
 
@@ -1256,7 +1239,8 @@ inline void grid_phase2(
     bool is_1x1_card = card_span_is_single(row_span, col_span);
     if (cfg.info_only && info_only_hidden_card_type(context)) continue;
     navigation_register_home_target(idx, pos, p.label, scfg, s.btn);
-    if (bind_image_card(s, p, cfg)) continue;
+    if (espcontrol::cards::image_driver_bind_main(
+          s, p, context, cfg)) continue;
     if (bind_basic_sensor_card(s, p, context, palette)) continue;
     espcontrol::cards::ToggleDriverState toggle_state;
     toggle_state.has_sensor = &has_sensor[idx - 1];
@@ -1684,7 +1668,8 @@ inline void grid_phase2(
       display_apply_slot_text_width(sub_slot, display);
       setup_card_visual(sub_slot, sb_cfg, context, cfg, palette, rs, cs);
 
-      if (bind_image_card(sub_slot, sb_cfg, cfg, true)) continue;
+      if (espcontrol::cards::image_driver_bind_subpage(
+            sub_slot, sb_cfg, context, cfg)) continue;
       if (bind_basic_sensor_card(sub_slot, sb_cfg, context, palette)) continue;
       espcontrol::cards::BasicActionSubpageEnvironment action_environment;
       action_environment.grid_config = &cfg;

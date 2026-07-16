@@ -532,7 +532,7 @@ def firmware_local_sensor_binding_order_errors(firmware_dir: Path, root: Path) -
 
     for match in re.finditer(r"if\s*\(\s*bind_basic_sensor_card\s*\(", grid_text):
         bind_start = match.start()
-        image_start = grid_text.rfind("if (bind_image_card", 0, bind_start)
+        image_start = grid_text.rfind("image_driver_bind_main", 0, bind_start)
         line_no = grid_text.count("\n", 0, bind_start) + 1
         if image_start < 0:
             errors.append(f"{grid_rel}:{line_no}: bind image cards before basic sensor cards")
@@ -1881,12 +1881,19 @@ def firmware_image_card_quality_errors(firmware_dir: Path, root: Path) -> list[s
     if "image_card_tile_request_size" not in text:
         errors.append(f"{rel}: keep small-display image card tile downloads sized to the tile")
 
-    grid_path = firmware_dir / "button_grid_grid.h"
-    if grid_path.exists():
-        grid_rel = grid_path.relative_to(root)
-        grid_text = grid_path.read_text(encoding="utf-8")
-        if "image_card_refresh_tile_geometry(ctx)" not in grid_text:
-            errors.append(f"{grid_rel}: update active image-card geometry during grid refresh")
+    driver_path = firmware_dir / "button_grid_image_driver.h"
+    if driver_path.exists():
+        driver_rel = driver_path.relative_to(root)
+        driver_text = driver_path.read_text(encoding="utf-8")
+        if "image_card_refresh_tile_geometry(image_context)" not in driver_text:
+            errors.append(f"{driver_rel}: update active image-card geometry during grid refresh")
+    else:
+        grid_path = firmware_dir / "button_grid_grid.h"
+        if grid_path.exists():
+            grid_rel = grid_path.relative_to(root)
+            grid_text = grid_path.read_text(encoding="utf-8")
+            if "image_card_refresh_tile_geometry(ctx)" not in grid_text:
+                errors.append(f"{grid_rel}: update active image-card geometry during grid refresh")
     return errors
 
 
@@ -4118,7 +4125,7 @@ def run_self_test() -> int:
         "local sensor subtype reaches HA subscription first",
         {
             "button_grid_grid.h":
-                "if (bind_image_card(s, p, cfg)) continue;\n"
+                "if (image_driver_bind_main(s, p, context, cfg)) continue;\n"
                 "if (sensor_driver_bind_data(s, p, context, palette)) return true;\n"
                 "if (bind_basic_sensor_card(s, p, context, palette)) continue;\n",
             "button_grid_sensor_driver.h":
@@ -4136,7 +4143,7 @@ def run_self_test() -> int:
         "local sensor subtype binds through shared driver",
         {
             "button_grid_grid.h":
-                "if (bind_image_card(s, p, cfg)) continue;\n"
+                "if (image_driver_bind_main(s, p, context, cfg)) continue;\n"
                 "if (sensor_driver_bind_data(s, p, context, palette)) return true;\n"
                 "if (bind_basic_sensor_card(s, p, context, palette)) continue;\n",
             "button_grid_sensor_driver.h":
