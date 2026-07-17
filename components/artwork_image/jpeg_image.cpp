@@ -235,13 +235,13 @@ int JpegDecoder::decode_hardware_(uint8_t *buffer, size_t size) {
       p4_release_jpeg_workspace();
       return 0;
     }
-    input_size = jpeg_strip_metadata(buffer, size, early_workspace.input);
+    input_size = jpeg_normalize_for_hardware(buffer, size, early_workspace.input);
     if (input_size != 0) {
       info_err = jpeg_decoder_get_info(early_workspace.input, input_size, &info);
       header_ok = info_err == ESP_OK && info.width != 0 && info.height != 0;
       if (header_ok) {
-        ESP_LOGD(TAG, "Stripped %u bytes of JPEG metadata for hardware decode",
-                 (unsigned) (size - input_size));
+        ESP_LOGD(TAG, "Normalized JPEG for hardware decode (%u -> %u bytes)",
+                 (unsigned) size, (unsigned) input_size);
         input_prepared = true;
       }
     }

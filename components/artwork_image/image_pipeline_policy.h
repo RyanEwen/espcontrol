@@ -207,15 +207,18 @@ constexpr bool p4_jpeg_hardware_target_supported(bool target_is_rgb565) {
   return target_is_rgb565;
 }
 
-// Copy a JPEG stream into dst while dropping APPn and COM segments. Cameras
-// and photo services front-load kilobytes of EXIF/ICC metadata, which pushes
-// the frame header beyond the window the ESP32-P4 ROM parser inspects — it
-// then reports a 0x0 image and the decode falls back to a multi-second
-// software path. Without the (legally optional) metadata the hardware accepts
-// the same image. Returns the stripped size, or 0 when the stream is not a
-// JPEG this simple walker understands (caller falls back to software).
-// dst must hold at least size bytes.
-inline size_t jpeg_strip_metadata(const uint8_t *src, size_t size, uint8_t *dst) {
+// Copy a JPEG stream into dst, normalized so the ESP32-P4 hardware decoder can
+// accept it when the content is decodable:
+//   - APPn and COM segments are dropped. Front-loaded EXIF/ICC metadata pushes
+//     the frame header beyond the window the ROM parser inspects, making it
+//     report a 0x0 image.
+//   - An 8-bit SOF1 (extended sequential) frame marker is relabeled to SOF0
+//     (baseline). Photo services emit a mix of the two; the 8-bit huffman
+//     bitstreams are compatible, and the hardware is baseline-only.
+// Returns the normalized size, or 0 when the stream is not a JPEG this simple
+// walker understands (caller falls back to software). dst must hold at least
+// size bytes.
+inline size_t jpeg_normalize_for_hardware(const uint8_t *src, size_t size, uint8_t *dst) {
   if (src == nullptr || dst == nullptr || size < 4) return 0;
   if (src[0] != 0xFF || src[1] != 0xD8) return 0;  // SOI
   size_t out = 0;
@@ -237,6 +240,11 @@ inline size_t jpeg_strip_metadata(const uint8_t *src, size_t size, uint8_t *dst)
         (marker >= 0xE0 && marker <= 0xEF) || marker == 0xFE;  // APPn / COM
     if (!metadata) {
       memcpy(dst + out, src + i, 2 + segment_length);
+      // SOF payload starts with the sample precision; only 8-bit extended
+      // sequential is bitstream-compatible with baseline.
+      if (marker == 0xC1 && segment_length >= 3 && src[i + 4] == 8) {
+        dst[out + 1] = 0xC0;
+      }
       out += 2 + segment_length;
     }
     i += 2 + segment_length;
