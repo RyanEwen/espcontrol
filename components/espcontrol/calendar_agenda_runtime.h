@@ -57,6 +57,9 @@ class AgendaFetcher {
         this->finish_one_(generation);
         continue;
       }
+      // Ask Home Assistant to return the service response (the events); without
+      // this the call still runs but no data comes back to the device.
+      req.wants_response = true;
       ha_action_add_entity(req, entity);
       ha_action_add_data(req, "start_date_time", start_datetime.c_str());
       ha_action_add_data(req, "end_date_time", end_datetime.c_str());
