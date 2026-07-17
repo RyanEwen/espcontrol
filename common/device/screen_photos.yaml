@@ -569,15 +569,6 @@ script:
             - script.execute: photos_subscribe_weather
             - script.execute: clock_bar_hide
             - script.wait: clock_bar_hide
-            # Fade the previous UI to black BEFORE the photo overlay is revealed,
-            # so the swap happens while the screen is dark. Revealing the photo
-            # first would show it, then dip to black, then ramp back up — two
-            # visible fades. This mirrors the clock screensaver.
-            - script.execute:
-                id: backlight_fade_current_ui_to_black
-                generation: !lambda 'return generation;'
-                target_mode: !lambda 'return static_cast<int>(espcontrol::DisplayMode::PHOTOS);'
-            - script.wait: backlight_fade_current_ui_to_black
             - lambda: |-
                 if (!id(display_mode_controller).transition_is_current(
                       static_cast<uint32_t>(generation), espcontrol::DisplayMode::PHOTOS)) {
@@ -590,10 +581,8 @@ script:
                                                  id(network_status_button));
                 network_status_hide_modal();
                 refresh_screensaver_fullscreen(id(photos_screensaver), id(dim_screensaver_touch_guard));
-                lv_obj_clear_flag(id(photos_screensaver), LV_OBJ_FLAG_HIDDEN);
-                lv_obj_move_foreground(id(photos_screensaver));
                 // Reveal a retained photo if one is loaded; otherwise the overlay
-                // stays black until the first crossfade brings one in.
+                // fades in as black until the first crossfade brings one in.
                 if (id(photos_first_image_ready)) {
                   lv_obj_t *active = id(photos_active_slot) == 0
                                          ? id(photos_image_widget_a)
@@ -602,12 +591,21 @@ script:
                   lv_obj_set_style_opa(active, LV_OPA_COVER, 0);
                   lv_obj_clear_flag(active, LV_OBJ_FLAG_HIDDEN);
                 }
-            # Screen is black with the photo already in place; ramp the backlight
-            # up so the photo fades in exactly once.
+                // Present the overlay transparent over the current screen, then
+                // fade it in below — a direct crossfade from the UI to the photo
+                // at full backlight, with no dip to black. The photo image covers
+                // the overlay, so fading the overlay's opacity dissolves the photo
+                // in over whatever was showing.
+                lv_obj_set_style_opa(id(photos_screensaver), LV_OPA_TRANSP, 0);
+                lv_obj_clear_flag(id(photos_screensaver), LV_OBJ_FLAG_HIDDEN);
+                lv_obj_move_foreground(id(photos_screensaver));
+            # Bring the backlight to full without a dip (a no-op when already
+            # active), then crossfade the photo overlay in over the current UI.
             - light.turn_on:
                 id: display_backlight
                 brightness: 100%
-                transition_length: 400ms
+                transition_length: 200ms
+            - lambda: 'lv_obj_fade_in(id(photos_screensaver), 500, 0);'
           else:
             - lambda: 'ESP_LOGD("photos", "Skipping photo screensaver while image modal is active");'
 
