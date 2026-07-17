@@ -23,6 +23,12 @@ target_compile_options(display_mode_controller_test PRIVATE -Wall -Wextra -Werro
 target_include_directories(display_mode_controller_test PRIVATE ../../components/espcontrol)
 add_test(NAME display_mode_controller_test COMMAND display_mode_controller_test)
 
+add_executable(calendar_agenda_test calendar_agenda_test.cpp)
+target_compile_features(calendar_agenda_test PRIVATE cxx_std_17)
+target_compile_options(calendar_agenda_test PRIVATE -Wall -Wextra -Werror)
+target_include_directories(calendar_agenda_test PRIVATE ../../components/espcontrol)
+add_test(NAME calendar_agenda_test COMMAND calendar_agenda_test)
+
 add_executable(photo_screensaver_test photo_screensaver_test.cpp)
 target_compile_features(photo_screensaver_test PRIVATE cxx_std_17)
 target_compile_options(photo_screensaver_test PRIVATE -Wall -Wextra -Werror)
