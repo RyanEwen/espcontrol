@@ -81,6 +81,7 @@ substitutions:
   cover_art_live_image_updates: "false"
   photos_decode_size: "480"
   photos_download_budget: "2097152"
+  photos_retain_decoded: "false"
 
 packages:
   # ---------------------------------------------------------------------------

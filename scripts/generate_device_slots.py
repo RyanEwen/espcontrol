@@ -122,10 +122,16 @@ def photos_substitution_lines(device: dict) -> list[str]:
     decode = max(dimension("screen_width"), dimension("screen_height")) or 480
     # Full-resolution photos routinely exceed the 2MB artwork default. The P4
     # panels have the PSRAM headroom for camera originals; the S3 does not.
-    budget = 2097152 if "-s3-" in device["slug"] else 8388608
+    is_s3 = "-s3-" in device["slug"]
+    budget = 2097152 if is_s3 else 8388608
+    # Keeping the last decoded photo across dismissals lets the screensaver
+    # reappear instantly instead of starting black. The S3 releases it, matching
+    # its cover-art policy of freeing decoded images when hidden.
+    retain = "false" if is_s3 else "true"
     return [
         f'  photos_decode_size: "{decode}"',
         f'  photos_download_budget: "{budget}"',
+        f'  photos_retain_decoded: "{retain}"',
     ]
 
 

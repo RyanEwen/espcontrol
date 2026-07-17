@@ -512,6 +512,9 @@ script:
           then:
             - lambda: 'navigation_return_home(id(main_page)->obj);'
             - lvgl.widget.hide: dim_screensaver_touch_guard
+            # Start fetching the next photo immediately so the download and
+            # decode run during the fade instead of after it.
+            - script.execute: photos_screensaver_advance
             - script.execute: photos_apply_widgets
             - script.execute: photos_subscribe_weather
             - lambda: |-
@@ -545,8 +548,6 @@ script:
                       static_cast<uint32_t>(generation), espcontrol::DisplayMode::PHOTOS)) {
                   id(show_photos_view).stop();
                 }
-            # Start (or continue) rotating, then bring the backlight up to full.
-            - script.execute: photos_screensaver_advance
             - light.turn_on:
                 id: display_backlight
                 brightness: 100%
@@ -567,17 +568,36 @@ script:
               return !lv_obj_has_flag(id(photos_screensaver), LV_OBJ_FLAG_HIDDEN);
           then:
             - script.stop: photos_fade_in_slot
-            - lvgl.widget.hide: photos_image_widget_a
-            - lvgl.widget.hide: photos_image_widget_b
             - lvgl.widget.hide: photos_screensaver
             - lambda: |-
                 id(photos_advance_generation)++;  // cancel any in-flight resolve
-                id(photos_first_image_ready) = false;
-                // Detach the decoded buffers from the widgets before release.
-                lv_image_set_src(id(photos_image_widget_a), id(photos_placeholder)->get_lv_image_dsc());
-                lv_image_set_src(id(photos_image_widget_b), id(photos_placeholder)->get_lv_image_dsc());
-            - artwork_image.release: photos_downloaded_image_a
-            - artwork_image.release: photos_downloaded_image_b
+                const bool retain = std::string("${photos_retain_decoded}") == "true";
+                auto *active_image = id(photos_active_slot) == 0
+                                         ? id(photos_downloaded_image_a)
+                                         : id(photos_downloaded_image_b);
+                auto *inactive_image = id(photos_active_slot) == 0
+                                           ? id(photos_downloaded_image_b)
+                                           : id(photos_downloaded_image_a);
+                lv_obj_t *active_widget = id(photos_active_slot) == 0
+                                              ? id(photos_image_widget_a)
+                                              : id(photos_image_widget_b);
+                lv_obj_t *inactive_widget = id(photos_active_slot) == 0
+                                                ? id(photos_image_widget_b)
+                                                : id(photos_image_widget_a);
+                // The inactive slot is always released; detach its widget first.
+                lv_obj_add_flag(inactive_widget, LV_OBJ_FLAG_HIDDEN);
+                lv_image_set_src(inactive_widget, id(photos_placeholder)->get_lv_image_dsc());
+                inactive_image->release();
+                if (retain) {
+                  // Keep the photo that was showing so the screensaver can
+                  // reappear with it instantly instead of starting black. The
+                  // hidden parent overlay keeps it off screen meanwhile.
+                } else {
+                  lv_obj_add_flag(active_widget, LV_OBJ_FLAG_HIDDEN);
+                  lv_image_set_src(active_widget, id(photos_placeholder)->get_lv_image_dsc());
+                  active_image->release();
+                  id(photos_first_image_ready) = false;
+                }
             - script.execute: clock_bar_apply
 
   # Keep the overlay above any screen changes or top-layer overlays that appear
