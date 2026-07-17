@@ -37,6 +37,15 @@ globals:
   - id: photos_pending_slot
     type: int
     initial_value: '0'
+  # One download at a time: a second advance while one is in flight would
+  # target the same slot and re-fade the photo already on screen. The timestamp
+  # doubles as the rotation clock and as a stale-download escape hatch.
+  - id: photos_download_pending
+    type: bool
+    initial_value: 'false'
+  - id: photos_last_advance_ms
+    type: uint32_t
+    initial_value: '0'
 
 # The websocket client that browses the folder and resolves signed URLs. Its
 # connection is wired from the stored Home Assistant URL/token entities by
@@ -351,10 +360,16 @@ script:
       - lambda: |-
           if (id(photo_media).index().empty()) {
             // Nothing indexed yet (or folder empty). Ask the client to browse if
-            // it is ready; the on-index-ready path will kick the first advance.
+            // it is ready; the rotation interval will retry the first advance.
             if (id(photo_media).ready() && !id(photo_media).index_loading()) {
               id(photo_media).refresh_index();
             }
+            return;
+          }
+          // One in-flight photo at a time; a stacked second download would
+          // re-fade the slot that is already showing. Stale escapes after 60s.
+          if (id(photos_download_pending) &&
+              millis() - id(photos_last_advance_ms) < 60000) {
             return;
           }
 
@@ -368,10 +383,15 @@ script:
           if (next_ref.empty()) return;
           const std::string next(next_ref.c_str(), next_ref.size());
 
+          id(photos_download_pending) = true;
+          id(photos_last_advance_ms) = millis();
           const uint32_t generation = ++id(photos_advance_generation);
           id(photo_media).resolve(next, [generation](const std::string &url) {
             if (generation != id(photos_advance_generation)) return;  // superseded
-            if (url.empty()) return;
+            if (url.empty()) {
+              id(photos_download_pending) = false;
+              return;
+            }
             id(photos_pending_url) = url;
             // Download into the slot that is NOT on screen, so the current
             // photo stays visible until the new one is ready to fade in.
@@ -392,10 +412,18 @@ script:
       slot: int
     then:
       - lambda: |-
+          id(photos_download_pending) = false;
           if (slot != id(photos_pending_slot)) return;  // stale completion
-          id(photos_first_image_ready) = true;
           lv_obj_t *incoming = slot == 0 ? id(photos_image_widget_a)
                                          : id(photos_image_widget_b);
+          // If this slot is already on screen (a re-download landed in the
+          // visible slot), the content has been swapped in place by the image
+          // update; restarting the fade from transparent would blink black.
+          const bool already_showing =
+              id(photos_first_image_ready) && slot == id(photos_active_slot) &&
+              !lv_obj_has_flag(incoming, LV_OBJ_FLAG_HIDDEN);
+          id(photos_first_image_ready) = true;
+          if (already_showing) return;
           lv_image_set_inner_align(incoming, LV_IMAGE_ALIGN_COVER);
           lv_obj_move_foreground(incoming);  // within photos_image_stack only
           lv_obj_set_style_opa(incoming, LV_OPA_TRANSP, 0);
@@ -417,6 +445,7 @@ script:
   - id: photos_skip_failed_photo
     mode: restart
     then:
+      - lambda: 'id(photos_download_pending) = false;'
       - if:
           condition:
             lambda: |-
@@ -571,6 +600,7 @@ script:
             - lvgl.widget.hide: photos_screensaver
             - lambda: |-
                 id(photos_advance_generation)++;  // cancel any in-flight resolve
+                id(photos_download_pending) = false;
                 const bool retain = std::string("${photos_retain_decoded}") == "true";
                 auto *active_image = id(photos_active_slot) == 0
                                          ? id(photos_downloaded_image_a)
@@ -636,17 +666,18 @@ interval:
               if (!id(display_mode_controller).current_mode_is(
                     espcontrol::DisplayMode::PHOTOS))
                 return false;
-              // Advance when the configured photo duration has elapsed. The
-              // number entity is in seconds; default to 30s if unset.
-              static uint32_t last_advance_ms = 0;
+              // Advance when the configured photo duration has elapsed since
+              // the last advance — including the one show_photos_view kicks at
+              // activation, so the timer and the activation kick share one
+              // clock. The advance script itself serializes in-flight
+              // downloads; this only paces the cadence.
               float secs = id(screensaver_photos_interval).state;
               if (std::isnan(secs) || secs < 5) secs = 30;
               const uint32_t now = millis();
-              if (last_advance_ms != 0 &&
-                  now - last_advance_ms < (uint32_t)(secs * 1000)) {
+              if (id(photos_last_advance_ms) != 0 &&
+                  now - id(photos_last_advance_ms) < (uint32_t)(secs * 1000)) {
                 return false;
               }
-              last_advance_ms = now;
               return true;
           then:
             - script.execute: photos_screensaver_advance
