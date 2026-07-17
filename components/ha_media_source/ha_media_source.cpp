@@ -272,8 +272,11 @@ void HaMediaSource::websocket_event_handler(void *handler_args, esp_event_base_t
         const bool complete =
             data->payload_offset + data->data_len >= data->payload_len;
         if (complete && !self->rx_skip_current_) {
+          // Move-construct into the queue; RAMAllocator has no operator==, so a
+          // move-assignment of the drained buffer would not compile. clear()
+          // leaves the moved-from vector empty and reusable.
           self->rx_queue_.push_back(std::move(self->rx_partial_));
-          self->rx_partial_ = PayloadBuffer();
+          self->rx_partial_.clear();
         }
         if (complete) self->rx_skip_current_ = false;
         xSemaphoreGive(self->rx_lock_);
