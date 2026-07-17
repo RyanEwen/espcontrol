@@ -4,6 +4,7 @@
 
 #include "esphome/core/log.h"
 #include "esphome/components/json/json_util.h"
+#include "esp_heap_caps.h"
 
 namespace esphome {
 namespace ha_media_source {
@@ -122,15 +123,32 @@ void HaMediaSource::loop() {
 
   // Drain websocket-task messages on the main task, where JSON decode and
   // callbacks are safe.
-  std::vector<std::string> messages;
+  std::vector<PayloadBuffer> messages;
+  bool oversize = false;
   if (this->rx_lock_ != nullptr &&
       xSemaphoreTake(this->rx_lock_, 0) == pdTRUE) {
     if (!this->rx_queue_.empty()) messages.swap(this->rx_queue_);
+    oversize = this->rx_oversize_notice_;
+    this->rx_oversize_notice_ = false;
     xSemaphoreGive(this->rx_lock_);
   }
-  for (const std::string &message : messages) {
-    this->handle_message_(message);
+  if (oversize) {
+    ESP_LOGW(TAG, "Dropped a websocket message larger than %u bytes",
+             (unsigned) kMaxMessageBytes);
+    // The dropped message was almost certainly the pending browse response;
+    // fail it so callers are not left waiting forever.
+    this->fail_pending_browse_();
   }
+  for (const PayloadBuffer &message : messages) {
+    this->handle_message_(message.data(), message.size());
+  }
+}
+
+void HaMediaSource::fail_pending_browse_() {
+  if (this->browse_request_id_ == 0) return;
+  this->browse_request_id_ = 0;
+  this->index_.clear();
+  this->index_ready_callback_.call();
 }
 
 void HaMediaSource::connect_() {
@@ -183,8 +201,11 @@ void HaMediaSource::fail_pending_resolves_() {
 
 bool HaMediaSource::send_json_(const std::string &json) {
   if (this->client_ == nullptr) return false;
+  if (!esp_websocket_client_is_connected(this->client_)) return false;
+  // A bounded timeout so a stalled connection can never wedge the main loop;
+  // a failed send is reported to the caller and retried by higher layers.
   const int sent = esp_websocket_client_send_text(this->client_, json.c_str(),
-                                                   json.size(), portMAX_DELAY);
+                                                   json.size(), pdMS_TO_TICKS(5000));
   return sent >= 0;
 }
 
@@ -230,17 +251,31 @@ void HaMediaSource::websocket_event_handler(void *handler_args, esp_event_base_t
     case WEBSOCKET_EVENT_DATA: {
       if (data->op_code != 0x01 || data->data_len <= 0) break;  // text frames only
       if (self->rx_lock_ == nullptr) break;
-      // Home Assistant may fragment a large browse response across frames.
-      // Reassemble by payload offset/total length before queueing a message.
+      // Home Assistant delivers a large browse response in chunks of one text
+      // frame. Reassemble by payload offset/total length before queueing a
+      // message; the total is known up front, so the buffer is reserved once
+      // (PSRAM-first) and anything beyond the cap is skipped, not accumulated.
       if (xSemaphoreTake(self->rx_lock_, portMAX_DELAY) == pdTRUE) {
-        if (data->payload_offset == 0) self->rx_partial_.clear();
-        self->rx_partial_.append(data->data_ptr, data->data_len);
+        if (data->payload_offset == 0) {
+          self->rx_partial_.clear();
+          self->rx_skip_current_ = data->payload_len > kMaxMessageBytes;
+          if (self->rx_skip_current_) {
+            self->rx_oversize_notice_ = true;
+          } else {
+            self->rx_partial_.reserve(data->payload_len);
+          }
+        }
+        if (!self->rx_skip_current_) {
+          self->rx_partial_.insert(self->rx_partial_.end(), data->data_ptr,
+                                   data->data_ptr + data->data_len);
+        }
         const bool complete =
             data->payload_offset + data->data_len >= data->payload_len;
-        if (complete) {
+        if (complete && !self->rx_skip_current_) {
           self->rx_queue_.push_back(std::move(self->rx_partial_));
-          self->rx_partial_.clear();
+          self->rx_partial_ = PayloadBuffer();
         }
+        if (complete) self->rx_skip_current_ = false;
         xSemaphoreGive(self->rx_lock_);
       }
       break;
@@ -251,10 +286,19 @@ void HaMediaSource::websocket_event_handler(void *handler_args, esp_event_base_t
 }
 
 // ── Main-task message handling ───────────────────────────────────────────
-void HaMediaSource::handle_message_(const std::string &payload) {
-  const JsonDocument doc = json::parse_json(payload);
+void HaMediaSource::handle_message_(const char *data, size_t len) {
+  if (len > 16 * 1024) {
+    ESP_LOGI(TAG, "Parsing %u byte websocket message (heap: %u internal, %u largest)",
+             (unsigned) len,
+             (unsigned) heap_caps_get_free_size(MALLOC_CAP_INTERNAL),
+             (unsigned) heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL));
+  }
+  // Parse exactly once; the browse and resolve handlers read from this document
+  // rather than re-parsing a possibly very large payload.
+  const JsonDocument doc =
+      json::parse_json(reinterpret_cast<const uint8_t *>(data), len);
   if (doc.isNull()) {
-    ESP_LOGW(TAG, "Ignoring malformed websocket message");
+    ESP_LOGW(TAG, "Ignoring malformed websocket message (%u bytes)", (unsigned) len);
     return;
   }
   const JsonObjectConst root = doc.as<JsonObjectConst>();
@@ -286,7 +330,7 @@ void HaMediaSource::handle_message_(const std::string &payload) {
     if (id != 0 && id == this->browse_request_id_) {
       this->browse_request_id_ = 0;
       if (success) {
-        this->handle_browse_result_(payload);
+        this->handle_browse_result_(root);
       } else {
         ESP_LOGW(TAG, "Browse failed for %s", this->folder_.c_str());
         this->index_.clear();
@@ -294,49 +338,47 @@ void HaMediaSource::handle_message_(const std::string &payload) {
       this->index_ready_callback_.call();
       return;
     }
-    this->handle_resolve_result_(id, payload);
+    this->handle_resolve_result_(id, root);
     return;
   }
 }
 
-void HaMediaSource::handle_browse_result_(const std::string &payload) {
+void HaMediaSource::handle_browse_result_(JsonObjectConst root) {
   this->index_.clear();
-  json::parse_json(payload, [&](JsonObject root) -> bool {
-    JsonObject result = root["result"];
-    JsonArray children = result["children"];
-    if (children.isNull()) return false;
-    size_t images = 0;
-    for (JsonObject child : children) {
-      const std::string media_class = child["media_class"] | "";
-      const std::string content_type = child["media_content_type"] | "";
-      const std::string content_id = child["media_content_id"] | "";
-      const bool can_expand = child["can_expand"] | false;
-      if (espcontrol::media_child_is_folder(media_class, can_expand)) continue;
-      if (!espcontrol::media_child_is_image(media_class, content_type)) continue;
-      if (this->index_.add_photo(content_id)) images++;
-    }
-    ESP_LOGI(TAG, "Indexed %u photo(s) from %s%s", (unsigned) images,
-             this->folder_.c_str(),
-             this->index_.truncated() ? " (list truncated to cap)" : "");
-    return true;
-  });
+  JsonObjectConst result = root["result"];
+  JsonArrayConst children = result["children"];
+  if (children.isNull()) {
+    ESP_LOGW(TAG, "Browse result for %s had no children", this->folder_.c_str());
+    return;
+  }
+  size_t images = 0;
+  for (JsonObjectConst child : children) {
+    const std::string media_class = child["media_class"] | "";
+    const std::string content_type = child["media_content_type"] | "";
+    const std::string content_id = child["media_content_id"] | "";
+    const bool can_expand = child["can_expand"] | false;
+    if (espcontrol::media_child_is_folder(media_class, can_expand)) continue;
+    if (!espcontrol::media_child_is_image(media_class, content_type)) continue;
+    if (this->index_.add_photo(content_id)) images++;
+  }
+  ESP_LOGI(TAG, "Indexed %u photo(s) from %s%s", (unsigned) images,
+           this->folder_.c_str(),
+           this->index_.truncated() ? " (list truncated to cap)" : "");
 }
 
-void HaMediaSource::handle_resolve_result_(int request_id, const std::string &payload) {
+void HaMediaSource::handle_resolve_result_(int request_id, JsonObjectConst root) {
   for (size_t i = 0; i < this->pending_resolves_.size(); i++) {
     if (this->pending_resolves_[i].request_id != request_id) continue;
     auto callback = std::move(this->pending_resolves_[i].callback);
     this->pending_resolves_.erase(this->pending_resolves_.begin() + i);
 
     std::string absolute;
-    json::parse_json(payload, [&](JsonObject root) -> bool {
-      const bool success = root["success"] | false;
-      if (!success) return false;
-      JsonObject result = root["result"];
+    const bool success = root["success"] | false;
+    if (success) {
+      JsonObjectConst result = root["result"];
       const std::string resolved = result["url"] | "";
       absolute = espcontrol::media_source_absolute_url(this->base_url_, resolved);
-      return true;
-    });
+    }
     callback(absolute);
     return;
   }

@@ -29,6 +29,7 @@
 
 #include "esphome/core/component.h"
 #include "esphome/core/helpers.h"
+#include "esphome/components/json/json_util.h"
 #include "esp_websocket_client.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
@@ -92,10 +93,11 @@ class HaMediaSource : public Component {
   void disconnect_();
   void send_auth_();
   void send_browse_();
-  void handle_message_(const std::string &payload);
-  void handle_browse_result_(const std::string &payload);
-  void handle_resolve_result_(int request_id, const std::string &payload);
+  void handle_message_(const char *data, size_t len);
+  void handle_browse_result_(JsonObjectConst root);
+  void handle_resolve_result_(int request_id, JsonObjectConst root);
   bool send_json_(const std::string &json);
+  void fail_pending_browse_();
   int next_request_id_() { return ++this->request_id_; }
   void fail_pending_resolves_();
 
@@ -119,10 +121,18 @@ class HaMediaSource : public Component {
   };
   std::vector<PendingResolve> pending_resolves_;
 
-  // Filled on the websocket task, drained on the main task.
+  // Filled on the websocket task, drained on the main task. A browse of a large
+  // album can be hundreds of kilobytes, so payloads live in PSRAM-first buffers
+  // (internal heap on these panels has only tens of kilobytes free) and any
+  // message beyond the cap is skipped and reported instead of exhausting RAM.
+  using PayloadBuffer = std::vector<char, RAMAllocator<char>>;
+  static constexpr size_t kMaxMessageBytes = 2 * 1024 * 1024;
+
   SemaphoreHandle_t rx_lock_{nullptr};
-  std::vector<std::string> rx_queue_;
-  std::string rx_partial_;
+  std::vector<PayloadBuffer> rx_queue_;
+  PayloadBuffer rx_partial_;
+  bool rx_skip_current_{false};
+  bool rx_oversize_notice_{false};
   bool pending_connect_{false};
   bool pending_disconnect_{false};
 
