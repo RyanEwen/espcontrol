@@ -22,6 +22,7 @@
 #include <cctype>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -113,21 +114,32 @@ inline std::string normalize_ha_websocket_url(const std::string &raw) {
 }
 
 // Ordered set of media_content_ids to rotate through.
-class PhotoIndex {
+//
+// A large Home Assistant album holds hundreds of long media_content_ids, which
+// is real memory on a panel whose internal heap has only tens of kilobytes
+// free. The container types are template parameters so the firmware can keep
+// the index in PSRAM-backed strings while host tests use plain std::string via
+// the PhotoIndex alias below.
+template<class String = std::string, class VecAlloc = std::allocator<String>>
+class BasicPhotoIndex {
  public:
   // Returns false when the entry was rejected: either empty, a duplicate, or
   // beyond the cap. truncated() reports whether the cap was reached.
-  bool add_photo(const std::string &media_content_id) {
-    if (media_content_id.empty()) return false;
+  bool add_photo(const char *media_content_id) {
+    if (media_content_id == nullptr || media_content_id[0] == '\0') return false;
     if (photos_.size() >= kPhotoIndexMaxEntries) {
       truncated_ = true;
       return false;
     }
-    for (const std::string &existing : photos_) {
+    for (const String &existing : photos_) {
       if (existing == media_content_id) return false;
     }
-    photos_.push_back(media_content_id);
+    photos_.emplace_back(media_content_id);
     return true;
+  }
+
+  bool add_photo(const String &media_content_id) {
+    return this->add_photo(media_content_id.c_str());
   }
 
   void clear() {
@@ -140,20 +152,20 @@ class PhotoIndex {
   bool empty() const { return photos_.empty(); }
   std::size_t size() const { return photos_.size(); }
   bool truncated() const { return truncated_; }
-  const std::vector<std::string> &photos() const { return photos_; }
+  const std::vector<String, VecAlloc> &photos() const { return photos_; }
 
   // The photo the screensaver should currently be showing. Empty when the index
   // holds nothing or rotation has not started.
-  const std::string &current() const {
-    static const std::string kEmpty;
+  const String &current() const {
+    static const String kEmpty;
     if (photos_.empty() || !started_) return kEmpty;
     return photos_[cursor_];
   }
 
   // Advance to the next photo and return it. The first call after clear()/add()
   // yields the first photo rather than skipping it. Wraps at the end.
-  const std::string &advance(PhotoOrder order, uint32_t random_value) {
-    static const std::string kEmpty;
+  const String &advance(PhotoOrder order, uint32_t random_value) {
+    static const String kEmpty;
     if (photos_.empty()) return kEmpty;
 
     if (!started_) {
@@ -176,11 +188,13 @@ class PhotoIndex {
   }
 
  private:
-  std::vector<std::string> photos_;
+  std::vector<String, VecAlloc> photos_;
   std::size_t cursor_{0};
   bool truncated_{false};
   bool started_{false};
 };
+
+using PhotoIndex = BasicPhotoIndex<>;
 
 }  // namespace espcontrol
 

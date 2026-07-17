@@ -199,9 +199,12 @@ script:
           const espcontrol::PhotoOrder order = id(screensaver_photos_shuffle).state
               ? espcontrol::PhotoOrder::SHUFFLE
               : espcontrol::PhotoOrder::SEQUENTIAL;
-          const std::string next =
+          // The index stores PSRAM-backed strings; copy into a std::string for
+          // the resolve call.
+          const auto &next_ref =
               id(photo_media).mutable_index().advance(order, esphome::random_uint32());
-          if (next.empty()) return;
+          if (next_ref.empty()) return;
+          const std::string next(next_ref.c_str(), next_ref.size());
 
           const uint32_t generation = ++id(photos_advance_generation);
           id(photo_media).resolve(next, [generation](const std::string &url) {

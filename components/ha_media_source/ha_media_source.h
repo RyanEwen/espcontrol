@@ -39,6 +39,12 @@
 namespace esphome {
 namespace ha_media_source {
 
+// The photo index holds hundreds of long media_content_ids for a real album;
+// keep both the strings and their vector in PSRAM-first storage so the index
+// never leans on the small internal heap.
+using PsramString = std::basic_string<char, std::char_traits<char>, RAMAllocator<char>>;
+using PsramPhotoIndex = espcontrol::BasicPhotoIndex<PsramString, RAMAllocator<PsramString>>;
+
 enum class ConnectionState : uint8_t {
   DISCONNECTED,
   CONNECTING,
@@ -66,9 +72,9 @@ class HaMediaSource : public Component {
   bool ready() const { return this->state_ == ConnectionState::READY; }
   bool auth_rejected() const { return this->state_ == ConnectionState::FAILED_AUTH; }
 
-  const espcontrol::PhotoIndex &index() const { return this->index_; }
+  const PsramPhotoIndex &index() const { return this->index_; }
   // Non-const access for the rotation adapter, which advances the cursor.
-  espcontrol::PhotoIndex &mutable_index() { return this->index_; }
+  PsramPhotoIndex &mutable_index() { return this->index_; }
 
   // Re-browse the configured folder. Results land in index(); on_index_ready
   // fires when the browse completes (with an empty index if the folder held no
@@ -109,7 +115,7 @@ class HaMediaSource : public Component {
   std::string base_url_;  // http(s):// origin, for joining signed paths
   std::string folder_;
 
-  espcontrol::PhotoIndex index_;
+  PsramPhotoIndex index_;
   CallbackManager<void()> index_ready_callback_;
 
   int request_id_{0};

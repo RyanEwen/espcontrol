@@ -358,7 +358,9 @@ void HaMediaSource::handle_browse_result_(JsonObjectConst root) {
   for (JsonObjectConst child : children) {
     const std::string media_class = child["media_class"] | "";
     const std::string content_type = child["media_content_type"] | "";
-    const std::string content_id = child["media_content_id"] | "";
+    // The content id goes straight into the PSRAM-backed index without an
+    // intermediate std::string; these ids are long and there are hundreds.
+    const char *content_id = child["media_content_id"] | "";
     const bool can_expand = child["can_expand"] | false;
     if (espcontrol::media_child_is_folder(media_class, can_expand)) continue;
     if (!espcontrol::media_child_is_image(media_class, content_type)) continue;
