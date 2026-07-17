@@ -118,6 +118,8 @@ class AgendaFetcher {
     if (this->pending_ > 0) this->pending_--;
     if (this->pending_ > 0) return;
     this->accumulated_.finalize(this->max_events_, this->now_epoch_);
+    ESP_LOGI("agenda", "Agenda ready: %u event(s) after fetch",
+             (unsigned) this->accumulated_.size());
     if (this->on_ready_) this->on_ready_(this->accumulated_);
   }
 #endif
