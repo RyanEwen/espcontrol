@@ -551,9 +551,20 @@ script:
           then:
             - lambda: 'navigation_return_home(id(main_page)->obj);'
             - lvgl.widget.hide: dim_screensaver_touch_guard
-            # Start fetching the next photo immediately so the download and
-            # decode run during the fade instead of after it.
-            - script.execute: photos_screensaver_advance
+            # Reset the rotation clock so whatever photo is shown now gets a full
+            # interval before the next change, instead of the timer firing an
+            # advance the moment the screensaver reappears.
+            - lambda: 'id(photos_last_advance_ms) = millis();'
+            # Only fetch immediately when there is nothing retained to show yet
+            # (the first activation after boot). When a photo was retained across
+            # the previous dismissal it reappears instantly below, and the
+            # rotation interval advances on cadence — kicking an advance here
+            # would crossfade to a new photo seconds after activation.
+            - if:
+                condition:
+                  lambda: 'return !id(photos_first_image_ready);'
+                then:
+                  - script.execute: photos_screensaver_advance
             - script.execute: photos_apply_widgets
             - script.execute: photos_subscribe_weather
             - lambda: |-
