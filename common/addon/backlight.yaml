@@ -174,9 +174,14 @@ script:
                   - script.wait: cover_art_hide_effect
             # The photo overlay lives on the top layer, so it must be dismissed
             # for every mode other than PHOTOS or it would stay above the target.
+            # A wake to ACTIVE keeps the overlay up until the active effect's
+            # delayed hide below, so the waking touch cannot fall through to a
+            # card underneath — the same cooldown the clock screensaver uses.
             - if:
                 condition:
-                  lambda: 'return target_mode != static_cast<int>(espcontrol::DisplayMode::PHOTOS);'
+                  lambda: |-
+                    return target_mode != static_cast<int>(espcontrol::DisplayMode::PHOTOS) &&
+                           target_mode != static_cast<int>(espcontrol::DisplayMode::ACTIVE);
                 then:
                   - script.execute: hide_photos_view
             - if:
@@ -299,7 +304,9 @@ script:
       - lvgl.widget.hide: dim_screensaver_touch_guard
       - if:
           condition:
-            lambda: 'return previous_mode == static_cast<int>(espcontrol::DisplayMode::CLOCK);'
+            lambda: |-
+              return previous_mode == static_cast<int>(espcontrol::DisplayMode::CLOCK) ||
+                     previous_mode == static_cast<int>(espcontrol::DisplayMode::PHOTOS);
           then:
             - script.execute: clock_bar_apply
             - if:
@@ -308,6 +315,8 @@ script:
                 then:
                   - script.execute: navigate_after_api
             - script.execute: backlight_apply_brightness
+            # The waking touch's release must land on the still-visible overlay,
+            # not on a card underneath; hide it only after this settle window.
             - delay: 300ms
             - lambda: |-
                 if (!id(display_mode_controller).transition_is_current(
@@ -315,8 +324,10 @@ script:
                   id(display_mode_effect_active).stop();
                 }
             - script.execute: hide_clock_view
+            - script.execute: hide_photos_view
           else:
             - script.execute: hide_clock_view
+            - script.execute: hide_photos_view
             - delay: 100ms
             - lambda: |-
                 if (!id(display_mode_controller).transition_is_current(
