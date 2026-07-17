@@ -25,10 +25,18 @@ globals:
     type: std::string
     initial_value: '""'
   # Set true once a photo has actually been decoded, so show_photos_view can hold
-  # the placeholder scrim until the first image is ready instead of flashing.
+  # the black backdrop until the first image is ready instead of flashing.
   - id: photos_first_image_ready
     type: bool
     initial_value: 'false'
+  # Crossfade bookkeeping: which decode slot is currently on screen (0=a, 1=b)
+  # and which one the in-flight download targets.
+  - id: photos_active_slot
+    type: int
+    initial_value: '0'
+  - id: photos_pending_slot
+    type: int
+    initial_value: '0'
 
 # The websocket client that browses the folder and resolves signed URLs. Its
 # connection is wired from the stored Home Assistant URL/token entities by
@@ -47,9 +55,12 @@ image:
 # raised on PSRAM-rich panels because full-resolution camera originals
 # routinely exceed the 2MB artwork default (both come from the device
 # generator as substitutions).
+# Two alternating decode slots so the next photo can fade in over the one that
+# is still showing. The rotation downloads into the inactive slot and
+# crossfades its widget on top when the decode completes.
 artwork_image:
   - url: "https://placehold.co/${photos_decode_size}x${photos_decode_size}/000000/000000.jpg"
-    id: photos_downloaded_image
+    id: photos_downloaded_image_a
     format: AUTO
     type: RGB565
     byte_order: LITTLE_ENDIAN
@@ -61,25 +72,35 @@ artwork_image:
     max_download_size: ${photos_download_budget}
     allow_insecure_local_urls: true
     on_download_finished:
-      - lambda: |-
-          id(photos_first_image_ready) = true;
       - lvgl.image.update:
-          id: photos_image_widget
-          src: photos_downloaded_image
-      - lvgl.widget.show: photos_image_widget
+          id: photos_image_widget_a
+          src: photos_downloaded_image_a
+      - script.execute:
+          id: photos_fade_in_slot
+          slot: 0
     on_error:
-      # A photo that fails to download or decode (unsupported format, oversized
-      # file) should not leave the previous photo on screen for a full cycle;
-      # move on after a short pause. Only while the photo screensaver is the
-      # current presentation.
-      - if:
-          condition:
-            lambda: |-
-              return id(display_mode_controller).current_mode_is(
-                  espcontrol::DisplayMode::PHOTOS);
-          then:
-            - delay: 2s
-            - script.execute: photos_screensaver_advance
+      - script.execute: photos_skip_failed_photo
+  - url: "https://placehold.co/${photos_decode_size}x${photos_decode_size}/000000/000000.jpg"
+    id: photos_downloaded_image_b
+    format: AUTO
+    type: RGB565
+    byte_order: LITTLE_ENDIAN
+    placeholder: photos_placeholder
+    resize: ${photos_decode_size}x${photos_decode_size}
+    resize_mode: COVER
+    priority: COVER_ART
+    buffer_size: 65536
+    max_download_size: ${photos_download_budget}
+    allow_insecure_local_urls: true
+    on_download_finished:
+      - lvgl.image.update:
+          id: photos_image_widget_b
+          src: photos_downloaded_image_b
+      - script.execute:
+          id: photos_fade_in_slot
+          slot: 1
+    on_error:
+      - script.execute: photos_skip_failed_photo
 
 lvgl:
   top_layer:
@@ -103,34 +124,43 @@ lvgl:
             then:
               - script.execute: screensaver_wake
           widgets:
-            - image:
-                id: photos_image_widget
+            # The two photo widgets stack inside their own container so the
+            # crossfade can reorder them without ever covering the overlay text.
+            - obj:
+                id: photos_image_stack
                 x: 0
                 y: 0
                 width: 100%
                 height: 100%
-                src: photos_placeholder
-                align: CENTER
-                hidden: true
-            # Legibility scrim behind the optional widgets, bottom of the screen.
-            - obj:
-                id: photos_widget_scrim
-                align: BOTTOM_MID
-                x: 0
-                y: 0
-                width: 100%
-                height: 33%
-                bg_color: 0x000000
-                bg_grad_color: 0x000000
-                bg_opa: 40%
+                bg_opa: 0%
                 radius: 0
                 border_width: 0
                 pad_all: 0
                 scrollable: false
                 clickable: false
-                hidden: true
+                widgets:
+                  - image:
+                      id: photos_image_widget_a
+                      x: 0
+                      y: 0
+                      width: 100%
+                      height: 100%
+                      src: photos_placeholder
+                      align: CENTER
+                      hidden: true
+                  - image:
+                      id: photos_image_widget_b
+                      x: 0
+                      y: 0
+                      width: 100%
+                      height: 100%
+                      src: photos_placeholder
+                      align: CENTER
+                      hidden: true
             # Time above date, stacked by a flex column so the labels can never
-            # overlap regardless of each device's font sizes.
+            # overlap regardless of each device's font sizes. Every visible text
+            # is paired with an offset black copy behind it — a drop shadow that
+            # keeps contrast on bright photos without a scrim band.
             - obj:
                 id: photos_datetime_box
                 align: BOTTOM_LEFT
@@ -150,16 +180,54 @@ lvgl:
                   flex_align_cross: start
                   pad_row: 2
                 widgets:
-                  - label:
-                      id: photos_datetime_label
-                      text_font: font_text_title
-                      text_color: 0xFFFFFF
-                      text: ""
-                  - label:
-                      id: photos_date_label
-                      text_font: font_text_body
-                      text_color: 0xDDDDDD
-                      text: ""
+                  - obj:
+                      width: SIZE_CONTENT
+                      height: SIZE_CONTENT
+                      bg_opa: 0%
+                      border_width: 0
+                      pad_all: 0
+                      scrollable: false
+                      clickable: false
+                      widgets:
+                        - label:
+                            id: photos_datetime_shadow
+                            x: 2
+                            y: 2
+                            text_font: font_text_title
+                            text_color: 0x000000
+                            opa: 70%
+                            text: ""
+                        - label:
+                            id: photos_datetime_label
+                            x: 0
+                            y: 0
+                            text_font: font_text_title
+                            text_color: 0xFFFFFF
+                            text: ""
+                  - obj:
+                      width: SIZE_CONTENT
+                      height: SIZE_CONTENT
+                      bg_opa: 0%
+                      border_width: 0
+                      pad_all: 0
+                      scrollable: false
+                      clickable: false
+                      widgets:
+                        - label:
+                            id: photos_date_shadow
+                            x: 2
+                            y: 2
+                            text_font: font_text_body
+                            text_color: 0x000000
+                            opa: 70%
+                            text: ""
+                        - label:
+                            id: photos_date_label
+                            x: 0
+                            y: 0
+                            text_font: font_text_body
+                            text_color: 0xFFFFFF
+                            text: ""
             # Weather icon beside the temperature, bottom right.
             - obj:
                 id: photos_weather_box
@@ -180,16 +248,54 @@ lvgl:
                   flex_align_cross: center
                   pad_column: 12
                 widgets:
-                  - label:
-                      id: photos_weather_icon
-                      text_font: font_icon_main
-                      text_color: 0xFFFFFF
-                      text: ""
-                  - label:
-                      id: photos_weather_temp
-                      text_font: font_text_title
-                      text_color: 0xFFFFFF
-                      text: ""
+                  - obj:
+                      width: SIZE_CONTENT
+                      height: SIZE_CONTENT
+                      bg_opa: 0%
+                      border_width: 0
+                      pad_all: 0
+                      scrollable: false
+                      clickable: false
+                      widgets:
+                        - label:
+                            id: photos_weather_icon_shadow
+                            x: 2
+                            y: 2
+                            text_font: font_icon_main
+                            text_color: 0x000000
+                            opa: 70%
+                            text: ""
+                        - label:
+                            id: photos_weather_icon
+                            x: 0
+                            y: 0
+                            text_font: font_icon_main
+                            text_color: 0xFFFFFF
+                            text: ""
+                  - obj:
+                      width: SIZE_CONTENT
+                      height: SIZE_CONTENT
+                      bg_opa: 0%
+                      border_width: 0
+                      pad_all: 0
+                      scrollable: false
+                      clickable: false
+                      widgets:
+                        - label:
+                            id: photos_weather_temp_shadow
+                            x: 2
+                            y: 2
+                            text_font: font_text_title
+                            text_color: 0x000000
+                            opa: 70%
+                            text: ""
+                        - label:
+                            id: photos_weather_temp
+                            x: 0
+                            y: 0
+                            text_font: font_text_title
+                            text_color: 0xFFFFFF
+                            text: ""
             # subscribe_weather_state writes the condition text here; the photo
             # overlay shows temperature instead, so this sink stays hidden.
             - label:
@@ -226,11 +332,12 @@ script:
           static bool photos_auth_header_added = false;
           if (!photos_auth_header_added) {
             photos_auth_header_added = true;
-            id(photos_downloaded_image)->add_request_header(
-                "Authorization", []() -> std::string {
-                  const std::string &token = id(home_assistant_token).state;
-                  return token.empty() ? std::string() : "Bearer " + token;
-                });
+            auto bearer = []() -> std::string {
+              const std::string &token = id(home_assistant_token).state;
+              return token.empty() ? std::string() : "Bearer " + token;
+            };
+            id(photos_downloaded_image_a)->add_request_header("Authorization", bearer);
+            id(photos_downloaded_image_b)->add_request_header("Authorization", bearer);
           }
       # Point the client at the configured folder (no-op if unchanged).
       - lambda: 'id(photo_media).set_folder(id(screensaver_photos_folder).state);'
@@ -266,8 +373,58 @@ script:
             if (generation != id(photos_advance_generation)) return;  // superseded
             if (url.empty()) return;
             id(photos_pending_url) = url;
-            id(photos_downloaded_image)->request_update_url(url);
+            // Download into the slot that is NOT on screen, so the current
+            // photo stays visible until the new one is ready to fade in.
+            const int target = 1 - id(photos_active_slot);
+            id(photos_pending_slot) = target;
+            if (target == 0) {
+              id(photos_downloaded_image_a)->request_update_url(url);
+            } else {
+              id(photos_downloaded_image_b)->request_update_url(url);
+            }
           });
+
+  # Crossfade the freshly decoded slot over the one currently showing, then
+  # hide the old widget once the fade has finished.
+  - id: photos_fade_in_slot
+    mode: restart
+    parameters:
+      slot: int
+    then:
+      - lambda: |-
+          if (slot != id(photos_pending_slot)) return;  // stale completion
+          id(photos_first_image_ready) = true;
+          lv_obj_t *incoming = slot == 0 ? id(photos_image_widget_a)
+                                         : id(photos_image_widget_b);
+          lv_image_set_inner_align(incoming, LV_IMAGE_ALIGN_COVER);
+          lv_obj_move_foreground(incoming);  // within photos_image_stack only
+          lv_obj_set_style_opa(incoming, LV_OPA_TRANSP, 0);
+          lv_obj_clear_flag(incoming, LV_OBJ_FLAG_HIDDEN);
+          lv_obj_fade_in(incoming, 400, 0);
+          id(photos_active_slot) = slot;
+      - delay: 450ms
+      - lambda: |-
+          // Hide whichever widget is no longer active; keep its decoded buffer
+          // so the next advance can simply overwrite it.
+          lv_obj_t *outgoing = id(photos_active_slot) == 0
+                                   ? id(photos_image_widget_b)
+                                   : id(photos_image_widget_a);
+          lv_obj_add_flag(outgoing, LV_OBJ_FLAG_HIDDEN);
+
+  # A photo that fails to download or decode (unsupported format, oversized
+  # file) should not leave the previous photo on screen for a full cycle; move
+  # on after a short pause. Only while the photo screensaver is showing.
+  - id: photos_skip_failed_photo
+    mode: restart
+    then:
+      - if:
+          condition:
+            lambda: |-
+              return id(display_mode_controller).current_mode_is(
+                  espcontrol::DisplayMode::PHOTOS);
+          then:
+            - delay: 2s
+            - script.execute: photos_screensaver_advance
 
   # Apply the optional date/time and weather widgets' visibility and content.
   - id: photos_apply_widgets
@@ -281,10 +438,6 @@ script:
           else lv_obj_add_flag(id(photos_datetime_box), LV_OBJ_FLAG_HIDDEN);
           if (show_weather) lv_obj_clear_flag(id(photos_weather_box), LV_OBJ_FLAG_HIDDEN);
           else lv_obj_add_flag(id(photos_weather_box), LV_OBJ_FLAG_HIDDEN);
-          if (show_datetime || show_weather)
-            lv_obj_clear_flag(id(photos_widget_scrim), LV_OBJ_FLAG_HIDDEN);
-          else
-            lv_obj_add_flag(id(photos_widget_scrim), LV_OBJ_FLAG_HIDDEN);
       - script.execute: photos_refresh_datetime
 
   # Refresh the date/time label from the panel clock. Cheap; called each second
@@ -300,6 +453,7 @@ script:
           format_clock_time_without_suffix(buf, sizeof(buf), time.hour, time.minute,
                                            id(clock_format_12h));
           lv_label_set_text(id(photos_datetime_label), buf);
+          lv_label_set_text(id(photos_datetime_shadow), buf);
           char date_buf[24];
           static const char *const kWeekdays[] = {
             "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
@@ -312,6 +466,13 @@ script:
           snprintf(date_buf, sizeof(date_buf), "%s %d %s", kWeekdays[wd],
                    time.day_of_month, kMonths[mo]);
           lv_label_set_text(id(photos_date_label), date_buf);
+          lv_label_set_text(id(photos_date_shadow), date_buf);
+          // The weather icon text is written by the shared weather subscription,
+          // which doesn't know about the shadow copy; mirror it here.
+          const char *icon_text = lv_label_get_text(id(photos_weather_icon));
+          if (strcmp(icon_text, lv_label_get_text(id(photos_weather_icon_shadow))) != 0) {
+            lv_label_set_text(id(photos_weather_icon_shadow), icon_text);
+          }
 
   # Subscribe the weather widget to the configured weather entity.
   - id: photos_subscribe_weather
@@ -332,6 +493,7 @@ script:
                 char buf[12];
                 snprintf(buf, sizeof(buf), "%d°", (int) lround(parsed));
                 lv_label_set_text(id(photos_weather_temp), buf);
+                lv_label_set_text(id(photos_weather_temp_shadow), buf);
               }));
 
   # Show the photo screensaver overlay.
@@ -359,17 +521,18 @@ script:
                                                  id(network_status_button));
                 network_status_hide_modal();
                 refresh_screensaver_fullscreen(id(photos_screensaver), id(dim_screensaver_touch_guard));
-                // Scale-and-crop the decoded photo to fill the widget (and so
-                // the screen) in either orientation.
-                lv_image_set_inner_align(id(photos_image_widget), LV_IMAGE_ALIGN_COVER);
                 lv_obj_clear_flag(id(photos_screensaver), LV_OBJ_FLAG_HIDDEN);
                 lv_obj_move_foreground(id(photos_screensaver));
-                // Only reveal the decoded image if one is already loaded; otherwise
-                // hold the black overlay until on_download_finished shows it.
-                if (id(photos_first_image_ready))
-                  lv_obj_clear_flag(id(photos_image_widget), LV_OBJ_FLAG_HIDDEN);
-                else
-                  lv_obj_add_flag(id(photos_image_widget), LV_OBJ_FLAG_HIDDEN);
+                // Only reveal a decoded photo if one is already loaded; otherwise
+                // hold the black overlay until the first crossfade brings one in.
+                if (id(photos_first_image_ready)) {
+                  lv_obj_t *active = id(photos_active_slot) == 0
+                                         ? id(photos_image_widget_a)
+                                         : id(photos_image_widget_b);
+                  lv_image_set_inner_align(active, LV_IMAGE_ALIGN_COVER);
+                  lv_obj_set_style_opa(active, LV_OPA_COVER, 0);
+                  lv_obj_clear_flag(active, LV_OBJ_FLAG_HIDDEN);
+                }
             - script.execute: clock_bar_hide
             - script.wait: clock_bar_hide
             - script.execute:
@@ -403,12 +566,18 @@ script:
             lambda: |-
               return !lv_obj_has_flag(id(photos_screensaver), LV_OBJ_FLAG_HIDDEN);
           then:
-            - lvgl.widget.hide: photos_image_widget
+            - script.stop: photos_fade_in_slot
+            - lvgl.widget.hide: photos_image_widget_a
+            - lvgl.widget.hide: photos_image_widget_b
             - lvgl.widget.hide: photos_screensaver
             - lambda: |-
                 id(photos_advance_generation)++;  // cancel any in-flight resolve
                 id(photos_first_image_ready) = false;
-            - artwork_image.release: photos_downloaded_image
+                // Detach the decoded buffers from the widgets before release.
+                lv_image_set_src(id(photos_image_widget_a), id(photos_placeholder)->get_lv_img_dsc());
+                lv_image_set_src(id(photos_image_widget_b), id(photos_placeholder)->get_lv_img_dsc());
+            - artwork_image.release: photos_downloaded_image_a
+            - artwork_image.release: photos_downloaded_image_b
             - script.execute: clock_bar_apply
 
   # Keep the overlay above any screen changes or top-layer overlays that appear
