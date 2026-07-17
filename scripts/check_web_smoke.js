@@ -1339,10 +1339,10 @@ const mediaCoverArtDetailsPreview = hooks.buttonTypePreviewFor("media", {
 assert(mediaCoverArtDetailsPreview.iconHtml.includes("sp-media-cover-artwork"), "media cover art details preview demonstrates artwork");
 assert(mediaCoverArtDetailsPreview.iconHtml.includes("sp-media-cover-tint"), "media cover art details preview demonstrates its tint");
 assert(mediaCoverArtDetailsPreview.iconHtml.includes("sp-media-cover-details-title"), "media cover art details preview insets its title like other cards");
-assert(mediaCoverArtDetailsPreview.iconHtml.includes("Midnight City"), "media cover art details preview shows a track title");
+assert(mediaCoverArtDetailsPreview.iconHtml.includes("Track Title"), "media cover art details preview shows a track title");
 assert(mediaCoverArtDetailsPreview.buttonClass.includes("sp-media-cover-details-card"), "media cover art details preview can stack large-card metadata");
 assert(mediaCoverArtDetailsPreview.labelHtml.includes("sp-media-cover-details-row"), "media cover art details preview insets its artist row like other cards");
-assert(mediaCoverArtDetailsPreview.labelHtml.includes("M83"), "media cover art details preview shows an artist");
+assert(mediaCoverArtDetailsPreview.labelHtml.includes("Artist Name"), "media cover art details preview shows an artist");
 
 const issue243Backup = {
   version: 1,
