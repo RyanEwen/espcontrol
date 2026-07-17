@@ -567,27 +567,12 @@ script:
                   - script.execute: photos_screensaver_advance
             - script.execute: photos_apply_widgets
             - script.execute: photos_subscribe_weather
-            - lambda: |-
-                lv_obj_t *temperature_labels[] = { id(temperatures) };
-                hide_clock_bar_top_layer_widgets(temperature_labels, 1,
-                                                 id(display_time),
-                                                 id(network_status_button));
-                network_status_hide_modal();
-                refresh_screensaver_fullscreen(id(photos_screensaver), id(dim_screensaver_touch_guard));
-                lv_obj_clear_flag(id(photos_screensaver), LV_OBJ_FLAG_HIDDEN);
-                lv_obj_move_foreground(id(photos_screensaver));
-                // Only reveal a decoded photo if one is already loaded; otherwise
-                // hold the black overlay until the first crossfade brings one in.
-                if (id(photos_first_image_ready)) {
-                  lv_obj_t *active = id(photos_active_slot) == 0
-                                         ? id(photos_image_widget_a)
-                                         : id(photos_image_widget_b);
-                  lv_image_set_inner_align(active, LV_IMAGE_ALIGN_COVER);
-                  lv_obj_set_style_opa(active, LV_OPA_COVER, 0);
-                  lv_obj_clear_flag(active, LV_OBJ_FLAG_HIDDEN);
-                }
             - script.execute: clock_bar_hide
             - script.wait: clock_bar_hide
+            # Fade the previous UI to black BEFORE the photo overlay is revealed,
+            # so the swap happens while the screen is dark. Revealing the photo
+            # first would show it, then dip to black, then ramp back up — two
+            # visible fades. This mirrors the clock screensaver.
             - script.execute:
                 id: backlight_fade_current_ui_to_black
                 generation: !lambda 'return generation;'
@@ -597,7 +582,28 @@ script:
                 if (!id(display_mode_controller).transition_is_current(
                       static_cast<uint32_t>(generation), espcontrol::DisplayMode::PHOTOS)) {
                   id(show_photos_view).stop();
+                  return;
                 }
+                lv_obj_t *temperature_labels[] = { id(temperatures) };
+                hide_clock_bar_top_layer_widgets(temperature_labels, 1,
+                                                 id(display_time),
+                                                 id(network_status_button));
+                network_status_hide_modal();
+                refresh_screensaver_fullscreen(id(photos_screensaver), id(dim_screensaver_touch_guard));
+                lv_obj_clear_flag(id(photos_screensaver), LV_OBJ_FLAG_HIDDEN);
+                lv_obj_move_foreground(id(photos_screensaver));
+                // Reveal a retained photo if one is loaded; otherwise the overlay
+                // stays black until the first crossfade brings one in.
+                if (id(photos_first_image_ready)) {
+                  lv_obj_t *active = id(photos_active_slot) == 0
+                                         ? id(photos_image_widget_a)
+                                         : id(photos_image_widget_b);
+                  lv_image_set_inner_align(active, LV_IMAGE_ALIGN_COVER);
+                  lv_obj_set_style_opa(active, LV_OPA_COVER, 0);
+                  lv_obj_clear_flag(active, LV_OBJ_FLAG_HIDDEN);
+                }
+            # Screen is black with the photo already in place; ramp the backlight
+            # up so the photo fades in exactly once.
             - light.turn_on:
                 id: display_backlight
                 brightness: 100%
