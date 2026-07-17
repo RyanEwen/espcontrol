@@ -42,19 +42,23 @@ image:
     type: RGB565
     byte_order: LITTLE_ENDIAN
 
-# Reuse the per-device cover-art decode budget so photo memory use matches a
-# size already validated for this display. Photos fill the screen with COVER
-# alignment, so a square decode is cropped rather than letterboxed.
+# Photos decode as a square of the longest screen edge with a COVER crop, so
+# the picture fills the display in either orientation. The download budget is
+# raised on PSRAM-rich panels because full-resolution camera originals
+# routinely exceed the 2MB artwork default (both come from the device
+# generator as substitutions).
 artwork_image:
-  - url: "https://placehold.co/${cover_art_decode_size}x${cover_art_decode_size}/000000/000000.jpg"
+  - url: "https://placehold.co/${photos_decode_size}x${photos_decode_size}/000000/000000.jpg"
     id: photos_downloaded_image
     format: AUTO
     type: RGB565
     byte_order: LITTLE_ENDIAN
     placeholder: photos_placeholder
-    resize: ${cover_art_decode_size}x${cover_art_decode_size}
+    resize: ${photos_decode_size}x${photos_decode_size}
+    resize_mode: COVER
     priority: COVER_ART
     buffer_size: 65536
+    max_download_size: ${photos_download_budget}
     allow_insecure_local_urls: true
     on_download_finished:
       - lambda: |-
@@ -63,6 +67,19 @@ artwork_image:
           id: photos_image_widget
           src: photos_downloaded_image
       - lvgl.widget.show: photos_image_widget
+    on_error:
+      # A photo that fails to download or decode (unsupported format, oversized
+      # file) should not leave the previous photo on screen for a full cycle;
+      # move on after a short pause. Only while the photo screensaver is the
+      # current presentation.
+      - if:
+          condition:
+            lambda: |-
+              return id(display_mode_controller).current_mode_is(
+                  espcontrol::DisplayMode::PHOTOS);
+          then:
+            - delay: 2s
+            - script.execute: photos_screensaver_advance
 
 lvgl:
   top_layer:
@@ -112,51 +129,76 @@ lvgl:
                 scrollable: false
                 clickable: false
                 hidden: true
-            - label:
-                id: photos_datetime_label
+            # Time above date, stacked by a flex column so the labels can never
+            # overlap regardless of each device's font sizes.
+            - obj:
+                id: photos_datetime_box
                 align: BOTTOM_LEFT
                 x: 24
                 y: -20
-                text_font: font_text_title
-                text_color: 0xFFFFFF
-                text: ""
+                width: SIZE_CONTENT
+                height: SIZE_CONTENT
+                bg_opa: 0%
+                border_width: 0
+                pad_all: 0
+                scrollable: false
+                clickable: false
                 hidden: true
-            - label:
-                id: photos_date_label
-                align: BOTTOM_LEFT
-                x: 24
-                y: -64
-                text_font: font_text_body
-                text_color: 0xDDDDDD
-                text: ""
-                hidden: true
-            - label:
-                id: photos_weather_icon
+                layout:
+                  type: flex
+                  flex_flow: COLUMN
+                  flex_align_cross: start
+                  pad_row: 2
+                widgets:
+                  - label:
+                      id: photos_datetime_label
+                      text_font: font_text_title
+                      text_color: 0xFFFFFF
+                      text: ""
+                  - label:
+                      id: photos_date_label
+                      text_font: font_text_body
+                      text_color: 0xDDDDDD
+                      text: ""
+            # Weather icon beside the temperature, bottom right.
+            - obj:
+                id: photos_weather_box
                 align: BOTTOM_RIGHT
-                x: -110
+                x: -24
                 y: -20
-                text_font: font_icon_main
-                text_color: 0xFFFFFF
-                text: ""
+                width: SIZE_CONTENT
+                height: SIZE_CONTENT
+                bg_opa: 0%
+                border_width: 0
+                pad_all: 0
+                scrollable: false
+                clickable: false
                 hidden: true
+                layout:
+                  type: flex
+                  flex_flow: ROW
+                  flex_align_cross: center
+                  pad_column: 12
+                widgets:
+                  - label:
+                      id: photos_weather_icon
+                      text_font: font_icon_main
+                      text_color: 0xFFFFFF
+                      text: ""
+                  - label:
+                      id: photos_weather_temp
+                      text_font: font_text_title
+                      text_color: 0xFFFFFF
+                      text: ""
             # subscribe_weather_state writes the condition text here; the photo
             # overlay shows temperature instead, so this sink stays hidden.
             - label:
                 id: photos_weather_condition
                 align: BOTTOM_RIGHT
                 x: -24
-                y: -80
+                y: -120
                 text_font: font_text_body
                 text_color: 0xDDDDDD
-                text: ""
-                hidden: true
-            - label:
-                id: photos_weather_temp
-                align: BOTTOM_RIGHT
-                x: -24
-                y: -28
-                text_font: font_text_title
-                text_color: 0xFFFFFF
                 text: ""
                 hidden: true
 
@@ -235,16 +277,10 @@ script:
           const bool show_datetime = id(screensaver_photos_show_datetime).state;
           const bool show_weather = id(screensaver_photos_show_weather).state &&
                                     !id(screensaver_photos_weather_entity).state.empty();
-          lv_obj_t *datetime_widgets[] = { id(photos_datetime_label), id(photos_date_label) };
-          for (lv_obj_t *w : datetime_widgets) {
-            if (show_datetime) lv_obj_clear_flag(w, LV_OBJ_FLAG_HIDDEN);
-            else lv_obj_add_flag(w, LV_OBJ_FLAG_HIDDEN);
-          }
-          lv_obj_t *weather_widgets[] = { id(photos_weather_icon), id(photos_weather_temp) };
-          for (lv_obj_t *w : weather_widgets) {
-            if (show_weather) lv_obj_clear_flag(w, LV_OBJ_FLAG_HIDDEN);
-            else lv_obj_add_flag(w, LV_OBJ_FLAG_HIDDEN);
-          }
+          if (show_datetime) lv_obj_clear_flag(id(photos_datetime_box), LV_OBJ_FLAG_HIDDEN);
+          else lv_obj_add_flag(id(photos_datetime_box), LV_OBJ_FLAG_HIDDEN);
+          if (show_weather) lv_obj_clear_flag(id(photos_weather_box), LV_OBJ_FLAG_HIDDEN);
+          else lv_obj_add_flag(id(photos_weather_box), LV_OBJ_FLAG_HIDDEN);
           if (show_datetime || show_weather)
             lv_obj_clear_flag(id(photos_widget_scrim), LV_OBJ_FLAG_HIDDEN);
           else
@@ -323,6 +359,9 @@ script:
                                                  id(network_status_button));
                 network_status_hide_modal();
                 refresh_screensaver_fullscreen(id(photos_screensaver), id(dim_screensaver_touch_guard));
+                // Scale-and-crop the decoded photo to fill the widget (and so
+                // the screen) in either orientation.
+                lv_image_set_inner_align(id(photos_image_widget), LV_IMAGE_ALIGN_COVER);
                 lv_obj_clear_flag(id(photos_screensaver), LV_OBJ_FLAG_HIDDEN);
                 lv_obj_move_foreground(id(photos_screensaver));
                 // Only reveal the decoded image if one is already loaded; otherwise

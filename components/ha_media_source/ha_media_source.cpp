@@ -335,7 +335,6 @@ void HaMediaSource::handle_message_(const char *data, size_t len) {
   filter_child["media_content_type"] = true;
   filter_child["media_content_id"] = true;
   filter_child["can_expand"] = true;
-  filter_child["thumbnail"] = true;
 
   JsonDocument doc(&g_psram_json_allocator);
   const DeserializationError parse_error =
@@ -408,16 +407,14 @@ void HaMediaSource::handle_browse_result_(JsonObjectConst root) {
     // Strings go straight into the PSRAM-backed index without an intermediate
     // std::string; these entries are long and there are hundreds.
     const char *content_id = child["media_content_id"] | "";
-    const char *thumbnail = child["thumbnail"] | "";
     const bool can_expand = child["can_expand"] | false;
     if (espcontrol::media_child_is_folder(media_class, can_expand)) continue;
     if (!espcontrol::media_child_is_image(media_class, content_type)) continue;
-    // Prefer the thumbnail path when the source provides one: it downloads
-    // directly (no resolve round-trip), is sized for a panel instead of a
-    // multi-megabyte camera original, and is always JPEG regardless of the
-    // original format.
-    const char *item = thumbnail[0] != '\0' ? thumbnail : content_id;
-    if (this->index_.add_photo(item)) images++;
+    // Index the media_content_id and fetch originals through resolve_media.
+    // Browse children also carry a thumbnail path, but Immich serves those as
+    // WebP regardless of the declared content type, which the artwork decoder
+    // cannot decode; originals are real JPEG/PNG files.
+    if (this->index_.add_photo(content_id)) images++;
   }
   ESP_LOGI(TAG, "Indexed %u photo(s) from %s%s", (unsigned) images,
            this->folder_.c_str(),

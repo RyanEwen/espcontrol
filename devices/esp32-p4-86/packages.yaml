@@ -108,6 +108,8 @@ substitutions:
   cover_art_text_color: "0xFFFFFF"
   cover_art_square_overlay: "true"
   cover_art_live_image_updates: "false"
+  photos_decode_size: "720"
+  photos_download_budget: "8388608"
 
 packages:
   # ---------------------------------------------------------------------------

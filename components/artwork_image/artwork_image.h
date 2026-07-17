@@ -104,6 +104,10 @@ class ArtworkImage : public PollingComponent,
   }
   bool can_use_p4_pipeline(const std::string &url) const;
 
+  /** Override the download size limit for this slot (bytes). Full-resolution
+   * photos can exceed the 2MB default that suits cover art and camera tiles. */
+  void set_max_download_size(size_t max_bytes) { this->max_download_buffer_size_ = max_bytes; }
+
   /** Add the request header */
   template<typename V> void add_request_header(const std::string &header, V value) {
     this->request_headers_.push_back(std::pair<std::string, TemplatableValue<std::string> >(header, value));

@@ -61,6 +61,7 @@ def package_substitution_lines(device: dict) -> list[str]:
             ]
         )
     lines.extend(cover_art_substitution_lines(device))
+    lines.extend(photos_substitution_lines(device))
     return lines
 
 
@@ -105,6 +106,27 @@ def voice_substitution_lines(device: dict) -> list[str]:
 def cover_art_substitution_lines(device: dict) -> list[str]:
     layout = device.get("cover_art") or {}
     return [f'  {key}: "{value}"' for key, value in layout.items()]
+
+
+def photos_substitution_lines(device: dict) -> list[str]:
+    subs = package_data(device)["substitutions"]
+
+    def dimension(key: str) -> int:
+        try:
+            return int(str(subs.get(key, "0")).strip('"'))
+        except ValueError:
+            return 0
+
+    # Decode square at the longest screen edge so a COVER crop fills the display
+    # in either orientation.
+    decode = max(dimension("screen_width"), dimension("screen_height")) or 480
+    # Full-resolution photos routinely exceed the 2MB artwork default. The P4
+    # panels have the PSRAM headroom for camera originals; the S3 does not.
+    budget = 2097152 if "-s3-" in device["slug"] else 8388608
+    return [
+        f'  photos_decode_size: "{decode}"',
+        f'  photos_download_budget: "{budget}"',
+    ]
 
 
 def include_line(key: str, include: str) -> str:
