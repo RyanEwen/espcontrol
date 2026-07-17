@@ -47,6 +47,18 @@ int main() {
   CHECK(media_source_absolute_url("", "/media/local/a.jpg").empty());
   CHECK(media_source_absolute_url("/", "/media/local/a.jpg").empty());
 
+  // Immich thumbnail paths rewrite to the JPEG preview variant; everything else
+  // passes through untouched.
+  CHECK(immich_thumbnail_to_preview("/immich/owner/asset/thumbnail/image/jpeg") ==
+        "/immich/owner/asset/preview/image/jpeg");
+  CHECK(immich_thumbnail_to_preview("/immich/owner/asset/fullsize/image/jpeg") ==
+        "/immich/owner/asset/fullsize/image/jpeg");
+  // Only Immich paths are rewritten; other sources may serve real files at a
+  // path that happens to contain the word.
+  CHECK(immich_thumbnail_to_preview("/other/thumbnail/a.jpg") ==
+        "/other/thumbnail/a.jpg");
+  CHECK(immich_thumbnail_to_preview("").empty());
+
   // A thumbnail path from a proxying source is downloadable as-is; a
   // media_content_id needs resolve_media first.
   CHECK(media_item_is_direct_path("/immich/owner/asset/thumbnail/image/jpeg"));

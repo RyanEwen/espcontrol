@@ -61,6 +61,21 @@ inline bool media_item_is_direct_path(const std::string &item) {
   return item.rfind("http://", 0) == 0 || item.rfind("https://", 0) == 0;
 }
 
+// Immich's browse thumbnails are WebP regardless of their declared content
+// type, which the artwork decoder cannot use — but the integration also serves
+// a JPEG preview (~1440px) at the same path with the size segment swapped.
+// Rewrite an Immich thumbnail path to its preview variant; anything else passes
+// through untouched.
+inline std::string immich_thumbnail_to_preview(const std::string &thumbnail) {
+  if (thumbnail.rfind("/immich/", 0) != 0) return thumbnail;
+  const std::string needle = "/thumbnail/";
+  const size_t pos = thumbnail.find(needle);
+  if (pos == std::string::npos) return thumbnail;
+  std::string result = thumbnail;
+  result.replace(pos, needle.size(), "/preview/");
+  return result;
+}
+
 // Join the Home Assistant base URL to a resolve_media result. The signed path is
 // relative; any other query parameter would invalidate the signature, so the
 // path is used exactly as Home Assistant returned it.

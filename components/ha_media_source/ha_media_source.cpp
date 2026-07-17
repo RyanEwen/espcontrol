@@ -6,6 +6,8 @@
 #include "esphome/components/json/json_util.h"
 #include "esp_heap_caps.h"
 
+#include <cstring>
+
 namespace esphome {
 namespace ha_media_source {
 
@@ -335,6 +337,7 @@ void HaMediaSource::handle_message_(const char *data, size_t len) {
   filter_child["media_content_type"] = true;
   filter_child["media_content_id"] = true;
   filter_child["can_expand"] = true;
+  filter_child["thumbnail"] = true;
 
   JsonDocument doc(&g_psram_json_allocator);
   const DeserializationError parse_error =
@@ -404,17 +407,23 @@ void HaMediaSource::handle_browse_result_(JsonObjectConst root) {
   for (JsonObjectConst child : children) {
     const std::string media_class = child["media_class"] | "";
     const std::string content_type = child["media_content_type"] | "";
-    // Strings go straight into the PSRAM-backed index without an intermediate
-    // std::string; these entries are long and there are hundreds.
     const char *content_id = child["media_content_id"] | "";
+    const char *thumbnail = child["thumbnail"] | "";
     const bool can_expand = child["can_expand"] | false;
     if (espcontrol::media_child_is_folder(media_class, can_expand)) continue;
     if (!espcontrol::media_child_is_image(media_class, content_type)) continue;
-    // Index the media_content_id and fetch originals through resolve_media.
-    // Browse children also carry a thumbnail path, but Immich serves those as
-    // WebP regardless of the declared content type, which the artwork decoder
-    // cannot decode; originals are real JPEG/PNG files.
-    if (this->index_.add_photo(content_id)) images++;
+    // Prefer Immich's JPEG preview: the browse thumbnail is WebP (undecodable
+    // here) and the fullsize original behind resolve_media can run to well over
+    // ten megabytes — far too slow over panel WiFi. Sources without a usable
+    // preview keep the resolve_media flow via their media_content_id.
+    bool added = false;
+    if (thumbnail[0] != '\0' && strncmp(thumbnail, "/immich/", 8) == 0) {
+      added = this->index_.add_photo(
+          espcontrol::immich_thumbnail_to_preview(thumbnail).c_str());
+    } else {
+      added = this->index_.add_photo(content_id);
+    }
+    if (added) images++;
   }
   ESP_LOGI(TAG, "Indexed %u photo(s) from %s%s", (unsigned) images,
            this->folder_.c_str(),
