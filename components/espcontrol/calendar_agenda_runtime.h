@@ -19,6 +19,10 @@
 #include "calendar_agenda.h"
 #include "button_grid_ha.h"
 
+#ifdef USE_API_HOMEASSISTANT_ACTION_RESPONSES_JSON
+#include "esphome/components/json/json_util.h"
+#endif
+
 namespace espcontrol {
 
 using AgendaReadyCallback = std::function<void(const AgendaList &)>;
@@ -58,8 +62,21 @@ class AgendaFetcher {
         continue;
       }
       // Ask Home Assistant to return the service response (the events); without
-      // this the call still runs but no data comes back to the device.
+      // this the call still runs but no data comes back to the device. The
+      // response template renders the events into a compact JSON array
+      // Home-Assistant-side — the same mechanism the weather forecast card
+      // uses — so the device receives a small, versioned-envelope-free payload
+      // under the "response" key.
       req.wants_response = true;
+      static const char *const kTemplate =
+          "{% set ns = namespace(items=[]) %}"
+          "{% set data = response if response is defined and response is not none else {} %}"
+          "{% for cal, body in data.items() %}"
+          "{% for e in body['events'] | default([]) %}"
+          "{% set ns.items = ns.items + [{'s': e.start | string, 't': e.summary | string}] %}"
+          "{% endfor %}{% endfor %}"
+          "{{ ns.items | tojson }}";
+      req.response_template = decltype(req.response_template)(kTemplate);
       ha_action_add_entity(req, entity);
       ha_action_add_data(req, "start_date_time", start_datetime.c_str());
       ha_action_add_data(req, "end_date_time", end_datetime.c_str());
@@ -96,17 +113,32 @@ class AgendaFetcher {
   }
 
   void handle_response_(uint32_t generation, const esphome::api::ActionResponse &response) {
-    if (generation != this->generation_) return;  // superseded by a newer refresh
+    if (generation != this->generation_) {
+      ESP_LOGD("agenda", "Dropping superseded get_events response");
+      return;
+    }
     if (response.is_success()) {
-      // { "calendar.foo": { "events": [ {start, end, summary, location}, ... ] } }
+      // The response template renders a JSON array of {s: start, t: summary}
+      // delivered as a string under the "response" key (the envelope Home
+      // Assistant uses for templated action responses).
       JsonObjectConst root = response.get_json();
-      for (JsonPairConst calendar : root) {
-        JsonArrayConst events = calendar.value()["events"];
-        if (events.isNull()) continue;
-        for (JsonObjectConst event : events) {
-          const char *start = event["start"] | "";
-          const char *summary = event["summary"] | "";
-          this->accumulated_.add(start, std::string(summary));
+      const char *payload = root["response"].as<const char *>();
+      if (payload == nullptr || payload[0] == '\0') {
+        ESP_LOGW("agenda", "get_events response had no rendered payload");
+      } else {
+        const JsonDocument doc = esphome::json::parse_json(payload);
+        JsonArrayConst items = doc.as<JsonArrayConst>();
+        if (items.isNull()) {
+          ESP_LOGW("agenda", "get_events payload was not a JSON array: %.60s", payload);
+        } else {
+          size_t added = 0;
+          for (JsonObjectConst item : items) {
+            const char *start = item["s"] | "";
+            const char *summary = item["t"] | "";
+            this->accumulated_.add(start, std::string(summary));
+            added++;
+          }
+          ESP_LOGD("agenda", "Parsed %u event(s) from calendar response", (unsigned) added);
         }
       }
     } else {
