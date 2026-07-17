@@ -343,6 +343,24 @@ export const ENTITY_CATALOG = {
         "screensaver_photos_weather_entity"
       ]
     },
+    "screen_saver_photos_show_agenda": {
+      "domain": "switch",
+      "name": "Screen Saver: Photos Show Agenda",
+      "objectIds": [
+        "screen_saver__photos_show_agenda",
+        "screen_saver_photos_show_agenda",
+        "screensaver_photos_show_agenda"
+      ]
+    },
+    "screen_saver_photos_agenda_entities": {
+      "domain": "text",
+      "name": "Screen Saver: Photos Agenda Calendars",
+      "objectIds": [
+        "screen_saver__photos_agenda_entities",
+        "screen_saver_photos_agenda_entities",
+        "screensaver_photos_agenda_entities"
+      ]
+    },
     "screensaver_timeout": {
       "domain": "number",
       "name": "Screensaver Timeout",
@@ -683,6 +701,8 @@ export const ENTITY_CATALOG = {
       "screen_saver_photos_show_datetime",
       "screen_saver_photos_show_weather",
       "screen_saver_photos_weather_entity",
+      "screen_saver_photos_show_agenda",
+      "screen_saver_photos_agenda_entities",
       "screensaver_timeout",
       "home_screen_timeout",
       "screen_saver_clock",

@@ -15,6 +15,10 @@
 # =============================================================================
 
 globals:
+  # Fetches and merges upcoming calendar events for the optional agenda overlay.
+  - id: photos_agenda_fetcher
+    type: espcontrol::AgendaFetcher
+    restore_value: false
   # Advancing the rotation and resolving a signed URL are asynchronous. Each
   # advance carries a generation so a late resolve callback from a previous photo
   # (or a dismissed screensaver) cannot overwrite the current one.
@@ -316,11 +320,60 @@ lvgl:
                 text_color: 0xDDDDDD
                 text: ""
                 hidden: true
+            # Optional upcoming-events agenda, top-left. A single wrapping label
+            # holds the whole grouped list (day headings + event lines); a black
+            # twin behind it is the drop shadow, like the other overlay text.
+            - obj:
+                id: photos_agenda_box
+                align: TOP_LEFT
+                x: 24
+                y: 20
+                width: 45%
+                height: SIZE_CONTENT
+                bg_opa: 0%
+                border_width: 0
+                pad_all: 0
+                scrollable: false
+                clickable: false
+                hidden: true
+                widgets:
+                  - label:
+                      id: photos_agenda_shadow
+                      x: 2
+                      y: 2
+                      width: 100%
+                      text_font: font_text_body
+                      text_color: 0x000000
+                      opa: 70%
+                      long_mode: wrap
+                      text: ""
+                  - label:
+                      id: photos_agenda_label
+                      x: 0
+                      y: 0
+                      width: 100%
+                      text_font: font_text_body
+                      text_color: 0xFFFFFF
+                      long_mode: wrap
+                      text: ""
 
 esphome:
   on_boot:
     priority: 200
     then:
+      - lambda: |-
+          // Render the agenda into its label whenever a fetch completes.
+          id(photos_agenda_fetcher).set_on_ready([](const espcontrol::AgendaList &list) {
+            auto now = panel_time_or_fallback(id(panel_time).now(),
+                                              id(homeassistant_time).now());
+            int32_t today = now.is_valid()
+                ? espcontrol::agenda_days_from_civil(now.year, now.month, now.day_of_month)
+                : 0;
+            std::string text = espcontrol::agenda_build_text(list, today,
+                                                             id(clock_format_12h));
+            lv_label_set_text(id(photos_agenda_label), text.c_str());
+            lv_label_set_text(id(photos_agenda_shadow), text.c_str());
+          });
       - script.execute: ha_media_source_apply_connection
 
 script:
@@ -477,7 +530,45 @@ script:
           else lv_obj_add_flag(id(photos_datetime_box), LV_OBJ_FLAG_HIDDEN);
           if (show_weather) lv_obj_clear_flag(id(photos_weather_box), LV_OBJ_FLAG_HIDDEN);
           else lv_obj_add_flag(id(photos_weather_box), LV_OBJ_FLAG_HIDDEN);
+          const bool show_agenda = id(screensaver_photos_show_agenda).state &&
+                                   !id(screensaver_photos_agenda_entities).state.empty();
+          if (show_agenda) lv_obj_clear_flag(id(photos_agenda_box), LV_OBJ_FLAG_HIDDEN);
+          else lv_obj_add_flag(id(photos_agenda_box), LV_OBJ_FLAG_HIDDEN);
       - script.execute: photos_refresh_datetime
+      - if:
+          condition:
+            lambda: |-
+              return id(screensaver_photos_show_agenda).state &&
+                     !id(screensaver_photos_agenda_entities).state.empty();
+          then:
+            - script.execute: photos_agenda_refresh
+
+  # Fetch the upcoming events for the agenda overlay. Runs when the screensaver
+  # shows, when the agenda config changes, and on a slow interval while visible.
+  - id: photos_agenda_refresh
+    mode: restart
+    then:
+      - lambda: |-
+          auto now = panel_time_or_fallback(id(panel_time).now(),
+                                            id(homeassistant_time).now());
+          if (!now.is_valid()) return;
+          id(photos_agenda_fetcher).set_entities(
+              espcontrol::agenda_split_entities(
+                  id(screensaver_photos_agenda_entities).state));
+          id(photos_agenda_fetcher).set_max_events(6);
+          char start[24];
+          snprintf(start, sizeof(start), "%04d-%02d-%02d %02d:%02d:%02d",
+                   now.year, now.month, now.day_of_month, now.hour, now.minute, now.second);
+          // Window end: 14 days ahead at midnight.
+          int32_t today = espcontrol::agenda_days_from_civil(now.year, now.month,
+                                                             now.day_of_month);
+          int ey = 0, em = 0, ed = 0;
+          espcontrol::agenda_civil_from_days(today + 14, &ey, &em, &ed);
+          char end[24];
+          snprintf(end, sizeof(end), "%04d-%02d-%02d 00:00:00", ey, em, ed);
+          const int64_t now_epoch = static_cast<int64_t>(today) * 86400 +
+                                    now.hour * 3600 + now.minute * 60 + now.second;
+          id(photos_agenda_fetcher).refresh(std::string(start), std::string(end), now_epoch);
 
   # Refresh the date/time label from the panel clock. Cheap; called each second
   # while the photo screensaver is visible.
@@ -683,6 +774,18 @@ interval:
                   espcontrol::DisplayMode::PHOTOS);
           then:
             - script.execute: photos_refresh_datetime
+  # Refresh the agenda periodically so new/changed events show up.
+  - interval: 10min
+    then:
+      - if:
+          condition:
+            lambda: |-
+              return id(display_mode_controller).current_mode_is(
+                         espcontrol::DisplayMode::PHOTOS) &&
+                     id(screensaver_photos_show_agenda).state &&
+                     !id(screensaver_photos_agenda_entities).state.empty();
+          then:
+            - script.execute: photos_agenda_refresh
   - interval: 5s
     then:
       - if:

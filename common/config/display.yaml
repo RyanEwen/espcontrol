@@ -195,6 +195,21 @@ switch:
       - script.execute: photos_apply_widgets
 
   - platform: template
+    name: "${entity_screen_saver_photos_show_agenda}"
+    internal: true
+    id: screensaver_photos_show_agenda
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    entity_category: config
+    icon: "mdi:calendar-clock"
+    web_server:
+      sorting_group_id: sg_screensaver
+    on_turn_on:
+      - script.execute: photos_apply_widgets
+    on_turn_off:
+      - script.execute: photos_apply_widgets
+
+  - platform: template
     name: "${entity_screen_clock_bar}"
     internal: true
     id: clock_bar_enabled
@@ -772,6 +787,26 @@ text:
     on_value:
       then:
         - script.execute: photos_subscribe_weather
+
+  # Photo screensaver agenda: comma-separated calendar.* entities to show.
+  - platform: template
+    name: "${entity_screen_saver_photos_agenda_entities}"
+    internal: true
+    id: screensaver_photos_agenda_entities
+    optimistic: true
+    restore_value: true
+    initial_value: ""
+    min_length: 0
+    max_length: 250
+    mode: text
+    entity_category: config
+    icon: "mdi:calendar-clock"
+    update_interval: never
+    web_server:
+      sorting_group_id: sg_screensaver
+    on_value:
+      then:
+        - script.execute: photos_apply_widgets
 
   - platform: template
     name: "${entity_screen_saver_cover_art_conditions}"
