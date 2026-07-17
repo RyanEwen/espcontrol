@@ -539,13 +539,7 @@ script:
           if (show_agenda) lv_obj_clear_flag(id(photos_agenda_box), LV_OBJ_FLAG_HIDDEN);
           else lv_obj_add_flag(id(photos_agenda_box), LV_OBJ_FLAG_HIDDEN);
       - script.execute: photos_refresh_datetime
-      - if:
-          condition:
-            lambda: |-
-              return id(screensaver_photos_show_agenda).state &&
-                     !id(screensaver_photos_agenda_entities).state.empty();
-          then:
-            - script.execute: photos_agenda_refresh
+      - script.execute: photos_agenda_refresh
 
   # Fetch the upcoming events for the agenda overlay. Runs when the screensaver
   # shows, when the agenda config changes, and on a slow interval while visible.
@@ -553,6 +547,11 @@ script:
     mode: restart
     then:
       - lambda: |-
+          if (!id(screensaver_photos_show_agenda).state ||
+              id(screensaver_photos_agenda_entities).state.empty()) {
+            ESP_LOGD("agenda", "Refresh skipped: agenda disabled or no calendars");
+            return;
+          }
           auto now = panel_time_or_fallback(id(panel_time).now(),
                                             id(homeassistant_time).now());
           ESP_LOGI("agenda", "Refresh requested (time_valid=%d)", (int) now.is_valid());
@@ -779,16 +778,16 @@ interval:
                   espcontrol::DisplayMode::PHOTOS);
           then:
             - script.execute: photos_refresh_datetime
-  # Refresh the agenda periodically so new/changed events show up.
+  # Refresh the agenda periodically so new/changed events show up. The
+  # refresh script gates itself on the agenda config; only the presentation
+  # mode is checked here.
   - interval: 10min
     then:
       - if:
           condition:
             lambda: |-
               return id(display_mode_controller).current_mode_is(
-                         espcontrol::DisplayMode::PHOTOS) &&
-                     id(screensaver_photos_show_agenda).state &&
-                     !id(screensaver_photos_agenda_entities).state.empty();
+                         espcontrol::DisplayMode::PHOTOS);
           then:
             - script.execute: photos_agenda_refresh
   - interval: 5s
