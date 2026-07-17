@@ -526,6 +526,10 @@ script:
           const bool show_datetime = id(screensaver_photos_show_datetime).state;
           const bool show_weather = id(screensaver_photos_show_weather).state &&
                                     !id(screensaver_photos_weather_entity).state.empty();
+          ESP_LOGI("agenda", "apply_widgets: datetime=%d weather=%d agenda_sw=%d cals='%s'",
+                   (int) show_datetime, (int) show_weather,
+                   (int) id(screensaver_photos_show_agenda).state,
+                   id(screensaver_photos_agenda_entities).state.c_str());
           if (show_datetime) lv_obj_clear_flag(id(photos_datetime_box), LV_OBJ_FLAG_HIDDEN);
           else lv_obj_add_flag(id(photos_datetime_box), LV_OBJ_FLAG_HIDDEN);
           if (show_weather) lv_obj_clear_flag(id(photos_weather_box), LV_OBJ_FLAG_HIDDEN);
