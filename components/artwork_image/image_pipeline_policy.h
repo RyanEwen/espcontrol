@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 
 namespace esphome {
 namespace artwork_image {
@@ -204,6 +205,43 @@ constexpr P4CoverScalePlan p4_cover_scale_plan(uint32_t source_width,
 // must stay on the software path, which performs the required conversion.
 constexpr bool p4_jpeg_hardware_target_supported(bool target_is_rgb565) {
   return target_is_rgb565;
+}
+
+// Copy a JPEG stream into dst while dropping APPn and COM segments. Cameras
+// and photo services front-load kilobytes of EXIF/ICC metadata, which pushes
+// the frame header beyond the window the ESP32-P4 ROM parser inspects — it
+// then reports a 0x0 image and the decode falls back to a multi-second
+// software path. Without the (legally optional) metadata the hardware accepts
+// the same image. Returns the stripped size, or 0 when the stream is not a
+// JPEG this simple walker understands (caller falls back to software).
+// dst must hold at least size bytes.
+inline size_t jpeg_strip_metadata(const uint8_t *src, size_t size, uint8_t *dst) {
+  if (src == nullptr || dst == nullptr || size < 4) return 0;
+  if (src[0] != 0xFF || src[1] != 0xD8) return 0;  // SOI
+  size_t out = 0;
+  dst[out++] = 0xFF;
+  dst[out++] = 0xD8;
+  size_t i = 2;
+  while (i + 4 <= size) {
+    if (src[i] != 0xFF) return 0;  // lost marker sync
+    const uint8_t marker = src[i + 1];
+    if (marker == 0xDA) {  // SOS: entropy data follows; copy the rest wholesale
+      const size_t remaining = size - i;
+      memcpy(dst + out, src + i, remaining);
+      return out + remaining;
+    }
+    const size_t segment_length =
+        (static_cast<size_t>(src[i + 2]) << 8) | src[i + 3];
+    if (segment_length < 2 || i + 2 + segment_length > size) return 0;
+    const bool metadata =
+        (marker >= 0xE0 && marker <= 0xEF) || marker == 0xFE;  // APPn / COM
+    if (!metadata) {
+      memcpy(dst + out, src + i, 2 + segment_length);
+      out += 2 + segment_length;
+    }
+    i += 2 + segment_length;
+  }
+  return 0;
 }
 
 }  // namespace artwork_image

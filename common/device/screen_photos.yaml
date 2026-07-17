@@ -413,6 +413,10 @@ script:
     then:
       - lambda: |-
           id(photos_download_pending) = false;
+          // Count the per-photo duration from when the photo actually appears,
+          // not from when its download started — a slow decode must not make
+          // the next advance fire the moment this one lands.
+          id(photos_last_advance_ms) = millis();
           if (slot != id(photos_pending_slot)) return;  // stale completion
           lv_obj_t *incoming = slot == 0 ? id(photos_image_widget_a)
                                          : id(photos_image_widget_b);

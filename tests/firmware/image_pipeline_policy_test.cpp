@@ -2,6 +2,7 @@
 
 #include "image_pipeline_policy.h"
 
+using esphome::artwork_image::jpeg_strip_metadata;
 using esphome::artwork_image::p4_pipeline_candidate_precedes;
 using esphome::artwork_image::p4_pipeline_http_status_is_success;
 using esphome::artwork_image::p4_pipeline_result_is_current;
@@ -120,4 +121,41 @@ int main() {
   // configured type must fall back to the format-aware software decoder.
   assert(p4_jpeg_hardware_target_supported(true));
   assert(!p4_jpeg_hardware_target_supported(false));
+
+  // Metadata stripping drops APPn/COM segments and keeps everything else, so
+  // a JPEG whose frame header hides behind fat EXIF becomes hardware-decodable.
+  {
+    // SOI, APP1 (6 bytes of "metadata"), DQT (2 bytes), SOS + entropy data.
+    const uint8_t jpeg[] = {
+        0xFF, 0xD8,
+        0xFF, 0xE1, 0x00, 0x08, 'E', 'x', 'i', 'f', 0x00, 0x00,
+        0xFF, 0xDB, 0x00, 0x04, 0x01, 0x02,
+        0xFF, 0xDA, 0x00, 0x02, 0xAA, 0xBB, 0xCC,
+    };
+    uint8_t out[sizeof(jpeg)] = {};
+    const size_t stripped = jpeg_strip_metadata(jpeg, sizeof(jpeg), out);
+    // SOI + DQT + SOS-and-rest survive; the 10-byte APP1 segment is gone.
+    assert(stripped == sizeof(jpeg) - 10);
+    assert(out[0] == 0xFF && out[1] == 0xD8);
+    assert(out[2] == 0xFF && out[3] == 0xDB);          // DQT immediately after SOI
+    assert(out[8] == 0xFF && out[9] == 0xDA);          // then SOS
+    assert(out[stripped - 1] == 0xCC);                 // entropy tail intact
+
+    // A COM segment is dropped the same way.
+    const uint8_t with_comment[] = {
+        0xFF, 0xD8,
+        0xFF, 0xFE, 0x00, 0x04, 'h', 'i',
+        0xFF, 0xDA, 0x00, 0x02, 0x01,
+    };
+    uint8_t out2[sizeof(with_comment)] = {};
+    assert(jpeg_strip_metadata(with_comment, sizeof(with_comment), out2) ==
+           sizeof(with_comment) - 6);
+
+    // Not-a-JPEG and truncated segments are rejected rather than half-copied.
+    const uint8_t not_jpeg[] = {0x00, 0x11, 0x22, 0x33};
+    assert(jpeg_strip_metadata(not_jpeg, sizeof(not_jpeg), out2) == 0);
+    const uint8_t truncated[] = {0xFF, 0xD8, 0xFF, 0xE1, 0xFF, 0xFF};
+    assert(jpeg_strip_metadata(truncated, sizeof(truncated), out2) == 0);
+    assert(jpeg_strip_metadata(nullptr, 16, out2) == 0);
+  }
 }
