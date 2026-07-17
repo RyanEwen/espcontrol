@@ -208,18 +208,25 @@ int HOT JpegDecoder::decode(uint8_t *buffer, size_t size) {
 int JpegDecoder::decode_hardware_(uint8_t *buffer, size_t size) {
   if (!p4_jpeg_hardware_target_supported(
         this->image_->image_type() == image::ImageType::IMAGE_TYPE_RGB565)) {
+    ESP_LOGD(TAG, "Hardware JPEG skipped: target format is not RGB565");
     p4_release_jpeg_workspace();
     return 0;
   }
   jpeg_decoder_handle_t decoder = p4_jpeg_decoder();
   if (decoder == nullptr) {
+    ESP_LOGW(TAG, "Hardware JPEG skipped: decoder engine unavailable");
     p4_release_jpeg_workspace();
     return 0;
   }
 
   jpeg_decode_picture_info_t info{};
-  if (jpeg_decoder_get_info(buffer, size, &info) != ESP_OK || info.width == 0 || info.height == 0 ||
+  const esp_err_t info_err = jpeg_decoder_get_info(buffer, size, &info);
+  if (info_err != ESP_OK || info.width == 0 || info.height == 0 ||
       info.sample_method == JPEG_DOWN_SAMPLING_GRAY) {
+    ESP_LOGW(TAG,
+             "Hardware JPEG skipped: header info err=%d size=%ux%u sample_method=%d",
+             (int) info_err, (unsigned) info.width, (unsigned) info.height,
+             (int) info.sample_method);
     p4_release_jpeg_workspace();
     return 0;
   }
