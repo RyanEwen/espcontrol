@@ -82,7 +82,17 @@ void HaMediaSource::refresh_index() {
 
 void HaMediaSource::resolve(const std::string &media_content_id,
                             std::function<void(const std::string &)> &&callback) {
-  if (media_content_id.empty() || !this->ready()) {
+  if (media_content_id.empty()) {
+    callback(std::string());
+    return;
+  }
+  // Thumbnail paths from the browse response are downloadable directly (with
+  // the caller's Authorization header); no websocket round-trip needed.
+  if (espcontrol::media_item_is_direct_path(media_content_id)) {
+    callback(espcontrol::media_source_absolute_url(this->base_url_, media_content_id));
+    return;
+  }
+  if (!this->ready()) {
     callback(std::string());
     return;
   }
@@ -325,6 +335,7 @@ void HaMediaSource::handle_message_(const char *data, size_t len) {
   filter_child["media_content_type"] = true;
   filter_child["media_content_id"] = true;
   filter_child["can_expand"] = true;
+  filter_child["thumbnail"] = true;
 
   JsonDocument doc(&g_psram_json_allocator);
   const DeserializationError parse_error =
@@ -394,13 +405,19 @@ void HaMediaSource::handle_browse_result_(JsonObjectConst root) {
   for (JsonObjectConst child : children) {
     const std::string media_class = child["media_class"] | "";
     const std::string content_type = child["media_content_type"] | "";
-    // The content id goes straight into the PSRAM-backed index without an
-    // intermediate std::string; these ids are long and there are hundreds.
+    // Strings go straight into the PSRAM-backed index without an intermediate
+    // std::string; these entries are long and there are hundreds.
     const char *content_id = child["media_content_id"] | "";
+    const char *thumbnail = child["thumbnail"] | "";
     const bool can_expand = child["can_expand"] | false;
     if (espcontrol::media_child_is_folder(media_class, can_expand)) continue;
     if (!espcontrol::media_child_is_image(media_class, content_type)) continue;
-    if (this->index_.add_photo(content_id)) images++;
+    // Prefer the thumbnail path when the source provides one: it downloads
+    // directly (no resolve round-trip), is sized for a panel instead of a
+    // multi-megabyte camera original, and is always JPEG regardless of the
+    // original format.
+    const char *item = thumbnail[0] != '\0' ? thumbnail : content_id;
+    if (this->index_.add_photo(item)) images++;
   }
   ESP_LOGI(TAG, "Indexed %u photo(s) from %s%s", (unsigned) images,
            this->folder_.c_str(),

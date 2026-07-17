@@ -177,6 +177,19 @@ script:
           const std::string url =
               espcontrol::normalize_ha_websocket_url(id(home_assistant_url).state);
           id(photo_media).set_connection(url, id(home_assistant_token).state);
+          // Thumbnail paths from the browse response need the Home Assistant
+          // token as a bearer header (they are not signed like resolve_media
+          // URLs). Register the header once; the lambda reads the live token
+          // per request so a token change needs no re-registration.
+          static bool photos_auth_header_added = false;
+          if (!photos_auth_header_added) {
+            photos_auth_header_added = true;
+            id(photos_downloaded_image)->add_request_header(
+                "Authorization", []() -> std::string {
+                  const std::string &token = id(home_assistant_token).state;
+                  return token.empty() ? std::string() : "Bearer " + token;
+                });
+          }
       # Point the client at the configured folder (no-op if unchanged).
       - lambda: 'id(photo_media).set_folder(id(screensaver_photos_folder).state);'
 

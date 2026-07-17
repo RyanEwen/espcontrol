@@ -50,6 +50,17 @@ inline bool media_child_is_folder(const std::string &media_class, bool can_expan
   return can_expand || media_class == "directory";
 }
 
+// True when an index entry is already a downloadable path rather than a
+// media_content_id that needs resolve_media. Browse children from proxying
+// sources (Immich, for example) carry a thumbnail path like
+// "/immich/<owner>/<asset>/thumbnail/image/jpeg"; media_content_ids always
+// start with "media-source://".
+inline bool media_item_is_direct_path(const std::string &item) {
+  if (item.empty()) return false;
+  if (item.front() == '/') return true;
+  return item.rfind("http://", 0) == 0 || item.rfind("https://", 0) == 0;
+}
+
 // Join the Home Assistant base URL to a resolve_media result. The signed path is
 // relative; any other query parameter would invalidate the signature, so the
 // path is used exactly as Home Assistant returned it.

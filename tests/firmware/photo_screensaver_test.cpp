@@ -47,6 +47,15 @@ int main() {
   CHECK(media_source_absolute_url("", "/media/local/a.jpg").empty());
   CHECK(media_source_absolute_url("/", "/media/local/a.jpg").empty());
 
+  // A thumbnail path from a proxying source is downloadable as-is; a
+  // media_content_id needs resolve_media first.
+  CHECK(media_item_is_direct_path("/immich/owner/asset/thumbnail/image/jpeg"));
+  CHECK(media_item_is_direct_path("http://cdn.example/a.jpg"));
+  CHECK(media_item_is_direct_path("https://cdn.example/a.jpg"));
+  CHECK(!media_item_is_direct_path("media-source://media_source/local/a.jpg"));
+  CHECK(!media_item_is_direct_path("media-source://immich/a|albums|b"));
+  CHECK(!media_item_is_direct_path(""));
+
   // A bare host over plain http gets Home Assistant's default port and path.
   CHECK(normalize_ha_websocket_url("10.0.0.5") ==
         "ws://10.0.0.5:8123/api/websocket");
