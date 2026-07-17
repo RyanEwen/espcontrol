@@ -1,3 +1,6 @@
+#ifndef ESPCONTROL_PHOTO_SCREENSAVER_H
+#define ESPCONTROL_PHOTO_SCREENSAVER_H
+
 #pragma once
 
 // Pure logic for the photo screensaver's Home Assistant media-source index.
@@ -180,3 +183,5 @@ class PhotoIndex {
 };
 
 }  // namespace espcontrol
+
+#endif  // ESPCONTROL_PHOTO_SCREENSAVER_H

@@ -1,3 +1,6 @@
+#ifndef ESPHOME_HA_MEDIA_SOURCE_H
+#define ESPHOME_HA_MEDIA_SOURCE_H
+
 #pragma once
 
 // Home Assistant media-source client.
@@ -131,3 +134,5 @@ class HaMediaSource : public Component {
 }  // namespace esphome
 
 #endif  // USE_ESP_IDF
+
+#endif  // ESPHOME_HA_MEDIA_SOURCE_H

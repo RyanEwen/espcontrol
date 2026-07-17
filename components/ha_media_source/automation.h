@@ -1,3 +1,6 @@
+#ifndef ESPHOME_HA_MEDIA_SOURCE_AUTOMATION_H
+#define ESPHOME_HA_MEDIA_SOURCE_AUTOMATION_H
+
 #pragma once
 
 #ifdef USE_ESP_IDF
@@ -38,3 +41,5 @@ class RefreshAction : public Action<Ts...>, public Parented<HaMediaSource> {
 }  // namespace esphome
 
 #endif  // USE_ESP_IDF
+
+#endif  // ESPHOME_HA_MEDIA_SOURCE_AUTOMATION_H
