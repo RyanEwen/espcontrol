@@ -150,6 +150,10 @@ media_player:
       format: NONE
       sample_rate: 48000
     on_announcement:
+      - lambda: |-
+          id(alarm_delay_beep_announcement_active) =
+            id(alarm_delay_beep_requested);
+          id(alarm_delay_beep_requested) = false;
       - mixer_speaker.apply_ducking:
           id: voice_media_mixing_input
           decibel_reduction: 20
@@ -305,6 +309,16 @@ globals:
     restore_value: false
     initial_value: "false"
 
+  - id: alarm_delay_beep_requested
+    type: bool
+    restore_value: false
+    initial_value: "false"
+
+  - id: alarm_delay_beep_announcement_active
+    type: bool
+    restore_value: false
+    initial_value: "false"
+
 micro_wake_word:
   id: onboard_wake_word
   microphone:
@@ -421,6 +435,9 @@ script:
           id: voice_media_player
           volume: !lambda return id(alarm_delay_beep_volume).state;
       - switch.turn_on: speaker_amplifier_enable
+      - lambda: |-
+          id(alarm_delay_beep_requested) = true;
+          id(alarm_delay_beep_announcement_active) = false;
       - if:
           condition:
             lambda: return entry_delay;
@@ -435,6 +452,9 @@ script:
                 media_file: alarm_delay_exit_beep
                 announcement: true
       - delay: 250ms
+      - lambda: |-
+          id(alarm_delay_beep_requested) = false;
+          id(alarm_delay_beep_announcement_active) = false;
       - if:
           condition:
             lambda: return id(alarm_delay_volume_overridden);
@@ -479,8 +499,10 @@ script:
           then:
             - if:
                 condition:
-                  media_player.is_announcing:
-                    id: voice_media_player
+                  and:
+                    - lambda: return id(alarm_delay_beep_announcement_active);
+                    - media_player.is_announcing:
+                        id: voice_media_player
                 then:
                   - media_player.stop:
                       id: voice_media_player
@@ -499,6 +521,8 @@ script:
             - lambda: |-
                 id(alarm_delay_volume_overridden) = false;
                 id(alarm_delay_audio_session_active) = false;
+                id(alarm_delay_beep_requested) = false;
+                id(alarm_delay_beep_announcement_active) = false;
 
   - id: open_device_volume_control
     mode: restart

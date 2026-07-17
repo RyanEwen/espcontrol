@@ -40,3 +40,9 @@ inline uint32_t alarm_delay_audio_beep_period_ms(int remaining_seconds,
   return remaining_seconds > 0 && remaining_seconds <= final_countdown_seconds
     ? 700U : 1000U;
 }
+
+inline bool alarm_delay_audio_should_reset_timer(bool starting,
+                                                 uint32_t current_period_ms,
+                                                 uint32_t next_period_ms) {
+  return starting || current_period_ms != next_period_ms;
+}

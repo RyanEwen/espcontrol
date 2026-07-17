@@ -134,6 +134,7 @@ struct AlarmDelayAudioCoordinator {
   AlarmDelayAudioMode mode = AlarmDelayAudioMode::NONE;
   int remaining_seconds = -1;
   uint32_t remaining_updated_ms = 0;
+  uint32_t period_ms = 1000U;
   lv_timer_t *timer = nullptr;
   AlarmDelayAudioHooks hooks;
 };
@@ -190,10 +191,9 @@ inline void alarm_delay_audio_timer_cb(lv_timer_t *timer) {
   if (coordinator.hooks.play_beep) {
     coordinator.hooks.play_beep(coordinator.mode);
   }
-  lv_timer_set_period(
-    timer,
-    alarm_delay_audio_beep_period_ms(
-      remaining, alarm_delay_audio_final_countdown_seconds(coordinator)));
+  coordinator.period_ms = alarm_delay_audio_beep_period_ms(
+    remaining, alarm_delay_audio_final_countdown_seconds(coordinator));
+  lv_timer_set_period(timer, coordinator.period_ms);
 }
 
 inline void alarm_delay_audio_update(AlarmCardCtx *ctx) {
@@ -230,11 +230,17 @@ inline void alarm_delay_audio_update(AlarmCardCtx *ctx) {
   uint32_t period = alarm_delay_audio_beep_period_ms(
     remaining, alarm_delay_audio_final_countdown_seconds(coordinator));
   if (!coordinator.timer) {
+    coordinator.period_ms = period;
     coordinator.timer = lv_timer_create(alarm_delay_audio_timer_cb, period, nullptr);
   } else {
-    lv_timer_set_period(coordinator.timer, period);
+    bool reset_timer = alarm_delay_audio_should_reset_timer(
+      starting, coordinator.period_ms, period);
+    coordinator.period_ms = period;
+    if (reset_timer) {
+      lv_timer_set_period(coordinator.timer, period);
+      lv_timer_reset(coordinator.timer);
+    }
     lv_timer_resume(coordinator.timer);
-    lv_timer_reset(coordinator.timer);
   }
 }
 

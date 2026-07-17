@@ -28,5 +28,10 @@ int main() {
       alarm_delay_audio_beep_period_ms(-1, 10) != 1000U) {
     return EXIT_FAILURE;
   }
+  if (alarm_delay_audio_should_reset_timer(false, 1000U, 1000U) ||
+      !alarm_delay_audio_should_reset_timer(true, 1000U, 1000U) ||
+      !alarm_delay_audio_should_reset_timer(false, 1000U, 700U)) {
+    return EXIT_FAILURE;
+  }
   return EXIT_SUCCESS;
 }
