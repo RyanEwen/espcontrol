@@ -27,6 +27,7 @@ struct AlarmCardCtx {
   lv_timer_t *pending_action_timer = nullptr;
   std::function<void(espcontrol::DisplayTakeoverKind)> begin_display_takeover;
   std::function<void(espcontrol::DisplayTakeoverKind)> end_display_takeover;
+  AlarmDelayAudioHooks audio_hooks;
   uint32_t arm_delay_started_ms = 0;
   int arm_delay_seconds = -1;
   int arm_delay_total_seconds = -1;
@@ -124,6 +125,117 @@ inline AlarmToastUi &alarm_toast_ui() {
 inline AlarmDeferredAction &alarm_deferred_action() {
   static AlarmDeferredAction action;
   return action;
+}
+
+inline int alarm_remaining_delay_seconds(AlarmCardCtx *ctx);
+
+struct AlarmDelayAudioCoordinator {
+  std::string entity_id;
+  AlarmDelayAudioMode mode = AlarmDelayAudioMode::NONE;
+  int remaining_seconds = -1;
+  uint32_t remaining_updated_ms = 0;
+  lv_timer_t *timer = nullptr;
+  AlarmDelayAudioHooks hooks;
+};
+
+inline AlarmDelayAudioCoordinator &alarm_delay_audio_coordinator() {
+  static AlarmDelayAudioCoordinator coordinator;
+  return coordinator;
+}
+
+inline int alarm_delay_audio_remaining_seconds(
+    const AlarmDelayAudioCoordinator &coordinator) {
+  if (coordinator.remaining_seconds < 0) return -1;
+  if (coordinator.remaining_seconds == 0) return 0;
+  uint32_t elapsed_ms = lv_tick_get() - coordinator.remaining_updated_ms;
+  int elapsed_seconds = static_cast<int>(elapsed_ms / 1000U);
+  int remaining = coordinator.remaining_seconds - elapsed_seconds;
+  return remaining > 0 ? remaining : 0;
+}
+
+inline void alarm_delay_audio_stop() {
+  AlarmDelayAudioCoordinator &coordinator = alarm_delay_audio_coordinator();
+  if (coordinator.timer) lv_timer_pause(coordinator.timer);
+  if (coordinator.mode != AlarmDelayAudioMode::NONE && coordinator.hooks.stop) {
+    coordinator.hooks.stop();
+  }
+  coordinator.entity_id.clear();
+  coordinator.mode = AlarmDelayAudioMode::NONE;
+  coordinator.remaining_seconds = -1;
+  coordinator.remaining_updated_ms = 0;
+  coordinator.hooks = AlarmDelayAudioHooks();
+}
+
+inline int alarm_delay_audio_final_countdown_seconds(
+    const AlarmDelayAudioCoordinator &coordinator) {
+  int seconds = coordinator.hooks.final_countdown_seconds
+    ? coordinator.hooks.final_countdown_seconds() : 10;
+  if (seconds < 0) return 0;
+  if (seconds > 300) return 300;
+  return seconds;
+}
+
+inline void alarm_delay_audio_timer_cb(lv_timer_t *timer) {
+  AlarmDelayAudioCoordinator &coordinator = alarm_delay_audio_coordinator();
+  if (coordinator.timer != timer || coordinator.mode == AlarmDelayAudioMode::NONE) {
+    lv_timer_pause(timer);
+    return;
+  }
+  bool enabled = coordinator.hooks.enabled && coordinator.hooks.enabled();
+  int remaining = alarm_delay_audio_remaining_seconds(coordinator);
+  if (!enabled || remaining == 0) {
+    alarm_delay_audio_stop();
+    return;
+  }
+  if (coordinator.hooks.play_beep) {
+    coordinator.hooks.play_beep(coordinator.mode);
+  }
+  lv_timer_set_period(
+    timer,
+    alarm_delay_audio_beep_period_ms(
+      remaining, alarm_delay_audio_final_countdown_seconds(coordinator)));
+}
+
+inline void alarm_delay_audio_update(AlarmCardCtx *ctx) {
+  if (!ctx) return;
+  AlarmDelayAudioMode mode = alarm_delay_audio_mode_for_state(ctx->state);
+  bool enabled = ctx->audio_hooks.enabled && ctx->audio_hooks.enabled();
+  int remaining = alarm_remaining_delay_seconds(ctx);
+  bool should_run = alarm_delay_audio_should_run(
+    ctx->state, remaining, ctx->available, enabled);
+  AlarmDelayAudioCoordinator &coordinator = alarm_delay_audio_coordinator();
+  bool owns_active_audio = coordinator.entity_id == ctx->entity_id;
+  if (!should_run) {
+    if (owns_active_audio) alarm_delay_audio_stop();
+    return;
+  }
+
+  bool starting = !owns_active_audio || coordinator.mode != mode;
+  if (starting && coordinator.mode != AlarmDelayAudioMode::NONE) {
+    alarm_delay_audio_stop();
+  }
+  coordinator.entity_id = ctx->entity_id;
+  coordinator.mode = mode;
+  coordinator.remaining_seconds = remaining;
+  coordinator.remaining_updated_ms = lv_tick_get();
+  coordinator.hooks = ctx->audio_hooks;
+
+  if (starting) {
+    if (coordinator.hooks.tts_enabled && coordinator.hooks.tts_enabled() &&
+        coordinator.hooks.announce) {
+      coordinator.hooks.announce(mode);
+    }
+    if (coordinator.hooks.play_beep) coordinator.hooks.play_beep(mode);
+  }
+  uint32_t period = alarm_delay_audio_beep_period_ms(
+    remaining, alarm_delay_audio_final_countdown_seconds(coordinator));
+  if (!coordinator.timer) {
+    coordinator.timer = lv_timer_create(alarm_delay_audio_timer_cb, period, nullptr);
+  } else {
+    lv_timer_set_period(coordinator.timer, period);
+    lv_timer_resume(coordinator.timer);
+    lv_timer_reset(coordinator.timer);
+  }
 }
 
 inline bool alarm_card_context_valid(AlarmCardCtx *ctx) {
@@ -583,6 +695,7 @@ inline void alarm_apply_home_state(AlarmCardCtx *ctx, const std::string &state) 
   alarm_clear_pending_action_if_progressed(ctx);
   alarm_control_update_modal(ctx);
   alarm_arm_delay_refresh_timer(ctx);
+  alarm_delay_audio_update(ctx);
   alarm_refresh_arming_takeover(ctx);
 }
 
@@ -606,6 +719,7 @@ inline void alarm_apply_home_arm_delay(AlarmCardCtx *ctx, const std::string &del
   ctx->arm_delay_started_ms = lv_tick_get();
   alarm_control_update_modal(ctx);
   alarm_arm_delay_refresh_timer(ctx);
+  alarm_delay_audio_update(ctx);
   alarm_refresh_arming_takeover(ctx);
 }
 
@@ -648,6 +762,7 @@ inline void alarm_apply_action_state(AlarmCardCtx *ctx, const std::string &mode,
   alarm_clear_pending_action_if_progressed(ctx);
   alarm_control_update_modal(ctx);
   alarm_arm_delay_refresh_timer(ctx);
+  alarm_delay_audio_update(ctx);
   alarm_refresh_arming_takeover(ctx);
 }
 

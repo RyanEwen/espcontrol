@@ -17,6 +17,12 @@ target_include_directories(button_grid_foundations_test PRIVATE
 )
 add_test(NAME button_grid_foundations_test COMMAND button_grid_foundations_test)
 
+add_executable(alarm_delay_audio_test alarm_delay_audio_test.cpp)
+target_compile_features(alarm_delay_audio_test PRIVATE cxx_std_17)
+target_compile_options(alarm_delay_audio_test PRIVATE -Wall -Wextra -Werror)
+target_include_directories(alarm_delay_audio_test PRIVATE ../../components/espcontrol)
+add_test(NAME alarm_delay_audio_test COMMAND alarm_delay_audio_test)
+
 add_executable(display_mode_controller_test display_mode_controller_test.cpp)
 target_compile_features(display_mode_controller_test PRIVATE cxx_std_17)
 target_compile_options(display_mode_controller_test PRIVATE -Wall -Wextra -Werror)

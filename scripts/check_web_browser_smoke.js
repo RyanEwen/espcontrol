@@ -951,10 +951,20 @@ async function assertSettingsPage(page, label, options = {}) {
       has: page.locator(".card-header h3", { hasText: /^Voice Services$/ }),
     })
     .first();
+  const alarmDelayAudioCard = page
+    .locator("#sp-settings .card")
+    .filter({
+      has: page.locator(".card-header h3", { hasText: /^Alarm Delay Audio$/ }),
+    })
+    .first();
   if (options.slug === "esp32-p4-86") {
     assert(
       await voiceServicesCard.isVisible(),
       `${label}: voice services settings card is available for the voice-capable panel`,
+    );
+    assert(
+      await alarmDelayAudioCard.isVisible(),
+      `${label}: alarm delay audio settings are available for the speaker panel`,
     );
   } else {
     assert(
@@ -965,6 +975,11 @@ async function assertSettingsPage(page, label, options = {}) {
       await voiceServicesCard.count(),
       0,
       `${label}: voice services settings card is hidden on panels without local voice`,
+    );
+    assert.strictEqual(
+      await alarmDelayAudioCard.count(),
+      0,
+      `${label}: alarm delay audio settings are hidden on panels without speaker support`,
     );
   }
   const nightScheduleCard = page

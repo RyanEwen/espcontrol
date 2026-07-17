@@ -51,6 +51,7 @@ struct GridConfig {
   std::string timezone;
   std::function<void(espcontrol::DisplayTakeoverKind)> begin_display_takeover;
   std::function<void(espcontrol::DisplayTakeoverKind)> end_display_takeover;
+  AlarmDelayAudioHooks alarm_delay_audio;
   esphome::artwork_image::ArtworkImage **image_card_images = nullptr;
   esphome::artwork_image::ArtworkImage *image_card_modal_image = nullptr;
   int image_card_image_count = 0;

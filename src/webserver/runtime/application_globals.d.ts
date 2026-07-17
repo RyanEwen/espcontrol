@@ -1,6 +1,8 @@
 export {};
 
 declare global {
+  var DEFAULT_ALARM_DELAY_ENTRY_ANNOUNCEMENT: any;
+  var DEFAULT_ALARM_DELAY_EXIT_ANNOUNCEMENT: any;
   var ACTION_CARD_ACTIONS: any;
   var ACTION_CARD_LOCAL_ACTION: any;
   var ACTION_CARD_METADATA: any;
@@ -746,6 +748,9 @@ declare global {
   var normalizeMediaOptions: any;
   var normalizeCardSizeForConfig: any;
   var normalizeCoverArtDelay: any;
+  var normalizeAlarmDelayAnnouncement: any;
+  var normalizeAlarmDelayBeepVolume: any;
+  var normalizeAlarmDelayFinalCountdown: any;
   var normalizeMediaVolumeMax: any;
   var normalizeNetworkTransport: any;
   var normalizeNtpServer: any;
@@ -1160,6 +1165,14 @@ declare global {
   var vacuumUsesDefaultIcon: any;
   var validateBackupEnvelope: any;
   var voiceServicesPostUrls: any;
+  var postAlarmDelayAudio: any;
+  var postAlarmDelayTts: any;
+  var postAlarmDelayEntryAnnouncement: any;
+  var postAlarmDelayExitAnnouncement: any;
+  var postAlarmDelayBeepVolume: any;
+  var postAlarmDelayFinalCountdown: any;
+  var syncAlarmDelayAudioUi: any;
+  var buildAlarmDelayAudioSettingsCard: any;
   var voiceServicesSupported: any;
   var waitForFirmwareRestart: any;
   var waitForReboot: any;
