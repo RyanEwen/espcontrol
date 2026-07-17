@@ -2599,6 +2599,11 @@ inline bool media_cover_art_uses_screensaver_fonts(int row_span, int col_span) {
   return row_span >= 2 && col_span >= 2;
 }
 
+inline bool media_cover_art_limits_title_to_two_lines(int row_span,
+                                                       int col_span) {
+  return row_span == 2 && col_span == 2;
+}
+
 inline void setup_media_card(BtnSlot &s, const ParsedCfg &p, uint32_t on_color,
                              uint32_t secondary_color,
                              uint32_t tertiary_color,
@@ -2670,7 +2675,9 @@ inline void setup_media_card(BtnSlot &s, const ParsedCfg &p, uint32_t on_color,
       ctx->artist_gap = pad > 1 ? pad / 2 : 0;
       setup_media_now_playing_layout(
         s.btn, s.icon_lbl, ctx->title_lbl, ctx->artist_lbl,
-        media_title_font, pad, true, true, 0);
+        media_title_font, pad,
+        media_cover_art_limits_title_to_two_lines(row_span, col_span),
+        true, 0);
       media_position_now_playing_artist(ctx);
       return;
     }
