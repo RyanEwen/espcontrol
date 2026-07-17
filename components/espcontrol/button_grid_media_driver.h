@@ -31,11 +31,20 @@ inline bool media_driver_setup_visual(
     const CardPalette &palette, const DisplayProfile &display,
     int row_span = 1, int col_span = 1) {
   if (!media_driver_matches(context)) return false;
+  const bool large_cover_art =
+    context.runtime.driver == card_runtime::CardDriverId::MEDIA_COVER_ART &&
+    media_cover_art_uses_screensaver_fonts(row_span, col_span);
   setup_media_card(
     slot, config,
     palette.has_on ? palette.on_val : DEFAULT_SLIDER_COLOR,
     palette.off_val, palette.sensor_val,
-    display_sensor_font(display), display_media_title_font(display),
+    display_sensor_font(display),
+    large_cover_art
+      ? display_media_cover_art_title_font(display)
+      : display_media_title_font(display),
+    large_cover_art
+      ? display_media_cover_art_artist_font(display)
+      : nullptr,
     display_main_width_percent(display), row_span, col_span);
   return true;
 }
@@ -47,9 +56,9 @@ inline bool media_driver_attach_interaction(
 
 inline bool media_driver_refresh_layout(
     BtnSlot &slot, const ParsedCfg &config, const Context &context,
-    const GridConfig &grid_config, int row_span = 1) {
+    const GridConfig &grid_config, int row_span = 1, int col_span = 1) {
   if (!media_driver_matches(context)) return false;
-  refresh_media_card_layout(slot, config, grid_config, row_span);
+  refresh_media_card_layout(slot, config, grid_config, row_span, col_span);
   return true;
 }
 

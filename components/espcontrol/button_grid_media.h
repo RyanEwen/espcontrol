@@ -2583,11 +2583,16 @@ inline void media_control_open_modal(MediaControlCtx *ctx) {
   lv_obj_move_foreground(ui.overlay);
 }
 
+inline bool media_cover_art_uses_screensaver_fonts(int row_span, int col_span) {
+  return row_span >= 2 && col_span >= 2;
+}
+
 inline void setup_media_card(BtnSlot &s, const ParsedCfg &p, uint32_t on_color,
                              uint32_t secondary_color,
                              uint32_t tertiary_color,
                              const lv_font_t *sensor_font,
                              const lv_font_t *media_title_font,
+                             const lv_font_t *media_artist_font,
                              int width_compensation_percent = 100,
                              int row_span = 1,
                              int col_span = 1) {
@@ -2638,6 +2643,9 @@ inline void setup_media_card(BtnSlot &s, const ParsedCfg &p, uint32_t on_color,
       apply_width_compensation(title_lbl, width_compensation_percent);
       lv_obj_t *artist_lbl = lv_label_create(s.btn);
       lv_obj_set_style_text_color(artist_lbl, lv_color_white(), LV_PART_MAIN);
+      if (media_artist_font) {
+        lv_obj_set_style_text_font(artist_lbl, media_artist_font, LV_PART_MAIN);
+      }
       apply_width_compensation(artist_lbl, width_compensation_percent);
       if (s.text_lbl) {
         lv_label_set_text(s.text_lbl, "");

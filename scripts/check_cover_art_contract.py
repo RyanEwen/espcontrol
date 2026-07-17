@@ -154,6 +154,12 @@ web_styles = (ROOT / "src" / "webserver" / "application" / "styles.ts").read_tex
 if ".sp-media-cover-tint{position:absolute;inset:-2px;background:rgba(10,25,42,.5)" not in web_styles:
     raise SystemExit("Web preview media cover tint must match the 50% device overlay")
 for required in (
+    ".sp-btn-big .sp-media-cover-details-title,.sp-btn-extra-large .sp-media-cover-details-title{font-size:var(--media-cover-title)}",
+    ".sp-btn-big .sp-media-cover-details-row .sp-media-now-artist,.sp-btn-extra-large .sp-media-cover-details-row .sp-media-now-artist{font-size:var(--media-cover-artist)}",
+):
+    if required not in web_styles:
+        raise SystemExit(f"Large cover art web font-selection contract missing: {required}")
+for required in (
     "image_card_uses_background_pipeline(next->image, next->source_url)",
 ):
     if required not in image_cards:
@@ -231,6 +237,12 @@ if 'state->entity_id, std::string("media_artist")' in metadata:
     raise SystemExit("Media track changes must not retain duplicate one-shot metadata reads")
 if "state->artist.clear()" in metadata:
     raise SystemExit("Media title updates must preserve an unchanged subscribed artist")
+for required in (
+    "inline bool media_cover_art_uses_screensaver_fonts(int row_span, int col_span)",
+    "return row_span >= 2 && col_span >= 2;",
+):
+    if required not in media:
+        raise SystemExit(f"Large cover art font-selection contract missing: {required}")
 
 cover_details_start = media.find('    if (mode == "cover_art") {')
 cover_title_start = media.find(
