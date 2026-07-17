@@ -49,6 +49,8 @@ class AgendaFetcher {
       if (this->on_ready_) this->on_ready_(this->accumulated_);
       return;
     }
+    ESP_LOGI("agenda", "Fetching events from %u calendar(s)",
+             (unsigned) this->entities_.size());
     const uint32_t generation = ++this->generation_;
     this->accumulated_.clear();
     this->now_epoch_ = now_epoch;

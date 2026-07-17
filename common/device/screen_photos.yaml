@@ -551,6 +551,7 @@ script:
       - lambda: |-
           auto now = panel_time_or_fallback(id(panel_time).now(),
                                             id(homeassistant_time).now());
+          ESP_LOGI("agenda", "Refresh requested (time_valid=%d)", (int) now.is_valid());
           if (!now.is_valid()) return;
           id(photos_agenda_fetcher).set_entities(
               espcontrol::agenda_split_entities(
