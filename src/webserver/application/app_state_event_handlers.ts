@@ -143,16 +143,16 @@ export function installAppStateEventHandlersModule(): GlobalDescriptors {
                 state.photosFolder = val || "";
                 syncInput(els.setPhotosFolder, state.photosFolder);
             },
-            "number-screen_saver__photos_interval": function (this: any, val?: any) {
+            "number-screen_saver__photo_duration": function (this: any, val?: any) {
                 var n: any = parseInt(val, 10);
                 state.photosInterval = Number.isFinite(n) && n >= 5 ? n : 30;
                 syncInput(els.setPhotosInterval, String(state.photosInterval));
             },
-            "switch-screen_saver__photos_shuffle": function (this: any, val?: any, d?: any) {
+            "switch-screen_saver__shuffle_photos": function (this: any, val?: any, d?: any) {
                 state.photosShuffle = d.value === true || val === "ON";
                 if (els.setPhotosShuffle) els.setPhotosShuffle.checked = state.photosShuffle;
             },
-            "switch-screen_saver__photos_show_datetime": function (this: any, val?: any, d?: any) {
+            "switch-screen_saver__photos_show_clock": function (this: any, val?: any, d?: any) {
                 state.photosShowDatetime = d.value === true || val === "ON";
                 if (els.setPhotosShowDatetime) els.setPhotosShowDatetime.checked = state.photosShowDatetime;
             },

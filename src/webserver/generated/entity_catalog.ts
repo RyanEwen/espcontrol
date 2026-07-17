@@ -299,6 +299,7 @@ export const ENTITY_CATALOG = {
       "domain": "number",
       "name": "Screen Saver: Photo Duration",
       "objectIds": [
+        "screen_saver__photo_duration",
         "screen_saver__photos_interval",
         "screen_saver_photos_interval",
         "screensaver_photos_interval"
@@ -308,6 +309,7 @@ export const ENTITY_CATALOG = {
       "domain": "switch",
       "name": "Screen Saver: Shuffle Photos",
       "objectIds": [
+        "screen_saver__shuffle_photos",
         "screen_saver__photos_shuffle",
         "screen_saver_photos_shuffle",
         "screensaver_photos_shuffle"
@@ -317,6 +319,7 @@ export const ENTITY_CATALOG = {
       "domain": "switch",
       "name": "Screen Saver: Photos Show Clock",
       "objectIds": [
+        "screen_saver__photos_show_clock",
         "screen_saver__photos_show_datetime",
         "screen_saver_photos_show_datetime",
         "screensaver_photos_show_datetime"
