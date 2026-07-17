@@ -42,6 +42,42 @@ inline int agenda_weekday(int32_t day_number) {
   return static_cast<int>(((day_number % 7) + 4 + 7) % 7);
 }
 
+// Inverse of agenda_days_from_civil: recover the civil date from a day number.
+inline void agenda_civil_from_days(int32_t day_number, int *y, int *m, int *d) {
+  int32_t z = day_number + 719468;
+  const int32_t era = (z >= 0 ? z : z - 146096) / 146097;
+  const unsigned doe = static_cast<unsigned>(z - era * 146097);
+  const unsigned yoe = (doe - doe / 1460 + doe / 36524 - doe / 146096) / 365;
+  const int year = static_cast<int>(yoe) + era * 400;
+  const unsigned doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+  const unsigned mp = (5 * doy + 2) / 153;
+  const unsigned day = doy - (153 * mp + 2) / 5 + 1;
+  const unsigned month = mp + (mp < 10 ? 3 : -9);
+  if (y) *y = month <= 2 ? year + 1 : year;
+  if (m) *m = static_cast<int>(month);
+  if (d) *d = static_cast<int>(day);
+}
+
+// Split a comma-separated list of calendar entity ids, trimming surrounding
+// whitespace and dropping empty items. Used to configure the agenda from a
+// single text entity holding several calendars.
+inline std::vector<std::string> agenda_split_entities(const std::string &csv) {
+  std::vector<std::string> out;
+  std::size_t start = 0;
+  while (start <= csv.size()) {
+    std::size_t comma = csv.find(',', start);
+    std::size_t end = comma == std::string::npos ? csv.size() : comma;
+    std::size_t a = start;
+    std::size_t b = end;
+    while (a < b && (csv[a] == ' ' || csv[a] == '\t')) a++;
+    while (b > a && (csv[b - 1] == ' ' || csv[b - 1] == '\t')) b--;
+    if (b > a) out.push_back(csv.substr(a, b - a));
+    if (comma == std::string::npos) break;
+    start = comma + 1;
+  }
+  return out;
+}
+
 struct AgendaEventTime {
   int64_t sort_key{0};   // seconds for time-ordering the merged list
   int32_t day_number{0}; // days_from_civil of the local start date, for grouping
@@ -145,18 +181,10 @@ inline void agenda_format_day_heading(char *buf, std::size_t size, int32_t day_n
                                           "Thu", "Fri", "Sat"};
   static const char *const kMonths[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
                                         "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-  // Recover the civil date from the day number for the "Wed 23 Jul" form.
-  int32_t z = day_number + 719468;
-  const int32_t era = (z >= 0 ? z : z - 146096) / 146097;
-  const unsigned doe = static_cast<unsigned>(z - era * 146097);
-  const unsigned yoe = (doe - doe / 1460 + doe / 36524 - doe / 146096) / 365;
-  int year = static_cast<int>(yoe) + era * 400;
-  const unsigned doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
-  const unsigned mp = (5 * doy + 2) / 153;
-  const unsigned day = doy - (153 * mp + 2) / 5 + 1;
-  const unsigned month = mp + (mp < 10 ? 3 : -9);
+  int year = 0, month = 1, day = 1;
+  agenda_civil_from_days(day_number, &year, &month, &day);
   (void) year;
-  std::snprintf(buf, size, "%s %u %s", kWeekdays[agenda_weekday(day_number)],
+  std::snprintf(buf, size, "%s %d %s", kWeekdays[agenda_weekday(day_number)],
                 day, kMonths[(month - 1) % 12]);
 }
 

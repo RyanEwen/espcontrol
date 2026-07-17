@@ -40,7 +40,8 @@ class AgendaFetcher {
                int64_t now_epoch) {
 #ifdef USE_API_HOMEASSISTANT_ACTION_RESPONSES_JSON
     if (this->entities_.empty()) {
-      this->pending_.clear();
+      this->pending_ = 0;
+      this->accumulated_.clear();
       if (this->on_ready_) this->on_ready_(this->accumulated_);
       return;
     }

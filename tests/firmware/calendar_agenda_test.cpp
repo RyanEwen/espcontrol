@@ -159,5 +159,25 @@ int main() {
   none.finalize(kAgendaMaxEvents);
   CHECK(agenda_build_text(none, today, true).empty());
 
+  // Civil-from-days round-trips against days-from-civil.
+  for (int32_t dn : {0, today, today + 14, agenda_days_from_civil(2024, 2, 29),
+                     agenda_days_from_civil(2027, 1, 1)}) {
+    int yy = 0, mm2 = 0, dd = 0;
+    agenda_civil_from_days(dn, &yy, &mm2, &dd);
+    CHECK(agenda_days_from_civil(yy, mm2, dd) == dn);
+  }
+  int wy = 0, wm = 0, wd = 0;
+  agenda_civil_from_days(agenda_days_from_civil(2026, 7, 31) + 1, &wy, &wm, &wd);
+  CHECK(wy == 2026 && wm == 8 && wd == 1);  // month rollover
+
+  // Entity CSV splitting trims and drops blanks.
+  auto ents = agenda_split_entities(" calendar.family , calendar.work ,, ");
+  CHECK(ents.size() == 2);
+  CHECK(ents[0] == "calendar.family" && ents[1] == "calendar.work");
+  CHECK(agenda_split_entities("").empty());
+  CHECK(agenda_split_entities("   ").empty());
+  auto one = agenda_split_entities("calendar.solo");
+  CHECK(one.size() == 1 && one[0] == "calendar.solo");
+
   return EXIT_SUCCESS;
 }
