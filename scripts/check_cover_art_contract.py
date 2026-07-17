@@ -286,6 +286,15 @@ if "if (control) control->highlight_playing = false;" not in media_driver:
 grid = (ROOT / "components" / "espcontrol" / "button_grid_grid.h").read_text(encoding="utf-8")
 if "media_cover_art_limits_title_to_two_lines(row_span, col_span)" not in grid:
     raise SystemExit("Cover art layout refresh must keep track titles limited to two lines")
+if "if (ha_api_state_connected()) refresh_image_cards();" not in grid:
+    raise SystemExit("Grid startup must refresh bound cover artwork after Home Assistant state is ready")
+for required in (
+    "lv_obj_set_height(title_lbl, LV_SIZE_CONTENT);",
+    "lv_obj_set_style_max_height(",
+    "title_lbl, font->line_height * 2 + TITLE_LINE_SPACE, LV_PART_MAIN);",
+):
+    if required not in media:
+        raise SystemExit(f"Two-line cover art title must flex to its content height: {required}")
 media_art_start = grid.find("inline void subscribe_media_cover_art(")
 media_art_end = grid.find("\ninline void setup_card_visual(", media_art_start)
 if media_art_start < 0 or media_art_end < 0:

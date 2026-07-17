@@ -1881,6 +1881,10 @@ inline void grid_phase2(
 
   }
   screen_lock_apply();
+  // Phase 2 can finish after the API connection callbacks have already run
+  // during boot. Refresh newly bound artwork contexts here so the current
+  // track image loads without waiting for the next media metadata change.
+  if (ha_api_state_connected()) refresh_image_cards();
   refresh_weather_forecast_cards();
   grid_log_memory("end");
   ESP_LOGI("sensors", "Phase 2: done (%lu ms)", esphome::millis());

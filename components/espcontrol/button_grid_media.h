@@ -1444,13 +1444,17 @@ inline void setup_media_now_playing_layout(lv_obj_t *btn, lv_obj_t *icon_lbl,
     if (limit_title_lines) {
       const lv_font_t *font = title_font ? title_font : lv_obj_get_style_text_font(title_lbl, LV_PART_MAIN);
       lv_label_set_long_mode(title_lbl, LV_LABEL_LONG_DOT);
+      lv_obj_set_width(title_lbl, text_width);
+      lv_obj_set_height(title_lbl, LV_SIZE_CONTENT);
       if (font && font->line_height > 0) {
-        lv_obj_set_size(title_lbl, text_width, font->line_height * 2 + TITLE_LINE_SPACE);
+        lv_obj_set_style_max_height(
+          title_lbl, font->line_height * 2 + TITLE_LINE_SPACE, LV_PART_MAIN);
       }
-      else lv_obj_set_width(title_lbl, text_width);
     } else {
+      lv_obj_set_style_max_height(title_lbl, LV_COORD_MAX, LV_PART_MAIN);
       lv_label_set_long_mode(title_lbl, LV_LABEL_LONG_WRAP);
       lv_obj_set_width(title_lbl, text_width);
+      lv_obj_set_height(title_lbl, LV_SIZE_CONTENT);
     }
     lv_obj_align(title_lbl, LV_ALIGN_TOP_LEFT, text_inset, text_inset);
     if (reset_text) lv_label_set_text(title_lbl, "--");
