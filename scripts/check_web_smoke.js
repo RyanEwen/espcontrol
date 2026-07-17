@@ -1316,7 +1316,8 @@ const mediaNowPlayingPreview = hooks.buttonTypePreviewFor("media", {
   type: "media",
   precision: "progress",
 });
-assert(mediaNowPlayingPreview.iconHtml.includes("Midnight City"), "media now-playing preview keeps title text");
+assert(mediaNowPlayingPreview.iconHtml.includes("Track Title"), "media now-playing preview uses the shared mock title");
+assert(mediaNowPlayingPreview.labelHtml.includes("Artist Name"), "media now-playing preview uses the shared mock artist");
 assert(mediaNowPlayingPreview.labelHtml.includes("sp-media-now-artist"), "media now-playing preview keeps artist styling");
 
 const mediaCoverArtPreview = hooks.buttonTypePreviewFor("media", {
