@@ -121,27 +121,34 @@ class AgendaFetcher {
     }
     if (response.is_success()) {
       // The response template renders a JSON array of {s: start, t: summary}
-      // delivered as a string under the "response" key (the envelope Home
-      // Assistant uses for templated action responses).
+      // under the "response" key. Home Assistant parses template output that
+      // looks like JSON back into a native value, so the array can arrive
+      // either as a JSON array directly or as its string form; accept both.
       JsonObjectConst root = response.get_json();
-      const char *payload = root["response"].as<const char *>();
-      if (payload == nullptr || payload[0] == '\0') {
-        ESP_LOGW("agenda", "get_events response had no rendered payload");
-      } else {
-        const JsonDocument doc = esphome::json::parse_json(payload);
-        JsonArrayConst items = doc.as<JsonArrayConst>();
-        if (items.isNull()) {
-          ESP_LOGW("agenda", "get_events payload was not a JSON array: %.60s", payload);
-        } else {
-          size_t added = 0;
-          for (JsonObjectConst item : items) {
-            const char *start = item["s"] | "";
-            const char *summary = item["t"] | "";
-            this->accumulated_.add(start, std::string(summary));
-            added++;
-          }
-          ESP_LOGD("agenda", "Parsed %u event(s) from calendar response", (unsigned) added);
+      JsonVariantConst rendered = root["response"];
+      JsonDocument parsed_doc;
+      JsonArrayConst items;
+      if (rendered.is<JsonArrayConst>()) {
+        items = rendered.as<JsonArrayConst>();
+      } else if (rendered.is<const char *>()) {
+        const char *payload = rendered.as<const char *>();
+        if (payload != nullptr && payload[0] != '\0') {
+          parsed_doc = esphome::json::parse_json(
+              reinterpret_cast<const uint8_t *>(payload), strlen(payload));
+          items = parsed_doc.as<JsonArrayConst>();
         }
+      }
+      if (items.isNull()) {
+        ESP_LOGW("agenda", "get_events response had no usable payload");
+      } else {
+        size_t added = 0;
+        for (JsonObjectConst item : items) {
+          const char *start = item["s"] | "";
+          const char *summary = item["t"] | "";
+          this->accumulated_.add(start, std::string(summary));
+          added++;
+        }
+        ESP_LOGD("agenda", "Parsed %u event(s) from calendar response", (unsigned) added);
       }
     } else {
       ESP_LOGW("agenda", "calendar.get_events failed: %s",
