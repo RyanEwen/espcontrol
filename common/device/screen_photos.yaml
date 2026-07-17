@@ -338,15 +338,21 @@ script:
           // token as a bearer header (they are not signed like resolve_media
           // URLs). Register the header once; the lambda reads the live token
           // per request so a token change needs no re-registration.
-          static bool photos_auth_header_added = false;
-          if (!photos_auth_header_added) {
-            photos_auth_header_added = true;
+          static bool photos_slots_configured = false;
+          if (!photos_slots_configured) {
+            photos_slots_configured = true;
             auto bearer = []() -> std::string {
               const std::string &token = id(home_assistant_token).state;
               return token.empty() ? std::string() : "Bearer " + token;
             };
             id(photos_downloaded_image_a)->add_request_header("Authorization", bearer);
             id(photos_downloaded_image_b)->add_request_header("Authorization", bearer);
+            // Photos are arbitrary and often far larger than the panel. When a
+            // preview cannot use the hardware decoder (e.g. jpegli-encoded
+            // Immich previews), let the software decoder downscale below the
+            // target so the decode is fast enough not to stall rotation.
+            id(photos_downloaded_image_a)->set_software_downscale_allowed(true);
+            id(photos_downloaded_image_b)->set_software_downscale_allowed(true);
           }
       # Point the client at the configured folder (no-op if unchanged).
       - lambda: 'id(photo_media).set_folder(id(screensaver_photos_folder).state);'

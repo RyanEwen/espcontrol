@@ -377,6 +377,13 @@ int JpegDecoder::start_decode_(uint8_t *buffer, size_t size) {
     long best_score = LONG_MAX;
     uint64_t best_area = UINT64_MAX;
     const bool cover_mode = this->image_->get_resize_mode() == ImageResizeMode::COVER;
+    // Normally cover mode refuses any downscale that lands below the target, so
+    // the result still fully covers it. When the slot opts into software
+    // downscale (large arbitrary photos), allow below-target candidates too and
+    // let the closest-to-target score win — a source much larger than the panel
+    // then decodes at a fraction of the cost and the geometry upscales the
+    // slightly smaller result to fill the crop.
+    const bool require_cover_fill = cover_mode && !this->image_->software_downscale_allowed();
     bool found_candidate = false;
     for (unsigned int denom : denoms) {
       this->cinfo_.scale_num = 1;
@@ -384,7 +391,7 @@ int JpegDecoder::start_decode_(uint8_t *buffer, size_t size) {
       jpeg_calc_output_dimensions(&this->cinfo_);
       int candidate_w = static_cast<int>(this->cinfo_.output_width);
       int candidate_h = static_cast<int>(this->cinfo_.output_height);
-      if (cover_mode && (candidate_w < target_w || candidate_h < target_h)) continue;
+      if (require_cover_fill && (candidate_w < target_w || candidate_h < target_h)) continue;
       long score = std::labs(candidate_w - target_w) + std::labs(candidate_h - target_h);
       uint64_t area = static_cast<uint64_t>(candidate_w) * static_cast<uint64_t>(candidate_h);
       if (score < best_score || (score == best_score && area < best_area)) {
