@@ -137,5 +137,27 @@ int main() {
   }
   CHECK(has_evening && has_allday && !has_past);
 
+  // Multi-line rendering groups by day with headings and indented events.
+  AgendaList render;
+  render.add("2026-07-17", "Review finances together");
+  render.add("2026-07-17T14:30:00-04:00", "School pickup");
+  render.add("2026-07-18", "Bracebridge Art Show");
+  render.finalize(kAgendaMaxEvents);
+  const std::string text = agenda_build_text(render, today, true);
+  // Day groups are separated by a blank line.
+  const std::string expected =
+      "Today\n"
+      "  Review finances together\n"
+      "  2:30 PM  School pickup\n"
+      "\n"
+      "Tomorrow\n"
+      "  Bracebridge Art Show";
+  CHECK(text == expected);
+
+  // An empty agenda renders to an empty string.
+  AgendaList none;
+  none.finalize(kAgendaMaxEvents);
+  CHECK(agenda_build_text(none, today, true).empty());
+
   return EXIT_SUCCESS;
 }

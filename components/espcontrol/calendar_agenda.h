@@ -232,6 +232,37 @@ class AgendaList {
   std::vector<AgendaEntry> entries_;
 };
 
+// Render the agenda as a multi-line string: a day heading line ("Today",
+// "Tomorrow", "Wed 22 Jul") followed by one indented line per event, the time
+// (when present) and the summary. Grouped days are separated by a blank line.
+// This is what both the grid card and the screensaver overlay display in a
+// single wrapping label, so day grouping needs no per-row widgets.
+inline std::string agenda_build_text(const AgendaList &list, int32_t today_number,
+                                     bool use_12h) {
+  std::string text;
+  const std::vector<AgendaEntry> &entries = list.entries();
+  for (std::size_t i = 0; i < entries.size(); i++) {
+    if (list.starts_new_day(i)) {
+      if (!text.empty()) text += "\n";
+      char heading[24];
+      agenda_format_day_heading(heading, sizeof(heading), entries[i].when.day_number,
+                                today_number);
+      text += heading;
+      text += "\n";
+    }
+    char time_buf[16];
+    agenda_format_time(time_buf, sizeof(time_buf), entries[i].when, use_12h);
+    text += "  ";
+    if (time_buf[0] != '\0') {
+      text += time_buf;
+      text += "  ";
+    }
+    text += entries[i].summary;
+    if (i + 1 < entries.size()) text += "\n";
+  }
+  return text;
+}
+
 }  // namespace espcontrol
 
 #endif  // ESPCONTROL_CALENDAR_AGENDA_H
