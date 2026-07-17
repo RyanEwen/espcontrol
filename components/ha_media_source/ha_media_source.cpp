@@ -288,21 +288,57 @@ void HaMediaSource::websocket_event_handler(void *handler_args, esp_event_base_t
   }
 }
 
+// ArduinoJson allocator backed by PSRAM-first RAMAllocator, so large documents
+// never lean on the small internal heap regardless of the json component's
+// USE_PSRAM configuration.
+namespace {
+struct PsramJsonAllocator : ArduinoJson::Allocator {
+  void *allocate(size_t size) override { return this->ram_.allocate(size, 1); }
+  void deallocate(void *ptr) override {
+    this->ram_.deallocate(static_cast<char *>(ptr), 0);
+  }
+  void *reallocate(void *ptr, size_t new_size) override {
+    return this->ram_.reallocate(static_cast<char *>(ptr), new_size, 1);
+  }
+  RAMAllocator<char> ram_;
+};
+PsramJsonAllocator g_psram_json_allocator;  // NOLINT(cert-err58-cpp)
+}  // namespace
+
 // ── Main-task message handling ───────────────────────────────────────────
 void HaMediaSource::handle_message_(const char *data, size_t len) {
+  const uint32_t parse_start = millis();
+
+  // A browse response for a real album is hundreds of kilobytes, most of it
+  // fields this client never reads (titles, thumbnails). Parse through a filter
+  // that keeps only the fields the handlers below use — it cuts both the
+  // document size and the time spent blocking the main loop by an order of
+  // magnitude.
+  JsonDocument filter;
+  filter["type"] = true;
+  filter["id"] = true;
+  filter["success"] = true;
+  JsonObject filter_result = filter["result"].to<JsonObject>();
+  filter_result["url"] = true;
+  JsonObject filter_child = filter_result["children"].add<JsonObject>();
+  filter_child["media_class"] = true;
+  filter_child["media_content_type"] = true;
+  filter_child["media_content_id"] = true;
+  filter_child["can_expand"] = true;
+
+  JsonDocument doc(&g_psram_json_allocator);
+  const DeserializationError parse_error =
+      deserializeJson(doc, data, len, DeserializationOption::Filter(filter));
+  if (parse_error != DeserializationError::Ok) {
+    ESP_LOGW(TAG, "Ignoring malformed websocket message (%u bytes): %s",
+             (unsigned) len, parse_error.c_str());
+    return;
+  }
   if (len > 16 * 1024) {
-    ESP_LOGI(TAG, "Parsing %u byte websocket message (heap: %u internal, %u largest)",
-             (unsigned) len,
+    ESP_LOGI(TAG, "Parsed %u byte message in %u ms (heap: %u internal, %u largest)",
+             (unsigned) len, (unsigned) (millis() - parse_start),
              (unsigned) heap_caps_get_free_size(MALLOC_CAP_INTERNAL),
              (unsigned) heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL));
-  }
-  // Parse exactly once; the browse and resolve handlers read from this document
-  // rather than re-parsing a possibly very large payload.
-  const JsonDocument doc =
-      json::parse_json(reinterpret_cast<const uint8_t *>(data), len);
-  if (doc.isNull()) {
-    ESP_LOGW(TAG, "Ignoring malformed websocket message (%u bytes)", (unsigned) len);
-    return;
   }
   const JsonObjectConst root = doc.as<JsonObjectConst>();
   const std::string type = root["type"] | "";
