@@ -574,8 +574,8 @@ script:
                 id(photos_advance_generation)++;  // cancel any in-flight resolve
                 id(photos_first_image_ready) = false;
                 // Detach the decoded buffers from the widgets before release.
-                lv_image_set_src(id(photos_image_widget_a), id(photos_placeholder)->get_lv_img_dsc());
-                lv_image_set_src(id(photos_image_widget_b), id(photos_placeholder)->get_lv_img_dsc());
+                lv_image_set_src(id(photos_image_widget_a), id(photos_placeholder)->get_lv_image_dsc());
+                lv_image_set_src(id(photos_image_widget_b), id(photos_placeholder)->get_lv_image_dsc());
             - artwork_image.release: photos_downloaded_image_a
             - artwork_image.release: photos_downloaded_image_b
             - script.execute: clock_bar_apply
