@@ -49,7 +49,7 @@ export function createInitialState(deviceConfig: DeviceConfig): AppState {
     _screensaverActionReceived: false, clockScreensaverOn: false, clockBrightnessDay: 35,
     clockBrightnessNight: 35, clockBrightnessSplitReceived: false, screensaverDimmedBrightness: 10,
     photosFolder: "", photosInterval: 30, photosShuffle: false, photosShowDatetime: true,
-    photosShowWeather: false, photosWeatherEntity: "",
+    photosShowWeather: false, photosWeatherEntity: "", photosShowAgenda: false, photosAgendaEntities: "", photosAgendaStyle: "Next Event", photosAgendaOpacity: 45,
     screensaverTimeout: 300, screensaverTimeoutMin: 60, screensaverTimeoutMax: 3600,
     screensaverTimeoutLimitsLoaded: false, homeScreenTimeout: 60, brightnessDayVal: 100,
     brightnessNightVal: 75, automaticBrightnessEnabled: true, brightnessDawnTime: "06:00",

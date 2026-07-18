@@ -144,6 +144,18 @@ export function installApiModule(): GlobalDescriptors {
     function postScreensaverPhotosWeatherEntity(this: any, value?: any) {
         postTextWithObjectIds(entityName("screen_saver_photos_weather_entity"), entityObjectIds("screen_saver_photos_weather_entity"), value, PHOTOS_UNAVAILABLE);
     }
+    function postScreensaverPhotosShowAgenda(this: any, on?: any) {
+        postSwitchWithObjectIds(entityName("screen_saver_photos_show_agenda"), entityObjectIds("screen_saver_photos_show_agenda"), on, PHOTOS_UNAVAILABLE);
+    }
+    function postScreensaverPhotosAgendaEntities(this: any, value?: any) {
+        postTextWithObjectIds(entityName("screen_saver_photos_agenda_entities"), entityObjectIds("screen_saver_photos_agenda_entities"), value, PHOTOS_UNAVAILABLE);
+    }
+    function postScreensaverPhotosAgendaStyle(this: any, value?: any) {
+        postSelectWithObjectIds(entityName("screen_saver_photos_agenda_style"), entityObjectIds("screen_saver_photos_agenda_style"), value, PHOTOS_UNAVAILABLE);
+    }
+    function postScreensaverPhotosAgendaOpacity(this: any, value?: any) {
+        postNumberWithObjectIds(entityName("screen_saver_photos_agenda_opacity"), entityObjectIds("screen_saver_photos_agenda_opacity"), value, PHOTOS_UNAVAILABLE);
+    }
     function postHomeScreenTimeout(this: any, value?: any) {
         postNumberWithObjectIds(entityName("home_screen_timeout"), entityObjectIds("home_screen_timeout"), value);
     }
@@ -219,6 +231,10 @@ export function installApiModule(): GlobalDescriptors {
         "postScreensaverAction": staticGlobal(postScreensaverAction),
         "postScreensaverDimmedBrightness": staticGlobal(postScreensaverDimmedBrightness),
         "postScreensaverPhotosFolder": staticGlobal(postScreensaverPhotosFolder),
+        "postScreensaverPhotosShowAgenda": staticGlobal(postScreensaverPhotosShowAgenda),
+        "postScreensaverPhotosAgendaEntities": staticGlobal(postScreensaverPhotosAgendaEntities),
+        "postScreensaverPhotosAgendaStyle": staticGlobal(postScreensaverPhotosAgendaStyle),
+        "postScreensaverPhotosAgendaOpacity": staticGlobal(postScreensaverPhotosAgendaOpacity),
         "postScreensaverPhotosInterval": staticGlobal(postScreensaverPhotosInterval),
         "postScreensaverPhotosShuffle": staticGlobal(postScreensaverPhotosShuffle),
         "postScreensaverPhotosShowDatetime": staticGlobal(postScreensaverPhotosShowDatetime),

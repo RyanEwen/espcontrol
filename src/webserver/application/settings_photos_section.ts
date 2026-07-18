@@ -99,6 +99,85 @@ export function installSettingsPhotosSectionModule(): GlobalDescriptors {
         syncPhotoWeatherField();
         els.syncPhotoWeatherField = syncPhotoWeatherField;
 
+        // ── Agenda overlay ────────────────────────────────────────────────
+        var agendaToggle: any = toggleRow("Show Agenda", "sp-set-ss-photos-agenda", state.photosShowAgenda);
+        body.appendChild(agendaToggle.row);
+        agendaToggle.input.addEventListener("change", function (this: any) {
+            state.photosShowAgenda = this.checked;
+            syncPhotoAgendaFields();
+            postScreensaverPhotosShowAgenda(state.photosShowAgenda);
+        });
+        els.setPhotosShowAgenda = agendaToggle.input;
+
+        var agendaEntitiesField: any = document.createElement("div");
+        agendaEntitiesField.className = "sp-field sp-cond-field";
+        agendaEntitiesField.appendChild(fieldLabel("Agenda Calendars", "sp-set-ss-photos-agenda-entities"));
+        var agendaEntitiesInp: any = entityInput("sp-set-ss-photos-agenda-entities", state.photosAgendaEntities, "e.g. calendar.family, calendar.work", ["calendar"]);
+        agendaEntitiesField.appendChild(agendaEntitiesInp);
+        var agendaHelp: any = document.createElement("div");
+        agendaHelp.className = "sp-help";
+        agendaHelp.textContent = "One or more calendar entities, separated by commas.";
+        agendaEntitiesField.appendChild(agendaHelp);
+        body.appendChild(agendaEntitiesField);
+        bindTextPost(agendaEntitiesInp, entityName("screen_saver_photos_agenda_entities"), {
+            onBlur: function (this: any, value?: any) { state.photosAgendaEntities = value; },
+            post: function (this: any, value?: any) { postScreensaverPhotosAgendaEntities(value); },
+        });
+        els.setPhotosAgendaEntities = agendaEntitiesInp;
+
+        var agendaStyleField: any = document.createElement("div");
+        agendaStyleField.className = "sp-field sp-cond-field";
+        agendaStyleField.appendChild(fieldLabel("Agenda Style", "sp-set-ss-photos-agenda-style"));
+        var agendaStyleSel: any = document.createElement("select");
+        agendaStyleSel.className = "sp-input";
+        agendaStyleSel.id = "sp-set-ss-photos-agenda-style";
+        ["Next Event", "Today", "Upcoming"].forEach(function (this: any, opt?: any) {
+            var o: any = document.createElement("option");
+            o.value = opt;
+            o.textContent = opt;
+            agendaStyleSel.appendChild(o);
+        });
+        agendaStyleSel.value = state.photosAgendaStyle || "Next Event";
+        agendaStyleField.appendChild(agendaStyleSel);
+        body.appendChild(agendaStyleField);
+        agendaStyleSel.addEventListener("change", function (this: any) {
+            state.photosAgendaStyle = this.value;
+            postScreensaverPhotosAgendaStyle(state.photosAgendaStyle);
+        });
+        els.setPhotosAgendaStyle = agendaStyleSel;
+
+        var agendaOpacityField: any = document.createElement("div");
+        agendaOpacityField.className = "sp-field sp-cond-field";
+        agendaOpacityField.appendChild(fieldLabel("Agenda Background Opacity (%)", "sp-set-ss-photos-agenda-opacity"));
+        var agendaOpacityInp: any = document.createElement("input");
+        agendaOpacityInp.type = "number";
+        agendaOpacityInp.min = "0";
+        agendaOpacityInp.max = "90";
+        agendaOpacityInp.step = "5";
+        agendaOpacityInp.className = "sp-input";
+        agendaOpacityInp.id = "sp-set-ss-photos-agenda-opacity";
+        agendaOpacityInp.value = String(state.photosAgendaOpacity != null ? state.photosAgendaOpacity : 45);
+        agendaOpacityField.appendChild(agendaOpacityInp);
+        body.appendChild(agendaOpacityField);
+        agendaOpacityInp.addEventListener("change", function (this: any) {
+            var n: any = parseInt(this.value, 10);
+            if (!Number.isFinite(n) || n < 0) n = 45;
+            if (n > 90) n = 90;
+            state.photosAgendaOpacity = n;
+            this.value = String(n);
+            postScreensaverPhotosAgendaOpacity(n);
+        });
+        els.setPhotosAgendaOpacity = agendaOpacityInp;
+
+        function syncPhotoAgendaFields(this: any) {
+            var show: any = state.photosShowAgenda ? "" : "none";
+            agendaEntitiesField.style.display = show;
+            agendaStyleField.style.display = show;
+            agendaOpacityField.style.display = show;
+        }
+        syncPhotoAgendaFields();
+        els.syncPhotoAgendaFields = syncPhotoAgendaFields;
+
         return body;
     }
     return {

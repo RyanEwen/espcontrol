@@ -139,6 +139,24 @@ export function installAppStateEventHandlersModule(): GlobalDescriptors {
                 state.screensaverDimmedBrightness = normalizeScreensaverDimmedBrightness(val);
                 syncClockScreensaverControls();
             },
+            "switch-screen_saver__photos_show_agenda": function (this: any, val?: any, d?: any) {
+                state.photosShowAgenda = d.value === true || val === "ON";
+                if (els.setPhotosShowAgenda) els.setPhotosShowAgenda.checked = state.photosShowAgenda;
+                if (els.syncPhotoAgendaFields) els.syncPhotoAgendaFields();
+            },
+            "text-screen_saver__photos_agenda_entities": function (this: any, val?: any) {
+                state.photosAgendaEntities = val || "";
+                syncInput(els.setPhotosAgendaEntities, state.photosAgendaEntities);
+            },
+            "select-screen_saver__photos_agenda_style": function (this: any, val?: any) {
+                state.photosAgendaStyle = val || "Next Event";
+                syncInput(els.setPhotosAgendaStyle, state.photosAgendaStyle);
+            },
+            "number-screen_saver__photos_agenda_opacity": function (this: any, val?: any) {
+                var n: any = parseFloat(val);
+                state.photosAgendaOpacity = Number.isFinite(n) ? n : 45;
+                syncInput(els.setPhotosAgendaOpacity, String(state.photosAgendaOpacity));
+            },
             "text-screen_saver__photos_folder": function (this: any, val?: any) {
                 state.photosFolder = val || "";
                 syncInput(els.setPhotosFolder, state.photosFolder);

@@ -860,6 +860,10 @@ declare global {
   var postScreensaverAction: any;
   var postScreensaverDimmedBrightness: any;
   var postScreensaverPhotosFolder: any;
+  var postScreensaverPhotosShowAgenda: any;
+  var postScreensaverPhotosAgendaEntities: any;
+  var postScreensaverPhotosAgendaStyle: any;
+  var postScreensaverPhotosAgendaOpacity: any;
   var postScreensaverPhotosInterval: any;
   var postScreensaverPhotosShuffle: any;
   var postScreensaverPhotosShowDatetime: any;
