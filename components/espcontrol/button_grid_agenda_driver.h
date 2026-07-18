@@ -37,15 +37,17 @@ inline bool agenda_driver_setup_visual(
   lv_obj_add_flag(slot.icon_lbl, LV_OBJ_FLAG_HIDDEN);
   lv_obj_add_flag(slot.sensor_container, LV_OBJ_FLAG_HIDDEN);
   lv_obj_add_flag(slot.text_lbl, LV_OBJ_FLAG_HIDDEN);
-  // Deliberate hierarchy: titles in the card name (body) font, all secondary
-  // text in the shared small-text role, and the day number in the agenda-day
-  // role (the mid-size cover-art artist font) — prominent without the
-  // heading font's bulk.
-  const lv_font_t *title_font =
-      lv_obj_get_style_text_font(slot.text_lbl, LV_PART_MAIN);
-  const lv_font_t *small_font = display.fonts.small_text != nullptr
-      ? display.fonts.small_text
-      : lv_obj_get_style_text_font(slot.unit_lbl, LV_PART_MAIN);
+  // Deliberate hierarchy: medium-weight titles, clearly smaller secondary
+  // text, and a mid-size day number — with fallbacks to the slot's fonts for
+  // profiles that predate the agenda roles.
+  const lv_font_t *title_font = display.fonts.agenda_title != nullptr
+      ? display.fonts.agenda_title
+      : lv_obj_get_style_text_font(slot.text_lbl, LV_PART_MAIN);
+  const lv_font_t *small_font = display.fonts.agenda_secondary != nullptr
+      ? display.fonts.agenda_secondary
+      : (display.fonts.small_text != nullptr
+             ? display.fonts.small_text
+             : lv_obj_get_style_text_font(slot.unit_lbl, LV_PART_MAIN));
   const lv_font_t *big_font = display.fonts.agenda_day != nullptr
       ? display.fonts.agenda_day
       : (display.fonts.media_title != nullptr

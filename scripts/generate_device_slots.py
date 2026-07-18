@@ -415,6 +415,8 @@ def cfg_lines(device: dict) -> list[str]:
     # (times, day metadata, markers) uses it as a shared small-text role.
     lines.append("            cfg.small_text_font = id(font_text_small)->get_lv_font();")
     lines.append("            cfg.agenda_day_font = id(font_cover_art_artist)->get_lv_font();")
+    lines.append("            cfg.agenda_title_font = id(font_agenda_title)->get_lv_font();")
+    lines.append("            cfg.agenda_secondary_font = id(font_agenda_secondary)->get_lv_font();")
     lines.append(f"            cfg.sp_sensor_font = id({device['sensor_font']})->get_lv_font();")
     lines.append(f"            cfg.sp_large_sensor_font = id({device['large_sensor_font']})->get_lv_font();")
     lines.append(f"            cfg.large_sensor_unit_offset_percent = {device['large_sensor_unit_offset_percent']};")

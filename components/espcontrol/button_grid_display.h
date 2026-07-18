@@ -19,6 +19,8 @@ struct DisplayFontRoles {
   const lv_font_t *volume_label = nullptr;
   const lv_font_t *small_text = nullptr;
   const lv_font_t *agenda_day = nullptr;
+  const lv_font_t *agenda_title = nullptr;
+  const lv_font_t *agenda_secondary = nullptr;
   const lv_font_t *climate_card_icon = nullptr;
   const lv_font_t *climate_option_title = nullptr;
   const lv_font_t *climate_option_value = nullptr;
