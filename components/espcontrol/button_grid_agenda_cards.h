@@ -144,16 +144,15 @@ inline void agenda_card_render(AgendaCardRef &ref, const AgendaList &list,
     lv_obj_clear_flag(row, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_clear_flag(row, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(row, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_STRETCH,
+    lv_obj_set_flex_align(row, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START,
                           LV_FLEX_ALIGN_START);
 
     lv_obj_t *bar = lv_obj_create(row);
-    lv_obj_set_size(bar, 3, LV_SIZE_CONTENT);
+    lv_obj_set_size(bar, 3, 14);
     lv_obj_set_style_bg_color(bar, lv_color_hex(ref.accent), 0);
     lv_obj_set_style_bg_opa(bar, LV_OPA_COVER, 0);
     lv_obj_set_style_border_width(bar, 0, 0);
     lv_obj_set_style_radius(bar, 2, 0);
-    lv_obj_set_style_min_height(bar, 14, 0);
     lv_obj_clear_flag(bar, LV_OBJ_FLAG_SCROLLABLE);
 
     lv_obj_t *body = lv_obj_create(row);
