@@ -3,11 +3,12 @@
 
 #pragma once
 
-// Runtime registry for Agenda cards. Each card holds a comma-separated list of
-// calendar entities; a shared service tick (driven from YAML with the panel
-// time) fetches upcoming events through calendar.get_events and renders the
-// next event into the tile: its start ("9:00 AM", "Tomorrow") in the sensor
-// label and its summary in the text label.
+// Runtime registry and renderer for Agenda cards. Each card holds a
+// comma-separated list of calendar entities; a shared service tick (driven
+// from YAML with the panel time) fetches upcoming events through
+// calendar.get_events and renders them as a Calendar-Card-Pro-style list:
+// dimmed day headings, then one row per event with a colored accent bar, the
+// event title, and its time underneath. Rows beyond the tile clip.
 
 #include "calendar_agenda.h"
 #include "calendar_agenda_runtime.h"
@@ -16,11 +17,14 @@ namespace espcontrol {
 
 inline constexpr int kMaxAgendaCards = 6;
 inline constexpr uint32_t kAgendaCardRefreshMs = 10 * 60 * 1000;
+inline constexpr uint32_t kAgendaAccentFallback = 0x4FC3F7;
+inline constexpr int kAgendaCardMaxRows = 4;
 
 struct AgendaCardRef {
-  lv_obj_t *sensor_lbl{nullptr};
-  lv_obj_t *unit_lbl{nullptr};
-  lv_obj_t *text_lbl{nullptr};
+  lv_obj_t *list{nullptr};
+  const lv_font_t *title_font{nullptr};
+  const lv_font_t *small_font{nullptr};
+  uint32_t accent{kAgendaAccentFallback};
   std::string entities;
   std::string label;
   uint32_t last_fetch_ms{0};
@@ -42,8 +46,8 @@ inline AgendaFetcher *agenda_card_fetchers() {
   return fetchers;
 }
 
-// Bumped on every grid rebuild so a late fetch callback can never touch
-// widgets from a previous grid generation.
+// Bumped on every grid rebuild and subpage teardown so a late fetch callback
+// can never touch widgets from a previous grid generation.
 inline uint32_t &agenda_cards_generation() {
   static uint32_t generation = 1;
   return generation;
@@ -54,49 +58,123 @@ inline void reset_agenda_cards() {
   agenda_cards_generation()++;
 }
 
-inline void register_agenda_card(lv_obj_t *sensor_lbl, lv_obj_t *unit_lbl,
-                                 lv_obj_t *text_lbl, const std::string &entities,
+// Build the list container that fills the card and register it for updates.
+// Fonts are borrowed from the slot's own labels so every device profile keeps
+// its typography without new font roles.
+inline void register_agenda_card(lv_obj_t *btn, const lv_font_t *title_font,
+                                 const lv_font_t *small_font, uint32_t accent,
+                                 const std::string &entities,
                                  const std::string &label) {
   int &count = agenda_card_count();
   if (count >= kMaxAgendaCards) {
     ESP_LOGW("agenda", "Too many agenda cards; skipping updates for extras");
     return;
   }
+
+  lv_obj_t *list = lv_obj_create(btn);
+  lv_obj_set_size(list, lv_pct(100), lv_pct(100));
+  lv_obj_align(list, LV_ALIGN_TOP_LEFT, 0, 0);
+  lv_obj_set_style_bg_opa(list, LV_OPA_TRANSP, 0);
+  lv_obj_set_style_border_width(list, 0, 0);
+  lv_obj_set_style_pad_all(list, 6, 0);
+  lv_obj_set_style_pad_row(list, 4, 0);
+  lv_obj_clear_flag(list, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_clear_flag(list, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_set_flex_flow(list, LV_FLEX_FLOW_COLUMN);
+  lv_obj_set_flex_align(list, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START,
+                        LV_FLEX_ALIGN_START);
+
   AgendaCardRef &ref = agenda_card_refs()[count];
   ref = AgendaCardRef();
-  ref.sensor_lbl = sensor_lbl;
-  ref.unit_lbl = unit_lbl;
-  ref.text_lbl = text_lbl;
+  ref.list = list;
+  ref.title_font = title_font;
+  ref.small_font = small_font;
+  ref.accent = accent;
   ref.entities = entities;
   ref.label = label;
   count++;
 }
 
-inline void agenda_card_apply(AgendaCardRef &ref, const AgendaList &list,
-                              int32_t today_number, bool use_12h) {
-  if (ref.sensor_lbl == nullptr || ref.text_lbl == nullptr) return;
+inline lv_obj_t *agenda_row_label_(lv_obj_t *parent, const char *text,
+                                   const lv_font_t *font, uint32_t color,
+                                   lv_opa_t opa) {
+  lv_obj_t *lbl = lv_label_create(parent);
+  lv_label_set_text(lbl, text);
+  if (font != nullptr) lv_obj_set_style_text_font(lbl, font, 0);
+  lv_obj_set_style_text_color(lbl, lv_color_hex(color), 0);
+  lv_obj_set_style_text_opa(lbl, opa, 0);
+  lv_obj_set_width(lbl, lv_pct(100));
+  lv_label_set_long_mode(lbl, LV_LABEL_LONG_DOT);
+  return lbl;
+}
+
+// Render the agenda into the card's list container.
+inline void agenda_card_render(AgendaCardRef &ref, const AgendaList &list,
+                               int32_t today_number, bool use_12h) {
+  if (ref.list == nullptr) return;
+  lv_obj_clean(ref.list);
+
   if (list.empty()) {
-    lv_label_set_text(ref.sensor_lbl, "--");
-    lv_label_set_text(ref.text_lbl,
-                      ref.label.empty() ? espcontrol_i18n("No events")
-                                        : ref.label.c_str());
-    if (ref.unit_lbl != nullptr) lv_label_set_text(ref.unit_lbl, "");
+    agenda_row_label_(ref.list, espcontrol_i18n("No upcoming events"),
+                      ref.small_font, 0xFFFFFF, LV_OPA_60);
     return;
   }
-  const AgendaEntry &next = list.entries().front();
-  // Sensor area: today's events show the time; later days show the day.
-  char when[24];
-  if (next.when.day_number == today_number && !next.when.all_day) {
-    agenda_format_time(when, sizeof(when), next.when, use_12h);
-  } else if (next.when.day_number == today_number) {
-    std::snprintf(when, sizeof(when), "%s", espcontrol_i18n("Today"));
-  } else {
-    agenda_format_day_heading(when, sizeof(when), next.when.day_number,
-                              today_number);
+
+  int rows = 0;
+  const std::vector<AgendaEntry> &entries = list.entries();
+  for (std::size_t i = 0; i < entries.size() && rows < kAgendaCardMaxRows; i++) {
+    if (list.starts_new_day(i)) {
+      char heading[24];
+      agenda_format_day_heading(heading, sizeof(heading),
+                                entries[i].when.day_number, today_number);
+      lv_obj_t *head = agenda_row_label_(ref.list, heading, ref.small_font,
+                                         0xFFFFFF, LV_OPA_50);
+      lv_obj_set_style_pad_top(head, i == 0 ? 0 : 2, 0);
+      rows++;
+      if (rows >= kAgendaCardMaxRows) break;
+    }
+
+    // Event row: accent bar on the left, then title with the time beneath.
+    lv_obj_t *row = lv_obj_create(ref.list);
+    lv_obj_set_size(row, lv_pct(100), LV_SIZE_CONTENT);
+    lv_obj_set_style_bg_opa(row, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(row, 0, 0);
+    lv_obj_set_style_pad_all(row, 0, 0);
+    lv_obj_set_style_pad_column(row, 6, 0);
+    lv_obj_clear_flag(row, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_clear_flag(row, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(row, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_STRETCH,
+                          LV_FLEX_ALIGN_START);
+
+    lv_obj_t *bar = lv_obj_create(row);
+    lv_obj_set_size(bar, 3, LV_SIZE_CONTENT);
+    lv_obj_set_style_bg_color(bar, lv_color_hex(ref.accent), 0);
+    lv_obj_set_style_bg_opa(bar, LV_OPA_COVER, 0);
+    lv_obj_set_style_border_width(bar, 0, 0);
+    lv_obj_set_style_radius(bar, 2, 0);
+    lv_obj_set_style_min_height(bar, 14, 0);
+    lv_obj_clear_flag(bar, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_t *body = lv_obj_create(row);
+    lv_obj_set_size(body, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    lv_obj_set_flex_grow(body, 1);
+    lv_obj_set_style_bg_opa(body, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(body, 0, 0);
+    lv_obj_set_style_pad_all(body, 0, 0);
+    lv_obj_set_style_pad_row(body, 0, 0);
+    lv_obj_clear_flag(body, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_flex_flow(body, LV_FLEX_FLOW_COLUMN);
+
+    agenda_row_label_(body, entries[i].summary.c_str(), ref.title_font,
+                      0xFFFFFF, LV_OPA_COVER);
+    char time_buf[16];
+    agenda_format_time(time_buf, sizeof(time_buf), entries[i].when, use_12h);
+    if (time_buf[0] != '\0') {
+      agenda_row_label_(body, time_buf, ref.small_font, 0xFFFFFF, LV_OPA_60);
+    }
+    rows++;
   }
-  lv_label_set_text(ref.sensor_lbl, when);
-  if (ref.unit_lbl != nullptr) lv_label_set_text(ref.unit_lbl, "");
-  lv_label_set_text(ref.text_lbl, next.summary.c_str());
 }
 
 // Periodic service driven from YAML with the panel clock. Fetches each card's
@@ -122,7 +200,10 @@ inline void agenda_cards_service(int year, int month, int day, int hour,
     fetcher.set_on_ready([index, generation, today, use_12h](const AgendaList &list) {
       if (generation != agenda_cards_generation()) return;  // grid rebuilt
       if (index >= agenda_card_count()) return;
-      agenda_card_apply(agenda_card_refs()[index], list, today, use_12h);
+      AgendaCardRef &current = agenda_card_refs()[index];
+      // Belt and braces: never render into a widget LVGL no longer tracks.
+      if (current.list == nullptr || !lv_obj_is_valid(current.list)) return;
+      agenda_card_render(current, list, today, use_12h);
     });
 
     char start[24];

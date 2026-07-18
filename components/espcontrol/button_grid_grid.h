@@ -807,6 +807,7 @@ inline void grid_phase1(
   display_activate_profile(display);
   // Clear image references before visual setup removes their old LVGL widgets.
   espcontrol::cards::image_driver_reset_pool(cfg);
+  espcontrol::reset_agenda_cards();
   int NS = bounded_grid_slots(cfg.num_slots);
   int COLS = cfg.cols > 0 ? cfg.cols : 1;
   if (COLS > MAX_GRID_SLOTS) COLS = MAX_GRID_SLOTS;
@@ -1207,6 +1208,9 @@ inline void grid_phase2(
   navigation_clear_home_targets();
   // Image-card contexts may still point at widgets inside subpage screens.
   espcontrol::cards::image_driver_reset_pool(cfg);
+  // Agenda registrations may too; their async fetch callbacks must never
+  // touch widgets after the screens are deleted.
+  espcontrol::reset_agenda_cards();
   navigation_clear_subpages();
   clear_subpage_vacuum_card_text_refs();
 

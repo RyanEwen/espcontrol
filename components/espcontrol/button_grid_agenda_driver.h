@@ -28,15 +28,22 @@ inline bool agenda_driver_setup_visual(
       static_cast<lv_style_selector_t>(LV_PART_MAIN) |
         static_cast<lv_style_selector_t>(LV_STATE_DEFAULT));
   }
+  // The agenda draws its own event list over the whole tile; the standard
+  // icon/sensor/name widgets stay hidden. Fonts are borrowed from the slot's
+  // labels so device typography profiles apply unchanged: the name label's
+  // font for event titles and the unit label's smaller font for times and
+  // day headings.
   lv_obj_add_flag(slot.icon_lbl, LV_OBJ_FLAG_HIDDEN);
-  lv_obj_clear_flag(slot.sensor_container, LV_OBJ_FLAG_HIDDEN);
-  lv_label_set_text(slot.sensor_lbl, "--");
-  lv_label_set_text(slot.unit_lbl, "");
-  lv_label_set_text(slot.text_lbl,
-                    config.label.empty() ? espcontrol_i18n("Agenda")
-                                         : config.label.c_str());
-  register_agenda_card(slot.sensor_lbl, slot.unit_lbl, slot.text_lbl,
-                       config.entity, config.label);
+  lv_obj_add_flag(slot.sensor_container, LV_OBJ_FLAG_HIDDEN);
+  lv_obj_add_flag(slot.text_lbl, LV_OBJ_FLAG_HIDDEN);
+  const lv_font_t *title_font =
+      lv_obj_get_style_text_font(slot.text_lbl, LV_PART_MAIN);
+  const lv_font_t *small_font =
+      lv_obj_get_style_text_font(slot.unit_lbl, LV_PART_MAIN);
+  const uint32_t accent =
+      palette.has_on ? palette.on_val : kAgendaAccentFallback;
+  register_agenda_card(slot.btn, title_font, small_font, accent, config.entity,
+                       config.label);
   return true;
 }
 
