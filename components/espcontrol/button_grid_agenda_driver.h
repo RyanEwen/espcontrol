@@ -40,10 +40,11 @@ inline bool agenda_driver_setup_visual(
       lv_obj_get_style_text_font(slot.text_lbl, LV_PART_MAIN);
   const lv_font_t *small_font =
       lv_obj_get_style_text_font(slot.unit_lbl, LV_PART_MAIN);
-  const uint32_t accent =
-      palette.has_on ? palette.on_val : kAgendaAccentFallback;
-  register_agenda_card(slot.btn, title_font, small_font, accent, config.entity,
-                       config.label);
+  const lv_font_t *big_font =
+      lv_obj_get_style_text_font(slot.sensor_lbl, LV_PART_MAIN);
+  const uint32_t accent = palette.has_on ? palette.on_val : 0;
+  register_agenda_card(slot.btn, title_font, small_font, big_font, accent,
+                       config.entity, config.label);
   return true;
 }
 

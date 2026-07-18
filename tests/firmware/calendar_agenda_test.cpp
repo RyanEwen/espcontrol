@@ -170,6 +170,50 @@ int main() {
   agenda_civil_from_days(agenda_days_from_civil(2026, 7, 31) + 1, &wy, &wm, &wd);
   CHECK(wy == 2026 && wm == 8 && wd == 1);  // month rollover
 
+  // Time ranges, all-day spans (exclusive end), and relative markers.
+  {
+    AgendaList rich;
+    rich.add("2026-07-21T09:00:00-04:00", "2026-07-21T10:00:00-04:00",
+             "Doctor", "Clinic", 1);
+    rich.add("2026-07-17", "2026-07-20", "Art Show", "", 0);
+    rich.add("2026-07-22", "2026-07-23", "Jen off", "", 2);
+    rich.finalize(kAgendaMaxEvents);
+    const auto &re = rich.entries();
+    CHECK(re.size() == 3);
+    CHECK(re[0].summary == "Art Show" && re[0].source == 0);
+    CHECK(re[1].summary == "Doctor" && re[1].source == 1);
+    CHECK(re[2].summary == "Jen off" && re[2].source == 2);
+    CHECK(re[1].location == "Clinic");
+
+    char range[48];
+    agenda_format_range(range, sizeof(range), re[1], true, today);
+    CHECK(std::strcmp(range, "9:00 AM - 10:00 AM") == 0);
+    // Multi-day all-day: HA's end date is exclusive, so 17..20 displays as
+    // ending the 19th.
+    agenda_format_range(range, sizeof(range), re[0], true, today);
+    CHECK(std::strncmp(range, "All day, ends ", 14) == 0);
+    // Single all-day (22..23 exclusive = one day).
+    agenda_format_range(range, sizeof(range), re[2], true, today);
+    CHECK(std::strcmp(range, "All day") == 0);
+
+    char rel[16];
+    agenda_format_relative(rel, sizeof(rel), today, today);
+    CHECK(rel[0] == '\0');
+    agenda_format_relative(rel, sizeof(rel), today + 1, today);
+    CHECK(rel[0] == '\0');
+    agenda_format_relative(rel, sizeof(rel), today + 2, today);
+    CHECK(std::strcmp(rel, "in 2 days") == 0);
+    agenda_format_relative(rel, sizeof(rel), today + 9, today);
+    CHECK(std::strcmp(rel, "in 9 days") == 0);
+
+    // Timed event without an end renders just the start time.
+    AgendaList open_ended;
+    open_ended.add("2026-07-21T09:00:00-04:00", nullptr, "Solo", "", 0);
+    open_ended.finalize(kAgendaMaxEvents);
+    agenda_format_range(range, sizeof(range), open_ended.entries()[0], true, today);
+    CHECK(std::strcmp(range, "9:00 AM") == 0);
+  }
+
   // Entity CSV splitting trims and drops blanks.
   auto ents = agenda_split_entities(" calendar.family , calendar.work ,, ");
   CHECK(ents.size() == 2);

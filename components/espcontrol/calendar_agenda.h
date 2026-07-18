@@ -190,8 +190,61 @@ inline void agenda_format_day_heading(char *buf, std::size_t size, int32_t day_n
 
 struct AgendaEntry {
   AgendaEventTime when;
+  AgendaEventTime end;
+  bool has_end{false};
   std::string summary;
+  std::string location;
+  uint8_t source{0};
 };
+
+// Format an event's time range the way Calendar Card Pro does:
+//   timed:            "9:00 AM - 10:00 AM"
+//   all-day:          "All day"
+//   multi-day all-day "All day, ends Tomorrow" / "All day, ends Wed 23 Jul"
+// Home Assistant's all-day end date is exclusive, so an event through the
+// 19th reports an end of the 20th; the displayed end is end-1.
+inline void agenda_format_range(char *buf, std::size_t size,
+                                const AgendaEntry &entry, bool use_12h,
+                                int32_t today_number) {
+  if (buf == nullptr || size == 0) return;
+  if (entry.when.all_day) {
+    if (entry.has_end) {
+      const int32_t display_end = entry.end.day_number - 1;
+      if (display_end > entry.when.day_number) {
+        char end_text[24];
+        agenda_format_day_heading(end_text, sizeof(end_text), display_end,
+                                  today_number);
+        std::snprintf(buf, size, "%s, %s %s", "All day", "ends", end_text);
+        return;
+      }
+    }
+    std::snprintf(buf, size, "%s", "All day");
+    return;
+  }
+  char start_text[16];
+  agenda_format_time(start_text, sizeof(start_text), entry.when, use_12h);
+  if (entry.has_end && !entry.end.all_day) {
+    char end_text[16];
+    agenda_format_time(end_text, sizeof(end_text), entry.end, use_12h);
+    std::snprintf(buf, size, "%s - %s", start_text, end_text);
+  } else {
+    std::snprintf(buf, size, "%s", start_text);
+  }
+}
+
+// Right-hand relative marker: "in N days" for events two or more days out;
+// empty for today and tomorrow (the date column already says so).
+inline void agenda_format_relative(char *buf, std::size_t size,
+                                   int32_t day_number, int32_t today_number) {
+  if (buf == nullptr || size == 0) return;
+  const int32_t delta = day_number - today_number;
+  if (delta >= 2) {
+    std::snprintf(buf, size, "in %d days", static_cast<int>(delta));
+  } else {
+    buf[0] = '\0';
+  }
+}
+
 
 // Accumulates events across calendars, then time-orders, de-duplicates, and
 // caps them for display. Grouping by day is derived from adjacent entries'
@@ -207,6 +260,11 @@ class AgendaList {
   // events are skipped. Duplicates (same start second and summary, e.g. an
   // event shared across two calendars) are dropped.
   void add(const char *start, const std::string &summary) {
+    this->add(start, nullptr, summary, std::string(), 0);
+  }
+
+  void add(const char *start, const char *end, const std::string &summary,
+           const std::string &location, uint8_t source) {
     if (summary.empty()) return;
     AgendaEventTime when;
     if (!agenda_parse_start(start, &when)) return;
@@ -215,7 +273,15 @@ class AgendaList {
         return;
       }
     }
-    entries_.push_back({when, summary});
+    AgendaEntry entry;
+    entry.when = when;
+    entry.summary = summary;
+    entry.location = location;
+    entry.source = source;
+    if (end != nullptr) {
+      entry.has_end = agenda_parse_start(end, &entry.end);
+    }
+    entries_.push_back(std::move(entry));
   }
 
   // Sort by time, drop anything already ended before now_epoch when provided

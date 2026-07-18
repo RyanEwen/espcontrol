@@ -144,8 +144,12 @@ class AgendaFetcher {
         size_t added = 0;
         for (JsonObjectConst item : items) {
           const char *start = item["s"] | "";
+          const char *end = item["e"] | "";
           const char *summary = item["t"] | "";
-          this->accumulated_.add(start, std::string(summary));
+          const char *location = item["l"] | "";
+          this->accumulated_.add(start, end[0] != '\0' ? end : nullptr,
+                                 std::string(summary), std::string(location),
+                                 source);
           added++;
         }
         ESP_LOGD("agenda", "Parsed %u event(s) from calendar response", (unsigned) added);

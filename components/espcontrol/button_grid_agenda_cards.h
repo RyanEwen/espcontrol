@@ -19,11 +19,29 @@ inline constexpr int kMaxAgendaCards = 6;
 inline constexpr uint32_t kAgendaCardRefreshMs = 10 * 60 * 1000;
 inline constexpr uint32_t kAgendaAccentFallback = 0x4FC3F7;
 
+// Per-calendar accent colors, indexed by the entity's position in the card's
+// calendar list (Calendar-Card-Pro-style attribution).
+inline constexpr uint32_t kAgendaCalendarColors[] = {
+    0x66BB6A,  // green
+    0xEF5350,  // red
+    0x42A5F5,  // blue
+    0xAB47BC,  // purple
+    0xFFB300,  // amber
+    0x26C6DA,  // cyan
+};
+
+inline uint32_t agenda_source_color(uint8_t source, uint32_t first_override) {
+  if (source == 0 && first_override != 0) return first_override;
+  return kAgendaCalendarColors[source % (sizeof(kAgendaCalendarColors) /
+                                         sizeof(kAgendaCalendarColors[0]))];
+}
+
 struct AgendaCardRef {
   lv_obj_t *list{nullptr};
   const lv_font_t *title_font{nullptr};
   const lv_font_t *small_font{nullptr};
-  uint32_t accent{kAgendaAccentFallback};
+  const lv_font_t *big_font{nullptr};
+  uint32_t accent{0};
   std::string entities;
   std::string label;
   uint32_t last_fetch_ms{0};
@@ -61,7 +79,8 @@ inline void reset_agenda_cards() {
 // Fonts are borrowed from the slot's own labels so every device profile keeps
 // its typography without new font roles.
 inline void register_agenda_card(lv_obj_t *btn, const lv_font_t *title_font,
-                                 const lv_font_t *small_font, uint32_t accent,
+                                 const lv_font_t *small_font,
+                                 const lv_font_t *big_font, uint32_t accent,
                                  const std::string &entities,
                                  const std::string &label) {
   int &count = agenda_card_count();
@@ -88,6 +107,7 @@ inline void register_agenda_card(lv_obj_t *btn, const lv_font_t *title_font,
   ref.list = list;
   ref.title_font = title_font;
   ref.small_font = small_font;
+  ref.big_font = big_font;
   ref.accent = accent;
   ref.entities = entities;
   ref.label = label;
@@ -107,7 +127,10 @@ inline lv_obj_t *agenda_row_label_(lv_obj_t *parent, const char *text,
   return lbl;
 }
 
-// Render the agenda into the card's list container.
+// Render the agenda into the card's list container: one row per day with a
+// date column (weekday / big day number / month) beside accent-tinted event
+// boxes carrying the title, time range, optional location, and an "in N days"
+// marker — the Calendar Card Pro layout.
 inline void agenda_card_render(AgendaCardRef &ref, const AgendaList &list,
                                int32_t today_number, bool use_12h) {
   if (ref.list == nullptr) return;
@@ -119,68 +142,146 @@ inline void agenda_card_render(AgendaCardRef &ref, const AgendaList &list,
     return;
   }
 
-  // Fill however much height the card actually has: a 1x1 tile fits a couple
-  // of rows, a full-height card fits the whole fetched list. Heights are
-  // estimated from the fonts because flex layout has not run yet.
   lv_obj_update_layout(ref.list);
   const int available = lv_obj_get_content_height(ref.list);
   const int title_h = ref.title_font ? lv_font_get_line_height(ref.title_font) : 16;
   const int small_h = ref.small_font ? lv_font_get_line_height(ref.small_font) : 12;
-  const int event_h = title_h + small_h + 4;   // title + time + row gap
-  const int header_h = small_h + 6;
+  const int big_h = ref.big_font ? lv_font_get_line_height(ref.big_font) : 24;
+  const int date_col_w = 44;
   int used = 0;
+
+  static const char *const kWeekdays[] = {"Sun", "Mon", "Tue", "Wed",
+                                          "Thu", "Fri", "Sat"};
+  static const char *const kMonths[] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+                                        "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
+
   const std::vector<AgendaEntry> &entries = list.entries();
+  lv_obj_t *events_col = nullptr;
   for (std::size_t i = 0; i < entries.size(); i++) {
-    int needed = event_h;
-    if (list.starts_new_day(i)) needed += header_h;
+    const AgendaEntry &entry = entries[i];
+    const bool has_location = !entry.location.empty();
+    const int event_h = title_h + small_h + (has_location ? small_h : 0) + 10;
+    const int day_min_h = small_h * 2 + big_h;
+    const int needed = list.starts_new_day(i)
+                           ? (event_h > day_min_h ? event_h : day_min_h) + 6
+                           : event_h;
     if (used + needed > available && used > 0) break;
-    if (list.starts_new_day(i)) {
-      char heading[24];
-      agenda_format_day_heading(heading, sizeof(heading),
-                                entries[i].when.day_number, today_number);
-      lv_obj_t *head = agenda_row_label_(ref.list, heading, ref.small_font,
-                                         0xFFFFFF, LV_OPA_50);
-      lv_obj_set_style_pad_top(head, i == 0 ? 0 : 2, 0);
-    }
     used += needed;
 
-    // Event row: accent bar on the left, then title with the time beneath.
-    lv_obj_t *row = lv_obj_create(ref.list);
-    lv_obj_set_size(row, lv_pct(100), LV_SIZE_CONTENT);
-    lv_obj_set_style_bg_opa(row, LV_OPA_TRANSP, 0);
-    lv_obj_set_style_border_width(row, 0, 0);
-    lv_obj_set_style_pad_all(row, 0, 0);
-    lv_obj_set_style_pad_column(row, 6, 0);
-    lv_obj_clear_flag(row, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_clear_flag(row, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(row, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START,
-                          LV_FLEX_ALIGN_START);
+    if (list.starts_new_day(i)) {
+      // Day row: date column on the left, an events column growing beside it.
+      lv_obj_t *day_row = lv_obj_create(ref.list);
+      lv_obj_set_size(day_row, lv_pct(100), LV_SIZE_CONTENT);
+      lv_obj_set_style_bg_opa(day_row, LV_OPA_TRANSP, 0);
+      lv_obj_set_style_border_width(day_row, 0, 0);
+      lv_obj_set_style_pad_all(day_row, 0, 0);
+      lv_obj_set_style_pad_column(day_row, 6, 0);
+      lv_obj_clear_flag(day_row, LV_OBJ_FLAG_SCROLLABLE);
+      lv_obj_clear_flag(day_row, LV_OBJ_FLAG_CLICKABLE);
+      lv_obj_set_flex_flow(day_row, LV_FLEX_FLOW_ROW);
+      lv_obj_set_flex_align(day_row, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START,
+                            LV_FLEX_ALIGN_START);
 
-    lv_obj_t *bar = lv_obj_create(row);
-    lv_obj_set_size(bar, 3, 14);
-    lv_obj_set_style_bg_color(bar, lv_color_hex(ref.accent), 0);
+      int year = 0, month = 1, day = 1;
+      agenda_civil_from_days(entry.when.day_number, &year, &month, &day);
+      lv_obj_t *date_col = lv_obj_create(day_row);
+      lv_obj_set_size(date_col, date_col_w, LV_SIZE_CONTENT);
+      lv_obj_set_style_bg_opa(date_col, LV_OPA_TRANSP, 0);
+      lv_obj_set_style_border_width(date_col, 0, 0);
+      lv_obj_set_style_pad_all(date_col, 0, 0);
+      lv_obj_set_style_pad_row(date_col, 0, 0);
+      lv_obj_clear_flag(date_col, LV_OBJ_FLAG_SCROLLABLE);
+      lv_obj_set_flex_flow(date_col, LV_FLEX_FLOW_COLUMN);
+      lv_obj_set_flex_align(date_col, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER,
+                            LV_FLEX_ALIGN_CENTER);
+
+      char text[8];
+      std::snprintf(text, sizeof(text), "%s",
+                    kWeekdays[agenda_weekday(entry.when.day_number)]);
+      agenda_row_label_(date_col, text, ref.small_font, 0xFFFFFF, LV_OPA_60);
+      std::snprintf(text, sizeof(text), "%d", day);
+      lv_obj_t *num = agenda_row_label_(date_col, text, ref.big_font, 0xFFFFFF,
+                                        LV_OPA_COVER);
+      lv_obj_set_style_text_align(num, LV_TEXT_ALIGN_CENTER, 0);
+      std::snprintf(text, sizeof(text), "%s", kMonths[(month - 1) % 12]);
+      agenda_row_label_(date_col, text, ref.small_font, 0xFFFFFF, LV_OPA_60);
+
+      events_col = lv_obj_create(day_row);
+      lv_obj_set_size(events_col, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+      lv_obj_set_flex_grow(events_col, 1);
+      lv_obj_set_style_bg_opa(events_col, LV_OPA_TRANSP, 0);
+      lv_obj_set_style_border_width(events_col, 0, 0);
+      lv_obj_set_style_pad_all(events_col, 0, 0);
+      lv_obj_set_style_pad_row(events_col, 4, 0);
+      lv_obj_clear_flag(events_col, LV_OBJ_FLAG_SCROLLABLE);
+      lv_obj_set_flex_flow(events_col, LV_FLEX_FLOW_COLUMN);
+    }
+    if (events_col == nullptr) continue;
+
+    // Event box: accent-tinted background with a solid accent bar on its left
+    // edge (drawn as a left border), title + relative marker, time range, and
+    // the location when present.
+    const uint32_t color = agenda_source_color(entry.source, ref.accent);
+    lv_obj_t *box = lv_obj_create(events_col);
+    lv_obj_set_size(box, lv_pct(100), LV_SIZE_CONTENT);
+    lv_obj_set_style_bg_color(box, lv_color_hex(color), 0);
+    lv_obj_set_style_bg_opa(box, LV_OPA_10, 0);
+    lv_obj_set_style_radius(box, 4, 0);
+    lv_obj_set_style_border_width(box, 0, 0);
+    lv_obj_set_style_pad_all(box, 4, 0);
+    lv_obj_set_style_pad_left(box, 8, 0);
+    lv_obj_set_style_pad_row(box, 0, 0);
+    lv_obj_clear_flag(box, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_clear_flag(box, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_flex_flow(box, LV_FLEX_FLOW_COLUMN);
+
+    lv_obj_t *bar = lv_obj_create(box);
+    lv_obj_set_size(bar, 3, lv_pct(100));
+    lv_obj_add_flag(bar, LV_OBJ_FLAG_IGNORE_LAYOUT);
+    lv_obj_align(bar, LV_ALIGN_LEFT_MID, -6, 0);
+    lv_obj_set_style_bg_color(bar, lv_color_hex(color), 0);
     lv_obj_set_style_bg_opa(bar, LV_OPA_COVER, 0);
     lv_obj_set_style_border_width(bar, 0, 0);
     lv_obj_set_style_radius(bar, 2, 0);
     lv_obj_clear_flag(bar, LV_OBJ_FLAG_SCROLLABLE);
 
-    lv_obj_t *body = lv_obj_create(row);
-    lv_obj_set_size(body, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-    lv_obj_set_flex_grow(body, 1);
-    lv_obj_set_style_bg_opa(body, LV_OPA_TRANSP, 0);
-    lv_obj_set_style_border_width(body, 0, 0);
-    lv_obj_set_style_pad_all(body, 0, 0);
-    lv_obj_set_style_pad_row(body, 0, 0);
-    lv_obj_clear_flag(body, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_flex_flow(body, LV_FLEX_FLOW_COLUMN);
+    // Title with the "in N days" marker right-aligned beside it.
+    lv_obj_t *title_row = lv_obj_create(box);
+    lv_obj_set_size(title_row, lv_pct(100), LV_SIZE_CONTENT);
+    lv_obj_set_style_bg_opa(title_row, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(title_row, 0, 0);
+    lv_obj_set_style_pad_all(title_row, 0, 0);
+    lv_obj_set_style_pad_column(title_row, 4, 0);
+    lv_obj_clear_flag(title_row, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_flex_flow(title_row, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(title_row, LV_FLEX_ALIGN_SPACE_BETWEEN,
+                          LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
 
-    agenda_row_label_(body, entries[i].summary.c_str(), ref.title_font,
-                      0xFFFFFF, LV_OPA_COVER);
-    char time_buf[16];
-    agenda_format_time(time_buf, sizeof(time_buf), entries[i].when, use_12h);
-    if (time_buf[0] != '\0') {
-      agenda_row_label_(body, time_buf, ref.small_font, 0xFFFFFF, LV_OPA_60);
+    lv_obj_t *title = lv_label_create(title_row);
+    lv_label_set_text(title, entry.summary.c_str());
+    if (ref.title_font != nullptr)
+      lv_obj_set_style_text_font(title, ref.title_font, 0);
+    lv_obj_set_style_text_color(title, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_set_flex_grow(title, 1);
+    lv_label_set_long_mode(title, LV_LABEL_LONG_DOT);
+
+    char rel[16];
+    agenda_format_relative(rel, sizeof(rel), entry.when.day_number, today_number);
+    if (rel[0] != '\0') {
+      lv_obj_t *marker = lv_label_create(title_row);
+      lv_label_set_text(marker, rel);
+      if (ref.small_font != nullptr)
+        lv_obj_set_style_text_font(marker, ref.small_font, 0);
+      lv_obj_set_style_text_color(marker, lv_color_hex(0xFFFFFF), 0);
+      lv_obj_set_style_text_opa(marker, LV_OPA_50, 0);
+    }
+
+    char range[48];
+    agenda_format_range(range, sizeof(range), entry, use_12h, today_number);
+    agenda_row_label_(box, range, ref.small_font, 0xFFFFFF, LV_OPA_60);
+    if (has_location) {
+      agenda_row_label_(box, entry.location.c_str(), ref.small_font, 0xFFFFFF,
+                        LV_OPA_40);
     }
   }
 }
