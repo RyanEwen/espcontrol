@@ -394,10 +394,6 @@ export default defineConfig({
         items: [
           { text: 'Overview', link: '/' },
           { text: 'Install', link: '/getting-started/install' },
-          {
-            text: 'Migrate from ESPHome Media Player',
-            link: '/getting-started/migrate-esphome-media-player',
-          },
           { text: 'Enable Actions', link: '/getting-started/home-assistant-actions' },
           { text: 'Manual Setup', link: '/getting-started/manual-esphome-setup' },
           { text: 'Troubleshooting', link: '/getting-started/troubleshooting' },
