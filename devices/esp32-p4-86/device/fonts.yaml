@@ -136,6 +136,6 @@ font:
   # Agenda date-column day number (digits only)
   - file: "gfonts://Roboto@Light"
     id: font_agenda_day
-    size: 54
+    size: 48
     bpp: 4
     glyphs: "0123456789"
