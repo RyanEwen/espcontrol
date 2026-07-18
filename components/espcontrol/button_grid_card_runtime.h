@@ -29,6 +29,7 @@ inline Family family_for_runtime_type(espcontrol::card_runtime::CardTypeId type)
     case Type::SWITCH:
     case Type::LIGHT_SWITCH: return Family::TOGGLE;
     case Type::ACTION: return Family::ACTION;
+    case Type::AGENDA: return Family::AGENDA;
     case Type::VACUUM: return Family::VACUUM;
     case Type::LAWN_MOWER: return Family::MOWER;
     case Type::ALARM: return Family::ALARM;
@@ -75,6 +76,7 @@ inline bool driver_uses_legacy_dispatch(
   using Driver = espcontrol::card_runtime::CardDriverId;
   switch (runtime.driver) {
     case Driver::STATUS_ENTITY: return false;
+    case Driver::AGENDA:
     case Driver::DATE_TIME:
     case Driver::SENSOR:
     case Driver::WEATHER:

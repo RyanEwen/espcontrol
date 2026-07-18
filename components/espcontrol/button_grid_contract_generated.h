@@ -50,6 +50,7 @@ enum class CardTypeId : uint8_t {
   SUBPAGE,
   TIMEZONE,
   WEATHER,
+  AGENDA,
   IMAGE,
   WEATHER_FORECAST,
   UNKNOWN,
@@ -95,6 +96,7 @@ enum class CardDriverId : uint8_t {
   SUBPAGE,
   WEATHER,
   IMAGE,
+  AGENDA,
   UNKNOWN,
 };
 
@@ -158,6 +160,7 @@ inline CardTypeId card_type_id(const std::string &type) {
   if (type == "subpage") return CardTypeId::SUBPAGE;
   if (type == "timezone") return CardTypeId::TIMEZONE;
   if (type == "weather") return CardTypeId::WEATHER;
+  if (type == "agenda") return CardTypeId::AGENDA;
   if (type == "image") return CardTypeId::IMAGE;
   if (type == "weather_forecast") return CardTypeId::WEATHER_FORECAST;
   return CardTypeId::UNKNOWN;
@@ -203,6 +206,7 @@ inline CardRuntimeSpec card_runtime_spec(CardTypeId type) {
     case CardTypeId::SUBPAGE: return {type, CardDriverId::SUBPAGE, static_cast<uint16_t>(CAPABILITY_ACTIONS | CAPABILITY_RUNTIME_ALLOCATION)};
     case CardTypeId::TIMEZONE: return {type, CardDriverId::DATE_TIME, static_cast<uint16_t>(CAPABILITY_INFORMATION_ONLY | CAPABILITY_SUBSCRIPTIONS | CAPABILITY_SUBPAGE)};
     case CardTypeId::WEATHER: return {type, CardDriverId::WEATHER, static_cast<uint16_t>(CAPABILITY_INFORMATION_ONLY | CAPABILITY_SUBSCRIPTIONS | CAPABILITY_SUBPAGE)};
+    case CardTypeId::AGENDA: return {type, CardDriverId::AGENDA, static_cast<uint16_t>(CAPABILITY_INFORMATION_ONLY | CAPABILITY_SUBSCRIPTIONS | CAPABILITY_SUBPAGE)};
     case CardTypeId::IMAGE: return {type, CardDriverId::IMAGE, static_cast<uint16_t>(CAPABILITY_INFORMATION_ONLY | CAPABILITY_SUBSCRIPTIONS | CAPABILITY_ACTIONS | CAPABILITY_MODAL | CAPABILITY_RUNTIME_ALLOCATION | CAPABILITY_SUBPAGE)};
     case CardTypeId::WEATHER_FORECAST: return {type, CardDriverId::WEATHER, static_cast<uint16_t>(CAPABILITY_INFORMATION_ONLY | CAPABILITY_SUBSCRIPTIONS | CAPABILITY_SUBPAGE)};
     default: return {};
@@ -579,6 +583,7 @@ inline const char *card_contract_card_label(const std::string &type) {
   if (type == "subpage") return "Subpage";
   if (type == "timezone") return "Date & Time";
   if (type == "weather") return "Weather";
+  if (type == "agenda") return "Agenda";
   if (type == "image") return "Camera Card";
   if (type == "weather_forecast") return "Weather Forecast";
   return type.empty() ? "Switch" : type.c_str();
@@ -623,6 +628,7 @@ inline bool card_contract_allow_in_subpage(const std::string &type) {
   if (type == "subpage") return false;
   if (type == "timezone") return true;
   if (type == "weather") return true;
+  if (type == "agenda") return true;
   if (type == "image") return true;
   if (type == "weather_forecast") return true;
   return false;
@@ -667,6 +673,7 @@ inline const char *card_contract_default_icon_name(const std::string &type) {
   if (type == "subpage") return "Auto";
   if (type == "timezone") return "Auto";
   if (type == "weather") return "Auto";
+  if (type == "agenda") return "Auto";
   if (type == "image") return "Auto";
   if (type == "weather_forecast") return "Auto";
   return "Auto";
@@ -711,6 +718,7 @@ inline const char *card_contract_default_icon_on_name(const std::string &type) {
   if (type == "subpage") return "Auto";
   if (type == "timezone") return "Auto";
   if (type == "weather") return "Auto";
+  if (type == "agenda") return "Auto";
   if (type == "image") return "Auto";
   if (type == "weather_forecast") return "Auto";
   return "Auto";
@@ -787,6 +795,7 @@ inline const char *card_contract_subpage_type_code(const std::string &type) {
   if (type == "webhook") return "WH";
   if (type == "internal") return "I";
   if (type == "subpage") return "G";
+  if (type == "agenda") return "AG";
   return type.c_str();
 }
 
@@ -829,5 +838,6 @@ inline std::string card_contract_subpage_type_from_code(const std::string &code)
   if (code == "WH") return "webhook";
   if (code == "I") return "internal";
   if (code == "G") return "subpage";
+  if (code == "AG") return "agenda";
   return code;
 }

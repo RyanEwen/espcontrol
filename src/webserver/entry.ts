@@ -93,6 +93,7 @@ import { registerEntityModeCardHelpers } from "./cards/entity_mode_card";
 import { registerFanCardTypes } from "./cards/fan";
 import { registerGarageCardTypes } from "./cards/garage";
 import { registerGateCardTypes } from "./cards/gate";
+import { registerAgendaCardTypes } from "./cards/agenda";
 import { registerImageCardTypes } from "./cards/image";
 import { registerInternalCardTypes } from "./cards/internal";
 import { registerLawnMowerCardTypes } from "./cards/lawn_mower";
@@ -224,6 +225,7 @@ function startEspControl(): void {
   installGlobals(registerFanCardTypes());
   installGlobals(registerGarageCardTypes());
   installGlobals(registerGateCardTypes());
+  installGlobals(registerAgendaCardTypes());
   installGlobals(registerImageCardTypes());
   installGlobals(registerInternalCardTypes());
   installGlobals(registerLawnMowerCardTypes());

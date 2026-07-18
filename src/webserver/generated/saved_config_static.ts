@@ -5,6 +5,16 @@
 import type { CardConfig } from "../contracts/types";
 
 export function normalizeSavedConfigStatic(config: CardConfig): boolean {
+  if (config.type === "agenda") {
+    config.icon = "Auto";
+    config.icon_on = "Auto";
+    config.sensor = "";
+    config.unit = "";
+    config.type = "agenda";
+    config.precision = "";
+    config.options = "";
+    return true;
+  }
   if (config.type === "internal") {
     config.type = "internal";
     config.options = "";

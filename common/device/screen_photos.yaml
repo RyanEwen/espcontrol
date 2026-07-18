@@ -778,6 +778,18 @@ interval:
                   espcontrol::DisplayMode::PHOTOS);
           then:
             - script.execute: photos_refresh_datetime
+  # Service tick for Agenda grid cards: fetches on first sight and every ten
+  # minutes afterwards. Cheap when no agenda cards are configured.
+  - interval: 5s
+    then:
+      - lambda: |-
+          auto now = panel_time_or_fallback(id(panel_time).now(),
+                                            id(homeassistant_time).now());
+          if (!now.is_valid()) return;
+          espcontrol::agenda_cards_service(now.year, now.month, now.day_of_month,
+                                           now.hour, now.minute, now.second,
+                                           id(clock_format_12h));
+
   # Refresh the agenda periodically so new/changed events show up. The
   # refresh script gates itself on the agenda config; only the presentation
   # mode is checked here.
