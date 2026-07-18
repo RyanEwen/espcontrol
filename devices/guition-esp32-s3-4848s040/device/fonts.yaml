@@ -132,3 +132,10 @@ font:
     extras:
       - file: "gfonts://Heebo"
         glyphs: !include ../../../common/assets/hebrew_glyphs.yaml
+
+  # Agenda date-column day number (digits only)
+  - file: "gfonts://Roboto@Light"
+    id: font_agenda_day
+    size: 36
+    bpp: 4
+    glyphs: "0123456789"
