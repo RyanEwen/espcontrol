@@ -103,7 +103,7 @@ inline void agenda_card_apply(AgendaCardRef &ref, const AgendaList &list,
 // calendars on first sight and every kAgendaCardRefreshMs afterwards.
 inline void agenda_cards_service(int year, int month, int day, int hour,
                                  int minute, int second, bool use_12h) {
-  const uint32_t now_ms = millis();
+  const uint32_t now_ms = esphome::millis();
   const int32_t today = agenda_days_from_civil(year, month, day);
   for (int i = 0; i < agenda_card_count(); i++) {
     AgendaCardRef &ref = agenda_card_refs()[i];

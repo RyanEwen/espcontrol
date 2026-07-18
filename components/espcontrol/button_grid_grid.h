@@ -853,7 +853,7 @@ inline void grid_phase1(
 
   bump_ha_subscription_generation();
   reset_calendar_cards();
-  reset_agenda_cards();
+  espcontrol::reset_agenda_cards();
   reset_timezone_cards();
   weather_forecast_cancel_pending_requests();
   reset_weather_forecast_cards();
