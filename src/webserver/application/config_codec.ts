@@ -40,7 +40,7 @@ export function installConfigCodecModule(): GlobalDescriptors {
         return !!(b && b.type === "media" && mediaEditorMode(b.sensor) === "cover_art");
     }
     function cardSupportsMaxSize(this: any, b?: any) {
-        return !!(b && b.type === "image");
+        return !!(b && (b.type === "image" || b.type === "agenda"));
     }
     function normalizeCardSizeForConfig(this: any, b?: any, size?: any) {
         size = size || CARD_SIZE_SINGLE;

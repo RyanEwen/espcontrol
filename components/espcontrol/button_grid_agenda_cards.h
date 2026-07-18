@@ -18,7 +18,6 @@ namespace espcontrol {
 inline constexpr int kMaxAgendaCards = 6;
 inline constexpr uint32_t kAgendaCardRefreshMs = 10 * 60 * 1000;
 inline constexpr uint32_t kAgendaAccentFallback = 0x4FC3F7;
-inline constexpr int kAgendaCardMaxRows = 4;
 
 struct AgendaCardRef {
   lv_obj_t *list{nullptr};
@@ -120,9 +119,21 @@ inline void agenda_card_render(AgendaCardRef &ref, const AgendaList &list,
     return;
   }
 
-  int rows = 0;
+  // Fill however much height the card actually has: a 1x1 tile fits a couple
+  // of rows, a full-height card fits the whole fetched list. Heights are
+  // estimated from the fonts because flex layout has not run yet.
+  lv_obj_update_layout(ref.list);
+  const int available = lv_obj_get_content_height(ref.list);
+  const int title_h = ref.title_font ? lv_font_get_line_height(ref.title_font) : 16;
+  const int small_h = ref.small_font ? lv_font_get_line_height(ref.small_font) : 12;
+  const int event_h = title_h + small_h + 4;   // title + time + row gap
+  const int header_h = small_h + 6;
+  int used = 0;
   const std::vector<AgendaEntry> &entries = list.entries();
-  for (std::size_t i = 0; i < entries.size() && rows < kAgendaCardMaxRows; i++) {
+  for (std::size_t i = 0; i < entries.size(); i++) {
+    int needed = event_h;
+    if (list.starts_new_day(i)) needed += header_h;
+    if (used + needed > available && used > 0) break;
     if (list.starts_new_day(i)) {
       char heading[24];
       agenda_format_day_heading(heading, sizeof(heading),
@@ -130,9 +141,8 @@ inline void agenda_card_render(AgendaCardRef &ref, const AgendaList &list,
       lv_obj_t *head = agenda_row_label_(ref.list, heading, ref.small_font,
                                          0xFFFFFF, LV_OPA_50);
       lv_obj_set_style_pad_top(head, i == 0 ? 0 : 2, 0);
-      rows++;
-      if (rows >= kAgendaCardMaxRows) break;
     }
+    used += needed;
 
     // Event row: accent bar on the left, then title with the time beneath.
     lv_obj_t *row = lv_obj_create(ref.list);
@@ -172,7 +182,6 @@ inline void agenda_card_render(AgendaCardRef &ref, const AgendaList &list,
     if (time_buf[0] != '\0') {
       agenda_row_label_(body, time_buf, ref.small_font, 0xFFFFFF, LV_OPA_60);
     }
-    rows++;
   }
 }
 
