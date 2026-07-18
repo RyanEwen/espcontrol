@@ -56,7 +56,9 @@ class AgendaFetcher {
     this->now_epoch_ = now_epoch;
     this->pending_ = static_cast<int>(this->entities_.size());
 
-    for (const std::string &entity : this->entities_) {
+    for (std::size_t entity_index = 0; entity_index < this->entities_.size();
+         entity_index++) {
+      const std::string &entity = this->entities_[entity_index];
       const uint32_t call_id = next_agenda_call_id_();
       esphome::api::HomeassistantActionRequest req;
       if (!ha_action_begin(req, "calendar.get_events", false, 3, call_id)) {
@@ -75,7 +77,7 @@ class AgendaFetcher {
           "{% set data = response if response is defined and response is not none else {} %}"
           "{% for cal, body in data.items() %}"
           "{% for e in body['events'] | default([]) %}"
-          "{% set ns.items = ns.items + [{'s': e.start | string, 't': e.summary | string}] %}"
+          "{% set ns.items = ns.items + [{'s': e.start | string, 'e': e.end | default('') | string, 't': e.summary | string, 'l': e.location | default('') | string}] %}"
           "{% endfor %}{% endfor %}"
           "{{ ns.items | tojson }}";
       req.response_template = decltype(req.response_template)(kTemplate);
@@ -84,10 +86,11 @@ class AgendaFetcher {
       ha_action_add_data(req, "end_date_time", end_datetime.c_str());
 
       auto *self = this;
+      const uint8_t source = static_cast<uint8_t>(entity_index & 0xFF);
       const bool registered = ha_register_action_response_callback(
           call_id,
-          [self, generation](const esphome::api::ActionResponse &response) {
-            self->handle_response_(generation, response);
+          [self, generation, source](const esphome::api::ActionResponse &response) {
+            self->handle_response_(generation, source, response);
           });
       if (!registered) {
         this->finish_one_(generation);
@@ -114,7 +117,8 @@ class AgendaFetcher {
     return call_id++;
   }
 
-  void handle_response_(uint32_t generation, const esphome::api::ActionResponse &response) {
+  void handle_response_(uint32_t generation, uint8_t source,
+                        const esphome::api::ActionResponse &response) {
     if (generation != this->generation_) {
       ESP_LOGD("agenda", "Dropping superseded get_events response");
       return;
