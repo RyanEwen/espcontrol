@@ -39,6 +39,7 @@ struct GridConfig {
   const lv_font_t *option_select_value_font = nullptr;
   const lv_font_t *volume_number_font;
   const lv_font_t *volume_label_font = nullptr;
+  const lv_font_t *small_text_font = nullptr;
   const lv_font_t *climate_card_icon_font = nullptr;
   const lv_font_t *climate_option_title_font = nullptr;
   const lv_font_t *climate_option_value_font = nullptr;
@@ -82,6 +83,7 @@ inline DisplayProfile display_profile_from_grid_config(const GridConfig &cfg) {
   profile.fonts.option_select_value = cfg.option_select_value_font;
   profile.fonts.volume_number = cfg.volume_number_font;
   profile.fonts.volume_label = cfg.volume_label_font;
+  profile.fonts.small_text = cfg.small_text_font;
   profile.fonts.climate_card_icon = cfg.climate_card_icon_font;
   profile.fonts.climate_option_title = cfg.climate_option_title_font;
   profile.fonts.climate_option_value = cfg.climate_option_value_font;
@@ -460,7 +462,7 @@ inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
       s, p, context, display, row_span, col_span);
     return;
   }
-  if (espcontrol::cards::agenda_driver_setup_visual(s, p, context, palette)) {
+  if (espcontrol::cards::agenda_driver_setup_visual(s, p, context, palette, display)) {
     espcontrol::cards::agenda_driver_attach_interaction(s, p, context);
     espcontrol::cards::agenda_driver_refresh_layout(
       s, p, context, display, row_span, col_span);

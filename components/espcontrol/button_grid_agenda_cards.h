@@ -147,7 +147,8 @@ inline void agenda_card_render(AgendaCardRef &ref, const AgendaList &list,
   const int title_h = ref.title_font ? lv_font_get_line_height(ref.title_font) : 16;
   const int small_h = ref.small_font ? lv_font_get_line_height(ref.small_font) : 12;
   const int big_h = ref.big_font ? lv_font_get_line_height(ref.big_font) : 24;
-  const int date_col_w = 44;
+  int date_col_w = big_h + big_h / 4;   // fits two digits of the day number
+  if (date_col_w < 40) date_col_w = 40;
   int used = 0;
 
   static const char *const kWeekdays[] = {"Sun", "Mon", "Tue", "Wed",

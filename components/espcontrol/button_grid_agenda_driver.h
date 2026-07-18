@@ -19,7 +19,7 @@ inline bool agenda_driver_matches(const Context &context) {
 
 inline bool agenda_driver_setup_visual(
     BtnSlot &slot, const ParsedCfg &config, const Context &context,
-    const CardPalette &palette) {
+    const CardPalette &palette, const DisplayProfile &display) {
   if (!agenda_driver_matches(context)) return false;
 
   if (palette.has_sensor_color) {
@@ -36,12 +36,17 @@ inline bool agenda_driver_setup_visual(
   lv_obj_add_flag(slot.icon_lbl, LV_OBJ_FLAG_HIDDEN);
   lv_obj_add_flag(slot.sensor_container, LV_OBJ_FLAG_HIDDEN);
   lv_obj_add_flag(slot.text_lbl, LV_OBJ_FLAG_HIDDEN);
+  // Deliberate hierarchy: titles in the card name (body) font, all secondary
+  // text in the shared small-text role, and the day number in the media-title
+  // font — prominent without the sensor-number font's bulk.
   const lv_font_t *title_font =
       lv_obj_get_style_text_font(slot.text_lbl, LV_PART_MAIN);
-  const lv_font_t *small_font =
-      lv_obj_get_style_text_font(slot.unit_lbl, LV_PART_MAIN);
-  const lv_font_t *big_font =
-      lv_obj_get_style_text_font(slot.sensor_lbl, LV_PART_MAIN);
+  const lv_font_t *small_font = display.fonts.small_text != nullptr
+      ? display.fonts.small_text
+      : lv_obj_get_style_text_font(slot.unit_lbl, LV_PART_MAIN);
+  const lv_font_t *big_font = display.fonts.media_title != nullptr
+      ? display.fonts.media_title
+      : lv_obj_get_style_text_font(slot.sensor_lbl, LV_PART_MAIN);
   const uint32_t accent = palette.has_on ? palette.on_val : 0;
   register_agenda_card(slot.btn, title_font, small_font, big_font, accent,
                        config.entity, config.label);
