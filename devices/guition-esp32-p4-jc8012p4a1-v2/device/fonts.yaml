@@ -133,6 +133,13 @@ font:
   # Agenda date-column day number (digits only)
   - file: "gfonts://Roboto@Light"
     id: font_agenda_day
-    size: 32
+    size: 28
     bpp: 4
     glyphs: "0123456789"
+
+  # Agenda date-column weekday/month (uppercase only)
+  - file: "gfonts://Roboto"
+    id: font_agenda_date_small
+    size: 14
+    bpp: 4
+    glyphs: "ABCDEFGHIJKLMNOPQRSTUVWXYZ"

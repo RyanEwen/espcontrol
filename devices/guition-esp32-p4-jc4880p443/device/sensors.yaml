@@ -49,6 +49,7 @@ script:
           cfg.agenda_day_font = id(font_agenda_day)->get_lv_font();
           cfg.agenda_title_font = id(font_agenda_title)->get_lv_font();
           cfg.agenda_secondary_font = id(font_agenda_secondary)->get_lv_font();
+          cfg.agenda_date_small_font = id(font_agenda_date_small)->get_lv_font();
           cfg.sp_sensor_font = id(font_number_value)->get_lv_font();
           cfg.sp_large_sensor_font = id(font_number_value_large)->get_lv_font();
           cfg.large_sensor_unit_offset_percent = -10;
@@ -197,6 +198,7 @@ esphome:
             cfg.agenda_day_font = id(font_agenda_day)->get_lv_font();
             cfg.agenda_title_font = id(font_agenda_title)->get_lv_font();
             cfg.agenda_secondary_font = id(font_agenda_secondary)->get_lv_font();
+            cfg.agenda_date_small_font = id(font_agenda_date_small)->get_lv_font();
             cfg.sp_sensor_font = id(font_number_value)->get_lv_font();
             cfg.sp_large_sensor_font = id(font_number_value_large)->get_lv_font();
             cfg.large_sensor_unit_offset_percent = -10;
@@ -337,6 +339,7 @@ esphome:
             cfg.agenda_day_font = id(font_agenda_day)->get_lv_font();
             cfg.agenda_title_font = id(font_agenda_title)->get_lv_font();
             cfg.agenda_secondary_font = id(font_agenda_secondary)->get_lv_font();
+            cfg.agenda_date_small_font = id(font_agenda_date_small)->get_lv_font();
             cfg.sp_sensor_font = id(font_number_value)->get_lv_font();
             cfg.sp_large_sensor_font = id(font_number_value_large)->get_lv_font();
             cfg.large_sensor_unit_offset_percent = -10;

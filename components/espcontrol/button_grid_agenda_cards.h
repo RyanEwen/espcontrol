@@ -39,6 +39,7 @@ struct AgendaCardRef {
   lv_obj_t *list{nullptr};
   const lv_font_t *title_font{nullptr};
   const lv_font_t *small_font{nullptr};
+  const lv_font_t *date_small_font{nullptr};
   const lv_font_t *big_font{nullptr};
   uint32_t accent{0};
   std::string entities;
@@ -98,6 +99,7 @@ inline void agenda_card_render(AgendaCardRef &ref, const AgendaList &list,
 // its typography without new font roles.
 inline void register_agenda_card(lv_obj_t *btn, const lv_font_t *title_font,
                                  const lv_font_t *small_font,
+                                 const lv_font_t *date_small_font,
                                  const lv_font_t *big_font, uint32_t accent,
                                  const std::string &entities,
                                  const std::string &label) {
@@ -125,6 +127,7 @@ inline void register_agenda_card(lv_obj_t *btn, const lv_font_t *title_font,
   ref.list = list;
   ref.title_font = title_font;
   ref.small_font = small_font;
+  ref.date_small_font = date_small_font;
   ref.big_font = big_font;
   ref.accent = accent;
   ref.entities = entities;
@@ -155,18 +158,18 @@ inline lv_obj_t *agenda_row_label_(lv_obj_t *parent, const char *text,
 // anatomy: a day row holding a date column (weekday / big day number / MONTH)
 // beside a column of accent-tinted event boxes.
 
-// Height of the weekday/day/month date stack at its natural line heights;
-// event boxes for single-event days grow to match it.
-inline int agenda_date_stack_height_(const lv_font_t *small_font,
-                                     const lv_font_t *big_font) {
+// Natural height of a two-line (title + time) event box; the date column is
+// sized to this so day rows read at one uniform height with no stretching.
+inline int agenda_two_line_event_height_(const lv_font_t *title_font,
+                                         const lv_font_t *small_font) {
+  const int title_lh = title_font ? lv_font_get_line_height(title_font) : 16;
   const int small_lh = small_font ? lv_font_get_line_height(small_font) : 12;
-  const int big_lh = big_font ? lv_font_get_line_height(big_font) : 24;
-  return 2 * small_lh + big_lh;
+  return title_lh + small_lh + 20;  // pad_top 9 + pad_bottom 9 + pad_row 2
 }
 
 inline const char *agenda_weekday_name_(int32_t day_number) {
-  static const char *const kWeekdays[] = {"Sun", "Mon", "Tue", "Wed",
-                                          "Thu", "Fri", "Sat"};
+  static const char *const kWeekdays[] = {"SUN", "MON", "TUE", "WED",
+                                          "THU", "FRI", "SAT"};
   return kWeekdays[agenda_weekday(day_number)];
 }
 
@@ -175,7 +178,7 @@ inline const char *agenda_weekday_name_(int32_t day_number) {
 inline lv_obj_t *agenda_day_row_(lv_obj_t *parent, int32_t day_number,
                                  int date_col_w, const lv_font_t *small_font,
                                  const lv_font_t *big_font,
-                                 int *date_col_height = nullptr) {
+                                 int date_col_min_h = 0) {
   static const char *const kMonths[] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN",
                                         "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
 
@@ -201,8 +204,12 @@ inline lv_obj_t *agenda_day_row_(lv_obj_t *parent, int32_t day_number,
   lv_obj_set_style_pad_row(date_col, 0, 0);
   lv_obj_clear_flag(date_col, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_flex_flow(date_col, LV_FLEX_FLOW_COLUMN);
-  lv_obj_set_flex_align(date_col, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER,
+  // Center the stack within the two-line event height so the date and a
+  // normal event box read as one row of equal height.
+  lv_obj_set_flex_align(date_col, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER,
                         LV_FLEX_ALIGN_CENTER);
+  if (date_col_min_h > 0)
+    lv_obj_set_style_min_height(date_col, date_col_min_h, 0);
 
   char text[8];
   std::snprintf(text, sizeof(text), "%s", agenda_weekday_name_(day_number));
@@ -227,14 +234,6 @@ inline lv_obj_t *agenda_day_row_(lv_obj_t *parent, int32_t day_number,
   lv_obj_set_style_pad_row(events_col, 4, 0);
   lv_obj_clear_flag(events_col, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_flex_flow(events_col, LV_FLEX_FLOW_COLUMN);
-  if (date_col_height != nullptr) {
-    // Measure the laid-out date stack so event boxes can match it exactly
-    // instead of trusting font arithmetic.
-    lv_obj_update_layout(date_col);
-    *date_col_height = lv_obj_get_height(date_col);
-    if (*date_col_height <= 0)
-      *date_col_height = agenda_date_stack_height_(small_font, big_font);
-  }
   return events_col;
 }
 
@@ -244,8 +243,7 @@ inline lv_obj_t *agenda_day_row_(lv_obj_t *parent, int32_t day_number,
 inline void agenda_event_box_(lv_obj_t *events_col, const AgendaEntry &entry,
                               int32_t today_number, bool use_12h,
                               uint32_t accent, const lv_font_t *title_font,
-                              const lv_font_t *small_font,
-                              int min_height = 0) {
+                              const lv_font_t *small_font) {
   const bool has_location = !entry.location.empty();
   const int title_h = title_font ? lv_font_get_line_height(title_font) : 16;
   const uint32_t color = agenda_source_color(entry.source, accent);
@@ -263,13 +261,6 @@ inline void agenda_event_box_(lv_obj_t *events_col, const AgendaEntry &entry,
   lv_obj_clear_flag(box, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_clear_flag(box, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_set_flex_flow(box, LV_FLEX_FLOW_COLUMN);
-  // A day's lone event box is stretched to the date stack's height (text
-  // vertically centered); days with several events keep natural heights.
-  if (min_height > 0) {
-    lv_obj_set_style_min_height(box, min_height, 0);
-    lv_obj_set_flex_align(box, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START,
-                          LV_FLEX_ALIGN_START);
-  }
 
   lv_obj_t *bar = lv_obj_create(box);
   lv_obj_set_size(bar, 3, lv_pct(100));
@@ -341,35 +332,29 @@ inline void agenda_card_render(AgendaCardRef &ref, const AgendaList &list,
   const int title_h = ref.title_font ? lv_font_get_line_height(ref.title_font) : 16;
   const int small_h = ref.small_font ? lv_font_get_line_height(ref.small_font) : 12;
   const int big_h = ref.big_font ? lv_font_get_line_height(ref.big_font) : 24;
+  const int two_line_h = agenda_two_line_event_height_(ref.title_font, ref.small_font);
   int date_col_w = big_h + big_h / 4;   // fits two digits of the day number
   if (date_col_w < 40) date_col_w = 40;
   int used = 0;
 
   const std::vector<AgendaEntry> &entries = list.entries();
   lv_obj_t *events_col = nullptr;
-  int date_stack_h = 0;
   for (std::size_t i = 0; i < entries.size(); i++) {
     const AgendaEntry &entry = entries[i];
     const bool has_location = !entry.location.empty();
-    const int event_h = title_h + small_h + (has_location ? small_h : 0) + 10;
-    const int day_min_h = small_h * 2 + big_h;
-    const int needed = list.starts_new_day(i)
-                           ? (event_h > day_min_h ? event_h : day_min_h) + 6
-                           : event_h;
+    const int event_h = two_line_h + (has_location ? small_h : 0);
+    const int needed = list.starts_new_day(i) ? event_h + 6 : event_h;
     if (used + needed > available && used > 0) break;
     used += needed;
 
     if (list.starts_new_day(i)) {
       events_col = agenda_day_row_(ref.list, entry.when.day_number, date_col_w,
-                                   ref.small_font, ref.big_font, &date_stack_h);
+                                   ref.date_small_font, ref.big_font,
+                                   two_line_h);
     }
     if (events_col == nullptr) continue;
-    const bool sole_event_of_day =
-        list.starts_new_day(i) &&
-        (i + 1 >= entries.size() || list.starts_new_day(i + 1));
     agenda_event_box_(events_col, entry, today_number, use_12h, ref.accent,
-                      ref.title_font, ref.small_font,
-                      sole_event_of_day ? date_stack_h : 0);
+                      ref.title_font, ref.small_font);
   }
 }
 
@@ -386,6 +371,7 @@ inline bool agenda_overlay_render(lv_obj_t *box, const AgendaList &list,
                                   AgendaOverlayStyle style, int32_t today_number,
                                   bool use_12h, const lv_font_t *title_font,
                                   const lv_font_t *small_font,
+                                  const lv_font_t *date_small_font,
                                   const lv_font_t *big_font) {
   if (box == nullptr) return false;
   lv_obj_clean(box);
@@ -393,6 +379,7 @@ inline bool agenda_overlay_render(lv_obj_t *box, const AgendaList &list,
   const std::vector<AgendaEntry> &entries = list.entries();
 
   const int big_h = big_font ? lv_font_get_line_height(big_font) : 24;
+  const int two_line_h = agenda_two_line_event_height_(title_font, small_font);
   int date_col_w = big_h + big_h / 4;
   if (date_col_w < 40) date_col_w = 40;
 
@@ -417,20 +404,15 @@ inline bool agenda_overlay_render(lv_obj_t *box, const AgendaList &list,
 
   int32_t prev_day = INT32_MIN;
   lv_obj_t *events_col = nullptr;
-  int date_stack_h = 0;
   for (std::size_t i = 0; i < picked.size(); i++) {
     const AgendaEntry *entry = picked[i];
     if (entry->when.day_number != prev_day || events_col == nullptr) {
       prev_day = entry->when.day_number;
       events_col = agenda_day_row_(box, entry->when.day_number, date_col_w,
-                                   small_font, big_font, &date_stack_h);
+                                   date_small_font, big_font, two_line_h);
     }
-    const bool sole_event_of_day =
-        (i + 1 >= picked.size() ||
-         picked[i + 1]->when.day_number != entry->when.day_number) &&
-        (i == 0 || picked[i - 1]->when.day_number != entry->when.day_number);
     agenda_event_box_(events_col, *entry, today_number, use_12h, 0, title_font,
-                      small_font, sole_event_of_day ? date_stack_h : 0);
+                      small_font);
   }
   return true;
 }

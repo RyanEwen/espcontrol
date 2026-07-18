@@ -53,9 +53,12 @@ inline bool agenda_driver_setup_visual(
       : (display.fonts.media_title != nullptr
              ? display.fonts.media_title
              : lv_obj_get_style_text_font(slot.sensor_lbl, LV_PART_MAIN));
+  const lv_font_t *date_small_font = display.fonts.agenda_date_small != nullptr
+      ? display.fonts.agenda_date_small
+      : small_font;
   const uint32_t accent = palette.has_on ? palette.on_val : 0;
-  register_agenda_card(slot.btn, title_font, small_font, big_font, accent,
-                       config.entity, config.label);
+  register_agenda_card(slot.btn, title_font, small_font, date_small_font,
+                       big_font, accent, config.entity, config.label);
   return true;
 }
 

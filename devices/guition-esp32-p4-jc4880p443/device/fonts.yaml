@@ -129,3 +129,10 @@ font:
     size: 32
     bpp: 4
     glyphs: "0123456789"
+
+  # Agenda date-column weekday/month (uppercase only)
+  - file: "gfonts://Roboto"
+    id: font_agenda_date_small
+    size: 16
+    bpp: 4
+    glyphs: "ABCDEFGHIJKLMNOPQRSTUVWXYZ"

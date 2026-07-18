@@ -555,6 +555,7 @@ script:
                 id(photos_agenda_box), list, style, render_today, id(clock_format_12h),
                 id(font_agenda_title)->get_lv_font(),
                 id(font_agenda_secondary)->get_lv_font(),
+                id(font_agenda_date_small)->get_lv_font(),
                 id(font_agenda_day)->get_lv_font());
             const bool show = has_content && id(screensaver_photos_show_agenda).state;
             ESP_LOGI("agenda", "Overlay render: content=%d switch=%d children=%u",
