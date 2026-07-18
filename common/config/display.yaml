@@ -179,6 +179,21 @@ switch:
       - script.execute: photos_apply_widgets
 
   - platform: template
+    name: "${entity_screen_saver_photos_show_date}"
+    internal: true
+    id: screensaver_photos_show_date
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+    entity_category: config
+    icon: "mdi:calendar-today"
+    web_server:
+      sorting_group_id: sg_screensaver
+    on_turn_on:
+      - script.execute: photos_apply_widgets
+    on_turn_off:
+      - script.execute: photos_apply_widgets
+
+  - platform: template
     name: "${entity_screen_saver_photos_show_weather}"
     internal: true
     id: screensaver_photos_show_weather
@@ -869,6 +884,24 @@ number:
     on_value:
       then:
         - script.execute: photos_apply_widgets
+
+  - platform: template
+    name: "${entity_screen_saver_photos_agenda_limit}"
+    internal: true
+    id: screensaver_photos_agenda_limit
+    entity_category: config
+    icon: "mdi:format-list-numbered"
+    optimistic: true
+    restore_value: true
+    initial_value: 5
+    min_value: 1
+    max_value: 10
+    step: 1
+    web_server:
+      sorting_group_id: sg_screensaver
+    on_value:
+      then:
+        - script.execute: photos_agenda_refresh
 
   - platform: template
     name: "${entity_screen_saver_daytime_clock_brightness}"

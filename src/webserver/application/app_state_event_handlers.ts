@@ -157,6 +157,11 @@ export function installAppStateEventHandlersModule(): GlobalDescriptors {
                 state.photosAgendaOpacity = Number.isFinite(n) ? n : 45;
                 syncInput(els.setPhotosAgendaOpacity, String(state.photosAgendaOpacity));
             },
+            "number-screen_saver__photos_agenda_limit": function (this: any, val?: any) {
+                var n: any = parseInt(val, 10);
+                state.photosAgendaLimit = Number.isFinite(n) && n >= 1 ? n : 5;
+                syncInput(els.setPhotosAgendaLimit, String(state.photosAgendaLimit));
+            },
             "text-screen_saver__photos_folder": function (this: any, val?: any) {
                 state.photosFolder = val || "";
                 syncInput(els.setPhotosFolder, state.photosFolder);
@@ -173,6 +178,10 @@ export function installAppStateEventHandlersModule(): GlobalDescriptors {
             "switch-screen_saver__photos_show_clock": function (this: any, val?: any, d?: any) {
                 state.photosShowDatetime = d.value === true || val === "ON";
                 if (els.setPhotosShowDatetime) els.setPhotosShowDatetime.checked = state.photosShowDatetime;
+            },
+            "switch-screen_saver__photos_show_date": function (this: any, val?: any, d?: any) {
+                state.photosShowDate = d.value === true || val === "ON";
+                if (els.setPhotosShowDate) els.setPhotosShowDate.checked = state.photosShowDate;
             },
             "switch-screen_saver__photos_show_weather": function (this: any, val?: any, d?: any) {
                 state.photosShowWeather = d.value === true || val === "ON";

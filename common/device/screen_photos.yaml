@@ -189,11 +189,12 @@ lvgl:
                 hidden: true
                 layout:
                   type: flex
-                  flex_flow: COLUMN
-                  flex_align_cross: start
-                  pad_row: 2
+                  flex_flow: ROW
+                  flex_align_cross: center
+                  pad_column: 14
                 widgets:
                   - obj:
+                      id: photos_time_wrap
                       width: SIZE_CONTENT
                       height: SIZE_CONTENT
                       bg_opa: 0%
@@ -217,7 +218,11 @@ lvgl:
                             text_font: font_text_title
                             text_color: 0xFFFFFF
                             text: ""
+                  # Compact date stack in the events' date-column format
+                  # (weekday / day / month), sitting beside the time at
+                  # roughly the same height.
                   - obj:
+                      id: photos_date_stack
                       width: SIZE_CONTENT
                       height: SIZE_CONTENT
                       bg_opa: 0%
@@ -225,22 +230,84 @@ lvgl:
                       pad_all: 0
                       scrollable: false
                       clickable: false
+                      layout:
+                        type: flex
+                        flex_flow: COLUMN
+                        flex_align_cross: center
+                        pad_row: 0
                       widgets:
-                        - label:
-                            id: photos_date_shadow
-                            x: 2
-                            y: 2
-                            text_font: font_text_body
-                            text_color: 0x000000
-                            opa: 70%
-                            text: ""
-                        - label:
-                            id: photos_date_label
-                            x: 0
-                            y: 0
-                            text_font: font_text_body
-                            text_color: 0xFFFFFF
-                            text: ""
+                        - obj:
+                            width: SIZE_CONTENT
+                            height: SIZE_CONTENT
+                            bg_opa: 0%
+                            border_width: 0
+                            pad_all: 0
+                            scrollable: false
+                            clickable: false
+                            widgets:
+                              - label:
+                                  id: photos_date_weekday_shadow
+                                  x: 1
+                                  y: 1
+                                  text_font: font_agenda_date_small
+                                  text_color: 0x000000
+                                  opa: 70%
+                                  text: ""
+                              - label:
+                                  id: photos_date_weekday_label
+                                  x: 0
+                                  y: 0
+                                  text_font: font_agenda_date_small
+                                  text_color: 0xFFFFFF
+                                  text: ""
+                        - obj:
+                            width: SIZE_CONTENT
+                            height: SIZE_CONTENT
+                            bg_opa: 0%
+                            border_width: 0
+                            pad_all: 0
+                            scrollable: false
+                            clickable: false
+                            widgets:
+                              - label:
+                                  id: photos_date_day_shadow
+                                  x: 1
+                                  y: 1
+                                  text_font: font_agenda_secondary
+                                  text_color: 0x000000
+                                  opa: 70%
+                                  text: ""
+                              - label:
+                                  id: photos_date_day_label
+                                  x: 0
+                                  y: 0
+                                  text_font: font_agenda_secondary
+                                  text_color: 0xFFFFFF
+                                  text: ""
+                        - obj:
+                            width: SIZE_CONTENT
+                            height: SIZE_CONTENT
+                            bg_opa: 0%
+                            border_width: 0
+                            pad_all: 0
+                            scrollable: false
+                            clickable: false
+                            widgets:
+                              - label:
+                                  id: photos_date_month_shadow
+                                  x: 1
+                                  y: 1
+                                  text_font: font_agenda_date_small
+                                  text_color: 0x000000
+                                  opa: 70%
+                                  text: ""
+                              - label:
+                                  id: photos_date_month_label
+                                  x: 0
+                                  y: 0
+                                  text_font: font_agenda_date_small
+                                  text_color: 0xFFFFFF
+                                  text: ""
             # Weather icon beside the temperature, bottom right.
             - obj:
                 id: photos_weather_box
@@ -497,7 +564,13 @@ script:
     mode: restart
     then:
       - lambda: |-
-          const bool show_datetime = id(screensaver_photos_show_datetime).state;
+          const bool show_time = id(screensaver_photos_show_datetime).state;
+          const bool show_date = id(screensaver_photos_show_date).state;
+          const bool show_datetime = show_time || show_date;
+          if (show_time) lv_obj_clear_flag(id(photos_time_wrap), LV_OBJ_FLAG_HIDDEN);
+          else lv_obj_add_flag(id(photos_time_wrap), LV_OBJ_FLAG_HIDDEN);
+          if (show_date) lv_obj_clear_flag(id(photos_date_stack), LV_OBJ_FLAG_HIDDEN);
+          else lv_obj_add_flag(id(photos_date_stack), LV_OBJ_FLAG_HIDDEN);
           const bool show_weather = id(screensaver_photos_show_weather).state &&
                                     !id(screensaver_photos_weather_entity).state.empty();
           ESP_LOGI("agenda", "apply_widgets: datetime=%d weather=%d agenda_sw=%d cals='%s'",
@@ -556,7 +629,8 @@ script:
                 id(font_agenda_title)->get_lv_font(),
                 id(font_agenda_secondary)->get_lv_font(),
                 id(font_agenda_date_small)->get_lv_font(),
-                id(font_agenda_day)->get_lv_font());
+                id(font_agenda_day)->get_lv_font(),
+                (int) id(screensaver_photos_agenda_limit).state);
             const bool show = has_content && id(screensaver_photos_show_agenda).state;
             ESP_LOGI("agenda", "Overlay render: content=%d switch=%d children=%u",
                      (int) has_content, (int) id(screensaver_photos_show_agenda).state,
@@ -588,7 +662,8 @@ script:
     mode: restart
     then:
       - lambda: |-
-          if (!id(screensaver_photos_show_datetime).state) return;
+          if (!id(screensaver_photos_show_datetime).state &&
+              !id(screensaver_photos_show_date).state) return;
           auto time = panel_time_or_fallback(id(panel_time).now(), id(homeassistant_time).now());
           if (!time.is_valid()) return;
           char buf[8];
@@ -596,19 +671,22 @@ script:
                                            id(clock_format_12h));
           lv_label_set_text(id(photos_datetime_label), buf);
           lv_label_set_text(id(photos_datetime_shadow), buf);
-          char date_buf[24];
           static const char *const kWeekdays[] = {
-            "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+            "SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
           static const char *const kMonths[] = {
-            "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+            "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+            "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
           const int wd = time.day_of_week >= 1 && time.day_of_week <= 7
                              ? time.day_of_week - 1 : 0;
           const int mo = time.month >= 1 && time.month <= 12 ? time.month - 1 : 0;
-          snprintf(date_buf, sizeof(date_buf), "%s %d %s", kWeekdays[wd],
-                   time.day_of_month, kMonths[mo]);
-          lv_label_set_text(id(photos_date_label), date_buf);
-          lv_label_set_text(id(photos_date_shadow), date_buf);
+          char day_buf[4];
+          snprintf(day_buf, sizeof(day_buf), "%d", time.day_of_month);
+          lv_label_set_text(id(photos_date_weekday_label), kWeekdays[wd]);
+          lv_label_set_text(id(photos_date_weekday_shadow), kWeekdays[wd]);
+          lv_label_set_text(id(photos_date_day_label), day_buf);
+          lv_label_set_text(id(photos_date_day_shadow), day_buf);
+          lv_label_set_text(id(photos_date_month_label), kMonths[mo]);
+          lv_label_set_text(id(photos_date_month_shadow), kMonths[mo]);
           // The weather icon text is written by the shared weather subscription,
           // which doesn't know about the shadow copy; mirror it here.
           const char *icon_text = lv_label_get_text(id(photos_weather_icon));

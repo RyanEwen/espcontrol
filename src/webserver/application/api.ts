@@ -156,6 +156,12 @@ export function installApiModule(): GlobalDescriptors {
     function postScreensaverPhotosAgendaOpacity(this: any, value?: any) {
         postNumberWithObjectIds(entityName("screen_saver_photos_agenda_opacity"), entityObjectIds("screen_saver_photos_agenda_opacity"), value, PHOTOS_UNAVAILABLE);
     }
+    function postScreensaverPhotosAgendaLimit(this: any, value?: any) {
+        postNumberWithObjectIds(entityName("screen_saver_photos_agenda_limit"), entityObjectIds("screen_saver_photos_agenda_limit"), value, PHOTOS_UNAVAILABLE);
+    }
+    function postScreensaverPhotosShowDate(this: any, on?: any) {
+        postSwitchWithObjectIds(entityName("screen_saver_photos_show_date"), entityObjectIds("screen_saver_photos_show_date"), on, PHOTOS_UNAVAILABLE);
+    }
     function postHomeScreenTimeout(this: any, value?: any) {
         postNumberWithObjectIds(entityName("home_screen_timeout"), entityObjectIds("home_screen_timeout"), value);
     }
@@ -238,6 +244,8 @@ export function installApiModule(): GlobalDescriptors {
         "postScreensaverPhotosInterval": staticGlobal(postScreensaverPhotosInterval),
         "postScreensaverPhotosShuffle": staticGlobal(postScreensaverPhotosShuffle),
         "postScreensaverPhotosShowDatetime": staticGlobal(postScreensaverPhotosShowDatetime),
+        "postScreensaverPhotosShowDate": staticGlobal(postScreensaverPhotosShowDate),
+        "postScreensaverPhotosAgendaLimit": staticGlobal(postScreensaverPhotosAgendaLimit),
         "postScreensaverPhotosShowWeather": staticGlobal(postScreensaverPhotosShowWeather),
         "postScreensaverPhotosWeatherEntity": staticGlobal(postScreensaverPhotosWeatherEntity),
         "postHomeScreenTimeout": staticGlobal(postHomeScreenTimeout),

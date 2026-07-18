@@ -871,6 +871,8 @@ declare global {
   var postScreensaverPhotosInterval: any;
   var postScreensaverPhotosShuffle: any;
   var postScreensaverPhotosShowDatetime: any;
+  var postScreensaverPhotosShowDate: any;
+  var postScreensaverPhotosAgendaLimit: any;
   var postScreensaverPhotosShowWeather: any;
   var postScreensaverPhotosWeatherEntity: any;
   var postScreensaverMode: any;

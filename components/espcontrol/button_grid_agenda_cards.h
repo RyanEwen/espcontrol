@@ -167,6 +167,21 @@ inline int agenda_two_line_event_height_(const lv_font_t *title_font,
   return title_lh + small_lh + 20;  // pad_top 9 + pad_bottom 9 + pad_row 2
 }
 
+// Monday-start week anchor for the day, used to draw week separators.
+inline int32_t agenda_week_start_(int32_t day_number) {
+  return day_number - static_cast<int32_t>((agenda_weekday(day_number) + 6) % 7);
+}
+
+inline void agenda_week_separator_(lv_obj_t *parent) {
+  lv_obj_t *line = lv_obj_create(parent);
+  lv_obj_set_size(line, lv_pct(100), 1);
+  lv_obj_set_style_bg_color(line, lv_color_hex(0x4FC3F7), 0);
+  lv_obj_set_style_bg_opa(line, LV_OPA_40, 0);
+  lv_obj_set_style_border_width(line, 0, 0);
+  lv_obj_set_style_radius(line, 0, 0);
+  lv_obj_clear_flag(line, LV_OBJ_FLAG_SCROLLABLE);
+}
+
 inline const char *agenda_weekday_name_(int32_t day_number) {
   static const char *const kWeekdays[] = {"SUN", "MON", "TUE", "WED",
                                           "THU", "FRI", "SAT"};
@@ -178,7 +193,8 @@ inline const char *agenda_weekday_name_(int32_t day_number) {
 inline lv_obj_t *agenda_day_row_(lv_obj_t *parent, int32_t day_number,
                                  int date_col_w, const lv_font_t *small_font,
                                  const lv_font_t *big_font,
-                                 int date_col_min_h = 0) {
+                                 int date_col_min_h = 0,
+                                 bool is_today = false) {
   static const char *const kMonths[] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN",
                                         "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
 
@@ -210,6 +226,17 @@ inline lv_obj_t *agenda_day_row_(lv_obj_t *parent, int32_t day_number,
                         LV_FLEX_ALIGN_CENTER);
   if (date_col_min_h > 0)
     lv_obj_set_style_min_height(date_col, date_col_min_h, 0);
+  if (is_today) {
+    // Blue dot beside the day number, like the reference's today marker.
+    lv_obj_t *dot = lv_obj_create(date_col);
+    lv_obj_set_size(dot, 6, 6);
+    lv_obj_add_flag(dot, LV_OBJ_FLAG_IGNORE_LAYOUT);
+    lv_obj_align(dot, LV_ALIGN_LEFT_MID, 0, 0);
+    lv_obj_set_style_radius(dot, LV_RADIUS_CIRCLE, 0);
+    lv_obj_set_style_bg_color(dot, lv_color_hex(0x4FC3F7), 0);
+    lv_obj_set_style_bg_opa(dot, LV_OPA_COVER, 0);
+    lv_obj_set_style_border_width(dot, 0, 0);
+  }
 
   char text[8];
   std::snprintf(text, sizeof(text), "%s", agenda_weekday_name_(day_number));
@@ -342,15 +369,22 @@ inline void agenda_card_render(AgendaCardRef &ref, const AgendaList &list,
   for (std::size_t i = 0; i < entries.size(); i++) {
     const AgendaEntry &entry = entries[i];
     const bool has_location = !entry.location.empty();
+    const bool new_day = list.starts_new_day(i);
+    const bool new_week =
+        new_day && events_col != nullptr &&
+        agenda_week_start_(entry.when.day_number) !=
+            agenda_week_start_(entries[i - 1].when.day_number);
     const int event_h = two_line_h + (has_location ? small_h : 0);
-    const int needed = list.starts_new_day(i) ? event_h + 6 : event_h;
+    const int needed = (new_day ? event_h + 6 : event_h) + (new_week ? 11 : 0);
     if (used + needed > available && used > 0) break;
     used += needed;
 
-    if (list.starts_new_day(i)) {
+    if (new_day) {
+      if (new_week) agenda_week_separator_(ref.list);
       events_col = agenda_day_row_(ref.list, entry.when.day_number, date_col_w,
                                    ref.date_small_font, ref.big_font,
-                                   two_line_h);
+                                   two_line_h,
+                                   entry.when.day_number == today_number);
     }
     if (events_col == nullptr) continue;
     agenda_event_box_(events_col, entry, today_number, use_12h, ref.accent,
@@ -372,7 +406,8 @@ inline bool agenda_overlay_render(lv_obj_t *box, const AgendaList &list,
                                   bool use_12h, const lv_font_t *title_font,
                                   const lv_font_t *small_font,
                                   const lv_font_t *date_small_font,
-                                  const lv_font_t *big_font) {
+                                  const lv_font_t *big_font,
+                                  int max_events = 5) {
   if (box == nullptr) return false;
   lv_obj_clean(box);
   if (list.empty()) return false;
@@ -383,6 +418,7 @@ inline bool agenda_overlay_render(lv_obj_t *box, const AgendaList &list,
   int date_col_w = big_h + big_h / 4;
   if (date_col_w < 40) date_col_w = 40;
 
+  if (max_events < 1) max_events = 1;
   std::vector<const AgendaEntry *> picked;
   if (style == AgendaOverlayStyle::NEXT_EVENT) {
     picked.push_back(&entries.front());
@@ -390,7 +426,7 @@ inline bool agenda_overlay_render(lv_obj_t *box, const AgendaList &list,
     for (const AgendaEntry &entry : entries) {
       if (entry.when.day_number != today_number) continue;
       picked.push_back(&entry);
-      if (picked.size() >= 4) break;
+      if (static_cast<int>(picked.size()) >= max_events) break;
     }
     // Nothing left today: fall back to the next event so the overlay stays
     // useful instead of disappearing.
@@ -398,7 +434,7 @@ inline bool agenda_overlay_render(lv_obj_t *box, const AgendaList &list,
   } else {
     for (const AgendaEntry &entry : entries) {
       picked.push_back(&entry);
-      if (picked.size() >= 5) break;
+      if (static_cast<int>(picked.size()) >= max_events) break;
     }
   }
 
@@ -407,9 +443,15 @@ inline bool agenda_overlay_render(lv_obj_t *box, const AgendaList &list,
   for (std::size_t i = 0; i < picked.size(); i++) {
     const AgendaEntry *entry = picked[i];
     if (entry->when.day_number != prev_day || events_col == nullptr) {
+      if (events_col != nullptr &&
+          agenda_week_start_(entry->when.day_number) !=
+              agenda_week_start_(prev_day)) {
+        agenda_week_separator_(box);
+      }
       prev_day = entry->when.day_number;
       events_col = agenda_day_row_(box, entry->when.day_number, date_col_w,
-                                   date_small_font, big_font, two_line_h);
+                                   date_small_font, big_font, two_line_h,
+                                   entry->when.day_number == today_number);
     }
     agenda_event_box_(events_col, *entry, today_number, use_12h, 0, title_font,
                       small_font);

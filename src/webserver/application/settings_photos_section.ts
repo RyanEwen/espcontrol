@@ -64,13 +64,21 @@ export function installSettingsPhotosSectionModule(): GlobalDescriptors {
         });
         els.setPhotosShuffle = shuffleToggle.input;
 
-        var datetimeToggle: any = toggleRow("Show Date and Time", "sp-set-ss-photos-datetime", state.photosShowDatetime);
+        var datetimeToggle: any = toggleRow("Show Time", "sp-set-ss-photos-datetime", state.photosShowDatetime);
         body.appendChild(datetimeToggle.row);
         datetimeToggle.input.addEventListener("change", function (this: any) {
             state.photosShowDatetime = this.checked;
             postScreensaverPhotosShowDatetime(state.photosShowDatetime);
         });
         els.setPhotosShowDatetime = datetimeToggle.input;
+
+        var dateToggle: any = toggleRow("Show Date", "sp-set-ss-photos-date", state.photosShowDate);
+        body.appendChild(dateToggle.row);
+        dateToggle.input.addEventListener("change", function (this: any) {
+            state.photosShowDate = this.checked;
+            postScreensaverPhotosShowDate(state.photosShowDate);
+        });
+        els.setPhotosShowDate = dateToggle.input;
 
         var weatherToggle: any = toggleRow("Show Weather", "sp-set-ss-photos-weather", state.photosShowWeather);
         body.appendChild(weatherToggle.row);
@@ -169,11 +177,35 @@ export function installSettingsPhotosSectionModule(): GlobalDescriptors {
         });
         els.setPhotosAgendaOpacity = agendaOpacityInp;
 
+        var agendaLimitField: any = document.createElement("div");
+        agendaLimitField.className = "sp-field sp-cond-field";
+        agendaLimitField.appendChild(fieldLabel("Agenda Events (Today/Upcoming)", "sp-set-ss-photos-agenda-limit"));
+        var agendaLimitInp: any = document.createElement("input");
+        agendaLimitInp.type = "number";
+        agendaLimitInp.min = "1";
+        agendaLimitInp.max = "10";
+        agendaLimitInp.step = "1";
+        agendaLimitInp.className = "sp-input";
+        agendaLimitInp.id = "sp-set-ss-photos-agenda-limit";
+        agendaLimitInp.value = String(state.photosAgendaLimit != null ? state.photosAgendaLimit : 5);
+        agendaLimitField.appendChild(agendaLimitInp);
+        body.appendChild(agendaLimitField);
+        agendaLimitInp.addEventListener("change", function (this: any) {
+            var n: any = parseInt(this.value, 10);
+            if (!Number.isFinite(n) || n < 1) n = 5;
+            if (n > 10) n = 10;
+            state.photosAgendaLimit = n;
+            this.value = String(n);
+            postScreensaverPhotosAgendaLimit(n);
+        });
+        els.setPhotosAgendaLimit = agendaLimitInp;
+
         function syncPhotoAgendaFields(this: any) {
             var show: any = !!state.photosShowAgenda;
             agendaEntitiesField.classList.toggle("sp-visible", show);
             agendaStyleField.classList.toggle("sp-visible", show);
             agendaOpacityField.classList.toggle("sp-visible", show);
+            agendaLimitField.classList.toggle("sp-visible", show);
         }
         syncPhotoAgendaFields();
         els.syncPhotoAgendaFields = syncPhotoAgendaFields;

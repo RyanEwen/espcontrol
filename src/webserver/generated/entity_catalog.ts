@@ -325,6 +325,15 @@ export const ENTITY_CATALOG = {
         "screensaver_photos_show_datetime"
       ]
     },
+    "screen_saver_photos_show_date": {
+      "domain": "switch",
+      "name": "Screen Saver: Photos Show Date",
+      "objectIds": [
+        "screen_saver__photos_show_date",
+        "screen_saver_photos_show_date",
+        "screensaver_photos_show_date"
+      ]
+    },
     "screen_saver_photos_show_weather": {
       "domain": "switch",
       "name": "Screen Saver: Photos Show Weather",
@@ -377,6 +386,15 @@ export const ENTITY_CATALOG = {
         "screen_saver__photos_agenda_opacity",
         "screen_saver_photos_agenda_opacity",
         "screensaver_photos_agenda_opacity"
+      ]
+    },
+    "screen_saver_photos_agenda_limit": {
+      "domain": "number",
+      "name": "Screen Saver: Photos Agenda Limit",
+      "objectIds": [
+        "screen_saver__photos_agenda_limit",
+        "screen_saver_photos_agenda_limit",
+        "screensaver_photos_agenda_limit"
       ]
     },
     "screensaver_timeout": {
@@ -717,12 +735,14 @@ export const ENTITY_CATALOG = {
       "screen_saver_photos_interval",
       "screen_saver_photos_shuffle",
       "screen_saver_photos_show_datetime",
+      "screen_saver_photos_show_date",
       "screen_saver_photos_show_weather",
       "screen_saver_photos_weather_entity",
       "screen_saver_photos_show_agenda",
       "screen_saver_photos_agenda_entities",
       "screen_saver_photos_agenda_style",
       "screen_saver_photos_agenda_opacity",
+      "screen_saver_photos_agenda_limit",
       "screensaver_timeout",
       "home_screen_timeout",
       "screen_saver_clock",

@@ -129,12 +129,14 @@ export interface AppState {
   photosInterval: number;
   photosShuffle: boolean;
   photosShowDatetime: boolean;
+  photosShowDate: boolean;
   photosShowWeather: boolean;
   photosWeatherEntity: string;
   photosShowAgenda: boolean;
   photosAgendaEntities: string;
   photosAgendaStyle: string;
   photosAgendaOpacity: number;
+  photosAgendaLimit: number;
   screensaverTimeout: number;
   screensaverTimeoutMin: number;
   screensaverTimeoutMax: number;
