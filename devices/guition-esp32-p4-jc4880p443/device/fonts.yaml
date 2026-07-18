@@ -106,7 +106,7 @@ font:
   # Agenda card/overlay event titles (medium weight, Calendar-Card-Pro-style)
   - file: "gfonts://Roboto@Medium"
     id: font_agenda_title
-    size: 29
+    size: 26
     bpp: 4
     glyphs: !include ../../../common/assets/text_glyphs.yaml
     extras:
