@@ -170,15 +170,27 @@ inline lv_obj_t *agenda_day_row_(lv_obj_t *parent, int32_t day_number,
   lv_obj_set_flex_align(date_col, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER,
                         LV_FLEX_ALIGN_CENTER);
 
+  // The date stack reads as one unit in the reference: everything centered,
+  // and each line pinned below its font's full line height to shed the
+  // leading (safe: weekday/day/month glyphs have no descenders).
+  const int small_lh = small_font ? lv_font_get_line_height(small_font) : 12;
+  const int big_lh = big_font ? lv_font_get_line_height(big_font) : 24;
   char text[8];
   std::snprintf(text, sizeof(text), "%s", agenda_weekday_name_(day_number));
-  agenda_row_label_(date_col, text, small_font, 0xFFFFFF, LV_OPA_60);
+  lv_obj_t *weekday = agenda_row_label_(date_col, text, small_font, 0xFFFFFF,
+                                        LV_OPA_60);
+  lv_obj_set_style_text_align(weekday, LV_TEXT_ALIGN_CENTER, 0);
+  lv_obj_set_height(weekday, small_lh - small_lh / 5);
   std::snprintf(text, sizeof(text), "%d", day);
   lv_obj_t *num = agenda_row_label_(date_col, text, big_font, 0xFFFFFF,
                                     LV_OPA_COVER);
   lv_obj_set_style_text_align(num, LV_TEXT_ALIGN_CENTER, 0);
+  lv_obj_set_height(num, big_lh - big_lh / 6);
   std::snprintf(text, sizeof(text), "%s", kMonths[(month - 1) % 12]);
-  agenda_row_label_(date_col, text, small_font, 0xFFFFFF, LV_OPA_60);
+  lv_obj_t *month_lbl = agenda_row_label_(date_col, text, small_font, 0xFFFFFF,
+                                          LV_OPA_60);
+  lv_obj_set_style_text_align(month_lbl, LV_TEXT_ALIGN_CENTER, 0);
+  lv_obj_set_height(month_lbl, small_lh - small_lh / 5);
 
   lv_obj_t *events_col = lv_obj_create(day_row);
   lv_obj_set_size(events_col, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
@@ -209,8 +221,10 @@ inline void agenda_event_box_(lv_obj_t *events_col, const AgendaEntry &entry,
   lv_obj_set_style_radius(box, 5, 0);
   lv_obj_set_style_border_width(box, 0, 0);
   lv_obj_set_style_pad_all(box, 6, 0);
+  lv_obj_set_style_pad_top(box, 9, 0);
+  lv_obj_set_style_pad_bottom(box, 9, 0);
   lv_obj_set_style_pad_left(box, 11, 0);
-  lv_obj_set_style_pad_row(box, 0, 0);
+  lv_obj_set_style_pad_row(box, 2, 0);
   lv_obj_clear_flag(box, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_clear_flag(box, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_set_flex_flow(box, LV_FLEX_FLOW_COLUMN);
