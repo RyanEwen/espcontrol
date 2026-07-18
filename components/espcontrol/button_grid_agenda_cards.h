@@ -174,7 +174,8 @@ inline const char *agenda_weekday_name_(int32_t day_number) {
 // event boxes for this day should be added to.
 inline lv_obj_t *agenda_day_row_(lv_obj_t *parent, int32_t day_number,
                                  int date_col_w, const lv_font_t *small_font,
-                                 const lv_font_t *big_font) {
+                                 const lv_font_t *big_font,
+                                 int *date_col_height = nullptr) {
   static const char *const kMonths[] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN",
                                         "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
 
@@ -234,6 +235,14 @@ inline lv_obj_t *agenda_day_row_(lv_obj_t *parent, int32_t day_number,
   lv_obj_set_style_pad_row(events_col, 4, 0);
   lv_obj_clear_flag(events_col, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_flex_flow(events_col, LV_FLEX_FLOW_COLUMN);
+  if (date_col_height != nullptr) {
+    // Measure the laid-out date stack so event boxes can match it exactly
+    // instead of trusting font arithmetic.
+    lv_obj_update_layout(date_col);
+    *date_col_height = lv_obj_get_height(date_col);
+    if (*date_col_height <= 0)
+      *date_col_height = agenda_date_stack_height_(small_font, big_font);
+  }
   return events_col;
 }
 
@@ -346,6 +355,7 @@ inline void agenda_card_render(AgendaCardRef &ref, const AgendaList &list,
 
   const std::vector<AgendaEntry> &entries = list.entries();
   lv_obj_t *events_col = nullptr;
+  int date_stack_h = 0;
   for (std::size_t i = 0; i < entries.size(); i++) {
     const AgendaEntry &entry = entries[i];
     const bool has_location = !entry.location.empty();
@@ -359,7 +369,7 @@ inline void agenda_card_render(AgendaCardRef &ref, const AgendaList &list,
 
     if (list.starts_new_day(i)) {
       events_col = agenda_day_row_(ref.list, entry.when.day_number, date_col_w,
-                                   ref.small_font, ref.big_font);
+                                   ref.small_font, ref.big_font, &date_stack_h);
     }
     if (events_col == nullptr) continue;
     const bool sole_event_of_day =
@@ -367,9 +377,7 @@ inline void agenda_card_render(AgendaCardRef &ref, const AgendaList &list,
         (i + 1 >= entries.size() || list.starts_new_day(i + 1));
     agenda_event_box_(events_col, entry, today_number, use_12h, ref.accent,
                       ref.title_font, ref.small_font,
-                      sole_event_of_day
-                          ? agenda_date_stack_height_(ref.small_font, ref.big_font)
-                          : 0);
+                      sole_event_of_day ? date_stack_h : 0);
   }
 }
 
@@ -417,22 +425,20 @@ inline bool agenda_overlay_render(lv_obj_t *box, const AgendaList &list,
 
   int32_t prev_day = INT32_MIN;
   lv_obj_t *events_col = nullptr;
+  int date_stack_h = 0;
   for (std::size_t i = 0; i < picked.size(); i++) {
     const AgendaEntry *entry = picked[i];
     if (entry->when.day_number != prev_day || events_col == nullptr) {
       prev_day = entry->when.day_number;
       events_col = agenda_day_row_(box, entry->when.day_number, date_col_w,
-                                   small_font, big_font);
+                                   small_font, big_font, &date_stack_h);
     }
     const bool sole_event_of_day =
         (i + 1 >= picked.size() ||
          picked[i + 1]->when.day_number != entry->when.day_number) &&
         (i == 0 || picked[i - 1]->when.day_number != entry->when.day_number);
     agenda_event_box_(events_col, *entry, today_number, use_12h, 0, title_font,
-                      small_font,
-                      sole_event_of_day
-                          ? agenda_date_stack_height_(small_font, big_font)
-                          : 0);
+                      small_font, sole_event_of_day ? date_stack_h : 0);
   }
   return true;
 }
