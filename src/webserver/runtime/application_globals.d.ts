@@ -42,6 +42,10 @@ declare global {
   var CARD_SIZE_EXTRA_WIDE: any;
   var CARD_SIZE_LARGE: any;
   var CARD_SIZE_MAX_TALL: any;
+  var CARD_SIZE_GIANT_TALL: any;
+  var CARD_SIZE_FULL_TALL: any;
+  var CARD_SIZE_GIANT_WIDE: any;
+  var CARD_SIZE_FULL_WIDE: any;
   var CARD_SIZE_MAX_WIDE: any;
   var CARD_SIZE_SINGLE: any;
   var CARD_SIZE_TALL: any;

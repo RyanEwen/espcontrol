@@ -84,6 +84,18 @@ constexpr int CARD_SIZE_MAX_WIDE_COL_SPAN = 3;
 constexpr char CARD_SIZE_MAX_TALL_TOKEN = 'v';
 constexpr int CARD_SIZE_MAX_TALL_ROW_SPAN = 3;
 constexpr int CARD_SIZE_MAX_TALL_COL_SPAN = 2;
+constexpr char CARD_SIZE_GIANT_TALL_TOKEN = 'g';
+constexpr int CARD_SIZE_GIANT_TALL_ROW_SPAN = 4;
+constexpr int CARD_SIZE_GIANT_TALL_COL_SPAN = 2;
+constexpr char CARD_SIZE_FULL_TALL_TOKEN = 'f';
+constexpr int CARD_SIZE_FULL_TALL_ROW_SPAN = 5;
+constexpr int CARD_SIZE_FULL_TALL_COL_SPAN = 2;
+constexpr char CARD_SIZE_GIANT_WIDE_TOKEN = 'z';
+constexpr int CARD_SIZE_GIANT_WIDE_ROW_SPAN = 2;
+constexpr int CARD_SIZE_GIANT_WIDE_COL_SPAN = 4;
+constexpr char CARD_SIZE_FULL_WIDE_TOKEN = 'e';
+constexpr int CARD_SIZE_FULL_WIDE_ROW_SPAN = 2;
+constexpr int CARD_SIZE_FULL_WIDE_COL_SPAN = 5;
 
 inline bool card_span_matches(int row_span, int col_span, int expected_rows, int expected_cols) {
   return row_span == expected_rows && col_span == expected_cols;
@@ -128,6 +140,18 @@ inline void grid_token_spans(char suffix, int &row_span, int &col_span) {
   } else if (suffix == CARD_SIZE_MAX_TALL_TOKEN) {
     row_span = CARD_SIZE_MAX_TALL_ROW_SPAN;
     col_span = CARD_SIZE_MAX_TALL_COL_SPAN;
+  } else if (suffix == CARD_SIZE_GIANT_TALL_TOKEN) {
+    row_span = CARD_SIZE_GIANT_TALL_ROW_SPAN;
+    col_span = CARD_SIZE_GIANT_TALL_COL_SPAN;
+  } else if (suffix == CARD_SIZE_FULL_TALL_TOKEN) {
+    row_span = CARD_SIZE_FULL_TALL_ROW_SPAN;
+    col_span = CARD_SIZE_FULL_TALL_COL_SPAN;
+  } else if (suffix == CARD_SIZE_GIANT_WIDE_TOKEN) {
+    row_span = CARD_SIZE_GIANT_WIDE_ROW_SPAN;
+    col_span = CARD_SIZE_GIANT_WIDE_COL_SPAN;
+  } else if (suffix == CARD_SIZE_FULL_WIDE_TOKEN) {
+    row_span = CARD_SIZE_FULL_WIDE_ROW_SPAN;
+    col_span = CARD_SIZE_FULL_WIDE_COL_SPAN;
   }
 }
 
@@ -135,7 +159,9 @@ inline bool grid_token_has_span_suffix(char suffix) {
   return suffix == CARD_SIZE_TALL_TOKEN || suffix == CARD_SIZE_WIDE_TOKEN ||
     suffix == CARD_SIZE_LARGE_TOKEN || suffix == CARD_SIZE_EXTRA_TALL_TOKEN ||
     suffix == CARD_SIZE_EXTRA_WIDE_TOKEN || suffix == CARD_SIZE_EXTRA_LARGE_TOKEN ||
-    suffix == CARD_SIZE_MAX_WIDE_TOKEN || suffix == CARD_SIZE_MAX_TALL_TOKEN;
+    suffix == CARD_SIZE_MAX_WIDE_TOKEN || suffix == CARD_SIZE_MAX_TALL_TOKEN ||
+    suffix == CARD_SIZE_GIANT_TALL_TOKEN || suffix == CARD_SIZE_FULL_TALL_TOKEN ||
+    suffix == CARD_SIZE_GIANT_WIDE_TOKEN || suffix == CARD_SIZE_FULL_WIDE_TOKEN;
 }
 
 inline int parse_positive_int_span(const std::string &value, size_t start, size_t end) {

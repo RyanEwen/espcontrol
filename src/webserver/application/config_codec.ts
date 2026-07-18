@@ -44,7 +44,9 @@ export function installConfigCodecModule(): GlobalDescriptors {
     }
     function normalizeCardSizeForConfig(this: any, b?: any, size?: any) {
         size = size || CARD_SIZE_SINGLE;
-        if (size === CARD_SIZE_MAX_WIDE || size === CARD_SIZE_MAX_TALL)
+        if (size === CARD_SIZE_MAX_WIDE || size === CARD_SIZE_MAX_TALL ||
+            size === CARD_SIZE_GIANT_TALL || size === CARD_SIZE_FULL_TALL ||
+            size === CARD_SIZE_GIANT_WIDE || size === CARD_SIZE_FULL_WIDE)
             return cardSupportsMaxSize(b) ? size : CARD_SIZE_SINGLE;
         if (!cardRequiresSquareSize(b))
             return size;
