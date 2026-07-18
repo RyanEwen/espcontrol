@@ -349,26 +349,6 @@ esphome:
   on_boot:
     priority: 200
     then:
-      - lambda: |-
-          // Render the agenda into its label whenever a fetch completes.
-          id(photos_agenda_fetcher).set_on_ready([](const espcontrol::AgendaList &list) {
-            auto now = panel_time_or_fallback(id(panel_time).now(),
-                                              id(homeassistant_time).now());
-            int32_t today = now.is_valid()
-                ? espcontrol::agenda_days_from_civil(now.year, now.month, now.day_of_month)
-                : 0;
-            const std::string style_opt = id(screensaver_photos_agenda_style).current_option();
-            espcontrol::AgendaOverlayStyle style =
-                style_opt == "Today" ? espcontrol::AgendaOverlayStyle::TODAY
-                : style_opt == "Upcoming" ? espcontrol::AgendaOverlayStyle::UPCOMING
-                                          : espcontrol::AgendaOverlayStyle::NEXT_EVENT;
-            const bool has_content = espcontrol::agenda_overlay_render(
-                id(photos_agenda_box), list, style, today, id(clock_format_12h),
-                id(font_text_body)->get_lv_font(), id(font_text_small)->get_lv_font());
-            const bool show = has_content && id(screensaver_photos_show_agenda).state;
-            if (show) lv_obj_clear_flag(id(photos_agenda_box), LV_OBJ_FLAG_HIDDEN);
-            else lv_obj_add_flag(id(photos_agenda_box), LV_OBJ_FLAG_HIDDEN);
-          });
       - script.execute: ha_media_source_apply_connection
 
 script:
@@ -552,8 +532,36 @@ script:
           }
           auto now = panel_time_or_fallback(id(panel_time).now(),
                                             id(homeassistant_time).now());
-          ESP_LOGI("agenda", "Refresh requested (time_valid=%d)", (int) now.is_valid());
+          ESP_LOGI("agenda", "Refresh requested (time_valid=%d, on_ready=%d, box_hidden=%d)",
+                   (int) now.is_valid(),
+                   (int) id(photos_agenda_fetcher).has_on_ready(),
+                   (int) lv_obj_has_flag(id(photos_agenda_box), LV_OBJ_FLAG_HIDDEN));
           if (!now.is_valid()) return;
+          // Render the agenda into the overlay box whenever a fetch completes.
+          // Registered here, at the point of use, so a response can never
+          // arrive without a renderer attached.
+          id(photos_agenda_fetcher).set_on_ready([](const espcontrol::AgendaList &list) {
+            auto render_now = panel_time_or_fallback(id(panel_time).now(),
+                                                     id(homeassistant_time).now());
+            int32_t render_today = render_now.is_valid()
+                ? espcontrol::agenda_days_from_civil(render_now.year, render_now.month,
+                                                     render_now.day_of_month)
+                : 0;
+            const std::string style_opt = id(screensaver_photos_agenda_style).current_option();
+            espcontrol::AgendaOverlayStyle style =
+                style_opt == "Today" ? espcontrol::AgendaOverlayStyle::TODAY
+                : style_opt == "Upcoming" ? espcontrol::AgendaOverlayStyle::UPCOMING
+                                          : espcontrol::AgendaOverlayStyle::NEXT_EVENT;
+            const bool has_content = espcontrol::agenda_overlay_render(
+                id(photos_agenda_box), list, style, render_today, id(clock_format_12h),
+                id(font_text_body)->get_lv_font(), id(font_text_small)->get_lv_font());
+            const bool show = has_content && id(screensaver_photos_show_agenda).state;
+            ESP_LOGI("agenda", "Overlay render: content=%d switch=%d children=%u",
+                     (int) has_content, (int) id(screensaver_photos_show_agenda).state,
+                     (unsigned) lv_obj_get_child_count(id(photos_agenda_box)));
+            if (show) lv_obj_clear_flag(id(photos_agenda_box), LV_OBJ_FLAG_HIDDEN);
+            else lv_obj_add_flag(id(photos_agenda_box), LV_OBJ_FLAG_HIDDEN);
+          });
           id(photos_agenda_fetcher).set_entities(
               espcontrol::agenda_split_entities(
                   id(screensaver_photos_agenda_entities).state));
