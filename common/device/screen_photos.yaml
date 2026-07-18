@@ -403,13 +403,33 @@ lvgl:
                 border_width: 0
                 pad_all: 10
                 scrollable: false
-                clickable: false
+                clickable: true
                 hidden: true
                 layout:
                   type: flex
                   flex_flow: COLUMN
                   pad_row: 6
                 widgets: []
+                on_click:
+                  then:
+                    # Tap the agenda: open the dedicated two-week agenda view
+                    # right over the screensaver; closing it returns to the
+                    # photos.
+                    - lambda: |-
+                        auto now = panel_time_or_fallback(id(panel_time).now(),
+                                                          id(homeassistant_time).now());
+                        if (!now.is_valid()) return;
+                        espcontrol::agenda_view_open(
+                            id(screensaver_photos_agenda_entities).state,
+                            id(font_agenda_title)->get_lv_font(),
+                            id(font_agenda_secondary)->get_lv_font(),
+                            id(font_agenda_date_small)->get_lv_font(),
+                            id(font_agenda_day)->get_lv_font(),
+                            id(font_icon_main)->get_lv_font(),
+                            id(clock_format_12h),
+                            now.year, now.month, now.day_of_month,
+                            now.hour, now.minute, now.second,
+                            nullptr, 100);
 
 esphome:
   on_boot:
@@ -564,6 +584,7 @@ script:
     mode: restart
     then:
       - lambda: |-
+          espcontrol::agenda_overlay_box() = id(photos_agenda_box);
           const bool show_time = id(screensaver_photos_show_datetime).state;
           const bool show_date = id(screensaver_photos_show_date).state;
           const bool show_datetime = show_time || show_date;
@@ -630,7 +651,8 @@ script:
                 id(font_agenda_secondary)->get_lv_font(),
                 id(font_agenda_date_small)->get_lv_font(),
                 id(font_agenda_day)->get_lv_font(),
-                (int) id(screensaver_photos_agenda_limit).state);
+                (int) id(screensaver_photos_agenda_limit).state,
+                id(screensaver_photos_agenda_entities).state.c_str());
             const bool show = has_content && id(screensaver_photos_show_agenda).state;
             ESP_LOGI("agenda", "Overlay render: content=%d switch=%d children=%u",
                      (int) has_content, (int) id(screensaver_photos_show_agenda).state,
@@ -639,7 +661,7 @@ script:
             else lv_obj_add_flag(id(photos_agenda_box), LV_OBJ_FLAG_HIDDEN);
           });
           id(photos_agenda_fetcher).set_entities(
-              espcontrol::agenda_split_entities(
+              espcontrol::agenda_entity_ids(
                   id(screensaver_photos_agenda_entities).state));
           id(photos_agenda_fetcher).set_max_events(6);
           char start[24];
@@ -844,6 +866,9 @@ script:
       - lambda: |-
           if (!id(display_mode_controller).current_mode_is(
                 espcontrol::DisplayMode::PHOTOS)) return;
+          // The agenda view opens above the screensaver; raising the
+          // screensaver while it is up would cover it.
+          if (control_modal_active().overlay != nullptr) return;
           lv_obj_t *temperature_labels[] = { id(temperatures) };
           hide_clock_bar_top_layer_widgets(temperature_labels, 1,
                                            id(display_time),

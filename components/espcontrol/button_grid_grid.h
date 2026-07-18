@@ -207,6 +207,7 @@ inline void apply_wide_large_date_time_card_layout(const BtnSlot &s,
 #include "button_grid_sensor_driver.h"
 #include "button_grid_weather_driver.h"
 #include "button_grid_agenda_cards.h"
+#include "button_grid_agenda_view.h"
 #include "button_grid_agenda_driver.h"
 #include "button_grid_basic_action_driver.h"
 #include "button_grid_numeric_selectable_driver.h"

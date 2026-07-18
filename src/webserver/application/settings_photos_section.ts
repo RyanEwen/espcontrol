@@ -124,7 +124,7 @@ export function installSettingsPhotosSectionModule(): GlobalDescriptors {
         agendaEntitiesField.appendChild(agendaEntitiesInp);
         var agendaHelp: any = document.createElement("div");
         agendaHelp.className = "sp-help";
-        agendaHelp.textContent = "One or more calendar entities, separated by commas.";
+        agendaHelp.textContent = "One or more calendar entities, separated by commas. Add a color per calendar with :#RRGGBB, e.g. calendar.family:#66BB6A.";
         agendaEntitiesField.appendChild(agendaHelp);
         body.appendChild(agendaEntitiesField);
         bindTextPost(agendaEntitiesInp, entityName("screen_saver_photos_agenda_entities"), {

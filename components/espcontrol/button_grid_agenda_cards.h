@@ -16,6 +16,7 @@
 namespace espcontrol {
 
 inline constexpr int kMaxAgendaCards = 6;
+inline constexpr std::size_t kAgendaCardMaxEvents = 20;
 inline constexpr uint32_t kAgendaCardRefreshMs = 10 * 60 * 1000;
 inline constexpr uint32_t kAgendaAccentFallback = 0x4FC3F7;
 
@@ -35,12 +36,26 @@ inline uint32_t agenda_source_color(uint8_t source, uint32_t /*unused*/) {
                                          sizeof(kAgendaCalendarColors[0]))];
 }
 
+// Per-calendar color: an explicit "calendar.x:#RRGGBB" suffix in the card's
+// calendar list wins; otherwise the palette assigns by position.
+inline uint32_t agenda_source_color_from(const std::string &entities_csv,
+                                         uint8_t source) {
+  const std::vector<std::string> items = agenda_split_entities(entities_csv);
+  if (source < items.size()) {
+    const uint32_t configured = agenda_entity_color(items[source]);
+    if (configured != 0) return configured;
+  }
+  return agenda_source_color(source, 0);
+}
+
 struct AgendaCardRef {
   lv_obj_t *list{nullptr};
   const lv_font_t *title_font{nullptr};
   const lv_font_t *small_font{nullptr};
   const lv_font_t *date_small_font{nullptr};
   const lv_font_t *big_font{nullptr};
+  const lv_font_t *icon_font{nullptr};
+  int width_compensation_percent{100};
   uint32_t accent{0};
   std::string entities;
   std::string label;
@@ -91,6 +106,16 @@ inline bool &agenda_service_clock_seen() {
   return seen;
 }
 
+// Full civil time of the last service tick (5 s granularity), for features
+// that must build calendar.get_events windows outside the tick itself.
+struct AgendaServiceClock {
+  int year = 0, month = 1, day = 1, hour = 0, minute = 0, second = 0;
+};
+inline AgendaServiceClock &agenda_service_clock() {
+  static AgendaServiceClock clock;
+  return clock;
+}
+
 inline void agenda_card_render(AgendaCardRef &ref, const AgendaList &list,
                                int32_t today_number, bool use_12h);
 
@@ -100,7 +125,10 @@ inline void agenda_card_render(AgendaCardRef &ref, const AgendaList &list,
 inline void register_agenda_card(lv_obj_t *btn, const lv_font_t *title_font,
                                  const lv_font_t *small_font,
                                  const lv_font_t *date_small_font,
-                                 const lv_font_t *big_font, uint32_t accent,
+                                 const lv_font_t *big_font,
+                                 const lv_font_t *icon_font,
+                                 int width_compensation_percent,
+                                 uint32_t accent,
                                  const std::string &entities,
                                  const std::string &label) {
   int &count = agenda_card_count();
@@ -116,8 +144,13 @@ inline void register_agenda_card(lv_obj_t *btn, const lv_font_t *title_font,
   lv_obj_set_style_border_width(list, 0, 0);
   lv_obj_set_style_pad_all(list, 6, 0);
   lv_obj_set_style_pad_row(list, 10, 0);
-  lv_obj_clear_flag(list, LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_clear_flag(list, LV_OBJ_FLAG_CLICKABLE);
+  // Drag to scroll through the full fetched list; a plain tap bubbles to the
+  // card button, which opens the dedicated agenda view.
+  lv_obj_add_flag(list, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_scroll_dir(list, LV_DIR_VER);
+  lv_obj_set_scrollbar_mode(list, LV_SCROLLBAR_MODE_OFF);
+  lv_obj_add_flag(list, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_add_flag(list, LV_OBJ_FLAG_EVENT_BUBBLE);
   lv_obj_set_flex_flow(list, LV_FLEX_FLOW_COLUMN);
   lv_obj_set_flex_align(list, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START,
                         LV_FLEX_ALIGN_START);
@@ -129,6 +162,8 @@ inline void register_agenda_card(lv_obj_t *btn, const lv_font_t *title_font,
   ref.small_font = small_font;
   ref.date_small_font = date_small_font;
   ref.big_font = big_font;
+  ref.icon_font = icon_font;
+  ref.width_compensation_percent = width_compensation_percent;
   ref.accent = accent;
   ref.entities = entities;
   ref.label = label;
@@ -180,6 +215,7 @@ inline void agenda_week_separator_(lv_obj_t *parent) {
   lv_obj_set_style_border_width(line, 0, 0);
   lv_obj_set_style_radius(line, 0, 0);
   lv_obj_clear_flag(line, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_clear_flag(line, LV_OBJ_FLAG_CLICKABLE);
 }
 
 inline const char *agenda_weekday_name_(int32_t day_number) {
@@ -219,6 +255,7 @@ inline lv_obj_t *agenda_day_row_(lv_obj_t *parent, int32_t day_number,
   lv_obj_set_style_pad_all(date_col, 0, 0);
   lv_obj_set_style_pad_row(date_col, 0, 0);
   lv_obj_clear_flag(date_col, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_clear_flag(date_col, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_set_flex_flow(date_col, LV_FLEX_FLOW_COLUMN);
   // Center the stack within the two-line event height so the date and a
   // normal event box read as one row of equal height.
@@ -260,6 +297,7 @@ inline lv_obj_t *agenda_day_row_(lv_obj_t *parent, int32_t day_number,
   lv_obj_set_style_pad_all(events_col, 0, 0);
   lv_obj_set_style_pad_row(events_col, 4, 0);
   lv_obj_clear_flag(events_col, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_clear_flag(events_col, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_set_flex_flow(events_col, LV_FLEX_FLOW_COLUMN);
   return events_col;
 }
@@ -269,11 +307,10 @@ inline lv_obj_t *agenda_day_row_(lv_obj_t *parent, int32_t day_number,
 // beside it, the time range, and the location when present.
 inline void agenda_event_box_(lv_obj_t *events_col, const AgendaEntry &entry,
                               int32_t today_number, bool use_12h,
-                              uint32_t accent, const lv_font_t *title_font,
+                              uint32_t color, const lv_font_t *title_font,
                               const lv_font_t *small_font) {
   const bool has_location = !entry.location.empty();
   const int title_h = title_font ? lv_font_get_line_height(title_font) : 16;
-  const uint32_t color = agenda_source_color(entry.source, accent);
   lv_obj_t *box = lv_obj_create(events_col);
   lv_obj_set_size(box, lv_pct(100), LV_SIZE_CONTENT);
   lv_obj_set_style_bg_color(box, lv_color_hex(color), 0);
@@ -298,6 +335,7 @@ inline void agenda_event_box_(lv_obj_t *events_col, const AgendaEntry &entry,
   lv_obj_set_style_border_width(bar, 0, 0);
   lv_obj_set_style_radius(bar, 2, 0);
   lv_obj_clear_flag(bar, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_clear_flag(bar, LV_OBJ_FLAG_CLICKABLE);
 
   lv_obj_t *title_row = lv_obj_create(box);
   lv_obj_set_size(title_row, lv_pct(100), LV_SIZE_CONTENT);
@@ -306,6 +344,7 @@ inline void agenda_event_box_(lv_obj_t *events_col, const AgendaEntry &entry,
   lv_obj_set_style_pad_all(title_row, 0, 0);
   lv_obj_set_style_pad_column(title_row, 4, 0);
   lv_obj_clear_flag(title_row, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_clear_flag(title_row, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_set_flex_flow(title_row, LV_FLEX_FLOW_ROW);
   lv_obj_set_flex_align(title_row, LV_FLEX_ALIGN_SPACE_BETWEEN,
                         LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
@@ -354,40 +393,31 @@ inline void agenda_card_render(AgendaCardRef &ref, const AgendaList &list,
     return;
   }
 
-  lv_obj_update_layout(ref.list);
-  const int available = lv_obj_get_content_height(ref.list);
-  const int title_h = ref.title_font ? lv_font_get_line_height(ref.title_font) : 16;
-  const int small_h = ref.small_font ? lv_font_get_line_height(ref.small_font) : 12;
   const int big_h = ref.big_font ? lv_font_get_line_height(ref.big_font) : 24;
   const int two_line_h = agenda_two_line_event_height_(ref.title_font, ref.small_font);
   int date_col_w = big_h + big_h / 4;   // fits two digits of the day number
   if (date_col_w < 40) date_col_w = 40;
-  int used = 0;
 
   const std::vector<AgendaEntry> &entries = list.entries();
   lv_obj_t *events_col = nullptr;
   for (std::size_t i = 0; i < entries.size(); i++) {
     const AgendaEntry &entry = entries[i];
-    const bool has_location = !entry.location.empty();
     const bool new_day = list.starts_new_day(i);
     const bool new_week =
         new_day && events_col != nullptr &&
         agenda_week_start_(entry.when.day_number) !=
             agenda_week_start_(entries[i - 1].when.day_number);
-    const int event_h = two_line_h + (has_location ? small_h : 0);
-    const int needed = (new_day ? event_h + 6 : event_h) + (new_week ? 11 : 0);
-    if (used + needed > available && used > 0) break;
-    used += needed;
+    if (new_week) agenda_week_separator_(ref.list);
 
     if (new_day) {
-      if (new_week) agenda_week_separator_(ref.list);
       events_col = agenda_day_row_(ref.list, entry.when.day_number, date_col_w,
                                    ref.date_small_font, ref.big_font,
                                    two_line_h,
                                    entry.when.day_number == today_number);
     }
     if (events_col == nullptr) continue;
-    agenda_event_box_(events_col, entry, today_number, use_12h, ref.accent,
+    agenda_event_box_(events_col, entry, today_number, use_12h,
+                      agenda_source_color_from(ref.entities, entry.source),
                       ref.title_font, ref.small_font);
   }
 }
@@ -407,7 +437,8 @@ inline bool agenda_overlay_render(lv_obj_t *box, const AgendaList &list,
                                   const lv_font_t *small_font,
                                   const lv_font_t *date_small_font,
                                   const lv_font_t *big_font,
-                                  int max_events = 5) {
+                                  int max_events = 5,
+                                  const char *entities_csv = "") {
   if (box == nullptr) return false;
   lv_obj_clean(box);
   if (list.empty()) return false;
@@ -419,6 +450,7 @@ inline bool agenda_overlay_render(lv_obj_t *box, const AgendaList &list,
   if (date_col_w < 40) date_col_w = 40;
 
   if (max_events < 1) max_events = 1;
+  const std::string entities_text(entities_csv != nullptr ? entities_csv : "");
   std::vector<const AgendaEntry *> picked;
   if (style == AgendaOverlayStyle::NEXT_EVENT) {
     picked.push_back(&entries.front());
@@ -453,8 +485,9 @@ inline bool agenda_overlay_render(lv_obj_t *box, const AgendaList &list,
                                    date_small_font, big_font, two_line_h,
                                    entry->when.day_number == today_number);
     }
-    agenda_event_box_(events_col, *entry, today_number, use_12h, 0, title_font,
-                      small_font);
+    agenda_event_box_(events_col, *entry, today_number, use_12h,
+                      agenda_source_color_from(entities_text, entry->source),
+                      title_font, small_font);
   }
   return true;
 }
@@ -468,6 +501,7 @@ inline void agenda_cards_service(int year, int month, int day, int hour,
   agenda_service_today() = today;
   agenda_service_use_12h() = use_12h;
   agenda_service_clock_seen() = true;
+  agenda_service_clock() = AgendaServiceClock{year, month, day, hour, minute, second};
   for (int i = 0; i < agenda_card_count(); i++) {
     AgendaCardRef &ref = agenda_card_refs()[i];
     if (ref.entities.empty()) continue;
@@ -478,8 +512,8 @@ inline void agenda_cards_service(int year, int month, int day, int hour,
     ref.last_fetch_ms = now_ms;
 
     AgendaFetcher &fetcher = agenda_card_fetchers()[i];
-    fetcher.set_entities(agenda_split_entities(ref.entities));
-    fetcher.set_max_events(kAgendaMaxEvents);
+    fetcher.set_entities(agenda_entity_ids(ref.entities));
+    fetcher.set_max_events(kAgendaCardMaxEvents);
     const uint32_t generation = agenda_cards_generation();
     const int index = i;
     fetcher.set_on_ready([index, generation, today, use_12h](const AgendaList &list) {

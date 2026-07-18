@@ -227,7 +227,9 @@ export function installEntityStateModule(): GlobalDescriptors {
                 prefix = raw.slice(0, comma + 1);
                 raw = raw.slice(comma + 1);
                 chosen = prefix.split(",").map(function (this: any, part?: any) {
-                    return part.trim().toLowerCase();
+                    // Entries may carry a ":#RRGGBB" color suffix; dedup on
+                    // the bare entity id.
+                    return part.trim().toLowerCase().split(":#")[0];
                 }).filter(Boolean);
             }
         }

@@ -78,6 +78,40 @@ inline std::vector<std::string> agenda_split_entities(const std::string &csv) {
   return out;
 }
 
+// One entry of the calendar list: "calendar.family" optionally suffixed with a
+// display color as "calendar.family:#66BB6A". agenda_split_entities keeps the
+// raw items; these helpers separate the entity id from its color.
+inline std::string agenda_entity_id(const std::string &item) {
+  std::size_t hash = item.find(":#");
+  std::string id = hash == std::string::npos ? item : item.substr(0, hash);
+  while (!id.empty() && (id.back() == ' ' || id.back() == '\t')) id.pop_back();
+  return id;
+}
+
+// Returns the "#RRGGBB" color as 0xRRGGBB, or 0 when absent or malformed.
+inline uint32_t agenda_entity_color(const std::string &item) {
+  std::size_t hash = item.find(":#");
+  if (hash == std::string::npos) return 0;
+  const std::string hex = item.substr(hash + 2);
+  if (hex.size() != 6) return 0;
+  uint32_t value = 0;
+  for (char ch : hex) {
+    value <<= 4;
+    if (ch >= '0' && ch <= '9') value |= static_cast<uint32_t>(ch - '0');
+    else if (ch >= 'a' && ch <= 'f') value |= static_cast<uint32_t>(ch - 'a' + 10);
+    else if (ch >= 'A' && ch <= 'F') value |= static_cast<uint32_t>(ch - 'A' + 10);
+    else return 0;
+  }
+  return value;
+}
+
+inline std::vector<std::string> agenda_entity_ids(const std::string &csv) {
+  std::vector<std::string> out;
+  for (const std::string &item : agenda_split_entities(csv))
+    out.push_back(agenda_entity_id(item));
+  return out;
+}
+
 struct AgendaEventTime {
   int64_t sort_key{0};   // seconds for time-ordering the merged list
   int32_t day_number{0}; // days_from_civil of the local start date, for grouping

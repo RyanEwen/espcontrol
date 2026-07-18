@@ -379,7 +379,16 @@ touchscreen:
     on_touch:
       - script.execute: cover_art_pause_after_touch
       - script.wait: cover_art_pause_after_touch
-      - script.execute: screensaver_wake
+      # Touches on the screensaver's agenda overlay (or inside the agenda
+      # view above it) open/use the agenda view instead of waking.
+      - if:
+          condition:
+            lambda: |-
+              int32_t x = touch.x, y = touch.y;
+              id(main_lvgl).rotate_coordinates(x, y);
+              return !espcontrol::agenda_touch_blocks_wake(x, y);
+          then:
+            - script.execute: screensaver_wake
 
 # ---------------------------------------------------------------------------
 # Display (4" 480x480 MIPI RGB panel)

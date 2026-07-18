@@ -24,11 +24,18 @@ inline bool agenda_driver_setup_visual(
 
   // Near-black canvas like the Calendar Card Pro dark theme, so the tinted
   // event boxes carry the color; a configured sensor color still overrides.
+  const lv_color_t agenda_canvas =
+      lv_color_hex(palette.has_sensor_color ? palette.sensor_val : 0x101216);
   lv_obj_set_style_bg_color(
-    slot.btn,
-    lv_color_hex(palette.has_sensor_color ? palette.sensor_val : 0x101216),
+    slot.btn, agenda_canvas,
     static_cast<lv_style_selector_t>(LV_PART_MAIN) |
       static_cast<lv_style_selector_t>(LV_STATE_DEFAULT));
+  // Scrolling the list would otherwise flash the button's pressed color
+  // across the whole card; opening the agenda view is feedback enough.
+  lv_obj_set_style_bg_color(
+    slot.btn, agenda_canvas,
+    static_cast<lv_style_selector_t>(LV_PART_MAIN) |
+      static_cast<lv_style_selector_t>(LV_STATE_PRESSED));
   // The agenda draws its own event list over the whole tile; the standard
   // icon/sensor/name widgets stay hidden. Fonts are borrowed from the slot's
   // labels so device typography profiles apply unchanged: the name label's
@@ -58,14 +65,32 @@ inline bool agenda_driver_setup_visual(
       : small_font;
   const uint32_t accent = palette.has_on ? palette.on_val : 0;
   register_agenda_card(slot.btn, title_font, small_font, date_small_font,
-                       big_font, accent, config.entity, config.label);
+                       big_font, display.fonts.icon,
+                       display_main_width_percent(display), accent,
+                       config.entity, config.label);
   return true;
 }
 
 inline bool agenda_driver_attach_interaction(
     BtnSlot &slot, const ParsedCfg &, const Context &context) {
   if (!agenda_driver_matches(context)) return false;
-  lv_obj_clear_flag(slot.btn, LV_OBJ_FLAG_CLICKABLE);
+  // Tapping the card opens the dedicated two-week agenda view.
+  lv_obj_add_flag(slot.btn, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_add_event_cb(slot.btn, [](lv_event_t *e) {
+    lv_obj_t *btn = static_cast<lv_obj_t *>(lv_event_get_current_target(e));
+    if (!agenda_service_clock_seen()) return;
+    for (int i = 0; i < agenda_card_count(); i++) {
+      AgendaCardRef &ref = agenda_card_refs()[i];
+      if (ref.list == nullptr || lv_obj_get_parent(ref.list) != btn) continue;
+      const AgendaServiceClock &clock = agenda_service_clock();
+      agenda_view_open(ref.entities, ref.title_font, ref.small_font,
+                       ref.date_small_font, ref.big_font, ref.icon_font,
+                       agenda_service_use_12h(), clock.year, clock.month,
+                       clock.day, clock.hour, clock.minute, clock.second, btn,
+                       ref.width_compensation_percent);
+      return;
+    }
+  }, LV_EVENT_CLICKED, nullptr);
   return true;
 }
 

@@ -220,6 +220,18 @@ int main() {
   CHECK(ents[0] == "calendar.family" && ents[1] == "calendar.work");
   CHECK(agenda_split_entities("").empty());
   CHECK(agenda_split_entities("   ").empty());
+
+  CHECK(agenda_entity_id("calendar.family:#66BB6A") == "calendar.family");
+  CHECK(agenda_entity_id("calendar.family") == "calendar.family");
+  CHECK(agenda_entity_color("calendar.family:#66BB6A") == 0x66BB6Au);
+  CHECK(agenda_entity_color("calendar.family:#66bb6a") == 0x66BB6Au);
+  CHECK(agenda_entity_color("calendar.family") == 0u);
+  CHECK(agenda_entity_color("calendar.family:#xyzzy1") == 0u);
+  CHECK(agenda_entity_color("calendar.family:#fff") == 0u);
+  auto colored = agenda_entity_ids(" calendar.a:#FF0000 , calendar.b ");
+  CHECK(colored.size() == 2);
+  CHECK(colored[0] == "calendar.a");
+  CHECK(colored[1] == "calendar.b");
   auto one = agenda_split_entities("calendar.solo");
   CHECK(one.size() == 1 && one[0] == "calendar.solo");
 
