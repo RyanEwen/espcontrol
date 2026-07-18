@@ -338,7 +338,7 @@ export function installStylesModule(): GlobalDescriptors {
         "background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}" +
         "select option{background:var(--surface);color:var(--text)}" +
         ".sp-entity-input-wrap{position:relative}" +
-        ".sp-entity-dropdown{display:none;position:absolute;left:0;right:0;top:100%;margin-top:6px;" +
+        ".sp-entity-dropdown{display:none;position:fixed;" +
         "background:var(--surface2);border:1px solid var(--border);border-radius:8px;max-height:220px;" +
         "overflow-y:auto;z-index:60;box-shadow:var(--shadow-3);padding:0}" +
         ".sp-entity-dropdown.sp-open{display:block}" +

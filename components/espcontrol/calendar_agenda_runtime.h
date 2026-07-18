@@ -35,6 +35,8 @@ class AgendaFetcher {
   void set_max_events(std::size_t max_events) { this->max_events_ = max_events; }
   void set_on_ready(AgendaReadyCallback callback) { this->on_ready_ = std::move(callback); }
   bool has_on_ready() const { return static_cast<bool>(this->on_ready_); }
+  // Last completed fetch's events; empty while a refresh is mid-flight.
+  const AgendaList &last_result() const { return this->accumulated_; }
 
   bool has_entities() const { return !this->entities_.empty(); }
 

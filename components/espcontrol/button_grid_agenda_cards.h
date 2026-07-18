@@ -74,6 +74,22 @@ inline void reset_agenda_cards() {
   agenda_cards_generation()++;
 }
 
+// The panel clock as of the last service tick, so a card registered during a
+// grid rebuild can render its fetcher's cached events immediately instead of
+// sitting blank until the next tick's fetch answers.
+inline int32_t &agenda_service_today() {
+  static int32_t today = 0;
+  return today;
+}
+inline bool &agenda_service_use_12h() {
+  static bool use_12h = false;
+  return use_12h;
+}
+inline bool &agenda_service_clock_seen() {
+  static bool seen = false;
+  return seen;
+}
+
 // Build the list container that fills the card and register it for updates.
 // Fonts are borrowed from the slot's own labels so every device profile keeps
 // its typography without new font roles.
@@ -110,6 +126,11 @@ inline void register_agenda_card(lv_obj_t *btn, const lv_font_t *title_font,
   ref.accent = accent;
   ref.entities = entities;
   ref.label = label;
+  const AgendaList &cached = agenda_card_fetchers()[count].last_result();
+  if (agenda_service_clock_seen() && !cached.empty()) {
+    agenda_card_render(ref, cached, agenda_service_today(),
+                       agenda_service_use_12h());
+  }
   count++;
 }
 
@@ -201,6 +222,11 @@ inline lv_obj_t *agenda_day_row_(lv_obj_t *parent, int32_t day_number,
   lv_obj_set_style_pad_row(events_col, 4, 0);
   lv_obj_clear_flag(events_col, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_flex_flow(events_col, LV_FLEX_FLOW_COLUMN);
+  // A day with one short event still fills the date stack's height; the
+  // boxes stretch (flex grow) and center their text to absorb the slack.
+  const int date_stack_h =
+      2 * (small_lh - small_lh / 5) + (big_lh - big_lh / 6);
+  lv_obj_set_style_min_height(events_col, date_stack_h, 0);
   return events_col;
 }
 
@@ -228,6 +254,9 @@ inline void agenda_event_box_(lv_obj_t *events_col, const AgendaEntry &entry,
   lv_obj_clear_flag(box, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_clear_flag(box, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_set_flex_flow(box, LV_FLEX_FLOW_COLUMN);
+  lv_obj_set_flex_grow(box, 1);
+  lv_obj_set_flex_align(box, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START,
+                        LV_FLEX_ALIGN_START);
 
   lv_obj_t *bar = lv_obj_create(box);
   lv_obj_set_size(bar, 3, lv_pct(100));
@@ -388,6 +417,9 @@ inline void agenda_cards_service(int year, int month, int day, int hour,
                                  int minute, int second, bool use_12h) {
   const uint32_t now_ms = esphome::millis();
   const int32_t today = agenda_days_from_civil(year, month, day);
+  agenda_service_today() = today;
+  agenda_service_use_12h() = use_12h;
+  agenda_service_clock_seen() = true;
   for (int i = 0; i < agenda_card_count(); i++) {
     AgendaCardRef &ref = agenda_card_refs()[i];
     if (ref.entities.empty()) continue;
