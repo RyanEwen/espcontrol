@@ -30,8 +30,7 @@ inline constexpr uint32_t kAgendaCalendarColors[] = {
     0x26C6DA,  // cyan
 };
 
-inline uint32_t agenda_source_color(uint8_t source, uint32_t first_override) {
-  if (source == 0 && first_override != 0) return first_override;
+inline uint32_t agenda_source_color(uint8_t source, uint32_t /*unused*/) {
   return kAgendaCalendarColors[source % (sizeof(kAgendaCalendarColors) /
                                          sizeof(kAgendaCalendarColors[0]))];
 }
@@ -95,7 +94,7 @@ inline void register_agenda_card(lv_obj_t *btn, const lv_font_t *title_font,
   lv_obj_set_style_bg_opa(list, LV_OPA_TRANSP, 0);
   lv_obj_set_style_border_width(list, 0, 0);
   lv_obj_set_style_pad_all(list, 6, 0);
-  lv_obj_set_style_pad_row(list, 4, 0);
+  lv_obj_set_style_pad_row(list, 10, 0);
   lv_obj_clear_flag(list, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_clear_flag(list, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_set_flex_flow(list, LV_FLEX_FLOW_COLUMN);
@@ -264,6 +263,9 @@ inline void agenda_card_render(AgendaCardRef &ref, const AgendaList &list,
       lv_obj_set_style_text_font(title, ref.title_font, 0);
     lv_obj_set_style_text_color(title, lv_color_hex(0xFFFFFF), 0);
     lv_obj_set_flex_grow(title, 1);
+    // A single ellipsized line, like the reference: LONG_DOT only truncates
+    // once the height is pinned to one text line.
+    lv_obj_set_height(title, title_h);
     lv_label_set_long_mode(title, LV_LABEL_LONG_DOT);
 
     char rel[16];
