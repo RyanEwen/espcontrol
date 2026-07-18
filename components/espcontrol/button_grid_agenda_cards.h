@@ -289,6 +289,106 @@ inline void agenda_card_render(AgendaCardRef &ref, const AgendaList &list,
   }
 }
 
+// ── Screensaver overlay rendering ────────────────────────────────────────
+// A compact agenda for the photo screensaver: a single next-event row, the
+// current day's events, or a short upcoming list. Rendered into a caller-owned
+// box whose background (and its opacity) the YAML controls. Returns false when
+// there is nothing to show so the caller can hide the box entirely.
+
+enum class AgendaOverlayStyle : uint8_t { NEXT_EVENT, TODAY, UPCOMING };
+
+inline void agenda_overlay_event_row_(lv_obj_t *parent, const AgendaEntry &entry,
+                                      int32_t today_number, bool use_12h,
+                                      bool include_day,
+                                      const lv_font_t *title_font,
+                                      const lv_font_t *small_font) {
+  lv_obj_t *row = lv_obj_create(parent);
+  lv_obj_set_size(row, lv_pct(100), LV_SIZE_CONTENT);
+  lv_obj_set_style_bg_opa(row, LV_OPA_TRANSP, 0);
+  lv_obj_set_style_border_width(row, 0, 0);
+  lv_obj_set_style_pad_all(row, 0, 0);
+  lv_obj_set_style_pad_left(row, 9, 0);
+  lv_obj_set_style_pad_row(row, 0, 0);
+  lv_obj_clear_flag(row, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_flex_flow(row, LV_FLEX_FLOW_COLUMN);
+
+  lv_obj_t *bar = lv_obj_create(row);
+  lv_obj_set_size(bar, 3, lv_pct(100));
+  lv_obj_add_flag(bar, LV_OBJ_FLAG_IGNORE_LAYOUT);
+  lv_obj_align(bar, LV_ALIGN_LEFT_MID, -9, 0);
+  lv_obj_set_style_bg_color(bar, lv_color_hex(agenda_source_color(entry.source, 0)), 0);
+  lv_obj_set_style_bg_opa(bar, LV_OPA_COVER, 0);
+  lv_obj_set_style_border_width(bar, 0, 0);
+  lv_obj_set_style_radius(bar, 2, 0);
+  lv_obj_clear_flag(bar, LV_OBJ_FLAG_SCROLLABLE);
+
+  const int title_h = title_font ? lv_font_get_line_height(title_font) : 16;
+  lv_obj_t *title = agenda_row_label_(row, entry.summary.c_str(), title_font,
+                                      0xFFFFFF, LV_OPA_COVER);
+  lv_obj_set_height(title, title_h);
+
+  char range[48];
+  agenda_format_range(range, sizeof(range), entry, use_12h, today_number);
+  char line[80];
+  if (include_day && entry.when.day_number != today_number) {
+    char heading[24];
+    agenda_format_day_heading(heading, sizeof(heading), entry.when.day_number,
+                              today_number);
+    std::snprintf(line, sizeof(line), "%s  %s", heading, range);
+  } else {
+    std::snprintf(line, sizeof(line), "%s", range);
+  }
+  agenda_row_label_(row, line, small_font, 0xFFFFFF, LV_OPA_70);
+}
+
+inline bool agenda_overlay_render(lv_obj_t *box, const AgendaList &list,
+                                  AgendaOverlayStyle style, int32_t today_number,
+                                  bool use_12h, const lv_font_t *title_font,
+                                  const lv_font_t *small_font) {
+  if (box == nullptr) return false;
+  lv_obj_clean(box);
+  if (list.empty()) return false;
+  const std::vector<AgendaEntry> &entries = list.entries();
+
+  if (style == AgendaOverlayStyle::NEXT_EVENT) {
+    agenda_overlay_event_row_(box, entries.front(), today_number, use_12h,
+                              true, title_font, small_font);
+    return true;
+  }
+
+  if (style == AgendaOverlayStyle::TODAY) {
+    int shown = 0;
+    for (const AgendaEntry &entry : entries) {
+      if (entry.when.day_number != today_number) continue;
+      agenda_overlay_event_row_(box, entry, today_number, use_12h, false,
+                                title_font, small_font);
+      if (++shown >= 4) break;
+    }
+    if (shown == 0) {
+      // Nothing left today: fall back to the next event so the overlay stays
+      // useful instead of disappearing.
+      agenda_overlay_event_row_(box, entries.front(), today_number, use_12h,
+                                true, title_font, small_font);
+    }
+    return true;
+  }
+
+  // UPCOMING: a short grouped list with lightweight day headings.
+  int shown = 0;
+  for (std::size_t i = 0; i < entries.size() && shown < 5; i++) {
+    if (list.starts_new_day(i)) {
+      char heading[24];
+      agenda_format_day_heading(heading, sizeof(heading),
+                                entries[i].when.day_number, today_number);
+      agenda_row_label_(box, heading, small_font, 0xFFFFFF, LV_OPA_50);
+    }
+    agenda_overlay_event_row_(box, entries[i], today_number, use_12h, false,
+                              title_font, small_font);
+    shown++;
+  }
+  return true;
+}
+
 // Periodic service driven from YAML with the panel clock. Fetches each card's
 // calendars on first sight and every kAgendaCardRefreshMs afterwards.
 inline void agenda_cards_service(int year, int month, int day, int hour,
