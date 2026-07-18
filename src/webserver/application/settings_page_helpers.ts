@@ -67,7 +67,7 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
 
         var ttsOptions: any = condField();
         els.alarmDelayTtsOptions = ttsOptions;
-        function announcementInput(label: any, id: any, value: any, fallback: any, postValue: any) {
+        function announcementInput(label: any, id: any, value: any, fallback: any, stateKey: any, postValue: any) {
             var field: any = document.createElement("div");
             field.className = "sp-field";
             field.appendChild(fieldLabel(label, id));
@@ -80,6 +80,7 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
             input.addEventListener("change", function (this: any) {
                 var normalized: any = normalizeAlarmDelayAnnouncement(this.value, fallback);
                 this.value = normalized;
+                state[stateKey] = normalized;
                 postValue(normalized);
             });
             field.appendChild(input);
@@ -89,10 +90,12 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
         els.setAlarmDelayEntryAnnouncement = announcementInput(
             "Entry Announcement", "sp-set-alarm-delay-entry-announcement",
             state.alarmDelayEntryAnnouncement, DEFAULT_ALARM_DELAY_ENTRY_ANNOUNCEMENT,
+            "alarmDelayEntryAnnouncement",
             postAlarmDelayEntryAnnouncement);
         els.setAlarmDelayExitAnnouncement = announcementInput(
             "Exit Announcement", "sp-set-alarm-delay-exit-announcement",
             state.alarmDelayExitAnnouncement, DEFAULT_ALARM_DELAY_EXIT_ANNOUNCEMENT,
+            "alarmDelayExitAnnouncement",
             postAlarmDelayExitAnnouncement);
         options.appendChild(ttsOptions);
 

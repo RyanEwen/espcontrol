@@ -153,7 +153,8 @@ inline std::vector<AlarmCardCtx *> &alarm_delay_audio_contexts() {
 
 inline void alarm_delay_audio_update(AlarmCardCtx *ctx,
                                      bool announce_start = true);
-inline bool alarm_delay_audio_resume_context(AlarmCardCtx *excluded);
+inline bool alarm_delay_audio_resume_context(AlarmCardCtx *excluded,
+                                             bool exclude_same_entity);
 
 inline void alarm_delay_audio_register_context(AlarmCardCtx *ctx) {
   if (!ctx) return;
@@ -214,7 +215,8 @@ inline void alarm_delay_audio_timer_cb(lv_timer_t *timer) {
     AlarmCardCtx *completed_source = coordinator.source;
     alarm_delay_audio_stop();
     if (enabled && remaining == 0) {
-      alarm_delay_audio_resume_context(completed_source);
+      alarm_delay_audio_resume_context(
+        completed_source, /* exclude_same_entity= */ true);
     }
     return;
   }
@@ -239,7 +241,7 @@ inline void alarm_delay_audio_update(AlarmCardCtx *ctx, bool announce_start) {
   if (!should_run) {
     if (owns_active_audio) {
       alarm_delay_audio_stop();
-      alarm_delay_audio_resume_context(ctx);
+      alarm_delay_audio_resume_context(ctx, /* exclude_same_entity= */ true);
     }
     return;
   }
@@ -280,8 +282,10 @@ inline void alarm_delay_audio_update(AlarmCardCtx *ctx, bool announce_start) {
   }
 }
 
-inline bool alarm_delay_audio_resume_context(AlarmCardCtx *excluded) {
-  const std::string excluded_entity = excluded ? excluded->entity_id : "";
+inline bool alarm_delay_audio_resume_context(AlarmCardCtx *excluded,
+                                             bool exclude_same_entity) {
+  const std::string excluded_entity =
+    exclude_same_entity && excluded ? excluded->entity_id : "";
   for (AlarmCardCtx *ctx : alarm_delay_audio_contexts()) {
     if (ctx == excluded || !alarm_card_context_valid(ctx) ||
         (!excluded_entity.empty() && ctx->entity_id == excluded_entity)) {
