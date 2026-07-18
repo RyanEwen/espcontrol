@@ -22,12 +22,13 @@ inline bool agenda_driver_setup_visual(
     const CardPalette &palette, const DisplayProfile &display) {
   if (!agenda_driver_matches(context)) return false;
 
-  if (palette.has_sensor_color) {
-    lv_obj_set_style_bg_color(
-      slot.btn, lv_color_hex(palette.sensor_val),
-      static_cast<lv_style_selector_t>(LV_PART_MAIN) |
-        static_cast<lv_style_selector_t>(LV_STATE_DEFAULT));
-  }
+  // Near-black canvas like the Calendar Card Pro dark theme, so the tinted
+  // event boxes carry the color; a configured sensor color still overrides.
+  lv_obj_set_style_bg_color(
+    slot.btn,
+    lv_color_hex(palette.has_sensor_color ? palette.sensor_val : 0x101216),
+    static_cast<lv_style_selector_t>(LV_PART_MAIN) |
+      static_cast<lv_style_selector_t>(LV_STATE_DEFAULT));
   // The agenda draws its own event list over the whole tile; the standard
   // icon/sensor/name widgets stay hidden. Fonts are borrowed from the slot's
   // labels so device typography profiles apply unchanged: the name label's

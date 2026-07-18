@@ -226,11 +226,11 @@ inline void agenda_card_render(AgendaCardRef &ref, const AgendaList &list,
     lv_obj_t *box = lv_obj_create(events_col);
     lv_obj_set_size(box, lv_pct(100), LV_SIZE_CONTENT);
     lv_obj_set_style_bg_color(box, lv_color_hex(color), 0);
-    lv_obj_set_style_bg_opa(box, LV_OPA_10, 0);
-    lv_obj_set_style_radius(box, 4, 0);
+    lv_obj_set_style_bg_opa(box, LV_OPA_20, 0);
+    lv_obj_set_style_radius(box, 5, 0);
     lv_obj_set_style_border_width(box, 0, 0);
-    lv_obj_set_style_pad_all(box, 4, 0);
-    lv_obj_set_style_pad_left(box, 8, 0);
+    lv_obj_set_style_pad_all(box, 6, 0);
+    lv_obj_set_style_pad_left(box, 11, 0);
     lv_obj_set_style_pad_row(box, 0, 0);
     lv_obj_clear_flag(box, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_clear_flag(box, LV_OBJ_FLAG_CLICKABLE);
@@ -239,7 +239,7 @@ inline void agenda_card_render(AgendaCardRef &ref, const AgendaList &list,
     lv_obj_t *bar = lv_obj_create(box);
     lv_obj_set_size(bar, 3, lv_pct(100));
     lv_obj_add_flag(bar, LV_OBJ_FLAG_IGNORE_LAYOUT);
-    lv_obj_align(bar, LV_ALIGN_LEFT_MID, -6, 0);
+    lv_obj_align(bar, LV_ALIGN_LEFT_MID, -8, 0);
     lv_obj_set_style_bg_color(bar, lv_color_hex(color), 0);
     lv_obj_set_style_bg_opa(bar, LV_OPA_COVER, 0);
     lv_obj_set_style_border_width(bar, 0, 0);
