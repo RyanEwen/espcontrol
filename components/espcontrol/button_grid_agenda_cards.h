@@ -126,10 +126,149 @@ inline lv_obj_t *agenda_row_label_(lv_obj_t *parent, const char *text,
   return lbl;
 }
 
+// ── Shared row building blocks ───────────────────────────────────────────
+// The card and the screensaver overlay render the same Calendar-Card-Pro
+// anatomy: a day row holding a date column (weekday / big day number / MONTH)
+// beside a column of accent-tinted event boxes.
+
+inline const char *agenda_weekday_name_(int32_t day_number) {
+  static const char *const kWeekdays[] = {"Sun", "Mon", "Tue", "Wed",
+                                          "Thu", "Fri", "Sat"};
+  return kWeekdays[agenda_weekday(day_number)];
+}
+
+// Creates a day row with its date column and returns the events column that
+// event boxes for this day should be added to.
+inline lv_obj_t *agenda_day_row_(lv_obj_t *parent, int32_t day_number,
+                                 int date_col_w, const lv_font_t *small_font,
+                                 const lv_font_t *big_font) {
+  static const char *const kMonths[] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+                                        "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
+
+  lv_obj_t *day_row = lv_obj_create(parent);
+  lv_obj_set_size(day_row, lv_pct(100), LV_SIZE_CONTENT);
+  lv_obj_set_style_bg_opa(day_row, LV_OPA_TRANSP, 0);
+  lv_obj_set_style_border_width(day_row, 0, 0);
+  lv_obj_set_style_pad_all(day_row, 0, 0);
+  lv_obj_set_style_pad_column(day_row, 6, 0);
+  lv_obj_clear_flag(day_row, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_clear_flag(day_row, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_set_flex_flow(day_row, LV_FLEX_FLOW_ROW);
+  lv_obj_set_flex_align(day_row, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START,
+                        LV_FLEX_ALIGN_START);
+
+  int year = 0, month = 1, day = 1;
+  agenda_civil_from_days(day_number, &year, &month, &day);
+  lv_obj_t *date_col = lv_obj_create(day_row);
+  lv_obj_set_size(date_col, date_col_w, LV_SIZE_CONTENT);
+  lv_obj_set_style_bg_opa(date_col, LV_OPA_TRANSP, 0);
+  lv_obj_set_style_border_width(date_col, 0, 0);
+  lv_obj_set_style_pad_all(date_col, 0, 0);
+  lv_obj_set_style_pad_row(date_col, 0, 0);
+  lv_obj_clear_flag(date_col, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_flex_flow(date_col, LV_FLEX_FLOW_COLUMN);
+  lv_obj_set_flex_align(date_col, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER,
+                        LV_FLEX_ALIGN_CENTER);
+
+  char text[8];
+  std::snprintf(text, sizeof(text), "%s", agenda_weekday_name_(day_number));
+  agenda_row_label_(date_col, text, small_font, 0xFFFFFF, LV_OPA_60);
+  std::snprintf(text, sizeof(text), "%d", day);
+  lv_obj_t *num = agenda_row_label_(date_col, text, big_font, 0xFFFFFF,
+                                    LV_OPA_COVER);
+  lv_obj_set_style_text_align(num, LV_TEXT_ALIGN_CENTER, 0);
+  std::snprintf(text, sizeof(text), "%s", kMonths[(month - 1) % 12]);
+  agenda_row_label_(date_col, text, small_font, 0xFFFFFF, LV_OPA_60);
+
+  lv_obj_t *events_col = lv_obj_create(day_row);
+  lv_obj_set_size(events_col, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+  lv_obj_set_flex_grow(events_col, 1);
+  lv_obj_set_style_bg_opa(events_col, LV_OPA_TRANSP, 0);
+  lv_obj_set_style_border_width(events_col, 0, 0);
+  lv_obj_set_style_pad_all(events_col, 0, 0);
+  lv_obj_set_style_pad_row(events_col, 4, 0);
+  lv_obj_clear_flag(events_col, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_flex_flow(events_col, LV_FLEX_FLOW_COLUMN);
+  return events_col;
+}
+
+// Event box: accent-tinted background with a solid accent bar on its left
+// edge, single-line ellipsized title with the "in N days" marker right-aligned
+// beside it, the time range, and the location when present.
+inline void agenda_event_box_(lv_obj_t *events_col, const AgendaEntry &entry,
+                              int32_t today_number, bool use_12h,
+                              uint32_t accent, const lv_font_t *title_font,
+                              const lv_font_t *small_font) {
+  const bool has_location = !entry.location.empty();
+  const int title_h = title_font ? lv_font_get_line_height(title_font) : 16;
+  const uint32_t color = agenda_source_color(entry.source, accent);
+  lv_obj_t *box = lv_obj_create(events_col);
+  lv_obj_set_size(box, lv_pct(100), LV_SIZE_CONTENT);
+  lv_obj_set_style_bg_color(box, lv_color_hex(color), 0);
+  lv_obj_set_style_bg_opa(box, LV_OPA_20, 0);
+  lv_obj_set_style_radius(box, 5, 0);
+  lv_obj_set_style_border_width(box, 0, 0);
+  lv_obj_set_style_pad_all(box, 6, 0);
+  lv_obj_set_style_pad_left(box, 11, 0);
+  lv_obj_set_style_pad_row(box, 0, 0);
+  lv_obj_clear_flag(box, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_clear_flag(box, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_set_flex_flow(box, LV_FLEX_FLOW_COLUMN);
+
+  lv_obj_t *bar = lv_obj_create(box);
+  lv_obj_set_size(bar, 3, lv_pct(100));
+  lv_obj_add_flag(bar, LV_OBJ_FLAG_IGNORE_LAYOUT);
+  lv_obj_align(bar, LV_ALIGN_LEFT_MID, -8, 0);
+  lv_obj_set_style_bg_color(bar, lv_color_hex(color), 0);
+  lv_obj_set_style_bg_opa(bar, LV_OPA_COVER, 0);
+  lv_obj_set_style_border_width(bar, 0, 0);
+  lv_obj_set_style_radius(bar, 2, 0);
+  lv_obj_clear_flag(bar, LV_OBJ_FLAG_SCROLLABLE);
+
+  lv_obj_t *title_row = lv_obj_create(box);
+  lv_obj_set_size(title_row, lv_pct(100), LV_SIZE_CONTENT);
+  lv_obj_set_style_bg_opa(title_row, LV_OPA_TRANSP, 0);
+  lv_obj_set_style_border_width(title_row, 0, 0);
+  lv_obj_set_style_pad_all(title_row, 0, 0);
+  lv_obj_set_style_pad_column(title_row, 4, 0);
+  lv_obj_clear_flag(title_row, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_flex_flow(title_row, LV_FLEX_FLOW_ROW);
+  lv_obj_set_flex_align(title_row, LV_FLEX_ALIGN_SPACE_BETWEEN,
+                        LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+
+  lv_obj_t *title = lv_label_create(title_row);
+  lv_label_set_text(title, entry.summary.c_str());
+  if (title_font != nullptr)
+    lv_obj_set_style_text_font(title, title_font, 0);
+  lv_obj_set_style_text_color(title, lv_color_hex(0xFFFFFF), 0);
+  lv_obj_set_flex_grow(title, 1);
+  // A single ellipsized line, like the reference: LONG_DOT only truncates
+  // once the height is pinned to one text line.
+  lv_obj_set_height(title, title_h);
+  lv_label_set_long_mode(title, LV_LABEL_LONG_DOT);
+
+  char rel[16];
+  agenda_format_relative(rel, sizeof(rel), entry.when.day_number, today_number);
+  if (rel[0] != '\0') {
+    lv_obj_t *marker = lv_label_create(title_row);
+    lv_label_set_text(marker, rel);
+    if (small_font != nullptr)
+      lv_obj_set_style_text_font(marker, small_font, 0);
+    lv_obj_set_style_text_color(marker, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_set_style_text_opa(marker, LV_OPA_50, 0);
+  }
+
+  char range[48];
+  agenda_format_range(range, sizeof(range), entry, use_12h, today_number);
+  agenda_row_label_(box, range, small_font, 0xFFFFFF, LV_OPA_60);
+  if (has_location) {
+    agenda_row_label_(box, entry.location.c_str(), small_font, 0xFFFFFF,
+                      LV_OPA_40);
+  }
+}
+
 // Render the agenda into the card's list container: one row per day with a
-// date column (weekday / big day number / month) beside accent-tinted event
-// boxes carrying the title, time range, optional location, and an "in N days"
-// marker — the Calendar Card Pro layout.
+// date column beside accent-tinted event boxes — the Calendar Card Pro layout.
 inline void agenda_card_render(AgendaCardRef &ref, const AgendaList &list,
                                int32_t today_number, bool use_12h) {
   if (ref.list == nullptr) return;
@@ -150,11 +289,6 @@ inline void agenda_card_render(AgendaCardRef &ref, const AgendaList &list,
   if (date_col_w < 40) date_col_w = 40;
   int used = 0;
 
-  static const char *const kWeekdays[] = {"Sun", "Mon", "Tue", "Wed",
-                                          "Thu", "Fri", "Sat"};
-  static const char *const kMonths[] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN",
-                                        "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
-
   const std::vector<AgendaEntry> &entries = list.entries();
   lv_obj_t *events_col = nullptr;
   for (std::size_t i = 0; i < entries.size(); i++) {
@@ -169,222 +303,67 @@ inline void agenda_card_render(AgendaCardRef &ref, const AgendaList &list,
     used += needed;
 
     if (list.starts_new_day(i)) {
-      // Day row: date column on the left, an events column growing beside it.
-      lv_obj_t *day_row = lv_obj_create(ref.list);
-      lv_obj_set_size(day_row, lv_pct(100), LV_SIZE_CONTENT);
-      lv_obj_set_style_bg_opa(day_row, LV_OPA_TRANSP, 0);
-      lv_obj_set_style_border_width(day_row, 0, 0);
-      lv_obj_set_style_pad_all(day_row, 0, 0);
-      lv_obj_set_style_pad_column(day_row, 6, 0);
-      lv_obj_clear_flag(day_row, LV_OBJ_FLAG_SCROLLABLE);
-      lv_obj_clear_flag(day_row, LV_OBJ_FLAG_CLICKABLE);
-      lv_obj_set_flex_flow(day_row, LV_FLEX_FLOW_ROW);
-      lv_obj_set_flex_align(day_row, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START,
-                            LV_FLEX_ALIGN_START);
-
-      int year = 0, month = 1, day = 1;
-      agenda_civil_from_days(entry.when.day_number, &year, &month, &day);
-      lv_obj_t *date_col = lv_obj_create(day_row);
-      lv_obj_set_size(date_col, date_col_w, LV_SIZE_CONTENT);
-      lv_obj_set_style_bg_opa(date_col, LV_OPA_TRANSP, 0);
-      lv_obj_set_style_border_width(date_col, 0, 0);
-      lv_obj_set_style_pad_all(date_col, 0, 0);
-      lv_obj_set_style_pad_row(date_col, 0, 0);
-      lv_obj_clear_flag(date_col, LV_OBJ_FLAG_SCROLLABLE);
-      lv_obj_set_flex_flow(date_col, LV_FLEX_FLOW_COLUMN);
-      lv_obj_set_flex_align(date_col, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER,
-                            LV_FLEX_ALIGN_CENTER);
-
-      char text[8];
-      std::snprintf(text, sizeof(text), "%s",
-                    kWeekdays[agenda_weekday(entry.when.day_number)]);
-      agenda_row_label_(date_col, text, ref.small_font, 0xFFFFFF, LV_OPA_60);
-      std::snprintf(text, sizeof(text), "%d", day);
-      lv_obj_t *num = agenda_row_label_(date_col, text, ref.big_font, 0xFFFFFF,
-                                        LV_OPA_COVER);
-      lv_obj_set_style_text_align(num, LV_TEXT_ALIGN_CENTER, 0);
-      std::snprintf(text, sizeof(text), "%s", kMonths[(month - 1) % 12]);
-      agenda_row_label_(date_col, text, ref.small_font, 0xFFFFFF, LV_OPA_60);
-
-      events_col = lv_obj_create(day_row);
-      lv_obj_set_size(events_col, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-      lv_obj_set_flex_grow(events_col, 1);
-      lv_obj_set_style_bg_opa(events_col, LV_OPA_TRANSP, 0);
-      lv_obj_set_style_border_width(events_col, 0, 0);
-      lv_obj_set_style_pad_all(events_col, 0, 0);
-      lv_obj_set_style_pad_row(events_col, 4, 0);
-      lv_obj_clear_flag(events_col, LV_OBJ_FLAG_SCROLLABLE);
-      lv_obj_set_flex_flow(events_col, LV_FLEX_FLOW_COLUMN);
+      events_col = agenda_day_row_(ref.list, entry.when.day_number, date_col_w,
+                                   ref.small_font, ref.big_font);
     }
     if (events_col == nullptr) continue;
-
-    // Event box: accent-tinted background with a solid accent bar on its left
-    // edge (drawn as a left border), title + relative marker, time range, and
-    // the location when present.
-    const uint32_t color = agenda_source_color(entry.source, ref.accent);
-    lv_obj_t *box = lv_obj_create(events_col);
-    lv_obj_set_size(box, lv_pct(100), LV_SIZE_CONTENT);
-    lv_obj_set_style_bg_color(box, lv_color_hex(color), 0);
-    lv_obj_set_style_bg_opa(box, LV_OPA_20, 0);
-    lv_obj_set_style_radius(box, 5, 0);
-    lv_obj_set_style_border_width(box, 0, 0);
-    lv_obj_set_style_pad_all(box, 6, 0);
-    lv_obj_set_style_pad_left(box, 11, 0);
-    lv_obj_set_style_pad_row(box, 0, 0);
-    lv_obj_clear_flag(box, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_clear_flag(box, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_set_flex_flow(box, LV_FLEX_FLOW_COLUMN);
-
-    lv_obj_t *bar = lv_obj_create(box);
-    lv_obj_set_size(bar, 3, lv_pct(100));
-    lv_obj_add_flag(bar, LV_OBJ_FLAG_IGNORE_LAYOUT);
-    lv_obj_align(bar, LV_ALIGN_LEFT_MID, -8, 0);
-    lv_obj_set_style_bg_color(bar, lv_color_hex(color), 0);
-    lv_obj_set_style_bg_opa(bar, LV_OPA_COVER, 0);
-    lv_obj_set_style_border_width(bar, 0, 0);
-    lv_obj_set_style_radius(bar, 2, 0);
-    lv_obj_clear_flag(bar, LV_OBJ_FLAG_SCROLLABLE);
-
-    // Title with the "in N days" marker right-aligned beside it.
-    lv_obj_t *title_row = lv_obj_create(box);
-    lv_obj_set_size(title_row, lv_pct(100), LV_SIZE_CONTENT);
-    lv_obj_set_style_bg_opa(title_row, LV_OPA_TRANSP, 0);
-    lv_obj_set_style_border_width(title_row, 0, 0);
-    lv_obj_set_style_pad_all(title_row, 0, 0);
-    lv_obj_set_style_pad_column(title_row, 4, 0);
-    lv_obj_clear_flag(title_row, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_flex_flow(title_row, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(title_row, LV_FLEX_ALIGN_SPACE_BETWEEN,
-                          LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-
-    lv_obj_t *title = lv_label_create(title_row);
-    lv_label_set_text(title, entry.summary.c_str());
-    if (ref.title_font != nullptr)
-      lv_obj_set_style_text_font(title, ref.title_font, 0);
-    lv_obj_set_style_text_color(title, lv_color_hex(0xFFFFFF), 0);
-    lv_obj_set_flex_grow(title, 1);
-    // A single ellipsized line, like the reference: LONG_DOT only truncates
-    // once the height is pinned to one text line.
-    lv_obj_set_height(title, title_h);
-    lv_label_set_long_mode(title, LV_LABEL_LONG_DOT);
-
-    char rel[16];
-    agenda_format_relative(rel, sizeof(rel), entry.when.day_number, today_number);
-    if (rel[0] != '\0') {
-      lv_obj_t *marker = lv_label_create(title_row);
-      lv_label_set_text(marker, rel);
-      if (ref.small_font != nullptr)
-        lv_obj_set_style_text_font(marker, ref.small_font, 0);
-      lv_obj_set_style_text_color(marker, lv_color_hex(0xFFFFFF), 0);
-      lv_obj_set_style_text_opa(marker, LV_OPA_50, 0);
-    }
-
-    char range[48];
-    agenda_format_range(range, sizeof(range), entry, use_12h, today_number);
-    agenda_row_label_(box, range, ref.small_font, 0xFFFFFF, LV_OPA_60);
-    if (has_location) {
-      agenda_row_label_(box, entry.location.c_str(), ref.small_font, 0xFFFFFF,
-                        LV_OPA_40);
-    }
+    agenda_event_box_(events_col, entry, today_number, use_12h, ref.accent,
+                      ref.title_font, ref.small_font);
   }
 }
 
 // ── Screensaver overlay rendering ────────────────────────────────────────
-// A compact agenda for the photo screensaver: a single next-event row, the
-// current day's events, or a short upcoming list. Rendered into a caller-owned
-// box whose background (and its opacity) the YAML controls. Returns false when
-// there is nothing to show so the caller can hide the box entirely.
+// A compact agenda for the photo screensaver: the next event, the current
+// day's events, or a short upcoming list — rendered with the same day-row and
+// tinted-event-box anatomy as the grid card, into a caller-owned box whose
+// background (and its opacity) the YAML controls. Returns false when there is
+// nothing to show so the caller can hide the box entirely.
 
 enum class AgendaOverlayStyle : uint8_t { NEXT_EVENT, TODAY, UPCOMING };
-
-inline void agenda_overlay_event_row_(lv_obj_t *parent, const AgendaEntry &entry,
-                                      int32_t today_number, bool use_12h,
-                                      bool include_day,
-                                      const lv_font_t *title_font,
-                                      const lv_font_t *small_font) {
-  lv_obj_t *row = lv_obj_create(parent);
-  lv_obj_set_size(row, lv_pct(100), LV_SIZE_CONTENT);
-  lv_obj_set_style_bg_opa(row, LV_OPA_TRANSP, 0);
-  lv_obj_set_style_border_width(row, 0, 0);
-  lv_obj_set_style_pad_all(row, 0, 0);
-  lv_obj_set_style_pad_left(row, 9, 0);
-  lv_obj_set_style_pad_row(row, 0, 0);
-  lv_obj_clear_flag(row, LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_set_flex_flow(row, LV_FLEX_FLOW_COLUMN);
-
-  lv_obj_t *bar = lv_obj_create(row);
-  lv_obj_set_size(bar, 3, lv_pct(100));
-  lv_obj_add_flag(bar, LV_OBJ_FLAG_IGNORE_LAYOUT);
-  lv_obj_align(bar, LV_ALIGN_LEFT_MID, -9, 0);
-  lv_obj_set_style_bg_color(bar, lv_color_hex(agenda_source_color(entry.source, 0)), 0);
-  lv_obj_set_style_bg_opa(bar, LV_OPA_COVER, 0);
-  lv_obj_set_style_border_width(bar, 0, 0);
-  lv_obj_set_style_radius(bar, 2, 0);
-  lv_obj_clear_flag(bar, LV_OBJ_FLAG_SCROLLABLE);
-
-  const int title_h = title_font ? lv_font_get_line_height(title_font) : 16;
-  lv_obj_t *title = agenda_row_label_(row, entry.summary.c_str(), title_font,
-                                      0xFFFFFF, LV_OPA_COVER);
-  lv_obj_set_height(title, title_h);
-
-  char range[48];
-  agenda_format_range(range, sizeof(range), entry, use_12h, today_number);
-  char line[80];
-  if (include_day && entry.when.day_number != today_number) {
-    char heading[24];
-    agenda_format_day_heading(heading, sizeof(heading), entry.when.day_number,
-                              today_number);
-    std::snprintf(line, sizeof(line), "%s  %s", heading, range);
-  } else {
-    std::snprintf(line, sizeof(line), "%s", range);
-  }
-  agenda_row_label_(row, line, small_font, 0xFFFFFF, LV_OPA_70);
-}
 
 inline bool agenda_overlay_render(lv_obj_t *box, const AgendaList &list,
                                   AgendaOverlayStyle style, int32_t today_number,
                                   bool use_12h, const lv_font_t *title_font,
-                                  const lv_font_t *small_font) {
+                                  const lv_font_t *small_font,
+                                  const lv_font_t *big_font) {
   if (box == nullptr) return false;
   lv_obj_clean(box);
   if (list.empty()) return false;
   const std::vector<AgendaEntry> &entries = list.entries();
 
-  if (style == AgendaOverlayStyle::NEXT_EVENT) {
-    agenda_overlay_event_row_(box, entries.front(), today_number, use_12h,
-                              true, title_font, small_font);
-    return true;
-  }
+  const int big_h = big_font ? lv_font_get_line_height(big_font) : 24;
+  int date_col_w = big_h + big_h / 4;
+  if (date_col_w < 40) date_col_w = 40;
 
-  if (style == AgendaOverlayStyle::TODAY) {
-    int shown = 0;
+  std::vector<const AgendaEntry *> picked;
+  if (style == AgendaOverlayStyle::NEXT_EVENT) {
+    picked.push_back(&entries.front());
+  } else if (style == AgendaOverlayStyle::TODAY) {
     for (const AgendaEntry &entry : entries) {
       if (entry.when.day_number != today_number) continue;
-      agenda_overlay_event_row_(box, entry, today_number, use_12h, false,
-                                title_font, small_font);
-      if (++shown >= 4) break;
+      picked.push_back(&entry);
+      if (picked.size() >= 4) break;
     }
-    if (shown == 0) {
-      // Nothing left today: fall back to the next event so the overlay stays
-      // useful instead of disappearing.
-      agenda_overlay_event_row_(box, entries.front(), today_number, use_12h,
-                                true, title_font, small_font);
+    // Nothing left today: fall back to the next event so the overlay stays
+    // useful instead of disappearing.
+    if (picked.empty()) picked.push_back(&entries.front());
+  } else {
+    for (const AgendaEntry &entry : entries) {
+      picked.push_back(&entry);
+      if (picked.size() >= 5) break;
     }
-    return true;
   }
 
-  // UPCOMING: a short grouped list with lightweight day headings.
-  int shown = 0;
-  for (std::size_t i = 0; i < entries.size() && shown < 5; i++) {
-    if (list.starts_new_day(i)) {
-      char heading[24];
-      agenda_format_day_heading(heading, sizeof(heading),
-                                entries[i].when.day_number, today_number);
-      agenda_row_label_(box, heading, small_font, 0xFFFFFF, LV_OPA_50);
+  int32_t prev_day = INT32_MIN;
+  lv_obj_t *events_col = nullptr;
+  for (const AgendaEntry *entry : picked) {
+    if (entry->when.day_number != prev_day || events_col == nullptr) {
+      prev_day = entry->when.day_number;
+      events_col = agenda_day_row_(box, entry->when.day_number, date_col_w,
+                                   small_font, big_font);
     }
-    agenda_overlay_event_row_(box, entries[i], today_number, use_12h, false,
-                              title_font, small_font);
-    shown++;
+    agenda_event_box_(events_col, *entry, today_number, use_12h, 0, title_font,
+                      small_font);
   }
   return true;
 }

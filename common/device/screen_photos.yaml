@@ -329,7 +329,7 @@ lvgl:
                 align: TOP_LEFT
                 x: 20
                 y: 20
-                width: 52%
+                width: 72%
                 height: SIZE_CONTENT
                 bg_color: 0x101216
                 bg_opa: 45%
@@ -554,7 +554,8 @@ script:
                                           : espcontrol::AgendaOverlayStyle::NEXT_EVENT;
             const bool has_content = espcontrol::agenda_overlay_render(
                 id(photos_agenda_box), list, style, render_today, id(clock_format_12h),
-                id(font_text_body)->get_lv_font(), id(font_text_small)->get_lv_font());
+                id(font_text_body)->get_lv_font(), id(font_text_small)->get_lv_font(),
+                id(font_cover_art_artist)->get_lv_font());
             const bool show = has_content && id(screensaver_photos_show_agenda).state;
             ESP_LOGI("agenda", "Overlay render: content=%d switch=%d children=%u",
                      (int) has_content, (int) id(screensaver_photos_show_agenda).state,
