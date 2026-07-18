@@ -90,6 +90,9 @@ inline bool &agenda_service_clock_seen() {
   return seen;
 }
 
+inline void agenda_card_render(AgendaCardRef &ref, const AgendaList &list,
+                               int32_t today_number, bool use_12h);
+
 // Build the list container that fills the card and register it for updates.
 // Fonts are borrowed from the slot's own labels so every device profile keeps
 // its typography without new font roles.
