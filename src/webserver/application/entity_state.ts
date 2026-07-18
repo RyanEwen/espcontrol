@@ -193,8 +193,26 @@ export function installEntityStateModule(): GlobalDescriptors {
             return;
         }
         dropdown.innerHTML = "";
-        var query: any = String(input.value || "").trim().toLowerCase();
+        var raw: any = String(input.value || "");
+        var prefix: any = "";
+        var chosen: any = [];
+        if (input._entityMulti) {
+            // Comma-separated list: suggest against the segment after the last
+            // comma and keep the earlier entries as a prefix on selection.
+            var comma: any = raw.lastIndexOf(",");
+            if (comma !== -1) {
+                prefix = raw.slice(0, comma + 1);
+                raw = raw.slice(comma + 1);
+                chosen = prefix.split(",").map(function (this: any, part?: any) {
+                    return part.trim().toLowerCase();
+                }).filter(Boolean);
+            }
+        }
+        input._entityMultiPrefix = prefix;
+        var query: any = raw.trim().toLowerCase();
         var items: any = entitySuggestions(input._entityDomains || []).filter(function (this: any, item?: any) {
+            if (chosen.indexOf(item.value.toLowerCase()) !== -1)
+                return false;
             if (!query)
                 return true;
             return item.value.toLowerCase().indexOf(query) !== -1 ||
@@ -208,7 +226,8 @@ export function installEntityStateModule(): GlobalDescriptors {
             option.addEventListener("mousedown", function (this: any, e?: any) {
                 e.preventDefault();
                 input._entitySuppressDropdown = true;
-                input.value = item.value;
+                var listPrefix: any = input._entityMulti ? String(input._entityMultiPrefix || "") : "";
+                input.value = listPrefix ? listPrefix.replace(/\s+$/, "") + " " + item.value : item.value;
                 rememberEntityName(item.value, item.label || titleFromEntityId(item.value));
                 input.dispatchEvent(new Event("input", { bubbles: true }));
                 input.dispatchEvent(new Event("change", { bubbles: true }));
@@ -219,10 +238,11 @@ export function installEntityStateModule(): GlobalDescriptors {
         });
         dropdown.classList.toggle("sp-open", document.activeElement === input && items.length > 0);
     }
-    function attachEntitySuggestions(this: any, input?: any, domains?: any) {
+    function attachEntitySuggestions(this: any, input?: any, domains?: any, multi?: any) {
         if (!input || input._entitySuggestionsAttached)
             return input;
         input._entityDomains = domains || [];
+        input._entityMulti = !!multi;
         input._entitySuggestionsAttached = true;
         input.addEventListener("focus", function (this: any) { refreshEntityDatalist(input); });
         input.addEventListener("input", function (this: any) {
@@ -239,9 +259,9 @@ export function installEntityStateModule(): GlobalDescriptors {
         refreshEntityDatalist(input);
         return input;
     }
-    function entityInput(this: any, id?: any, value?: any, placeholder?: any, domains?: any) {
+    function entityInput(this: any, id?: any, value?: any, placeholder?: any, domains?: any, multi?: any) {
         var el: any = textInput(id, value, placeholder);
-        return attachEntitySuggestions(el, domains);
+        return attachEntitySuggestions(el, domains, multi);
     }
     function rememberEntityPostPath(this: any, data?: any) {
         var preferred: any = parseEntityId(data && data.name_id) || parseEntityId(data && data.id);

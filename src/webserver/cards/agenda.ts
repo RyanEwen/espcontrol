@@ -8,6 +8,7 @@ export function registerAgendaCardTypes(): GlobalDescriptors {
             idSuffix: "entity",
             placeholder: "e.g. calendar.family, calendar.work",
             domains: function (this: any) { return cardContractDomains("agenda"); },
+            multi: true,
             bindName: "entity",
             rerender: true,
             requiredMessage: "Add at least one calendar entity before saving.",

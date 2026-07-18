@@ -298,7 +298,7 @@ export function installControlsFieldsModule(): GlobalDescriptors {
         var bindName: any = Object.prototype.hasOwnProperty.call(entity, "bindName") ? entity.bindName : "entity";
         var value: any = entity.value != null ? cardMetadataValue(entity.value, b, helpers) : (bindName ? b[bindName] : "");
         var domains: any = cardMetadataValue(entity.domains, b, helpers) || [];
-        var field: any = helpers.entityField(cardMetadataValue(entity.label, b, helpers) || "Entity", helpers.idPrefix + (entity.idSuffix || "entity"), value || "", cardMetadataValue(entity.placeholder, b, helpers) || "", domains, bindName, entity.rerender !== false, cardMetadataValue(entity.requiredMessage, b, helpers) || "");
+        var field: any = helpers.entityField(cardMetadataValue(entity.label, b, helpers) || "Entity", helpers.idPrefix + (entity.idSuffix || "entity"), value || "", cardMetadataValue(entity.placeholder, b, helpers) || "", domains, bindName, entity.rerender !== false, cardMetadataValue(entity.requiredMessage, b, helpers) || "", !!entity.multi);
         panel.appendChild(field.field);
         return field;
     }

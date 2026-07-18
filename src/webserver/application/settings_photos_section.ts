@@ -94,7 +94,7 @@ export function installSettingsPhotosSectionModule(): GlobalDescriptors {
         els.setPhotosWeatherEntity = weatherInp;
 
         function syncPhotoWeatherField(this: any) {
-            weatherField.style.display = state.photosShowWeather ? "" : "none";
+            weatherField.classList.toggle("sp-visible", !!state.photosShowWeather);
         }
         syncPhotoWeatherField();
         els.syncPhotoWeatherField = syncPhotoWeatherField;
@@ -112,7 +112,7 @@ export function installSettingsPhotosSectionModule(): GlobalDescriptors {
         var agendaEntitiesField: any = document.createElement("div");
         agendaEntitiesField.className = "sp-field sp-cond-field";
         agendaEntitiesField.appendChild(fieldLabel("Agenda Calendars", "sp-set-ss-photos-agenda-entities"));
-        var agendaEntitiesInp: any = entityInput("sp-set-ss-photos-agenda-entities", state.photosAgendaEntities, "e.g. calendar.family, calendar.work", ["calendar"]);
+        var agendaEntitiesInp: any = entityInput("sp-set-ss-photos-agenda-entities", state.photosAgendaEntities, "e.g. calendar.family, calendar.work", ["calendar"], true);
         agendaEntitiesField.appendChild(agendaEntitiesInp);
         var agendaHelp: any = document.createElement("div");
         agendaHelp.className = "sp-help";
@@ -170,10 +170,10 @@ export function installSettingsPhotosSectionModule(): GlobalDescriptors {
         els.setPhotosAgendaOpacity = agendaOpacityInp;
 
         function syncPhotoAgendaFields(this: any) {
-            var show: any = state.photosShowAgenda ? "" : "none";
-            agendaEntitiesField.style.display = show;
-            agendaStyleField.style.display = show;
-            agendaOpacityField.style.display = show;
+            var show: any = !!state.photosShowAgenda;
+            agendaEntitiesField.classList.toggle("sp-visible", show);
+            agendaStyleField.classList.toggle("sp-visible", show);
+            agendaOpacityField.classList.toggle("sp-visible", show);
         }
         syncPhotoAgendaFields();
         els.syncPhotoAgendaFields = syncPhotoAgendaFields;
