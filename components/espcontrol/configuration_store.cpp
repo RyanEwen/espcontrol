@@ -61,8 +61,18 @@ size_t ConfigurationStore::maximum_payload_size() const {
              : 0;
 }
 
-uint32_t ConfigurationStore::checksum(const uint8_t *data, size_t size) {
-  return ~checksum_update(0xFFFFFFFFU, data, size);
+uint32_t ConfigurationStore::checksum(uint32_t generation,
+                                      const uint8_t *data, size_t size) {
+  std::array<uint8_t, CHECKSUM_OFFSET - VERSION_OFFSET> metadata{};
+  write_u16(metadata.data(), CONFIGURATION_ENVELOPE_VERSION);
+  write_u16(metadata.data() + HEADER_SIZE_OFFSET - VERSION_OFFSET,
+            CONFIGURATION_ENVELOPE_HEADER_SIZE);
+  write_u32(metadata.data() + GENERATION_OFFSET - VERSION_OFFSET, generation);
+  write_u32(metadata.data() + PAYLOAD_SIZE_OFFSET - VERSION_OFFSET,
+            static_cast<uint32_t>(size));
+  uint32_t crc =
+      checksum_update(0xFFFFFFFFU, metadata.data(), metadata.size());
+  return ~checksum_update(crc, data, size);
 }
 
 bool ConfigurationStore::generation_is_newer(uint32_t candidate,
@@ -71,10 +81,13 @@ bool ConfigurationStore::generation_is_newer(uint32_t candidate,
 }
 
 bool ConfigurationStore::checksum_slot_payload(uint8_t slot,
+                                               const uint8_t *header,
                                                size_t payload_size,
                                                uint32_t *result) {
   std::array<uint8_t, CHECKSUM_CHUNK_SIZE> buffer{};
-  uint32_t crc = 0xFFFFFFFFU;
+  uint32_t crc = checksum_update(
+      0xFFFFFFFFU, header + VERSION_OFFSET,
+      CHECKSUM_OFFSET - VERSION_OFFSET);
   size_t offset = 0;
   while (offset < payload_size) {
     const size_t chunk = std::min(buffer.size(), payload_size - offset);
@@ -118,7 +131,8 @@ ConfigurationStore::SlotMetadata ConfigurationStore::inspect_slot(
   if (metadata.payload_size > maximum_payload_size()) return metadata;
 
   uint32_t actual_checksum = 0;
-  if (!checksum_slot_payload(slot, metadata.payload_size, &actual_checksum)) {
+  if (!checksum_slot_payload(slot, header.data(), metadata.payload_size,
+                             &actual_checksum)) {
     metadata.state = SlotState::IO_ERROR;
     return metadata;
   }
@@ -237,7 +251,8 @@ CommitResult ConfigurationStore::commit(const uint8_t *payload,
   write_u32(header.data() + GENERATION_OFFSET, next_generation);
   write_u32(header.data() + PAYLOAD_SIZE_OFFSET,
             static_cast<uint32_t>(payload_size));
-  write_u32(header.data() + CHECKSUM_OFFSET, checksum(payload, payload_size));
+  write_u32(header.data() + CHECKSUM_OFFSET,
+            checksum(next_generation, payload, payload_size));
 
   if (!backend_.write(target_slot, VERSION_OFFSET,
                       header.data() + VERSION_OFFSET,
@@ -264,7 +279,7 @@ CommitResult ConfigurationStore::commit(const uint8_t *payload,
   if (verified.state != SlotState::VALID ||
       verified.generation != next_generation ||
       verified.payload_size != payload_size ||
-      verified.checksum != checksum(payload, payload_size)) {
+      verified.checksum != checksum(next_generation, payload, payload_size)) {
     return {StoreStatus::VERIFY_FAILED, next_generation, payload_size,
             target_slot};
   }

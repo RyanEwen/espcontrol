@@ -20,6 +20,8 @@ envelope.
 Use `ConfigurationStore` as the durable storage boundary. It stores an opaque
 payload in two fixed-capacity slots. Each slot has
 a versioned header containing a generation, payload length, and CRC32 checksum.
+The checksum covers the version, header size, generation, payload length, and
+payload bytes so damaged selection metadata cannot promote a stale slot.
 
 A commit invalidates the target first, then writes and syncs its payload and
 header metadata. The envelope magic is written and synced separately as the

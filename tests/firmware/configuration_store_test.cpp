@@ -20,6 +20,8 @@ using espcontrol::configuration::LoadResult;
 using espcontrol::configuration::StorageBackend;
 using espcontrol::configuration::StoreStatus;
 
+constexpr size_t STORED_GENERATION_OFFSET = 8;
+
 class MemoryBackend final : public StorageBackend {
  public:
   explicit MemoryBackend(size_t capacity)
@@ -136,6 +138,24 @@ bool corrupt_newest_falls_back() {
   return loaded.generation == 1 && payload_equals(output, first, loaded);
 }
 
+bool corrupt_stale_generation_cannot_promote_old_payload() {
+  MemoryBackend backend(128);
+  ConfigurationStore store(backend);
+  const std::vector<uint8_t> stale = bytes("stale");
+  const std::vector<uint8_t> current = bytes("current");
+  const CommitResult first = store.commit(stale.data(), stale.size());
+  const CommitResult second = store.commit(current.data(), current.size());
+  if (!first.ok() || !second.ok()) return false;
+
+  // A generation bit flip used to make an intact stale payload look newer,
+  // because only payload bytes were protected by the checksum.
+  backend.corrupt(first.slot, STORED_GENERATION_OFFSET);
+  std::vector<uint8_t> output(current.size());
+  const LoadResult loaded = store.load(output.data(), output.size());
+  return loaded.slot == second.slot && loaded.generation == second.generation &&
+         payload_equals(output, current, loaded);
+}
+
 bool partial_payload_write_preserves_previous() {
   MemoryBackend backend(128);
   ConfigurationStore store(backend);
@@ -228,6 +248,7 @@ int main() {
   const bool passed =
       empty_store_is_reported() && commit_and_load_round_trip() &&
       newest_generation_wins() && corrupt_newest_falls_back() &&
+      corrupt_stale_generation_cannot_promote_old_payload() &&
       partial_payload_write_preserves_previous() &&
       partial_header_write_preserves_previous() &&
       torn_metadata_cannot_promote_stale_checksum() &&

@@ -78,10 +78,11 @@ class ConfigurationStore {
   };
 
   SlotMetadata inspect_slot(uint8_t slot);
-  bool checksum_slot_payload(uint8_t slot, size_t payload_size,
-                             uint32_t *checksum);
+  bool checksum_slot_payload(uint8_t slot, const uint8_t *header,
+                             size_t payload_size, uint32_t *checksum);
   static bool generation_is_newer(uint32_t candidate, uint32_t reference);
-  static uint32_t checksum(const uint8_t *data, size_t size);
+  static uint32_t checksum(uint32_t generation, const uint8_t *data,
+                           size_t size);
 
   StorageBackend &backend_;
 };
