@@ -1058,7 +1058,7 @@ async function assertSettingsPage(page, label, options = {}, posts = []) {
   const coverArtCard = page
     .locator("#sp-settings .card")
     .filter({
-      has: page.locator(".card-header h3", { hasText: /^Cover Art$/ }),
+      has: page.locator(".card-header h3", { hasText: /^Cover Art Screen Saver$/ }),
     })
     .first();
   assert(

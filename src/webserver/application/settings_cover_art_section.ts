@@ -170,7 +170,7 @@ export function installSettingsCoverArtSectionModule(): GlobalDescriptors {
         var coverArtBadge: any = statusBadge("Media cover art on");
         els.setCoverArtBadge = coverArtBadge;
         syncCoverArtScreensaverUi();
-        var coverArtCard: any = makeCollapsibleCard("Cover Art", coverArtBody, true, coverArtBadge);
+        var coverArtCard: any = makeCollapsibleCard("Cover Art Screen Saver", coverArtBody, true, coverArtBadge);
         return coverArtCard;
     }
     return {
