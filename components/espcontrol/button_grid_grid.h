@@ -2051,6 +2051,7 @@ inline void grid_phase2(
     }
 
   }
+  ha_commit_subscription_generation();
   screen_lock_apply();
   // Phase 2 can finish after the API connection callbacks have already run
   // during boot. Refresh newly bound artwork contexts here so the current
