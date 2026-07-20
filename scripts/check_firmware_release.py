@@ -22,6 +22,7 @@ CHIP = "ESP32-S3"
 PROJECT_NAME = "jtenniswood.espcontrol"
 ESPHOME_ENV = Path(__file__).resolve().parents[1] / ".github" / "esphome.env"
 RELEASE_WORKFLOW = Path(__file__).resolve().parents[1] / ".github" / "workflows" / "release.yml"
+PAGES_WORKFLOW = Path(__file__).resolve().parents[1] / ".github" / "workflows" / "pages.yml"
 RELEASE_SKILL = (
     Path(__file__).resolve().parents[1]
     / ".agents"
@@ -152,6 +153,12 @@ def test_release_workflow_uses_current_ota_output() -> None:
     assert "scripts/firmware_release.py verify-bundle" in workflow
     assert "scripts/firmware_release.py publish-draft" in workflow
     assert "path: dist/firmware/" in workflow, "publishable firmware must use the dist boundary"
+
+
+def test_pages_excludes_draft_prereleases() -> None:
+    workflow = PAGES_WORKFLOW.read_text(encoding="utf-8")
+    assert "select((.draft | not) and .prerelease)" in workflow
+    assert "select(.prerelease)" not in workflow
 
 
 def test_release_skill_creates_selected_tag_before_draft() -> None:
@@ -434,6 +441,7 @@ def test_public_pages_verification() -> None:
 def main() -> int:
     test_esphome_env_format()
     test_release_workflow_uses_current_ota_output()
+    test_pages_excludes_draft_prereleases()
     test_release_skill_creates_selected_tag_before_draft()
     test_valid_files_and_directory()
     test_placeholder_fails()
