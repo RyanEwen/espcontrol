@@ -267,8 +267,15 @@ inline void media_driver_bind_cover_art_route(
     }
 
     if (entity_changed && control) {
-      media_playback_detach_control(control);
-      control->entity_id = next_entity;
+      // A restored display setting can rerun Phase 2 while reusing the
+      // existing cover-art widgets. The newly bound control already targets
+      // the primary entity, so avoid detaching and rewriting it unless the
+      // route genuinely changed. Besides doing unnecessary work, that initial
+      // rewrite can touch a control released by the preceding layout refresh.
+      if (control->entity_id != next_entity) {
+        media_playback_detach_control(control);
+        control->entity_id = next_entity;
+      }
       subscribe_media_control_state(control);
     }
   };
