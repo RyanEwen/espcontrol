@@ -271,6 +271,13 @@ CommitResult ConfigurationStore::commit(const uint8_t *payload,
             target_slot};
   }
   if (!backend_.sync()) {
+    // Some backends expose written bytes before sync confirms durability. If
+    // publication cannot be confirmed, withdraw the marker and best-effort
+    // persist that rollback so load() continues to select the previous slot.
+    if (backend_.write(target_slot, MAGIC_OFFSET, invalid_magic.data(),
+                       invalid_magic.size())) {
+      backend_.sync();
+    }
     return {StoreStatus::SYNC_FAILED, next_generation, payload_size,
             target_slot};
   }

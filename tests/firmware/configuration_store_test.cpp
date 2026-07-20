@@ -209,6 +209,25 @@ bool torn_metadata_cannot_promote_stale_checksum() {
          loaded.generation == 2 && payload_equals(output, current, loaded);
 }
 
+bool failed_publication_sync_preserves_previous() {
+  MemoryBackend backend(128);
+  ConfigurationStore store(backend);
+  const std::vector<uint8_t> stable = bytes("stable-value");
+  const std::vector<uint8_t> replacement = bytes("replacement-value");
+  if (!store.commit(stable.data(), stable.size()).ok()) return false;
+
+  // Each commit has four sync points. Fail the final publication sync of the
+  // second commit after its marker bytes have already become readable.
+  backend.fail_sync_on_call(8);
+  const CommitResult failed =
+      store.commit(replacement.data(), replacement.size());
+
+  std::vector<uint8_t> output(stable.size());
+  const LoadResult loaded = store.load(output.data(), output.size());
+  return failed.status == StoreStatus::SYNC_FAILED && loaded.generation == 1 &&
+         payload_equals(output, stable, loaded);
+}
+
 bool size_and_argument_errors_are_explicit() {
   MemoryBackend backend(48);
   ConfigurationStore store(backend);
@@ -252,6 +271,7 @@ int main() {
       partial_payload_write_preserves_previous() &&
       partial_header_write_preserves_previous() &&
       torn_metadata_cannot_promote_stale_checksum() &&
+      failed_publication_sync_preserves_previous() &&
       size_and_argument_errors_are_explicit() &&
       io_and_sync_errors_are_explicit();
   return passed ? EXIT_SUCCESS : EXIT_FAILURE;
