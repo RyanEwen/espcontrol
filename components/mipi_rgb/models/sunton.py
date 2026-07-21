@@ -1,10 +1,15 @@
 from esphome.components.mipi import DriverChip
-from esphome.config_validation import UNDEFINED
+
+# These panels are driven straight off the RGB parallel bus with no controller
+# init sequence, so there is no MADCTL register to mirror or swap axes with.
+# Declaring no hardware transforms leaves rotation to LVGL in software.
+# Immutable so the two models below cannot share mutable state.
+NO_TRANSFORMS: frozenset[str] = frozenset()
 
 # fmt: off
 sunton = DriverChip(
     "ESP32-8048S070",
-    swap_xy=UNDEFINED,
+    transforms=NO_TRANSFORMS,
     initsequence=(),
     width=800,
     height=480,
@@ -28,7 +33,7 @@ sunton = DriverChip(
 
 sunton.extend(
     "ESP32-8048S050",
-    swap_xy=UNDEFINED,
+    transforms=NO_TRANSFORMS,
     initsequence=(),
     width=800,
     height=480,
