@@ -1236,6 +1236,7 @@
             "subpageChevronX": 3,
             "subpageChevronY": -2,
             "subpageChevronTextWidthPercent": 96,
+            "refreshRebuildsSubpages": true,
             "coverArt": {
               "cover_art_size": "480",
               "cover_art_decode_size": "320",

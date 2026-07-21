@@ -41,6 +41,13 @@ esp32:
       CONFIG_LCD_RGB_ISR_IRAM_SAFE: "y"
       CONFIG_SPIRAM_FETCH_INSTRUCTIONS: "y"
       CONFIG_SPIRAM_RODATA: "y"
+      # Widen the data cache line. Scan-out reads the frame buffer from PSRAM
+      # continuously, and with the 32-byte default it makes far more PSRAM round
+      # trips than at 480x480; the LCD FIFO underruns and the panel flickers.
+      # Raising the cache to 64KB helps further but costs 32KB of internal SRAM
+      # this panel does not have - it starves the web server until it can no
+      # longer send the UI bundle. The line size is free.
+      CONFIG_ESP32S3_DATA_CACHE_LINE_64B: "y"
 
 # ---------------------------------------------------------------------------
 # External component
@@ -292,7 +299,10 @@ lvgl:
   id: main_lvgl
   # Keep LVGL after WiFi and after the display driver.
   setup_priority: 230
-  buffer_size: 12%
+  # A full-frame draw buffer (800x480x2 = 768KB, in PSRAM). At 12% LVGL
+  # renders and flushes in roughly eight horizontal bands, visible as a
+  # top-to-bottom sweep on every redraw.
+  buffer_size: 100%
   displays: my_display
   rotation: 0
   touchscreens:
@@ -377,4 +387,8 @@ select:
               lambda: 'return id(screen_rotation_ready);'
             then:
               - script.execute: apply_screen_rotation
+              # Subpage grids are built for the current column count, so they
+              # need rebuilding too - rotating swaps 3x2 for 2x3 and the
+              # subpages otherwise keep the old geometry.
+              - script.execute: refresh_button_grid
               - script.execute: clock_bar_apply
